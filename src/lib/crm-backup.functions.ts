@@ -57,6 +57,9 @@ export const restoreCrmRecord = createServerFn({ method: "POST" })
     Token.extend({ date: DateStr, table: Table, id: z.string().uuid(), fields: z.array(z.string().max(64)).min(1).max(40) }).parse(i))
   .handler(async ({ data }) => {
     const c = await authority(data.adminToken);
+    // Restoring changes live records: read-only Executive HQ sessions may compare but never restore.
+    const { requireWrite } = await import("@/lib/access.server");
+    requireWrite(c);
     const m = await import("@/lib/crm-backup.server");
     return m.restoreFields(data.date, data.table, data.id, data.fields, c.label ?? c.profile?.name ?? "HQ");
   });
