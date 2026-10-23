@@ -61,7 +61,7 @@ describe("maintenance wiring", () => {
     "src/routes/tech.tsx",
   ];
   it("shows only USD, never BDT", () => {
-    expect(MAINTENANCE_FEE_LABEL).toBe("$46.29 USD + 15% VAT ($6.94) = $53.23 USD");
+    expect(MAINTENANCE_FEE_LABEL).toBe("$35.29 USD/month (incl. 15% VAT $4.60)");
     for (const f of files) expect(readFileSync(f, "utf8")).not.toMatch(/BDT|৳|4,?337/);
   });
   it("credential lives only on the server", () => {

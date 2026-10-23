@@ -36,10 +36,10 @@ describe("billing windows (Asia/Dhaka)", () => {
 });
 
 describe("payment-status wording", () => {
-  it("never says overdue on or before the 12th", () => {
+  it("never says overdue before the 15th 00:00 Dhaka deadline", () => {
     expect(paymentDueLabel(dhaka(2026, 10, 11, 18))).toBe("Payment Due");
-    expect(paymentDueLabel(dhaka(2026, 10, 12, 23, 59))).toBe("Payment Due");
-    expect(paymentDueLabel(dhaka(2026, 10, 13, 0, 0))).toBe("Payment Overdue");
+    expect(paymentDueLabel(dhaka(2026, 10, 13, 0, 0))).toBe("Payment Due");
+    expect(paymentDueLabel(dhaka(2026, 10, 14, 23, 59))).toBe("Payment Due");
   });
 });
 
