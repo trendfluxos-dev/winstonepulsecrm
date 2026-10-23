@@ -1,5 +1,5 @@
 /**
- * Automatic reminders for the monthly $46.29 USD maintenance fee.
+ * Automatic reminders for the monthly $35.29 USD (incl. VAT) architecture charge.
  *
  * Three stages per period, each fired at most once: the bill is coming up
  * (3 days before the 15th), the bill is due, and the grace window closed so it
@@ -211,7 +211,7 @@ export async function runServiceBillingAlerts(now = new Date()): Promise<AlertRu
           entityType: "service_invoice",
           entityId: invoice.period,
           actorLabel: "Billing scheduler",
-          metadata: { stage, amountUsd: 46.29, status: invoice.status },
+          metadata: { stage, amountUsd: 35.29, status: invoice.status },
         });
       }
     }
