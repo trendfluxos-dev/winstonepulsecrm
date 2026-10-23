@@ -108,6 +108,13 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
       });
     };
 
+    // Lead assignment is LeadHub Nexus only (canonical quota/Friday/audit path).
+    // Forged or stale proposals fail closed and are audited.
+    if ((type as string) === "assign_leads" || (type as string) === "distribute_unassigned") {
+      await audit("refused_use_leadhub_nexus");
+      throw new Error("লিড অ্যাসাইন শুধু LeadHub Nexus থেকে হয় — Winstone AI লিড দিতে পারে না");
+    }
+
     if (type === "assign_leads") {
       requireDispatch(caller);
       const agentId = str(params, "agent_id");
