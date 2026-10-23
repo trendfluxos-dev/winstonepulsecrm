@@ -226,6 +226,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
     id: "changelog",
     title: "18. Version and changelog",
     body: [
+      "1.5.0 (2026-10-23): Owner decisions applied — hard 50 leads/agent/Dhaka day in the database; Winstone AI command actions can no longer assign or distribute leads; monthly architecture charge $35.29 USD incl. 15% VAT; invoice statuses ISSUED/APPROVED/PAID/LOCKED; payment must be verified before the 15th 00:00 Asia/Dhaka; approval is not payment; late verified payment restores access.",
       "1.4.0 (2026-10-23): Role definitions clarified (Executive Headquarters (HQ) = performance review; LeadHub Nexus = canonical leads and assignment; IT Console = technical administration). Winstone AI can no longer assign leads and is shown only to IT Console. Unit inventory storage, JSON backup/restore, billing formulas and known limitations documented.",
       "1.3.0 (2026-10-08): Introduction rewritten as the canonical System Architecture manifesto — core philosophy, architecture model, eight principles, state-transition backbone and TrendFlux ecosystem positioning.",
       "1.2.0 (2026-09-30): Sales Intelligence module — AI Sales Brief, Smart Pitchbook, verified Market Facts with versioning, permanent Pitch History in Lead 360, deterministic Pitch Effectiveness, filtered CSV/PDF export.",
