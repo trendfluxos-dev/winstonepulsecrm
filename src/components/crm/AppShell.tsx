@@ -68,11 +68,14 @@ export const NAV = [
   { to: "/help", label: "Help Centre", scopes: ["authority", "coordinator", "agent", "none"] },
 ] as const satisfies ReadonlyArray<{ to: string; label: string; scopes: readonly Scope[] }>;
 
+/** Screens whose actions the server refuses for read-only Executive HQ sessions. */
+export const READ_ONLY_HIDDEN: readonly string[] = ["/system", "/docs-admin"];
+
 
 export function AppShell({ children }: { children: ReactNode }) {
   useCrmRealtime();
   const adminToken = useAdminToken();
-  const { scope } = useMyAccount();
+  const { scope, account } = useMyAccount();
   const signOut = useSignOut();
   const [pinOpen, setPinOpen] = useState(false);
   const lang = useLang();
@@ -82,7 +85,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     // Keep the saved value untouched; it must not affect today's palette.
     document.documentElement.classList.remove("dark");
   }, []);
-  const nav = NAV.filter((item) => (item.scopes as readonly Scope[]).includes(scope as Scope)).map((item) => ({
+  const nav = NAV.filter((item) => (item.scopes as readonly Scope[]).includes(scope as Scope))
+    .filter((item) => !(account?.readOnly && READ_ONLY_HIDDEN.includes(item.to)))
+    .map((item) => ({
     ...item,
     label: NAV_LABELS[item.to]?.[lang] ?? item.label,
   }));

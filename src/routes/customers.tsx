@@ -154,7 +154,7 @@ function CustomersPage() {
                   <Button
                     size="sm"
                     className="h-8 text-xs"
-                    disabled={save.isPending}
+                    disabled={save.isPending || readOnly}
                     onClick={() => save.mutate(customer.id)}
                   >
                     Save
