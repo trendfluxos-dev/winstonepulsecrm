@@ -200,7 +200,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
     id: "known",
     title: "16E. Known limitations and pending decisions",
     body: [
-      "Daily lead quota: the code default is 50 leads per agent per day (LeadHub can override). An older note of 25/day and a 15/day cap for one account is not what the system enforces; HQ must confirm before any change.",
+      "Daily lead quota: 50 leads per agent per day for every approved agent, including Haidar (saved operating rule since 2026-09-28, matching app settings; LeadHub can override for today or per agent). Older 25/day and 15/day-per-account notes predate that rule and are superseded.",
       "Subscription fee: the system charges $46.29 + VAT ($53.23) due on the 12th. A later project note mentions $35.29 due on the 14th; this was not applied. Confirm the final amount before any change.",
       "Call recordings: the web app cannot prove a phone recorded or uploaded audio; Android/OEM recording limits apply. WhatsApp call duration is agent-typed because phones do not log it.",
       "Preview and live share one database, so live-data tests are read-only; write tests use isolated data or a separate staging backend.",
