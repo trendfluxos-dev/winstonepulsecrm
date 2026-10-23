@@ -39,3 +39,4 @@
 
 - HQ summaries share one filtered command-center result; count current follow-up work and saved booking signals — why: independent status/recording guesses contradict totals.
 - Winstone AI copilot is read-only and IT Console (full PIN) only; it never assigns leads — why: LeadHub Nexus is the one assignment path with quota/Friday/audit rules.
+- Release counts as deployed only when scripts/check-live-release.ts (or IT Console Deployment status) sees /manual version, $35.29 and 50-lead markers live — why: publish requests are not proof.
