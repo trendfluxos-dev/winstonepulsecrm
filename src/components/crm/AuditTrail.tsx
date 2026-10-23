@@ -32,8 +32,8 @@ const ACTIONS = Object.keys(ACTION_LABEL);
 function describeRow(row: { action: string; created_at: string; metadata: unknown }) {
   const m = (row.metadata ?? {}) as Record<string, unknown>;
   if (row.action === "call_report_after_reassignment") {
-    const at = typeof m.reportSubmittedAt === "string" ? m.reportSubmittedAt : row.created_at;
-    const owner = typeof m.currentOwnerName === "string" ? m.currentOwnerName : m.currentOwnerId ? String(m.currentOwnerId) : "কেউ নেই";
+    const at = typeof m["reportSubmittedAt"] === "string" ? m["reportSubmittedAt"] : row.created_at;
+    const owner = typeof m["currentOwnerName"] === "string" ? m["currentOwnerName"] : m["currentOwnerId"] ? String(m["currentOwnerId"]) : "কেউ নেই";
     return `রিপোর্টের সময়: ${new Date(at).toLocaleString("bn-BD", { timeZone: "Asia/Dhaka" })} · লিডের বর্তমান মালিক: ${owner} · লিড রেকর্ড অপরিবর্তিত`;
   }
   return JSON.stringify(row.metadata ?? {});
