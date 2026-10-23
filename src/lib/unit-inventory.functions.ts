@@ -50,30 +50,24 @@ export const saveUnit = createServerFn({ method: "POST" })
     const { siCaller, requireAdminWriter } = await import("@/lib/sales-intel.server");
     const c = await siCaller(data.adminToken);
     requireAdminWriter(c);
-    const { db, units } = await load();
-    const { data: p } = await db.from("project_catalog").select("id, name").eq("id", data.projectId).maybeSingle();
-    if (!p) throw new Error("Project not found / প্রজেক্ট পাওয়া যায়নি");
-    if (units.some((u) => u.projectId === data.projectId && u.code.toLowerCase() === data.code.toLowerCase() && u.id !== data.id))
-      throw new Error("Unit code already exists / এই ইউনিট কোড আছে");
-    const prev = data.id ? units.find((u) => u.id === data.id) : undefined;
-    if (data.id && !prev) throw new Error("Unit not found");
-    const unit: Unit = {
-      id: data.id ?? crypto.randomUUID(), projectId: p.id, projectName: p.name, code: data.code, kind: data.kind, floor: data.floor,
-      sizeSqft: data.sizeSqft, sizeKatha: data.sizeKatha, bedrooms: data.bedrooms, bathrooms: data.bathrooms, priceBdt: data.priceBdt,
-      status: data.status, updatedBy: c.actor, updatedAt: new Date().toISOString(),
-    };
-    const { error } = await db.from("project_units").upsert({
-      id: unit.id, project_id: unit.projectId, project_name: unit.projectName, code: unit.code, kind: unit.kind, floor: unit.floor,
-      size_sqft: unit.sizeSqft, size_katha: unit.sizeKatha, bedrooms: unit.bedrooms, bathrooms: unit.bathrooms, price_bdt: unit.priceBdt,
-      status: unit.status, updated_by: unit.updatedBy, updated_at: unit.updatedAt,
-    });
-    if (error) throw new Error("Unit not saved / সংরক্ষণ হয়নি");
-    await db.from("audit_logs").insert({
-      action: prev ? "unit_updated" : "unit_created", entity_type: "project_unit", entity_id: null,
-      actor_profile_id: c.agentId, actor_label: c.actor,
-      metadata: { unitId: unit.id, unit: unit.code, project: p.name, from: prev?.status ?? null, to: unit.status },
-    });
-    return { ok: true };
+    const { saveUnitCore } = await import("@/lib/unit-inventory.server");
+    const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+    const { adminToken: _t, ...input } = data;
+    return saveUnitCore({
+      listUnits: async () => (await load()).units,
+      project: async (id) => (await db.from("project_catalog").select("id, name").eq("id", id).maybeSingle()).data ?? null,
+      upsertUnit: async (u) => {
+        const { error } = await db.from("project_units").upsert({
+          id: u.id, project_id: u.projectId, project_name: u.projectName, code: u.code, kind: u.kind, floor: u.floor,
+          size_sqft: u.sizeSqft, size_katha: u.sizeKatha, bedrooms: u.bedrooms, bathrooms: u.bathrooms, price_bdt: u.priceBdt,
+          status: u.status, updated_by: u.updatedBy, updated_at: u.updatedAt,
+        });
+        if (error) throw new Error("write failed");
+      },
+      audit: async (action, metadata) => {
+        await db.from("audit_logs").insert({ action, entity_type: "project_unit", entity_id: null, actor_profile_id: c.agentId, actor_label: c.actor, metadata: metadata as never });
+      },
+    }, c, { ...input, id: input.id ?? null });
   });
 
 /** Recent customer WhatsApp messages per lead, scoped to the caller (agents: own leads only). */
