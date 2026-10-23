@@ -198,7 +198,7 @@ export async function maintenanceAccess(now: Date = new Date()): Promise<Mainten
 }
 
 export const LOCKED_MESSAGE =
-  "SYSTEM MAINTENANCE LOCKED — monthly maintenance payment ($46.29 USD) is pending. Contact IT Console.";
+  "SYSTEM MAINTENANCE LOCKED — monthly maintenance payment ($53.23 USD incl. 15% VAT) is pending. Contact IT Console.";
 
 /** Fail closed: an unexpected error counts as locked for ordinary callers. */
 export async function isLockedForOrdinaryUsers(): Promise<boolean> {
@@ -239,7 +239,7 @@ export async function submitPayment(input: { actor: string; paymentRef: string; 
   if (error) throw new Error("Could not submit payment");
   clearMaintenanceCache();
   await audit({ actor: input.actor, actorRole: "it_console", action: "payment_submitted", period: state.period, previous: state.paymentStatus, next: "pending", reason: input.note ?? null, metadata: { payment_ref: input.paymentRef, fee_usd: state.feeUsd } });
-  await notifyOnce(`maintenance_payment_submitted_${state.period}_${input.paymentRef}`, "warning", "New payment submitted for verification", `${input.actor} submitted reference ${input.paymentRef} for ${state.period} ($46.29 USD). Awaiting System Architect verification.`);
+  await notifyOnce(`maintenance_payment_submitted_${state.period}_${input.paymentRef}`, "warning", "New payment submitted for verification", `${input.actor} submitted reference ${input.paymentRef} for ${state.period} ($53.23 USD incl. 15% VAT). Awaiting System Architect verification.`);
   return { ok: true, already: false };
 }
 
