@@ -48,7 +48,7 @@ const str = (v: unknown, max: number, nullable = false) => (nullable && v === nu
 export async function validateBackup(raw: unknown): Promise<{ ok: true; backup: UnitBackup; errors: [] } | { ok: false; errors: string[] }> {
   const errors: string[] = [];
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return { ok: false, errors: ["Not a backup object"] };
-  const b = raw as Record<string, unknown>;
+  const b = raw as { format?: unknown; formatVersion?: unknown; schemaVersion?: unknown; exportedAt?: unknown; recordCount?: unknown; checksum?: unknown; units?: unknown };
   if (b.format !== BACKUP_FORMAT) errors.push("Unknown backup format");
   if (b.formatVersion !== BACKUP_FORMAT_VERSION) errors.push(`Unsupported format version: ${String(b.formatVersion)}`);
   if (b.schemaVersion !== SCHEMA_VERSION) errors.push(`Unsupported schema version: ${String(b.schemaVersion)}`);
@@ -57,7 +57,7 @@ export async function validateBackup(raw: unknown): Promise<{ ok: true; backup: 
   if (b.units.length > MAX_BACKUP_UNITS) return { ok: false, errors: [...errors, `Too many units (max ${MAX_BACKUP_UNITS})`] };
   const seenId = new Set<string>(); const seenCode = new Set<string>();
   b.units.forEach((x, i) => {
-    const u = x as Record<string, unknown>; const at = `units[${i}]`;
+    const u = x as Partial<Record<(typeof FIELDS)[number], unknown>>; const at = `units[${i}]`;
     if (!u || typeof u !== "object") { errors.push(`${at}: not an object`); return; }
     if (typeof u.id !== "string" || !UUID.test(u.id)) errors.push(`${at}: invalid id`);
     else if (seenId.has(u.id)) errors.push(`${at}: duplicate id ${u.id}`); else seenId.add(u.id);
@@ -68,13 +68,13 @@ export async function validateBackup(raw: unknown): Promise<{ ok: true; backup: 
     if (!KINDS.includes(u.kind as never)) errors.push(`${at}: invalid kind`);
     if (!STATUSES.includes(u.status as never)) errors.push(`${at}: invalid status`);
     if (!str(u.floor, 20, true)) errors.push(`${at}: invalid floor`);
-    for (const f of ["sizeSqft", "sizeKatha", "bedrooms", "bathrooms", "priceBdt"]) if (!num(u[f])) errors.push(`${at}: invalid ${f}`);
+    for (const f of ["sizeSqft", "sizeKatha", "bedrooms", "bathrooms", "priceBdt"] as const) if (!num(u[f])) errors.push(`${at}: invalid ${f}`);
     if (!str(u.updatedBy, 200)) errors.push(`${at}: invalid updatedBy`);
     if (typeof u.updatedAt !== "string" || Number.isNaN(Date.parse(u.updatedAt))) errors.push(`${at}: invalid updatedAt`);
   });
   if (b.recordCount !== b.units.length) errors.push(`Record count mismatch: header ${String(b.recordCount)}, file ${b.units.length}`);
   if (errors.length) return { ok: false, errors: errors.slice(0, 200) };
-  const units = (b.units as Record<string, unknown>[]).map((u) => Object.fromEntries(FIELDS.map((f) => [f, u[f] ?? null])) as Unit);
+  const units = (b.units as Partial<Record<(typeof FIELDS)[number], unknown>>[]).map((u) => Object.fromEntries(FIELDS.map((f) => [f, u[f] ?? null])) as Unit);
   const sum = await unitsChecksum(units);
   if (b.checksum !== sum) return { ok: false, errors: ["Checksum mismatch — file was changed or corrupted"] };
   return { ok: true, errors: [], backup: { ...(b as unknown as UnitBackup), units } };
