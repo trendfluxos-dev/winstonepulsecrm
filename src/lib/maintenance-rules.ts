@@ -189,3 +189,6 @@ export function invoiceStatus(input: { now: Date; lockAt: string; paymentStatus:
 export function accessState(input: RuleInput): AccessState {
   return decide(input).locked ? "LOCKED" : "ACTIVE";
 }
+
+/** Customer-facing name of the monthly architecture/infrastructure/maintenance charge. */
+export const ARCH_PLAN_NAME = "WINSTONE PULSE — Monthly architecture charge";
