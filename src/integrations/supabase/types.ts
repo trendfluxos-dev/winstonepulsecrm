@@ -3719,6 +3719,68 @@ export type Database = {
           },
         ]
       }
+      project_units: {
+        Row: {
+          bathrooms: number | null
+          bedrooms: number | null
+          code: string
+          created_at: string
+          floor: string | null
+          id: string
+          kind: string
+          price_bdt: number | null
+          project_id: string
+          project_name: string
+          size_katha: number | null
+          size_sqft: number | null
+          status: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          bathrooms?: number | null
+          bedrooms?: number | null
+          code: string
+          created_at?: string
+          floor?: string | null
+          id?: string
+          kind: string
+          price_bdt?: number | null
+          project_id: string
+          project_name: string
+          size_katha?: number | null
+          size_sqft?: number | null
+          status?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Update: {
+          bathrooms?: number | null
+          bedrooms?: number | null
+          code?: string
+          created_at?: string
+          floor?: string | null
+          id?: string
+          kind?: string
+          price_bdt?: number | null
+          project_id?: string
+          project_name?: string
+          size_katha?: number | null
+          size_sqft?: number | null
+          status?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_units_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_deliveries: {
         Row: {
           created_at: string
