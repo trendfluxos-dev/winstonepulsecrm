@@ -1,4 +1,5 @@
 /**
+ * DEPRECATED (legacy ৳4,000 bill, kept read-only for historical 2026-09/10 records; not mounted, not billed). Current billing: maintenance-rules.ts.
  * Printable invoice sheet for the monthly ৳4,000 service bill.
  *
  * Purely presentational: it renders the invoice data the panel already holds
