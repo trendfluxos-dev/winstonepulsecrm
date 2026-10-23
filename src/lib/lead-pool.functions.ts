@@ -1,3 +1,4 @@
+import { MAX_DAILY_LEADS_PER_AGENT } from "@/lib/lead-quota";
 import { followUpWork } from "@/lib/follow-up-work.server";
 import { isOpenFollowUp } from "@/lib/follow-up-lifecycle";
 import { createServerFn } from "@tanstack/react-start";
@@ -271,7 +272,7 @@ export const leadPoolStatus = createServerFn({ method: "GET" })
 const DistributeInput = z.object({
   adminToken: z.string().nullable().optional(),
   /** How many database leads each active agent should receive today. */
-  perAgent: z.number().int().min(1).max(500),
+  perAgent: z.number().int().min(1).max(MAX_DAILY_LEADS_PER_AGENT),
   /** Also make this the amount the automatic daily run uses. */
   saveAsDaily: z.boolean().optional(),
   /** Desks to skip today — e.g. an account still waiting for HQ approval. */
@@ -305,7 +306,7 @@ export const distributeLeadPool = createServerFn({ method: "POST" })
 /** Changes only the daily automatic amount, without handing leads out now. */
 export const setDailyLeadPlan = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    TokenInput.extend({ perAgent: z.number().int().min(1).max(500) }).parse(input),
+    TokenInput.extend({ perAgent: z.number().int().min(1).max(MAX_DAILY_LEADS_PER_AGENT) }).parse(input),
   )
   .handler(async ({ data }) => {
     const caller = await dispatcher(data.adminToken);
@@ -377,7 +378,7 @@ const StoreInput = z.object({
   source: z.string().trim().max(60).nullable().optional(),
   temperature: z.string().trim().max(20).nullable().optional(),
   quality: z.enum(["any", "missing_reference", "invalid_phone"]).default("any"),
-  limit: z.number().int().min(1).max(500).default(200),
+  limit: z.number().int().min(1).max(MAX_DAILY_LEADS_PER_AGENT).default(200),
 });
 
 const BD_MOBILE = /^(?:\+?88)?01[3-9]\d{8}$/;

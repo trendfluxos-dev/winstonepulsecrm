@@ -87,7 +87,7 @@ function NoticeBody({ s }: { s: Status }) {
         <dt className="text-muted-foreground">Fee</dt>
         <dd className="font-semibold">{MAINTENANCE_FEE_LABEL}</dd>
         <dt className="text-muted-foreground">Billing date</dt>
-        <dd className="font-semibold">Renewal 12th · lock 15th 00:00 (Dhaka)</dd>
+        <dd className="font-semibold">Verify before 15th 00:00 (Dhaka)</dd>
         <dt className="text-muted-foreground">Lock time</dt>
         <dd className="font-semibold">{dhakaTime(s.lockAt)}</dd>
         <dt className="text-muted-foreground">Current status</dt>
@@ -204,7 +204,7 @@ export function MaintenanceProfileNotice() {
         <MaintenanceBadge />
       </div>
       <p className="mt-1">
-        Monthly System Maintenance Fee: <b>{MAINTENANCE_FEE_LABEL}</b> · Renewal due: 12th · Unpaid lock: 15th 00:00 (Dhaka) ·
+        Monthly System Maintenance Fee: <b>{MAINTENANCE_FEE_LABEL}</b> · Verify before: 15th 00:00 (Dhaka) · Unpaid lock: 15th 00:00 (Dhaka) ·
         Status: <b className="text-destructive">{statusLabel(data)}</b>
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
@@ -260,7 +260,7 @@ export function MaintenanceGate() {
             })
           : t({
               bn: `কোম্পানির সিস্টেম রক্ষণাবেক্ষণ ফি (${MAINTENANCE_FEE_LABEL}) — ১৫ তারিখ রাত ১২:০০ (ঢাকা)-র আগে পেমেন্ট যাচাই হতে হবে। ফি কোম্পানি দেয় — কর্তৃপক্ষ না জানলে তাঁদের জানান।`,
-              en: `Company system maintenance fee (${MAINTENANCE_FEE_LABEL}) — renewal due on the 12th, grace until 23:59 on the 14th. The company pays the fee — inform management if they are unaware.`,
+              en: `Company system maintenance fee (${MAINTENANCE_FEE_LABEL}) — payment must be verified before 00:00 on the 15th (Dhaka). The company pays the fee — inform management if they are unaware.`,
             });
   const strong = data.stage !== "upcoming";
   return (
