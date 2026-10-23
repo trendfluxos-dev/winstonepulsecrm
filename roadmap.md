@@ -181,3 +181,4 @@
 - [x] Live "IT Console" rename verified 2026-10-18
 - [ ] Recording audio recovery from agents' phones — blocked: needs agents to run phone-recorder check/upload
 - [ ] 5 call reports with impossible durations (up to 234083s, no device duration) — needs HQ/IT review; data left untouched
+- [x] Unit inventory JSON backup export/validate/safe-merge/full-restore (preview only)

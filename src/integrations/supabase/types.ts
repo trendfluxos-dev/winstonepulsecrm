@@ -5645,6 +5645,42 @@ export type Database = {
           },
         ]
       }
+      unit_inventory_backups: {
+        Row: {
+          checksum: string
+          created_at: string
+          created_by: string
+          filename: string
+          format_version: number
+          id: string
+          payload: Json
+          reason: string
+          record_count: number
+        }
+        Insert: {
+          checksum: string
+          created_at?: string
+          created_by?: string
+          filename: string
+          format_version: number
+          id?: string
+          payload: Json
+          reason: string
+          record_count: number
+        }
+        Update: {
+          checksum?: string
+          created_at?: string
+          created_by?: string
+          filename?: string
+          format_version?: number
+          id?: string
+          payload?: Json
+          reason?: string
+          record_count?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
