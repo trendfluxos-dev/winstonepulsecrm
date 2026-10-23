@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Send, Sparkles } from "lucide-react";
 import { useRef, useState } from "react";
@@ -14,8 +14,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { askCopilot } from "@/lib/copilot.functions";
-import { getAdminToken } from "@/lib/local-session";
+import { askCopilot, copilotAccess } from "@/lib/copilot.functions";
+import { getAdminToken, useAdminToken } from "@/lib/local-session";
 
 type Card = { title: string; rows: { label: string; value: string }[] };
 type Entry = { role: "user" | "assistant"; content: string; cards?: Card[] };
@@ -25,8 +25,21 @@ const SUGGESTIONS = [
   "এই মাসের কল-মিনিট ও আনুমানিক কল খরচ দেখাও",
 ];
 
-/** Floating natural-language console; the server accepts IT Console (full) PIN sessions only. */
+/** Floating natural-language console. Rendered only for IT Console (full) PIN sessions — the server enforces the same rule. */
 export function CopilotDrawer({ trigger }: { trigger?: React.ReactNode }) {
+  const adminToken = useAdminToken();
+  const check = useServerFn(copilotAccess);
+  const access = useQuery({
+    queryKey: ["copilot-access", adminToken ? adminToken.slice(-8) : "none"],
+    queryFn: () => check({ data: { adminToken } }),
+    enabled: Boolean(adminToken),
+    staleTime: 5 * 60_000,
+  });
+  if (!adminToken || !access.data?.allowed) return null;
+  return <CopilotDrawerPanel trigger={trigger} />;
+}
+
+function CopilotDrawerPanel({ trigger }: { trigger?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [log, setLog] = useState<Entry[]>([]);
