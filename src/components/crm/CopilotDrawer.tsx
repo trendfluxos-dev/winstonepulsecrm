@@ -22,11 +22,11 @@ type Entry = { role: "user" | "assistant"; content: string; cards?: Card[] };
 
 const SUGGESTIONS = [
   "আজকের সেরা ৩ এজেন্টকে কথার সময়সহ দেখাও",
-  "এই মাসের টেলিফোন বিলের রিপোর্ট বানাও",
+  "এই মাসের কল-মিনিট ও আনুমানিক কল খরচ দেখাও",
   "সোনিয়াকে ২০টি অমীমাংসিত লিড দাও",
 ];
 
-/** Floating natural-language command console for HQ and coordinators. */
+/** Floating natural-language console; the server accepts IT Console (full) PIN sessions only. */
 export function CopilotDrawer({ trigger }: { trigger?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
@@ -71,9 +71,9 @@ export function CopilotDrawer({ trigger }: { trigger?: React.ReactNode }) {
       <SheetContent side="right" className="flex w-full flex-col gap-0 sm:max-w-md">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
-            <Sparkles className="size-4 text-primary" /> এক্সিকিউটিভ এআই কোপাইলট
+            <Sparkles className="size-4 text-primary" /> Winstone AI কোপাইলট (IT Console)
           </SheetTitle>
-          <SheetDescription>সাধারণ ভাষায় পারফরম্যান্স, বিল বা লিড বণ্টন চান।</SheetDescription>
+          <SheetDescription>IT Console PIN দরকার। সাধারণ ভাষায় পারফরম্যান্স, কল-মিনিটের আনুমানিক খরচ বা লিড বণ্টন চান — নিয়মিত লিড বণ্টন LeadHub Nexus-এ হয়।</SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">

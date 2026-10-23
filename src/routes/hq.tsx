@@ -49,13 +49,13 @@ export const Route = createFileRoute("/hq")({
   validateSearch: sectionSearch,
   head: () => ({
     meta: [
-      { title: "Control Board — Winstone Pulse" },
+      { title: "Executive HQ — Winstone Pulse" },
       {
         name: "description",
         content:
-          "Live agent radar, call leaderboard and AI call intelligence for enterprise tele-sales teams.",
+          "Executive Headquarters (HQ): central management view of live team performance, agent performance, leaderboards and call/report metrics.",
       },
-      { property: "og:title", content: "Control Board — Winstone Pulse" },
+      { property: "og:title", content: "Executive HQ — Winstone Pulse" },
       {
         property: "og:description",
         content:
@@ -80,8 +80,8 @@ function ControlBoardPage() {
         surface="hq"
         allow={["authority"]}
         icon={<ShieldCheck className="size-7" />}
-        title="এক্সিকিউটিভ এইচকিউ"
-        description="লাইভ রাডার, লিডারবোর্ড, কল অডিট আর যা জানতে চান তার রিপোর্ট। মাস্টার পিন লাগবে।"
+        title="এক্সিকিউটিভ এইচকিউ (Executive HQ)"
+        description="ম্যানেজমেন্টের কেন্দ্রীয় ড্যাশবোর্ড — লাইভ টিম পারফরম্যান্স, এজেন্ট পারফরম্যান্স আপডেট, লিডারবোর্ড, কল/রিপোর্ট মেট্রিক ও বিজনেস অ্যানালিটিক্স। শুধু দেখা ও পর্যালোচনা; পিন লাগবে।"
       >
         <ControlBoard />
       </RoleGate>
