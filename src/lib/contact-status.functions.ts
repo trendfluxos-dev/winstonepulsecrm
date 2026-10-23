@@ -9,7 +9,7 @@ export const leadContactStatus = createServerFn({ method: "POST" })
   .inputValidator((data: object) => z.object({ leadId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     const caller = await resolveCaller(null);
-    if (!caller.profile) throw new Error("লগইন প্রয়োজন");
+    if (!caller.profile || (caller.scope !== "agent" && caller.scope !== "authority")) throw new Error("লগইন প্রয়োজন");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: lead } = await supabaseAdmin
@@ -21,7 +21,7 @@ export const leadContactStatus = createServerFn({ method: "POST" })
 
     const assigned = lead.assigned_to ?? lead.assigned_agent_id;
     // Not the caller's lead: reveal nothing, but don't crash the page.
-    if (caller.scope === "agent" && assigned !== caller.profile.id) return null;
+    if (caller.scope !== "authority" && assigned !== caller.profile.id) return null;
 
     const { findDoNotContact, latestConsent, recordingAllowed } =
       await import("@/lib/comms-guard.server");

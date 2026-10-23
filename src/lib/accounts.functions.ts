@@ -528,7 +528,7 @@ export const issuePasswordResetLink = createServerFn({ method: "POST" })
     const allowed = ["https://crm.winstonebd.com", "https://winstone-crm-v01.lovable.app"];
     const origin = new URL(data.origin).origin;
     const safeOrigin =
-      allowed.includes(origin) || origin.endsWith(".lovable.app") || origin.startsWith("http://localhost")
+      allowed.includes(origin) || /^https:\/\/(winstone-pulse-crm|id-preview--990267f3-4198-4d83-ae21-7d9c802617f4)\.lovable\.app$/.test(origin) || /^http:\/\/localhost(:\d+)?$/.test(origin)
         ? origin
         : allowed[0]!;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
