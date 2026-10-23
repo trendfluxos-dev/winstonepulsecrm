@@ -259,7 +259,7 @@ export function MaintenanceGate() {
               en: `🔴 The company's system maintenance fee (${MAINTENANCE_FEE_LABEL}) is due soon — lock at 00:00 on the 15th. Inform management.`,
             })
           : t({
-              bn: `কোম্পানির সিস্টেম রক্ষণাবেক্ষণ ফি (${MAINTENANCE_FEE_LABEL}) — রিন্যুয়াল দিন ১২ তারিখ, ১৪ তারিখ ২৩:৫৯ পর্যন্ত গ্রেস। ফি কোম্পানি দেয় — কর্তৃপক্ষ না জানলে তাঁদের জানান।`,
+              bn: `কোম্পানির সিস্টেম রক্ষণাবেক্ষণ ফি (${MAINTENANCE_FEE_LABEL}) — ১৫ তারিখ রাত ১২:০০ (ঢাকা)-র আগে পেমেন্ট যাচাই হতে হবে। ফি কোম্পানি দেয় — কর্তৃপক্ষ না জানলে তাঁদের জানান।`,
               en: `Company system maintenance fee (${MAINTENANCE_FEE_LABEL}) — renewal due on the 12th, grace until 23:59 on the 14th. The company pays the fee — inform management if they are unaware.`,
             });
   const strong = data.stage !== "upcoming";
@@ -287,7 +287,7 @@ function InvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v
           <dt className="text-muted-foreground">Base monthly fee</dt><dd className="font-semibold">$15.79 USD</dd>
           <dt className="text-muted-foreground">VAT (15%)</dt><dd className="font-semibold">$2.37 USD</dd>
           <dt className="text-muted-foreground">Total due</dt><dd className="font-semibold">{usd(ARCH_TOTAL_CENTS)} USD</dd>
-          <dt className="text-muted-foreground">Due date</dt><dd className="font-semibold">12 {dhakaMonthName()}</dd>
+          <dt className="text-muted-foreground">Verify payment before</dt><dd className="font-semibold">15 {dhakaMonthName()} 00:00 Asia/Dhaka</dd>
           <dt className="text-muted-foreground">Lock deadline</dt><dd className="font-semibold">15th 00:00 (Dhaka)</dd>
         </dl>
         <p className="text-xs text-muted-foreground">Payment is completed by IT Console / authorized team and verified by the System Architect.</p>
@@ -325,7 +325,7 @@ function UpcomingInvoiceWidget() {
   return (
     <div className="mt-3 rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
       <p className="font-bold text-warning">Upcoming Invoice Due</p>
-      <p className="mt-1">Complete payment by 12 {dhakaMonthName()} to maintain uninterrupted access to your CRM pipelines and sales monitoring.</p>
+      <p className="mt-1">Complete a verified payment before 15 {dhakaMonthName()} 00:00 Asia/Dhaka to maintain uninterrupted access to your CRM pipelines and sales monitoring.</p>
       <p className="mt-1">Total Due: <b>{usd(ARCH_TOTAL_CENTS)} USD</b>, including 15% VAT.</p>
       <Button size="sm" className="mt-2" onClick={() => setOpen(true)}>Settle Invoice</Button>
       <InvoiceDialog open={open} onOpenChange={setOpen} />
@@ -363,7 +363,7 @@ function UrgentRenewal({ period, admin, paymentStatus }: { period: string; admin
           </DialogHeader>
           <ul className="space-y-1.5 text-sm">
             <li>● Outstanding Balance: <b>{usd(ARCH_TOTAL_CENTS)} USD</b>, including VAT</li>
-            <li>● Payment Due Date: <b>12 {month}</b></li>
+            <li>● Payment deadline: <b>before 15 {month} 00:00 Asia/Dhaka</b></li>
             <li>● Lock Deadline: <b>15 {month}, 00:00 Asia/Dhaka</b></li>
             <li>● Payment Status: <b className="text-destructive">{statusText}</b></li>
           </ul>
