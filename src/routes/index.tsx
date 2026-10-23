@@ -214,7 +214,7 @@ function EntryHall() {
           <EntryCard
             icon={<Headphones className="size-6" />}
             title="Sales Agent"
-            description="Your own lead queue, call log, WhatsApp threads and AI coaching."
+            description="Your own assigned lead queue, call log, WhatsApp threads, follow-ups and AI coaching."
             primary={
               <Button asChild className="btn-enter flex-1">
                 <Link to="/auth" search={{ role: "agent", mode: "signin" }}>
@@ -234,7 +234,7 @@ function EntryHall() {
           <EntryCard
             icon={<Database className="size-6" />}
             title="LeadHub Nexus"
-            description="Canonical lead database, imports, data quality and quantity assignment."
+            description="Canonical lead database and lead operations — imports, data quality and deduplication, quotas and lead assignment."
             primary={
               <Button className="btn-enter flex-1" onClick={() => openPin("/leadhub")}>
                 <Lock className="size-4" /> Unlock PIN
@@ -244,8 +244,8 @@ function EntryHall() {
 
           <EntryCard
             icon={<BarChart3 className="size-6" />}
-            title="Executive HQ"
-            description="Live floor performance, leaderboards and ask-anything reports and charts."
+            title="Executive Headquarters (HQ)"
+            description="Central management dashboard for live team performance, agent performance updates, leaderboards, call/report metrics, and business analytics."
             primary={
               <Button className="btn-enter flex-1" onClick={() => openPin("/hq")}>
                 <Lock className="size-4" /> Unlock PIN
@@ -256,7 +256,7 @@ function EntryHall() {
           <EntryCard
             icon={<Server className="size-6" />}
             title="IT Console"
-            description="System configuration, integrations, data health and account approvals."
+            description="Technical administration — system configuration, integrations, data health, device and account provisioning, and account approvals."
             primary={
               <Button className="btn-enter flex-1" onClick={() => openPin("/system")}>
                 <Lock className="size-4" /> Unlock PIN
