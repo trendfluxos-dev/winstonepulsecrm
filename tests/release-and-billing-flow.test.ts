@@ -7,12 +7,12 @@ const lockAt = "2026-11-14T18:00:00.000Z"; // 15 Nov 00:00 Dhaka
 const base = { lockAt, unlockStatus: "none" as const, unlockExpiresAt: null };
 
 describe("live release check", () => {
-  const good = `<p>Manual version <!-- -->1.5.0</p> $35.29 ... exactly 50 unique leads per agent`;
+  const good = `<p>Manual version <!-- -->1.6.0</p> $35.29 ... exactly 50 unique leads per agent`;
   it("passes only when version, charge and quota all show", () => {
     expect(evaluateManualHtml(good).deployed).toBe(true);
   });
-  it("fails on the old 1.4.0 manual", () => {
-    expect(evaluateManualHtml(good.replace("1.5.0", "1.4.0")).deployed).toBe(false);
+  it("fails on the old 1.5.0 manual", () => {
+    expect(evaluateManualHtml(good.replace("1.6.0", "1.5.0")).deployed).toBe(false);
   });
   it("fails without the $35.29 charge", () => {
     expect(evaluateManualHtml(good.replace("$35.29", "$53.23")).deployed).toBe(false);

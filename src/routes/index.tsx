@@ -116,13 +116,13 @@ function EntryHall() {
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
               Leads, calls, follow-ups and team performance. One connected workspace for your sales floor.
             </p>
-            <div className="mt-7 grid gap-5 sm:mt-8 sm:grid-cols-3 sm:gap-8">
+            <div className="mt-8 grid overflow-hidden rounded-xl border border-border bg-card sm:mt-10 sm:grid-cols-3">
               {[
                 { icon: Headphones, label: "Manage your team", sub: "Agents, roles & performance" },
                 { icon: BarChart3, label: "Track your pipeline", sub: "Leads, follow-ups & bookings" },
                 { icon: Smartphone, label: "Review call activity", sub: "Call reports & customer history" },
               ].map(({ icon: Icon, label, sub }) => (
-                <span key={label} className="inline-flex items-center gap-3 text-left text-sm font-semibold text-foreground">
+                <span key={label} className="flex items-center gap-3 border-border p-4 text-left text-sm font-semibold text-foreground [&:not(:first-child)]:border-t sm:p-5 sm:[&:not(:first-child)]:border-l sm:[&:not(:first-child)]:border-t-0">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full text-gold ring-1 ring-gold/40">
                     <Icon className="size-4" />
                   </span>
@@ -169,7 +169,7 @@ function EntryHall() {
           />
           <ModeCard
             icon={<ShieldCheck />}
-            illustration={<div className="grid h-full w-full place-items-center rounded-lg bg-secondary text-gold"><ShieldCheck className="size-10" /></div>}
+            illustration={<span className="grid h-16 w-full shrink-0 place-items-center rounded-md bg-secondary text-gold sm:h-24 sm:w-24 lg:w-28"><ShieldCheck className="size-10" /></span>}
             title="IT Console"
             subtitle="Secure administration"
             onClick={() => openPin("/system")}
@@ -180,7 +180,7 @@ function EntryHall() {
           One CRM. One data layer. Every device.
         </p>
 
-        <div className="mx-auto mt-8 w-full max-w-md">
+        <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
           <p className="text-sm font-semibold">Your role &amp; workspace</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {ROLES.map(({ key, label, icon: Icon }) => (
@@ -202,6 +202,8 @@ function EntryHall() {
             Optional — pick a device above so we remember your preferred view.
           </p>
         </div>
+
+        <div aria-hidden className="mt-12 border-t border-border" />
 
         <h2
           id="workspace-signin"
@@ -265,7 +267,7 @@ function EntryHall() {
           />
         </div>
 
-        <section className="mt-10 border-y border-border py-6">
+        <section className="mt-10 rounded-xl border border-border bg-card p-5 sm:p-6">
           <h2 className="text-lg font-bold tracking-tight">Are you a Winstone sales agent?</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Your account and company device must be provisioned by the IT Console before you can start working.

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { MANUAL_PDF_PATH, MANUAL_SECTIONS, MANUAL_UPDATED, MANUAL_VERSION } from "@/lib/system-manual";
+import { MANUAL_PDF_META, MANUAL_PDF_PATH, MANUAL_SECTIONS, MANUAL_UPDATED, MANUAL_VERSION } from "@/lib/system-manual";
 
 export const Route = createFileRoute("/manual")({
   head: () => ({
@@ -27,7 +27,7 @@ function ManualPage() {
           Manual version {MANUAL_VERSION} · Last updated {MANUAL_UPDATED}
         </p>
         <a href={MANUAL_PDF_PATH} download className="mt-3 inline-block text-sm font-semibold text-primary hover:underline print:hidden">
-          Download PDF (older v1.2.0 — this page (v1.5.0) is current)
+          Download PDF (v{MANUAL_PDF_META.version} · {MANUAL_PDF_META.updated} · SHA-256 {MANUAL_PDF_META.sourceSha256.slice(0, 12)})
         </a>
       </header>
       <nav className="mt-6 grid gap-1 text-sm sm:grid-cols-2 print:hidden">
