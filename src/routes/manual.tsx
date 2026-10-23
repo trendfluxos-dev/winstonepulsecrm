@@ -27,7 +27,7 @@ function ManualPage() {
           Manual version {MANUAL_VERSION} · Last updated {MANUAL_UPDATED}
         </p>
         <a href={MANUAL_PDF_PATH} download className="mt-3 inline-block text-sm font-semibold text-primary hover:underline print:hidden">
-          Download PDF
+          Download PDF (older v1.2.0 — this page is current)
         </a>
       </header>
       <nav className="mt-6 grid gap-1 text-sm sm:grid-cols-2 print:hidden">
