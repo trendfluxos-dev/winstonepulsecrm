@@ -1,4 +1,5 @@
 /**
+ * DEPRECATED (legacy ৳4,000 bill, kept read-only for historical 2026-09/10 records; not mounted, not billed). Current billing: maintenance-rules.ts.
  * Monthly service bill for the Winstone Pulse (৳4,000 per period).
  *
  * One row per calendar period in public.service_invoices. The whole chain —

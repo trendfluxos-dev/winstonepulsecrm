@@ -156,17 +156,17 @@ export async function maintenanceAccess(now: Date = new Date()): Promise<Mainten
     const { isAmberWindow, isRedWindow } = await import("@/lib/maintenance-rules");
     const day = new Date(now.getTime() + 6 * 3600_000).getUTCDate();
     if (day >= 9 && day < 15) {
-      await notifyOnce(`billing_invoice_available_${period}`, "info", "New invoice available", `WINSTONE PULSE : CRM invoice for ${period}: $18.16 USD incl. 15% VAT. Due on the 12th; lock deadline 15th 00:00 (Dhaka).`);
+      await notifyOnce(`billing_invoice_available_${period}`, "info", "New invoice available", `WINSTONE PULSE : Full OS maintenance invoice for ${period}: ${(await import("@/lib/maintenance-rules")).MAINTENANCE_FEE_LABEL}. Due on the 12th; lock deadline 15th 00:00 (Dhaka).`);
     }
     if (isRedWindow(now) || (!isAmberWindow(now) && day === 11)) {
-      await notifyOnce(`billing_due_approaching_${period}`, "warning", "Payment due date approaching", `Invoice ${period} ($18.16 USD) is due on the 12th. Payment status: ${row.payment_status}.`);
+      await notifyOnce(`billing_due_approaching_${period}`, "warning", "Payment due date approaching", `Invoice ${period} ($53.23 USD incl. 15% VAT) is due on the 12th. Payment status: ${row.payment_status}.`);
     }
     if (day >= 13 && day < 15) {
-      await notifyOnce(`billing_overdue_${period}`, "critical", "Invoice overdue", `Invoice ${period} ($18.16 USD) passed its 12th due date unpaid/unverified. Lock at 15th 00:00 (Dhaka).`);
+      await notifyOnce(`billing_overdue_${period}`, "critical", "Invoice overdue", `Invoice ${period} ($53.23 USD incl. 15% VAT) passed its 12th due date unpaid/unverified. Lock at 15th 00:00 (Dhaka).`);
     }
   }
   if (result.stage === "due_today") {
-    await notifyOnce(`maintenance_lock_24h_${period}`, "warning", "Unpaid lock within 24 hours", `Lock at ${dhakaTime(row.lock_at)} (Dhaka). Payment status: ${row.payment_status}. Fee $46.29 USD.`);
+    await notifyOnce(`maintenance_lock_24h_${period}`, "warning", "Unpaid lock within 24 hours", `Lock at ${dhakaTime(row.lock_at)} (Dhaka). Payment status: ${row.payment_status}. Fee $53.23 USD incl. 15% VAT.`);
   }
 
   const { count } = await client
