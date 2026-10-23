@@ -170,6 +170,8 @@ describe("report submission verifies only phone-measured duration", () => {
     expect(tables).not.toContain("leads");
     expect(tables).not.toContain("follow_up_events");
     expect(tables).not.toContain("lead_classifications");
+    const trail = state.writes.find((w) => w.table === "audit_logs" && (w.patch as { action?: string })?.action === "call_report_after_reassignment");
+    expect((trail?.patch as { metadata?: Record<string, unknown> })?.metadata).toMatchObject({ currentOwnerId: "agent-b", leadRecordChanged: false });
   });
   it("a lead still owned by the agent keeps the normal lead update", async () => {
     state.allowSubmit = true;
