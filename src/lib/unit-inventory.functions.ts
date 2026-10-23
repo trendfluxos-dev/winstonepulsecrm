@@ -3,7 +3,7 @@ import { z } from "zod";
 
 /**
  * Unit inventory matrix + WhatsApp qualification feed. Server-only; caller resolved via siCaller.
- * Units live in app_config id 'unit_inventory' (HQ/IT write, everyone signed-in reads); units are never removed — mark Blocked.
+ * Units live in server-only public.project_units (HQ/IT write, everyone signed-in reads; legacy app_config 'unit_inventory' copied once); units are never removed — mark Blocked.
  */
 const Token = z.string().nullable().optional();
 export const UNIT_STATUSES = ["available", "booked", "sold", "blocked"] as const;
@@ -13,12 +13,16 @@ export type Unit = {
   sizeSqft: number | null; sizeKatha: number | null; bedrooms: number | null; bathrooms: number | null; priceBdt: number | null;
   status: (typeof UNIT_STATUSES)[number]; updatedBy: string; updatedAt: string;
 };
-const KEY = "unit_inventory";
 
+type Row = { id: string; project_id: string; project_name: string; code: string; kind: string; floor: string | null; size_sqft: number | null; size_katha: number | null; bedrooms: number | null; bathrooms: number | null; price_bdt: number | null; status: string; updated_by: string; updated_at: string };
+const toUnit = (r: Row): Unit => ({ id: r.id, projectId: r.project_id, projectName: r.project_name, code: r.code, kind: r.kind as Unit["kind"], floor: r.floor,
+  sizeSqft: r.size_sqft, sizeKatha: r.size_katha, bedrooms: r.bedrooms, bathrooms: r.bathrooms, priceBdt: r.price_bdt,
+  status: r.status as Unit["status"], updatedBy: r.updated_by, updatedAt: r.updated_at });
 async function load() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin.from("app_config").select("data").eq("id", KEY).maybeSingle();
-  return { db: supabaseAdmin, units: ((data?.data as { units?: Unit[] } | null)?.units ?? []) as Unit[] };
+  const { data, error } = await supabaseAdmin.from("project_units").select("*").order("project_name").order("code").limit(5000);
+  if (error) throw new Error("Units unavailable / ইউনিট লোড হয়নি");
+  return { db: supabaseAdmin, units: ((data ?? []) as Row[]).map(toUnit) };
 }
 
 export const listUnits = createServerFn({ method: "POST" })
@@ -58,8 +62,11 @@ export const saveUnit = createServerFn({ method: "POST" })
       sizeSqft: data.sizeSqft, sizeKatha: data.sizeKatha, bedrooms: data.bedrooms, bathrooms: data.bathrooms, priceBdt: data.priceBdt,
       status: data.status, updatedBy: c.actor, updatedAt: new Date().toISOString(),
     };
-    const next = prev ? units.map((u) => (u.id === unit.id ? unit : u)) : [...units, unit];
-    const { error } = await db.from("app_config").upsert({ id: KEY, data: { units: next }, updated_at: unit.updatedAt });
+    const { error } = await db.from("project_units").upsert({
+      id: unit.id, project_id: unit.projectId, project_name: unit.projectName, code: unit.code, kind: unit.kind, floor: unit.floor,
+      size_sqft: unit.sizeSqft, size_katha: unit.sizeKatha, bedrooms: unit.bedrooms, bathrooms: unit.bathrooms, price_bdt: unit.priceBdt,
+      status: unit.status, updated_by: unit.updatedBy, updated_at: unit.updatedAt,
+    });
     if (error) throw new Error("Unit not saved / সংরক্ষণ হয়নি");
     await db.from("audit_logs").insert({
       action: prev ? "unit_updated" : "unit_created", entity_type: "project_unit", entity_id: null,
