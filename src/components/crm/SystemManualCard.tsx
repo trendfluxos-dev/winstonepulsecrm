@@ -3,7 +3,7 @@ import { BookOpenCheck, Download } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { AUDIT_PDF_PATH, DOC_VERSION, HANDOVER_PDF_PATH } from "@/lib/handover-docs";
-import { MANUAL_PDF_PATH, MANUAL_UPDATED, MANUAL_VERSION } from "@/lib/system-manual";
+import { MANUAL_PDF_META, MANUAL_PDF_PATH, MANUAL_UPDATED, MANUAL_VERSION } from "@/lib/system-manual";
 
 /** Reference card for the one canonical manual; shown in HQ and IT Console. */
 export function SystemManualCard() {
