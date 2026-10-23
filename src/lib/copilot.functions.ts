@@ -14,7 +14,15 @@ const Input = z.object({
     .max(30),
 });
 
-/** One turn of the Winstone AI Copilot. IT Console ("full") PIN only; HQ's read-only PIN is rejected. It can read data and assign leads. */
+/** Whether this PIN session may use the copilot (IT Console "full" scope only). Used to hide the button elsewhere. */
+export const copilotAccess = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => z.object({ adminToken: z.string().nullable().optional() }).parse(input ?? {}))
+  .handler(async ({ data }) => {
+    const { adminTokenScope } = await import("@/lib/admin-gate.server");
+    return { allowed: Boolean(data.adminToken) && adminTokenScope(data.adminToken) === "full" };
+  });
+
+/** One turn of the Winstone AI Copilot. IT Console ("full") PIN only; HQ's read-only PIN is rejected. Read-only: it never assigns leads. */
 export const askCopilot = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }) => {

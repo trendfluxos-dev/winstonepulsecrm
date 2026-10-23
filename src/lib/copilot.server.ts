@@ -28,28 +28,12 @@ const TOOLS = [
     function: {
       name: "billing_report",
       description:
-        "Monthly telephony billing: dials, connected %, billable minutes, estimated carrier cost, AI analysed calls, deals won.",
+        "Monthly call-activity summary with an ESTIMATED call cost from synced call minutes (agents use their own SIMs; this is not a carrier bill and not the CRM subscription invoice).",
       parameters: {
         type: "object",
         properties: {
           rate_per_minute: { type: "number", description: "Carrier rate in BDT per minute" },
         },
-      },
-    },
-  },
-  {
-    type: "function" as const,
-    function: {
-      name: "assign_leads",
-      description:
-        "Assign unassigned/pending leads to one agent by name. Use only when the user asks to distribute or push leads.",
-      parameters: {
-        type: "object",
-        properties: {
-          agent_name: { type: "string" },
-          count: { type: "number" },
-        },
-        required: ["agent_name", "count"],
       },
     },
   },
@@ -117,12 +101,12 @@ async function runTool(
     return {
       data: bill,
       card: {
-        title: `Billing — ${bill.monthLabel}`,
+        title: `Estimated call cost — ${bill.monthLabel}`,
         rows: [
           { label: "Dials", value: String(bill.dials) },
           { label: "Connected", value: `${bill.connected} (${bill.connectedPct.toFixed(0)}%)` },
           { label: "Billable minutes", value: String(bill.billableMinutes) },
-          { label: "Estimated carrier cost", value: `৳${bill.carrierCost.toFixed(2)}` },
+          { label: "Estimated call cost (not a bill)", value: `৳${bill.carrierCost.toFixed(2)}` },
           { label: "AI analysed calls", value: String(bill.aiAnalysed) },
           { label: "Deals won", value: String(bill.dealsWon) },
         ],
@@ -131,7 +115,12 @@ async function runTool(
     };
   }
 
+  // Lead assignment is owned by LeadHub Nexus (quota, Friday, eligibility and audit rules live there).
+  // The copilot never assigns; a forged tool call fails closed here.
   if (name === "assign_leads") {
+    return { data: { error: "Lead assignment is done only in LeadHub Nexus. Open LeadHub Nexus to assign leads." }, mutated: false };
+  }
+  if (name === "__retired_assign_leads") {
     const wanted = String(args["agent_name"] ?? "")
       .toLowerCase()
       .trim();
@@ -207,7 +196,7 @@ async function runTool(
 }
 
 const SYSTEM = `You are the Winstone AI Copilot inside "Winstone Pulse — The Premium Real Estate CRM", available to IT Console sessions only.
-You help IT Console administrators read team and agent performance, summarise monthly call minutes with an estimated call cost (this is not the CRM subscription bill), and, only when explicitly asked, assign unassigned leads to an agent.
+You help IT Console administrators read team and agent performance, and summarise monthly call minutes with an estimated call cost (this is not a carrier bill or the CRM subscription invoice). You cannot assign, reassign or change leads; if asked, tell the user that lead assignment is done in LeadHub Nexus.
 Role boundaries: Executive HQ reviews performance and analytics; LeadHub Nexus owns the canonical lead database and routine lead assignment; IT Console owns technical administration.
 Always call a tool for data instead of guessing numbers. Money is Bangladeshi Taka (৳).
 Answer briefly (max 5 short lines or a compact list). If the user writes Bengali, answer in Bengali.`;
