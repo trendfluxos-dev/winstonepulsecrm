@@ -29,7 +29,7 @@ export function LeadDatabasePanel() {
     refetchInterval: 60_000,
   });
 
-  const quantity = Number(perAgent);
+  const quantity = Math.min(Number(perAgent), 50);
   const agentCount = status.data?.agents.length ?? 0;
   const poolCount = status.data?.poolCount ?? 0;
   const willSend = Math.min(quantity * agentCount || 0, poolCount);
@@ -108,7 +108,7 @@ export function LeadDatabasePanel() {
             value={perAgent}
             inputMode="numeric"
             placeholder={`খালি = ${status.data?.dailyPerAgent ?? 50}`}
-            onChange={(event) => setPerAgent(event.target.value.replace(/\D/g, "").slice(0, 3))}
+            onChange={(event) => setPerAgent(event.target.value.replace(/\D/g, "").slice(0, 2))}
             className="h-9 w-28"
           />
         </label>

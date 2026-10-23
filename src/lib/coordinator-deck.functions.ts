@@ -1,3 +1,4 @@
+import { MAX_DAILY_LEADS_PER_AGENT } from "@/lib/lead-quota";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -100,7 +101,7 @@ const BatchInput = z.object({
   adminToken: z.string().nullable().optional(),
   requestId: z.string().uuid(),
   rows: z
-    .array(z.object({ agentId: z.string().uuid(), count: z.number().int().min(1).max(500) }))
+    .array(z.object({ agentId: z.string().uuid(), count: z.number().int().min(1).max(MAX_DAILY_LEADS_PER_AGENT) }))
     .min(1)
     .max(40),
 }).superRefine((value, ctx) => {

@@ -13,6 +13,9 @@
 /** Fallback round size when no plan is stored. */
 export const DEFAULT_DAILY_QUOTA = 50;
 
+/** Hard per-agent Dhaka-day cap enforced by the database trigger zz_leads_daily_cap. */
+export const MAX_DAILY_LEADS_PER_AGENT = 50;
+
 /** Agent ID → fixed daily quota, regardless of the floor-wide round size. */
 // Empty since 2026-09-28: every approved active agent, including Haidar
 // (WIN2607), receives the same floor-wide round (50/day).
