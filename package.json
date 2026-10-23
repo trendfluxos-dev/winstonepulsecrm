@@ -7,7 +7,7 @@
     "test:restart": "python3 scripts/restart-recovery-check.py",
     "test:recovery": "python3 scripts/module-recovery-check.py",
     "dev": "vite dev",
-    "prebuild": "node scripts/check-build-tool-pin.mjs && node scripts/check-dashboard-colors.mjs",
+    "prebuild": "node scripts/check-build-tool-pin.mjs && node scripts/check-dashboard-colors.mjs && node scripts/manual/manual-meta.mjs check",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
@@ -15,7 +15,9 @@
     "test": "vitest run",
     "typecheck": "tsgo --noEmit",
     "format": "prettier --write .",
-    "check:colors": "node scripts/check-dashboard-colors.mjs"
+    "check:colors": "node scripts/check-dashboard-colors.mjs",
+    "manual:pdf": "node scripts/manual/build-html.mjs && python3 scripts/manual/print_pdf.py && node scripts/manual/manual-meta.mjs write",
+    "manual:check": "node scripts/manual/manual-meta.mjs check"
   },
   "overrides": {
     "rolldown": "1.2.1",
