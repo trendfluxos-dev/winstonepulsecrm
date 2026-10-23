@@ -88,14 +88,17 @@ async function ensureRow(period: string) {
     .maybeSingle();
   if (data) return data;
   const lockAt = defaultLockAt(period);
+  // The unique key is (billing_period, plan_code); onConflict must name both or
+  // Postgres rejects the insert and the new month's bill is never created.
   await client.from("system_maintenance").upsert(
     {
       billing_period: period,
+      plan_code: "architecture",
       fee_usd: MAINTENANCE_FEE_USD,
       due_date: defaultDueAt(period),
       lock_at: lockAt,
     },
-    { onConflict: "billing_period", ignoreDuplicates: true },
+    { onConflict: "billing_period,plan_code", ignoreDuplicates: true },
   );
   const { data: row, error } = await client
     .from("system_maintenance")

@@ -192,3 +192,20 @@ export function accessState(input: RuleInput): AccessState {
 
 /** Customer-facing name of the monthly architecture/infrastructure/maintenance charge. */
 export const ARCH_PLAN_NAME = "WINSTONE PULSE — Monthly architecture charge";
+
+/** "YYYY-MM" → the following month. */
+export function nextPeriod(period: string): string {
+  const [y, m] = period.split("-").map(Number);
+  return m === 12 ? `${y! + 1}-01` : `${y}-${String(m! + 1).padStart(2, "0")}`;
+}
+
+/**
+ * Paid-through for a VERIFIED billing month: access stays ACTIVE until the next
+ * month's lock (15th 00:00 Dhaka), i.e. through the 14th 23:59:59 Dhaka.
+ * Returns null unless the month is verified — an assertion never extends access.
+ */
+export function paidThrough(period: string, paymentStatus: PaymentStatus): { lastActiveInstant: string; nextLockAt: string } | null {
+  if (paymentStatus !== "verified") return null;
+  const nextLockAt = defaultLockAt(nextPeriod(period));
+  return { lastActiveInstant: new Date(new Date(nextLockAt).getTime() - 1000).toISOString(), nextLockAt };
+}
