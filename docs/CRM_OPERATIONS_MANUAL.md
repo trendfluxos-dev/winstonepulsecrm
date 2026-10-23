@@ -1,9 +1,9 @@
 # Winstone Pulse — CRM Operations Manual
 
-<!-- manual-version: 1.5.0 -->
+<!-- manual-version: 1.6.0 -->
 <!-- manual-updated: 2026-10-23 -->
 
-> Canonical source for the /manual page and the downloadable PDF. Edit this file, then run `npm run manual:pdf`. Version 1.5.0 · 2026-10-23.
+> Canonical source for the /manual page and the downloadable PDF. Edit this file, then run `npm run manual:pdf`. Version 1.6.0 · 2026-10-23.
 
 ## 1. System architecture — Introduction {#purpose}
 
@@ -125,6 +125,7 @@
 - Invoice statuses: ISSUED (created/sent) → APPROVED (customer accepted; NOT paid) → PAID (payment reference verified by the System Architect) or LOCKED (deadline passed without verified payment). Approval, invoice creation, a customer claim or a screenshot never make an invoice PAID.
 - CRM access (ACTIVE/LOCKED) is global for the whole workspace and separate from the invoice status. Only verified payment (or a time-boxed Architect unlock, max 24h) keeps or restores ACTIVE; a late verified payment restores access automatically. Approval never unlocks.
 - Deadline (Asia/Dhaka): payment must be verified BEFORE the 15th 00:00 — the first instant of the 15th (14th 18:00 UTC). At 14th 23:59:59 an unverified account is still active; at 15th 00:00 it locks. Reminders run from the 9th. IT Console stays open during a lock.
+- Paid-through: a VERIFIED payment for a billing month keeps the workspace ACTIVE until the next month's deadline. Example: the verified 2026-10 invoice keeps access through 2026-11-14 23:59:59 Asia/Dhaka; the 2026-11 invoice must be verified before 2026-11-15 00:00 Asia/Dhaka (2026-11-14 18:00 UTC). An owner statement alone never marks a month paid — only a recorded payment reference plus a named verifier does.
 - Payment status: IT submits the real transaction/receipt reference (month becomes PENDING); only the System Architect verifies it (month becomes PAID). The screen cannot mark a month paid by itself.
 - Estimated call cost (Winstone AI) is an estimate from synced call minutes at a per-minute rate. Agents call from their own SIMs, so it is not a carrier bill and not the CRM subscription invoice.
 
@@ -150,6 +151,7 @@
 
 ## 18. Version and changelog {#changelog}
 
+- 1.6.0 (2026-10-23): This Markdown file is now the single source for /manual and the downloadable PDF (npm run manual:pdf / manual:check, hash-checked in CI). Paid-through rule documented; new monthly bills are created safely for each month.
 - 1.5.0 (2026-10-23): Owner decisions applied — hard 50 leads/agent/Dhaka day in the database; Winstone AI command actions can no longer assign or distribute leads; monthly architecture charge $35.29 USD incl. 15% VAT; invoice statuses ISSUED/APPROVED/PAID/LOCKED; payment must be verified before the 15th 00:00 Asia/Dhaka; approval is not payment; late verified payment restores access.
 - 1.4.0 (2026-10-23): Role definitions clarified (Executive Headquarters (HQ) = performance review; LeadHub Nexus = canonical leads and assignment; IT Console = technical administration). Winstone AI can no longer assign leads and is shown only to IT Console. Unit inventory storage, JSON backup/restore, billing formulas and known limitations documented.
 - 1.3.0 (2026-10-08): Introduction rewritten as the canonical System Architecture manifesto — core philosophy, architecture model, eight principles, state-transition backbone and TrendFlux ecosystem positioning.
