@@ -38,3 +38,4 @@
 - Private AI/bill reads authenticate; support reads follow own/unassigned work but agent escalation requires ownership; project writes reject read-only HQ; scored time needs phone sync — why: requests cannot bypass access or fabricate evidence.
 
 - HQ summaries share one filtered command-center result; count current follow-up work and saved booking signals — why: independent status/recording guesses contradict totals.
+- Winstone AI copilot is read-only and IT Console (full PIN) only; it never assigns leads — why: LeadHub Nexus is the one assignment path with quota/Friday/audit rules.

@@ -28,28 +28,12 @@ const TOOLS = [
     function: {
       name: "billing_report",
       description:
-        "Monthly telephony billing: dials, connected %, billable minutes, estimated carrier cost, AI analysed calls, deals won.",
+        "Monthly call-activity summary with an ESTIMATED call cost from synced call minutes (agents use their own SIMs; this is not a carrier bill and not the CRM subscription invoice).",
       parameters: {
         type: "object",
         properties: {
           rate_per_minute: { type: "number", description: "Carrier rate in BDT per minute" },
         },
-      },
-    },
-  },
-  {
-    type: "function" as const,
-    function: {
-      name: "assign_leads",
-      description:
-        "Assign unassigned/pending leads to one agent by name. Use only when the user asks to distribute or push leads.",
-      parameters: {
-        type: "object",
-        properties: {
-          agent_name: { type: "string" },
-          count: { type: "number" },
-        },
-        required: ["agent_name", "count"],
       },
     },
   },
@@ -117,12 +101,12 @@ async function runTool(
     return {
       data: bill,
       card: {
-        title: `Billing — ${bill.monthLabel}`,
+        title: `Estimated call cost — ${bill.monthLabel}`,
         rows: [
           { label: "Dials", value: String(bill.dials) },
           { label: "Connected", value: `${bill.connected} (${bill.connectedPct.toFixed(0)}%)` },
           { label: "Billable minutes", value: String(bill.billableMinutes) },
-          { label: "Estimated carrier cost", value: `৳${bill.carrierCost.toFixed(2)}` },
+          { label: "Estimated call cost (not a bill)", value: `৳${bill.carrierCost.toFixed(2)}` },
           { label: "AI analysed calls", value: String(bill.aiAnalysed) },
           { label: "Deals won", value: String(bill.dealsWon) },
         ],
@@ -131,83 +115,16 @@ async function runTool(
     };
   }
 
+  // Lead assignment is owned by LeadHub Nexus (quota, Friday, eligibility and audit rules live there).
+  // The copilot never assigns; a forged tool call fails closed here.
   if (name === "assign_leads") {
-    const wanted = String(args["agent_name"] ?? "")
-      .toLowerCase()
-      .trim();
-    const count = Math.max(1, Math.min(Number(args["count"] ?? 0) || 0, 1000));
-    const agent =
-      snap.profiles.find((p) => p.name.toLowerCase() === wanted) ??
-      snap.profiles.find((p) => p.name.toLowerCase().includes(wanted)) ??
-      snap.profiles.find((p) => (p.employee_id ?? "").toLowerCase() === wanted);
-    if (!agent) {
-      return {
-        data: {
-          error: `No agent matching "${args["agent_name"]}"`,
-          agents: snap.profiles.map((p) => p.name),
-        },
-        mutated: false,
-      };
-    }
-    const candidates = snap.leads
-      .filter((l) => l.assigned_to === null && l.status === "pending")
-      .slice(0, count);
-    const { eligibleLeadIds } = await import("@/lib/lead-eligibility.server");
-    const eligible = new Set(await eligibleLeadIds(candidates.map((lead) => lead.id)));
-    const pool = candidates.filter((lead) => eligible.has(lead.id));
-    if (!pool.length)
-      return { data: { assigned: 0, note: "No unassigned pending leads left" }, mutated: false };
-
-    const { isDistributionDay, FRIDAY_BLOCK_MESSAGE } = await import("@/lib/business-day");
-    const { dhakaToday } = await import("@/lib/lead-pool.server");
-    if (!isDistributionDay(dhakaToday()))
-      return { data: { assigned: 0, note: FRIDAY_BLOCK_MESSAGE }, mutated: false };
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: updated, error } = await supabaseAdmin
-      .from("leads")
-      .update({
-        assigned_to: agent.id,
-        assigned_agent_id: agent.id,
-        assignment_source: "coordinator",
-      })
-      .in(
-        "id",
-        pool.map((l) => l.id),
-      )
-      .is("assigned_to", null)
-      .is("assigned_agent_id", null)
-      .select("id");
-    if (error) return { data: { error: error.message }, mutated: false };
-    const updatedIds = new Set((updated ?? []).map((lead) => lead.id));
-    const assigned = pool.filter((lead) => updatedIds.has(lead.id));
-    if (assigned.length) {
-      await supabaseAdmin.from("lead_assignments").insert(
-        assigned.map((lead) => ({
-          lead_id: lead.id,
-          to_agent_id: agent.id,
-          source: "copilot",
-        })),
-      );
-    }
-
-    return {
-      data: { assigned: assigned.length, agent: agent.name },
-      card: {
-        title: "Leads dispatched",
-        rows: [
-          { label: "Agent", value: agent.name },
-          { label: "Leads assigned", value: String(assigned.length) },
-        ],
-      },
-      mutated: true,
-    };
+    return { data: { error: "Lead assignment is done only in LeadHub Nexus. Open LeadHub Nexus to assign leads." }, mutated: false };
   }
-
   return { data: { error: `Unknown tool ${name}` }, mutated: false };
 }
 
 const SYSTEM = `You are the Winstone AI Copilot inside "Winstone Pulse — The Premium Real Estate CRM", available to IT Console sessions only.
-You help IT Console administrators read team and agent performance, summarise monthly call minutes with an estimated call cost (this is not the CRM subscription bill), and, only when explicitly asked, assign unassigned leads to an agent.
+You help IT Console administrators read team and agent performance, and summarise monthly call minutes with an estimated call cost (this is not a carrier bill or the CRM subscription invoice). You cannot assign, reassign or change leads; if asked, tell the user that lead assignment is done in LeadHub Nexus.
 Role boundaries: Executive HQ reviews performance and analytics; LeadHub Nexus owns the canonical lead database and routine lead assignment; IT Console owns technical administration.
 Always call a tool for data instead of guessing numbers. Money is Bangladeshi Taka (৳).
 Answer briefly (max 5 short lines or a compact list). If the user writes Bengali, answer in Bengali.`;

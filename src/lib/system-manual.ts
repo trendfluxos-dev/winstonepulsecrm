@@ -3,8 +3,8 @@
  * page, the HQ and IT Console reference cards and the downloadable PDF are
  * all generated from this content — never keep a second copy.
  */
-export const MANUAL_VERSION = "1.3.0";
-export const MANUAL_UPDATED = "2026-10-08";
+export const MANUAL_VERSION = "1.4.0";
+export const MANUAL_UPDATED = "2026-10-23";
 export const MANUAL_PDF_PATH = "/winstone-system-manual.pdf";
 
 export type ManualSection = { id: string; title: string; body: string[] };
@@ -30,10 +30,10 @@ export const MANUAL_SECTIONS: ManualSection[] = [
     id: "roles",
     title: "2. Roles and permissions",
     body: [
-      "Agent — every agent account is a peer with identical permissions. An agent sees only leads assigned to them and only their own calls, follow-ups, reports and activity. This is enforced on the server, not by hiding things on screen.",
-      "Executive HQ — PIN-protected. Global read access to all leads, agents, activity, analytics, Lead 360 and exports; approves or holds daily accountability reviews.",
-      "IT Console — PIN-protected. System health, accounts, approvals, releases, knowledge sources, notices and audit. IT monitors accountability but cannot approve it.",
-      "LeadHub Nexus — separate PIN. Only place where leads are imported and assigned to agents.",
+      "Sales Agent — every agent account is a peer with identical permissions. An agent sees only leads assigned to them and only their own calls, follow-ups, reports and activity. This is enforced on the server, not by hiding things on screen.",
+      "Executive Headquarters (HQ) — PIN-protected management view. Reviews live team and agent performance, leaderboards, call/report metrics and business analytics; global read access to leads, Lead 360 and exports; approves or holds daily accountability reviews and approves bookings. HQ does not assign leads or change system configuration.",
+      "IT Console — PIN-protected technical administration: system health, integrations, account and device provisioning and approvals, releases, knowledge sources, notices, billing payment submission and audit. IT monitors accountability but cannot approve it. Only IT Console sessions can use the Winstone AI Copilot.",
+      "LeadHub Nexus — separate PIN. The canonical lead database and lead operations: import, data quality and deduplication, quotas and assignment. It is the only place leads are assigned to agents — Winstone AI cannot assign leads.",
     ],
   },
   {
@@ -168,6 +168,52 @@ export const MANUAL_SECTIONS: ManualSection[] = [
     ],
   },
   {
+    id: "units",
+    title: "16B. Unit inventory, backup and restore",
+    body: [
+      "Unit Board: apartments, commercial spaces and plots with status Available, Booked, Sold or Blocked. HQ/IT (IT PIN) create and edit units; Executive HQ view sessions and agents read only. Unit codes are unique per project.",
+      "Units are never deleted — the database refuses deletes. To retire a unit, mark it Blocked. Every create/edit is recorded in the audit log.",
+      "Export JSON backup (HQ/IT): downloads every unit from the database with format/schema version, export time (ISO 8601), record count, status counts and a SHA-256 checksum. File name: unit-inventory-backup-YYYY-MM-DD-HHmmss.json (UTC).",
+      "Import JSON backup (IT only): the server validates structure, versions, fields, statuses, duplicates, record count and recomputes the checksum; a changed file is rejected. A preview shows units to add, unchanged, conflicts, skipped and live-only. Nothing changes until you confirm.",
+      "Safe merge (default): adds new units only. On a conflict the live value is kept unless you tick that unit. Full restore: needs a second confirmation; returns conflicting units to the backup state; live-only units are kept. Before any overwrite the server saves and re-verifies a snapshot of the full live inventory (append-only). If the inventory changed after the preview, the restore is refused.",
+    ],
+  },
+  {
+    id: "billing",
+    title: "16C. Subscription billing formulas and dates",
+    body: [
+      "Currency: USD. VAT is added at 15% on the base price and shown in the total. Full OS: $46.29 + $6.94 VAT = $53.23. CRM-only: $15.79 + $2.37 VAT = $18.16. VAT is rounded to the nearest cent.",
+      "Dates (Asia/Dhaka): notice from the 9th; renewal due on the 12th; grace through the 14th 23:59; lock at the 15th 00:00 if the month's payment is not verified. IT Console stays open during a lock.",
+      "Payment status: IT submits the real transaction/receipt reference (month becomes PENDING); only the System Architect verifies it (month becomes PAID). The screen cannot mark a month paid by itself.",
+      "Estimated call cost (Winstone AI) is an estimate from synced call minutes at a per-minute rate. Agents call from their own SIMs, so it is not a carrier bill and not the CRM subscription invoice.",
+    ],
+  },
+  {
+    id: "ai-copilot",
+    title: "16D. Winstone AI Copilot",
+    body: [
+      "Available only to IT Console sessions (the button is hidden elsewhere; the server refuses other PINs). It can read team/agent performance and the estimated call cost.",
+      "It cannot assign, reassign or change leads. Lead assignment is done only in LeadHub Nexus, which applies the daily quota, Friday rule, eligibility and audit history.",
+    ],
+  },
+  {
+    id: "known",
+    title: "16E. Known limitations and pending decisions",
+    body: [
+      "Daily lead quota: the code default is 50 leads per agent per day (LeadHub can override). An older note of 25/day and a 15/day cap for one account is not what the system enforces; HQ must confirm before any change.",
+      "Subscription fee: the system charges $46.29 + VAT ($53.23) due on the 12th. A later project note mentions $35.29 due on the 14th; this was not applied. Confirm the final amount before any change.",
+      "Call recordings: the web app cannot prove a phone recorded or uploaded audio; Android/OEM recording limits apply. WhatsApp call duration is agent-typed because phones do not log it.",
+      "Preview and live share one database, so live-data tests are read-only; write tests use isolated data or a separate staging backend.",
+    ],
+  },
+  {
+    id: "release",
+    title: "16F. Release checklist",
+    body: [
+      "Before publishing: full test suite passes; build passes; security scan has no unresolved critical finding; database changes are additive and applied; no secrets in code; manual updated. After publishing: open the live entry page, check role cards and a read-only HQ view; hard-refresh if an old version shows.",
+    ],
+  },
+  {
     id: "checklist",
     title: "17. Daily operational checklist",
     body: [
@@ -178,6 +224,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
     id: "changelog",
     title: "18. Version and changelog",
     body: [
+      "1.4.0 (2026-10-23): Role definitions clarified (Executive Headquarters (HQ) = performance review; LeadHub Nexus = canonical leads and assignment; IT Console = technical administration). Winstone AI can no longer assign leads and is shown only to IT Console. Unit inventory storage, JSON backup/restore, billing formulas and known limitations documented.",
       "1.3.0 (2026-10-08): Introduction rewritten as the canonical System Architecture manifesto — core philosophy, architecture model, eight principles, state-transition backbone and TrendFlux ecosystem positioning.",
       "1.2.0 (2026-09-30): Sales Intelligence module — AI Sales Brief, Smart Pitchbook, verified Market Facts with versioning, permanent Pitch History in Lead 360, deterministic Pitch Effectiveness, filtered CSV/PDF export.",
       "1.1.0 (2026-09-30): Contact-close reason enforced in the database and written to permanent lead history; Other note stored and shown; follow-up cancel/old-new values logged and deletes blocked; agent self-claim retired; 9:05 gate on all agent actions; Lead 360 filters (source, requirement, reason, event type) with totals, paging and filtered CSV.",
