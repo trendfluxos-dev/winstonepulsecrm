@@ -106,3 +106,74 @@ export const whatsappQualificationFeed = createServerFn({ method: "POST" })
     const names = new Map((leads ?? []).map((l) => [l.id, l.name ?? "—"]));
     return { rows: ids.map((id) => ({ leadId: id, name: names.get(id) ?? "—", ...by.get(id)! })) };
   });
+
+/* ---------- JSON backup / restore (HQ/IT). Server recomputes every check; nothing from the file is trusted. ---------- */
+async function backupStore(c: { agentId: string | null; actor: string }) {
+  const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+  const toRow = (u: Unit) => ({ id: u.id, project_id: u.projectId, project_name: u.projectName, code: u.code, kind: u.kind, floor: u.floor,
+    size_sqft: u.sizeSqft, size_katha: u.sizeKatha, bedrooms: u.bedrooms, bathrooms: u.bathrooms, price_bdt: u.priceBdt,
+    status: u.status, updated_by: u.updatedBy, updated_at: u.updatedAt });
+  const store: import("@/lib/unit-backup.server").BackupStore = {
+    listUnits: async () => (await load()).units,
+    projectIds: async () => {
+      const { data, error } = await db.from("project_catalog").select("id").limit(10000);
+      if (error) throw new Error("Projects unavailable");
+      return new Set((data ?? []).map((p) => p.id));
+    },
+    insertUnits: async (units) => { const { error } = await db.from("project_units").insert(units.map(toRow)); if (error) throw new Error("insert failed"); },
+    upsertUnits: async (units) => { const { error } = await db.from("project_units").upsert(units.map(toRow)); if (error) throw new Error("upsert failed"); },
+    saveSnapshot: async (s) => {
+      const { data, error } = await db.from("unit_inventory_backups").insert({ reason: s.reason, filename: s.filename, format_version: 1, record_count: s.recordCount,
+        checksum: s.checksum, payload: s.payload as never, created_by: s.createdBy }).select("id").single();
+      if (error || !data) throw new Error("snapshot failed");
+      return data.id;
+    },
+    readSnapshot: async (id) => { const { data } = await db.from("unit_inventory_backups").select("payload").eq("id", id).maybeSingle(); return data ?? null; },
+    audit: async (action, metadata) => {
+      await db.from("audit_logs").insert({ action, entity_type: "project_unit_backup", entity_id: null, actor_profile_id: c.agentId, actor_label: c.actor, metadata: metadata as never });
+    },
+  };
+  return store;
+}
+const envName = () => (process.env["SUPABASE_PROJECT_ID"] ?? process.env["VITE_SUPABASE_PROJECT_ID"] ?? "winstone-crm").slice(0, 40);
+
+export const exportUnitBackup = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => z.object({ adminToken: Token }).parse(i ?? {}))
+  .handler(async ({ data }) => {
+    const { siCaller } = await import("@/lib/sales-intel.server");
+    const c = await siCaller(data.adminToken);
+    if (c.scope !== "authority") throw new Error("Only HQ/IT can export unit backups / শুধু HQ/IT");
+    const { exportBackup } = await import("@/lib/unit-backup.server");
+    const r = await exportBackup(await backupStore(c), envName(), c.actor);
+    return { filename: r.filename, json: JSON.stringify(r.backup, null, 2) };
+  });
+
+const MAX_FILE = 5_000_000;
+const parseFile = (s: string) => { try { return JSON.parse(s) as unknown; } catch { return undefined; } };
+
+export const previewUnitRestore = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => z.object({ adminToken: Token, json: z.string().max(MAX_FILE) }).parse(i))
+  .handler(async ({ data }) => {
+    const { siCaller, requireAdminWriter } = await import("@/lib/sales-intel.server");
+    const c = await siCaller(data.adminToken);
+    requireAdminWriter(c);
+    const raw = parseFile(data.json);
+    if (raw === undefined) return { ok: false as const, errors: ["File is not valid JSON"] };
+    const { previewRestore } = await import("@/lib/unit-backup.server");
+    return previewRestore(await backupStore(c), raw);
+  });
+
+export const applyUnitRestore = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => z.object({
+    adminToken: Token, json: z.string().max(MAX_FILE), filename: z.string().max(200), mode: z.enum(["merge", "full"]),
+    overwriteIds: z.array(z.string().uuid()).max(5000), expectedLiveChecksum: z.string().max(100), confirmFull: z.boolean(),
+  }).parse(i))
+  .handler(async ({ data }) => {
+    const { siCaller, requireAdminWriter } = await import("@/lib/sales-intel.server");
+    const c = await siCaller(data.adminToken);
+    requireAdminWriter(c);
+    const raw = parseFile(data.json);
+    const { applyRestore } = await import("@/lib/unit-backup.server");
+    return applyRestore(await backupStore(c), { backup: raw ?? null, filename: data.filename, mode: data.mode, overwriteIds: data.overwriteIds,
+      expectedLiveChecksum: data.expectedLiveChecksum, confirmFull: data.confirmFull }, c.actor);
+  });
