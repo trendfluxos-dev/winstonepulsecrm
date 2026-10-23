@@ -30,10 +30,10 @@ export const listUnits = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { siCaller } = await import("@/lib/sales-intel.server");
     const c = await siCaller(data.adminToken).catch(() => null);
-    if (!c) return { canEdit: false, units: [] as Unit[], projects: [] as { id: string; name: string; location: string | null }[] };
+    if (!c) return { canEdit: false, canBackup: false, units: [] as Unit[], projects: [] as { id: string; name: string; location: string | null }[] };
     const { db, units } = await load();
     const { data: projects } = await db.from("project_catalog").select("id, name, location").eq("status", "active").order("name");
-    return { canEdit: c.scope === "authority" && !c.readOnly, units, projects: projects ?? [] };
+    return { canEdit: c.scope === "authority" && !c.readOnly, canBackup: c.scope === "authority", units, projects: projects ?? [] };
   });
 
 const n = (max: number) => z.number().nonnegative().max(max).nullish().transform((v) => v ?? null);
