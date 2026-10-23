@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminToken } from "@/lib/local-session";
+import { useMyAccount } from "@/lib/session";
 import { listSupportCustomers, updateSupportCustomer } from "@/lib/support-staff.functions";
 import { relativeTime } from "@/lib/support-shared";
 
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/customers")({
 
 function CustomersPage() {
   const adminToken = useAdminToken();
+  const readOnly = useMyAccount().account?.readOnly === true;
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
@@ -154,7 +156,7 @@ function CustomersPage() {
                   <Button
                     size="sm"
                     className="h-8 text-xs"
-                    disabled={save.isPending}
+                    disabled={save.isPending || readOnly}
                     onClick={() => save.mutate(customer.id)}
                   >
                     Save

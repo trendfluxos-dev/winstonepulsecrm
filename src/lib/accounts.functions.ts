@@ -169,6 +169,8 @@ export const getMyAccount = createServerFn({ method: "POST" })
     const caller = await (data.view === "agent" ? resolveWorkCaller(data.adminToken) : resolveCaller(data.adminToken));
     return {
       scope: caller.scope,
+      /** Display hint only — servers still enforce requireWrite on every mutation. */
+      readOnly: caller.readOnly,
       deck: deckAccess(caller),
       approval: caller.approval,
       signedIn: caller.userId !== null,
