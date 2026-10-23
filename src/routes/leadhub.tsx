@@ -34,7 +34,7 @@ type Section = (typeof SECTIONS)[number]["key"];
 export const Route = createFileRoute("/leadhub")({
   head: () => ({ meta: [
     { title: "LeadHub Nexus — Winstone Pulse" },
-    { name: "description", content: "HQ ও IT-এর canonical lead database, import, quality এবং quantity assignment workspace।" },
+    { name: "description", content: "LeadHub Nexus — canonical lead database ও lead operations: import, data quality ও deduplication, quota এবং lead assignment।" },
     { property: "og:title", content: "LeadHub Nexus — Winstone Pulse" },
     { property: "og:description", content: "Canonical lead identity, master pool এবং auditable agent assignment।" },
     { property: "og:type", content: "website" },

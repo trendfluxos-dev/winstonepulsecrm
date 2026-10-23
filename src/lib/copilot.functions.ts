@@ -14,7 +14,7 @@ const Input = z.object({
     .max(30),
 });
 
-/** One turn of the Executive AI Copilot. PIN-gated: it can read and dispatch leads. */
+/** One turn of the Winstone AI Copilot. IT Console ("full") PIN only; HQ's read-only PIN is rejected. It can read data and assign leads. */
 export const askCopilot = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }) => {
