@@ -9,6 +9,8 @@ import {
   dhakaTime,
   dhakaPeriod,
   isArchitectIdentity,
+  invoiceStatus as invoiceStatusOf,
+  type InvoiceStatus,
   type PaymentStatus,
   type Stage,
   type UnlockStatus,
@@ -31,6 +33,10 @@ export type MaintenanceState = {
   openRequest: boolean;
   locked: boolean;
   stage: Stage;
+  /** Invoice lifecycle (ISSUED/APPROVED/PAID/LOCKED) — separate from CRM access. */
+  invoiceStatus: InvoiceStatus;
+  invoiceApprovedAt: string | null;
+  totalCents: number | null;
 };
 
 async function db() {
@@ -192,6 +198,9 @@ export async function maintenanceAccess(now: Date = new Date()): Promise<Mainten
     openRequest: (count ?? 0) > 0,
     locked: result.locked,
     stage: result.stage,
+    invoiceStatus: invoiceStatusOf({ now, lockAt: row.lock_at, paymentStatus: row.payment_status, approvedAt: row.invoice_approved_at ?? null }),
+    invoiceApprovedAt: row.invoice_approved_at ?? null,
+    totalCents: row.total_cents ?? null,
   };
   cache = { at: now.getTime(), state };
   return state;
@@ -241,6 +250,29 @@ export async function submitPayment(input: { actor: string; paymentRef: string; 
   await audit({ actor: input.actor, actorRole: "it_console", action: "payment_submitted", period: state.period, previous: state.paymentStatus, next: "pending", reason: input.note ?? null, metadata: { payment_ref: input.paymentRef, fee_usd: state.feeUsd } });
   await notifyOnce(`maintenance_payment_submitted_${state.period}_${input.paymentRef}`, "warning", "New payment submitted for verification", `${input.actor} submitted reference ${input.paymentRef} for ${state.period} ($35.29 USD incl. 15% VAT). Awaiting System Architect verification.`);
   return { ok: true, already: false };
+}
+
+/**
+ * Customer accepts the issued invoice (APPROVED). Approval is NOT payment:
+ * it never changes payment_status, lock_status or CRM access. Idempotent.
+ */
+export async function approveInvoice(input: { actor: string }) {
+  const state = await maintenanceAccess();
+  if (state.paymentStatus === "verified") return { ok: true, already: true };
+  if (state.invoiceApprovedAt) return { ok: true, already: true };
+  const client = await db();
+  const at = new Date().toISOString();
+  const { data, error } = await client
+    .from("system_maintenance")
+    .update({ invoice_approved_at: at, invoice_approved_by: input.actor })
+    .eq("billing_period", state.period)
+    .is("invoice_approved_at", null)
+    .select("id")
+    .maybeSingle();
+  if (error) throw new Error("Could not record invoice approval");
+  clearMaintenanceCache();
+  if (data) await audit({ actor: input.actor, actorRole: "it_console", action: "invoice_approved", period: state.period, previous: state.invoiceStatus, next: "APPROVED", reason: "Customer accepted invoice — not a payment" });
+  return { ok: true, already: !data };
 }
 
 /** IT may withdraw a pending submission (back to unpaid). A verified month can only be changed by the Architect. */

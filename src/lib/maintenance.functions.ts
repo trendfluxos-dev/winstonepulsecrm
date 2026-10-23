@@ -98,6 +98,15 @@ export const submitMaintenancePayment = createServerFn({ method: "POST" })
     return submitPayment({ actor: label, paymentRef: data.paymentRef, note: data.note ?? null });
   });
 
+/** Customer (via IT Console) accepts the invoice. Not a payment; never unlocks. */
+export const approveMaintenanceInvoice = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => Token.parse(input))
+  .handler(async ({ data }) => {
+    const { label } = await itCaller(data.adminToken);
+    const { approveInvoice } = await import("@/lib/maintenance.server");
+    return approveInvoice({ actor: label });
+  });
+
 export const withdrawMaintenancePayment = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Token.extend({ reason: z.string().trim().max(300).optional() }).parse(input))
   .handler(async ({ data }) => {
