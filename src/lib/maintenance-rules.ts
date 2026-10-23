@@ -3,14 +3,20 @@
  * Fee is USD only; no other currency is ever shown for this feature.
  */
 
-export const MAINTENANCE_FEE_USD = 46.29;
+/**
+ * Monthly architecture / infrastructure / maintenance charge (owner decision 2026-10-23):
+ * $35.29 USD per month is the customer-facing total, 15% VAT included.
+ * Extraction in integer cents: base = round(3529 / 1.15) = 3069, VAT = 3529 - 3069 = 460.
+ * Older invoices keep their own stored snapshot (e.g. 2026-09/10 at $18.16) — never rewritten.
+ */
+export const ARCH_TOTAL_CENTS = 3529;
+export const ARCH_BASE_CENTS = Math.round(ARCH_TOTAL_CENTS / 1.15);
+export const ARCH_VAT_CENTS = ARCH_TOTAL_CENTS - ARCH_BASE_CENTS;
+export const MAINTENANCE_FEE_USD = 35.29;
 export const VAT_RATE = 0.15;
-/** Full operating-system unlock: $46.29 + 15% VAT ($6.94) = $53.23 USD. */
-export const MAINTENANCE_FEE_VAT_USD = 6.94;
-export const MAINTENANCE_FEE_TOTAL_USD = 53.23;
-export const MAINTENANCE_FEE_LABEL = "$46.29 USD + 15% VAT ($6.94) = $53.23 USD";
-/** CRM-only (installation files) unlock: $15.79 + 15% VAT ($2.37) = $18.16 USD. */
-export const CRM_ONLY_FEE_LABEL = "$15.79 USD + 15% VAT ($2.37) = $18.16 USD";
+export const MAINTENANCE_FEE_VAT_USD = ARCH_VAT_CENTS / 100;
+export const MAINTENANCE_FEE_TOTAL_USD = ARCH_TOTAL_CENTS / 100;
+export const MAINTENANCE_FEE_LABEL = "$35.29 USD/month (incl. 15% VAT $4.60)";
 /** Unpaid lock: 15th 00:00 Dhaka (grace period runs through the 14th 23:59). */
 export const BILLING_DAY = 15;
 /** Payment notice starts on the 9th 00:00 Dhaka. */
@@ -46,16 +52,16 @@ export function defaultLockAt(period: string): string {
   return new Date(Date.UTC(y!, m! - 1, BILLING_DAY, 0, 0, 0) - DHAKA_MS).toISOString();
 }
 
-/** Renewal due day (12th 00:00 Dhaka). */
-export const RENEWAL_DAY = 12;
+/** Payment deadline = 15th 00:00 Dhaka (the first instant of the 15th); payment must be verified before it. */
+export const RENEWAL_DAY = BILLING_DAY;
 
-/** 12th of the period at 00:00 Asia/Dhaka — the renewal due instant, as UTC ISO. */
+/** Deadline instant (15th 00:00 Asia/Dhaka) as UTC ISO — same instant as the lock. */
 export function defaultDueAt(period: string): string {
   const [y, m] = period.split("-").map(Number);
   return new Date(Date.UTC(y!, m! - 1, RENEWAL_DAY, 0, 0, 0) - DHAKA_MS).toISOString();
 }
 
-/** Next renewal due instant (12th 00:00 Dhaka) at or after `now`; skips the current month when already paid. */
+/** Next deadline instant (15th 00:00 Dhaka) at or after `now`; skips the current month when already paid. */
 export function nextRenewalDueAt(now: Date, paid: boolean): string {
   const d = new Date(now.getTime() + DHAKA_MS);
   let y = d.getUTCFullYear();
@@ -132,7 +138,7 @@ export function dhakaTime(iso: string | null | undefined): string {
   });
 }
 
-/** CRM plan invoice in integer cents (decimal-safe): 1579 + round(1579 × 15%) = 1579 + 237 = 1816. */
+/** HISTORICAL ONLY: the 2026-09/10 CRM invoice snapshot (1579 + 237 = 1816 cents). Not charged for new periods. */
 export const CRM_PLAN_NAME = "WINSTONE PULSE : CRM";
 export const CRM_BASE_CENTS = 1579;
 export const VAT_RATE_BPS = 1500;
@@ -160,8 +166,29 @@ export function isRedWindow(now: Date = new Date()): boolean {
   return (day === 11 && mins >= 17 * 60) || day === 12 || day === 13 || day === 14;
 }
 
-/** Accurate label: "Payment Overdue" only after the 12th (due date) has passed in Dhaka. */
-export function paymentDueLabel(now: Date = new Date()): "Payment Due" | "Payment Overdue" {
-  const day = new Date(now.getTime() + 6 * 3600_000).getUTCDate();
-  return day > 12 && day < 15 ? "Payment Overdue" : "Payment Due";
+/** The deadline is the lock instant (15th 00:00 Dhaka), so before it a bill is only ever "Payment Due". */
+export function paymentDueLabel(_now: Date = new Date()): "Payment Due" | "Payment Overdue" {
+  return "Payment Due";
 }
+
+export type InvoiceStatus = "ISSUED" | "APPROVED" | "PAID" | "LOCKED";
+export type AccessState = "ACTIVE" | "LOCKED";
+
+/**
+ * Invoice lifecycle (display + audit), kept separate from CRM access:
+ * PAID only when payment_status is 'verified' (Architect-verified proof);
+ * LOCKED when the deadline passed unverified; APPROVED = customer accepted (not paid); else ISSUED.
+ */
+export function invoiceStatus(input: { now: Date; lockAt: string; paymentStatus: PaymentStatus; approvedAt: string | null }): InvoiceStatus {
+  if (input.paymentStatus === "verified") return "PAID";
+  if (input.now.getTime() >= new Date(input.lockAt).getTime()) return "LOCKED";
+  return input.approvedAt ? "APPROVED" : "ISSUED";
+}
+
+/** Global CRM access for the account. Only verified payment (or a time-boxed Architect unlock) keeps/restores ACTIVE. */
+export function accessState(input: RuleInput): AccessState {
+  return decide(input).locked ? "LOCKED" : "ACTIVE";
+}
+
+/** Customer-facing name of the monthly architecture/infrastructure/maintenance charge. */
+export const ARCH_PLAN_NAME = "WINSTONE PULSE — Monthly architecture charge";

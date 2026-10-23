@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 /**
- * Monthly maintenance ($46.29 USD) endpoints. The lock itself is decided in
+ * Monthly architecture charge ($35.29 USD incl. VAT) endpoints. The lock itself is decided in
  * maintenance.server.ts; these functions only read it or move it through the
  * IT Console → System Architect workflow.
  */
@@ -46,7 +46,7 @@ export const getMaintenanceStatus = createServerFn({ method: "POST" })
       };
     } catch (error) {
       console.error("maintenance status failed", error);
-      return { ok: false as const, locked: true, stage: "locked" as const, exempt, feeUsd: 46.29, paymentStatus: "unpaid" as const, unlockStatus: "none" as const, openRequest: false, period: "", dueDate: "", lockAt: "", unlockExpiresAt: null };
+      return { ok: false as const, locked: true, stage: "locked" as const, exempt, feeUsd: 35.29, paymentStatus: "unpaid" as const, unlockStatus: "none" as const, openRequest: false, period: "", dueDate: "", lockAt: "", unlockExpiresAt: null };
     }
   });
 
@@ -73,7 +73,7 @@ export const requestPaymentHelp = createServerFn({ method: "POST" })
       code: "maintenance_payment_help",
       severity: "critical",
       title: "Maintenance payment / unlock requested",
-      detail: `${caller.profile?.name ?? "Executive HQ"} asked IT Console to settle the ${state.period} maintenance fee ($46.29 USD).`,
+      detail: `${caller.profile?.name ?? "Executive HQ"} asked IT Console to settle the ${state.period} architecture charge ($35.29 USD incl. 15% VAT).`,
     });
     return { ok: true };
   });
@@ -96,6 +96,15 @@ export const submitMaintenancePayment = createServerFn({ method: "POST" })
     const { label } = await itCaller(data.adminToken);
     const { submitPayment } = await import("@/lib/maintenance.server");
     return submitPayment({ actor: label, paymentRef: data.paymentRef, note: data.note ?? null });
+  });
+
+/** Customer (via IT Console) accepts the invoice. Not a payment; never unlocks. */
+export const approveMaintenanceInvoice = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => Token.parse(input))
+  .handler(async ({ data }) => {
+    const { label } = await itCaller(data.adminToken);
+    const { approveInvoice } = await import("@/lib/maintenance.server");
+    return approveInvoice({ actor: label });
   });
 
 export const withdrawMaintenancePayment = createServerFn({ method: "POST" })

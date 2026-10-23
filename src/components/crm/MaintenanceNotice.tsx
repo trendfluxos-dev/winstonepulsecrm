@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { lovable } from "@/integrations/lovable";
 import { useAdminToken } from "@/lib/local-session";
 import { getMaintenanceStatus, requestPaymentHelp } from "@/lib/maintenance.functions";
-import { CRM_PLAN_NAME, CRM_TOTAL_CENTS, MAINTENANCE_FEE_LABEL, dhakaMonthName, dhakaTime, isAmberWindow, isRedWindow, nextRenewalDueAt, paymentDueLabel, usd } from "@/lib/maintenance-rules";
+import { ARCH_PLAN_NAME, ARCH_TOTAL_CENTS, MAINTENANCE_FEE_LABEL, dhakaMonthName, dhakaTime, isAmberWindow, isRedWindow, nextRenewalDueAt, paymentDueLabel, usd } from "@/lib/maintenance-rules";
 import { useLang, useT } from "@/lib/i18n";
 import { amberDismissed, dismissAmber, firstRedModalThisSession } from "@/lib/billing-dismiss";
 
@@ -259,7 +259,7 @@ export function MaintenanceGate() {
               en: `🔴 The company's system maintenance fee (${MAINTENANCE_FEE_LABEL}) is due soon — lock at 00:00 on the 15th. Inform management.`,
             })
           : t({
-              bn: `কোম্পানির সিস্টেম রক্ষণাবেক্ষণ ফি (${MAINTENANCE_FEE_LABEL}) — রিন্যুয়াল দিন ১২ তারিখ, ১৪ তারিখ ২৩:৫৯ পর্যন্ত গ্রেস। ফি কোম্পানি দেয় — কর্তৃপক্ষ না জানলে তাঁদের জানান।`,
+              bn: `কোম্পানির সিস্টেম রক্ষণাবেক্ষণ ফি (${MAINTENANCE_FEE_LABEL}) — ১৫ তারিখ রাত ১২:০০ (ঢাকা)-র আগে পেমেন্ট যাচাই হতে হবে। ফি কোম্পানি দেয় — কর্তৃপক্ষ না জানলে তাঁদের জানান।`,
               en: `Company system maintenance fee (${MAINTENANCE_FEE_LABEL}) — renewal due on the 12th, grace until 23:59 on the 14th. The company pays the fee — inform management if they are unaware.`,
             });
   const strong = data.stage !== "upcoming";
@@ -281,13 +281,13 @@ function InvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{CRM_PLAN_NAME} — Invoice</DialogTitle>
+          <DialogTitle>{ARCH_PLAN_NAME} — Invoice</DialogTitle>
         </DialogHeader>
         <dl className="grid grid-cols-2 gap-2 rounded-lg border border-border p-3 text-sm">
           <dt className="text-muted-foreground">Base monthly fee</dt><dd className="font-semibold">$15.79 USD</dd>
           <dt className="text-muted-foreground">VAT (15%)</dt><dd className="font-semibold">$2.37 USD</dd>
-          <dt className="text-muted-foreground">Total due</dt><dd className="font-semibold">{usd(CRM_TOTAL_CENTS)} USD</dd>
-          <dt className="text-muted-foreground">Due date</dt><dd className="font-semibold">12 {dhakaMonthName()}</dd>
+          <dt className="text-muted-foreground">Total due</dt><dd className="font-semibold">{usd(ARCH_TOTAL_CENTS)} USD</dd>
+          <dt className="text-muted-foreground">Verify payment before</dt><dd className="font-semibold">15 {dhakaMonthName()} 00:00 Asia/Dhaka</dd>
           <dt className="text-muted-foreground">Lock deadline</dt><dd className="font-semibold">15th 00:00 (Dhaka)</dd>
         </dl>
         <p className="text-xs text-muted-foreground">Payment is completed by IT Console / authorized team and verified by the System Architect.</p>
@@ -308,7 +308,7 @@ function AmberReminderBanner({ period }: { period: string }) {
       <div role="status" className="fixed inset-x-0 bottom-0 z-[60] border-t border-warning/50 bg-warning/15 px-3 py-2 text-xs backdrop-blur sm:text-sm">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-2">
           <p className="min-w-0 flex-1">
-            <b className="text-warning">Subscription Reminder</b> — Your monthly invoice for {CRM_PLAN_NAME} ({usd(CRM_TOTAL_CENTS)} USD) is available. Payment is due on 12 {dhakaMonthName()}.
+            <b className="text-warning">Subscription Reminder</b> — Your monthly invoice for {ARCH_PLAN_NAME} ({usd(ARCH_TOTAL_CENTS)} USD) is available. Payment must be verified before 15 {dhakaMonthName()} 00:00 Asia/Dhaka.
           </p>
           <Button size="sm" variant="outline" className="h-7" onClick={() => setOpen(true)}>View Invoice</Button>
           <Button size="sm" className="h-7" onClick={() => setOpen(true)}>Pay Now</Button>
@@ -325,8 +325,8 @@ function UpcomingInvoiceWidget() {
   return (
     <div className="mt-3 rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
       <p className="font-bold text-warning">Upcoming Invoice Due</p>
-      <p className="mt-1">Complete payment by 12 {dhakaMonthName()} to maintain uninterrupted access to your CRM pipelines and sales monitoring.</p>
-      <p className="mt-1">Total Due: <b>{usd(CRM_TOTAL_CENTS)} USD</b>, including 15% VAT.</p>
+      <p className="mt-1">Complete a verified payment before 15 {dhakaMonthName()} 00:00 Asia/Dhaka to maintain uninterrupted access to your CRM pipelines and sales monitoring.</p>
+      <p className="mt-1">Total Due: <b>{usd(ARCH_TOTAL_CENTS)} USD</b>, including 15% VAT.</p>
       <Button size="sm" className="mt-2" onClick={() => setOpen(true)}>Settle Invoice</Button>
       <InvoiceDialog open={open} onOpenChange={setOpen} />
       <MaintenanceCountdown />
@@ -349,7 +349,7 @@ function UrgentRenewal({ period, admin, paymentStatus }: { period: string; admin
       <div role="alert" className="fixed inset-x-0 bottom-0 z-[60] bg-destructive px-3 py-2 text-xs text-destructive-foreground sm:text-sm">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-2">
           <p className="min-w-0 flex-1">
-            <b>Urgent Payment Notice</b> — Your {CRM_PLAN_NAME} subscription requires payment. The final access deadline is 15 {month} at 00:00 Asia/Dhaka. If the invoice remains unpaid and unverified, the subscribed workspace will be locked automatically.
+            <b>Urgent Payment Notice</b> — Your {ARCH_PLAN_NAME} subscription requires payment. The final access deadline is 15 {month} at 00:00 Asia/Dhaka. If the invoice remains unpaid and unverified, the subscribed workspace will be locked automatically.
           </p>
           <Button size="sm" variant="secondary" className="h-7" onClick={() => setInvoice(true)}>Complete Payment Immediately</Button>
         </div>
@@ -362,8 +362,8 @@ function UrgentRenewal({ period, admin, paymentStatus }: { period: string; admin
             </DialogTitle>
           </DialogHeader>
           <ul className="space-y-1.5 text-sm">
-            <li>● Outstanding Balance: <b>{usd(CRM_TOTAL_CENTS)} USD</b>, including VAT</li>
-            <li>● Payment Due Date: <b>12 {month}</b></li>
+            <li>● Outstanding Balance: <b>{usd(ARCH_TOTAL_CENTS)} USD</b>, including VAT</li>
+            <li>● Payment deadline: <b>before 15 {month} 00:00 Asia/Dhaka</b></li>
             <li>● Lock Deadline: <b>15 {month}, 00:00 Asia/Dhaka</b></li>
             <li>● Payment Status: <b className="text-destructive">{statusText}</b></li>
           </ul>

@@ -52,8 +52,6 @@ export function allowedActions(caller: Caller): CommandActionType[] {
   switch (scopeLabel(caller)) {
     case "authority":
       return [
-        "assign_leads",
-        "distribute_unassigned",
         "classify_lead",
         "retry_recording",
         "verify_drive",
@@ -63,8 +61,6 @@ export function allowedActions(caller: Caller): CommandActionType[] {
       ];
     case "coordinator":
       return [
-        "assign_leads",
-        "distribute_unassigned",
         "classify_lead",
         "generate_shift_summary",
         "acknowledge_alert",
@@ -237,9 +233,8 @@ export async function buildCommandFacts(caller: Caller, surface: Surface) {
   };
 }
 
-const ACTION_CATALOGUE = `Available action types (only propose ones in "allowed_actions"):
-- assign_leads      params: { agent_id: uuid, agent_name: string, count: number }  → moves that many pending unassigned leads to one agent
-- distribute_unassigned params: {}                                                → splits every unassigned lead evenly across active agents
+const ACTION_CATALOGUE = `Winstone AI never assigns or distributes leads — lead assignment happens only in LeadHub Nexus (50 leads per agent per Dhaka day).
+Available action types (only propose ones in "allowed_actions"):
 - classify_lead     params: { lead_id: uuid, lead_name: string, temperature: "hot"|"warm"|"cold", grade: "A"|"B"|"C"|"D", note?: string }
 - retry_recording   params: { recording_id: uuid, step: "drive"|"analysis" }       → re-runs a stuck recording step (idempotent)
 - verify_drive      params: { limit: number }                                      → checks real Drive files behind recent backups
@@ -285,8 +280,6 @@ const ANSWER_SCHEMA = {
           type: {
             type: "string",
             enum: [
-              "assign_leads",
-              "distribute_unassigned",
               "classify_lead",
               "retry_recording",
               "verify_drive",

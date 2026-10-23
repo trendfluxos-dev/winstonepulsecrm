@@ -2279,6 +2279,27 @@ export type Database = {
           },
         ]
       }
+      lead_daily_assignment_ledger: {
+        Row: {
+          agent_id: string
+          created_at: string
+          lead_id: string
+          work_date: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          lead_id: string
+          work_date: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          lead_id?: string
+          work_date?: string
+        }
+        Relationships: []
+      }
       lead_distribution_runs: {
         Row: {
           actor_label: string | null
@@ -5376,6 +5397,9 @@ export type Database = {
           fee_bdt: number | null
           fee_usd: number
           id: string
+          invoice_approved_at: string | null
+          invoice_approved_by: string | null
+          invoice_issued_at: string | null
           lock_at: string
           lock_status: string
           locked_logged_at: string | null
@@ -5408,6 +5432,9 @@ export type Database = {
           fee_bdt?: number | null
           fee_usd?: number
           id?: string
+          invoice_approved_at?: string | null
+          invoice_approved_by?: string | null
+          invoice_issued_at?: string | null
           lock_at: string
           lock_status?: string
           locked_logged_at?: string | null
@@ -5440,6 +5467,9 @@ export type Database = {
           fee_bdt?: number | null
           fee_usd?: number
           id?: string
+          invoice_approved_at?: string | null
+          invoice_approved_by?: string | null
+          invoice_issued_at?: string | null
           lock_at?: string
           lock_status?: string
           locked_logged_at?: string | null

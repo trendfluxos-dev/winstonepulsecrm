@@ -13,6 +13,7 @@ import {
   requestSystemUnlock,
   setMaintenanceLockAt,
   submitMaintenancePayment,
+  approveMaintenanceInvoice,
   withdrawMaintenancePayment,
 } from "@/lib/maintenance.functions";
 import { MAINTENANCE_FEE_LABEL, UNLOCK_PRESET_HOURS, dhakaTime } from "@/lib/maintenance-rules";
@@ -58,6 +59,7 @@ export function MaintenancePanel() {
     onError: (e: Error) => toast.error(e.message),
   });
   const submit = useMutation(run(() => submitMaintenancePayment({ data: { adminToken, paymentRef: ref } }), "Submitted — waiting for System Architect verification"));
+  const approveInv = useMutation(run(() => approveMaintenanceInvoice({ data: { adminToken } }), "Invoice approved — this is not a payment"));
   const withdraw = useMutation(run(() => withdrawMaintenancePayment({ data: { adminToken, reason: "Submission withdrawn by IT" } }), "Submission withdrawn"));
   const [search, setSearch] = useState("");
   const [kind, setKind] = useState<AuditKind>("all");
@@ -87,7 +89,10 @@ export function MaintenancePanel() {
         {[
           ["Billing period", state.period],
           ["Maintenance fee", MAINTENANCE_FEE_LABEL],
-          ["Due date", dhakaTime(state.dueDate)],
+          ["Invoice status", state.invoiceStatus ?? "—"],
+          ["CRM access", state.locked ? "LOCKED" : "ACTIVE"],
+          ["Invoice total", state.totalCents != null ? `$${(state.totalCents / 100).toFixed(2)} USD` : "—"],
+          ["Verify payment before", dhakaTime(state.lockAt)],
           ["Lock time", dhakaTime(state.lockAt)],
           ["Verified by", state.paymentVerifiedBy ?? "—"],
           ["Verified at", dhakaTime(state.paymentVerifiedAt)],
@@ -106,7 +111,7 @@ export function MaintenancePanel() {
         <p className="mb-1 text-sm font-semibold">কীভাবে কাজ করে (ঢাকা সময়)</p>
         <ol className="list-decimal space-y-0.5 pl-4 text-muted-foreground">
           <li>৯ তারিখ ০০:০০ — সবার স্ক্রিনে পেমেন্ট নোটিশ শুরু।</li>
-          <li>১২ তারিখ ০০:০০ — Renewal Due ($53.23 USD পরিশোধের দিন — $46.29 + 15% VAT $6.94)।</li>
+          <li>মাসিক আর্কিটেকচার চার্জ $35.29 USD (১৫% VAT $4.60 সহ) — ১৫ তারিখ ০০:০০ (ঢাকা)-র আগে পেমেন্ট যাচাই হতে হবে।</li>
           <li>১৪ তারিখ ২৩:৫৯ পর্যন্ত — CRM পুরোপুরি চালু (গ্রেস সময়)।</li>
           <li>১৫ তারিখ ০০:০০ — পেমেন্ট যাচাই না হলে এজেন্ট/HQ লক; IT Console খোলা থাকে।</li>
           <li>পেমেন্ট হলে নিচে আসল ট্রানজ্যাকশন/রসিদ নম্বর লিখে “Submit for verification” চাপুন — মাসটি PENDING হবে।</li>
@@ -124,6 +129,9 @@ export function MaintenancePanel() {
           <Input id="mt-ref" value={ref} onChange={(e) => setRef(e.target.value)} placeholder="bKash TrxID / bank receipt" />
           <Button className="w-full" disabled={ref.trim().length < 3 || submit.isPending || state.paymentStatus === "verified"} onClick={() => submit.mutate()}>
             Submit for verification
+          </Button>
+          <Button variant="secondary" size="sm" className="w-full" disabled={approveInv.isPending || !!state.invoiceApprovedAt || state.paymentStatus === "verified"} onClick={() => approveInv.mutate()}>
+            Approve invoice (not a payment)
           </Button>
           <Button variant="ghost" size="sm" className="w-full" disabled={withdraw.isPending || state.paymentStatus !== "pending"} onClick={() => withdraw.mutate()}>Withdraw submission</Button>
           <p className="text-xs text-muted-foreground">Final verification requires System Architect approval.</p>
