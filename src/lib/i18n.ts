@@ -55,6 +55,7 @@ export const NAV_LABELS: Record<string, { bn: string; en: string }> = {
   "/security": { bn: "পিন ও অ্যাক্সেস", en: "PIN & Access" },
   "/docs": { bn: "ডকস", en: "Docs" },
   "/docs-admin": { bn: "ডকস অ্যাডমিন", en: "Docs Admin" },
+  "/messenger": { bn: "Messenger ইনবক্স", en: "Messenger Inbox" },
   "/inbox": { bn: "সাপোর্ট ইনবক্স", en: "Support Inbox" },
   "/tickets": { bn: "টিকিট", en: "Tickets" },
   "/customers": { bn: "কাস্টমার", en: "Customers" },
