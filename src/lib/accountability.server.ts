@@ -66,7 +66,7 @@ export async function measureAgentDay(agentId: string, day: string): Promise<Acc
     const handled = f.status === "done" && Boolean(f.completed_at) && String(f.completed_at) >= f.scheduled_at && String(f.completed_at) <= end;
     const history = (assignments.data ?? []).filter(a => a.lead_id === f.lead_id);
     const latest = history[0];
-    const assessment = classifyOverdue({ ...f, ownerId: ownerBy.get(f.lead_id), ownershipConfirmed: Boolean(latest && latest.to_agent_id === agentId && latest.created_at <= f.created_at) }, end);
+    const assessment = classifyOverdue({ ...f, ownerId: ownerBy.get(f.lead_id) ?? null, ownershipConfirmed: Boolean(latest && latest.to_agent_id === agentId && latest.created_at <= f.created_at) }, end);
     return { id: f.id, handled, scheduled_at: f.scheduled_at, customer: f.customer_name, ...assessment };
   });
   // Today's work = follow-ups scheduled for this day; older ones are backlog, shown separately.

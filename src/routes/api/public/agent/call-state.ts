@@ -1,4 +1,4 @@
-import { reconcileLifecycle, recordingAvailability } from "@/lib/call-reconciliation";
+import { lifecyclePatch, recordingAvailability } from "@/lib/call-reconciliation";
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
@@ -96,11 +96,11 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
           return json({ error: "This call record belongs to another agent or lead" }, 403);
         }
 
-        if (existing) Object.assign(patch, reconcileLifecycle(existing, patch));
+        const acceptedPatch = existing ? lifecyclePatch(existing, patch) : patch;
         let recordingId = existing?.id ?? null;
 
         if (existing) {
-          await supabaseAdmin.from("call_recordings").update(patch).eq("id", existing.id);
+          await supabaseAdmin.from("call_recordings").update(acceptedPatch).eq("id", existing.id);
         } else {
           const { data: inserted, error } = await supabaseAdmin
             .from("call_recordings")
@@ -186,7 +186,7 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
           recording_id: recordingId,
           report_id: reportId,
           call_status: body.state,
-          recording_status: existing ? recordingAvailability({ ...existing, ...patch }) : recordingStatus,
+          recording_status: existing ? recordingAvailability({ ...existing, ...acceptedPatch }) : recordingStatus,
         });
       },
     },

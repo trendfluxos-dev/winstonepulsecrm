@@ -153,7 +153,7 @@ export const recordingPipeline = createServerFn({ method: "POST" })
           : r.recording_status === "not_available"
             ? "failed"
             : "pending";
-      const supabaseState: StageState = r.storage_path
+      const supabaseState: StageState = recovery.hasAudio && r.storage_path
         ? "success"
         : r.recording_status === "not_available"
           ? "skipped"

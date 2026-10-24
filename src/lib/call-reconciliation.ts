@@ -48,3 +48,9 @@ export function uploadConfirmed(value: { recording_id?: unknown; upload_status?:
   return typeof value.recording_id === "string" && value.recording_id.length > 0 &&
     value.upload_status === "uploaded" && value.checksum === expectedChecksum;
 }
+/** Remove stale observation fields as well as preserving statuses on offline replay. */
+export function lifecyclePatch<T extends { call_status: string; recording_status: string }>(row: AudioEvidence, patch: T): Partial<T> & { call_status: string; recording_status: string } {
+  const reconciled = reconcileLifecycle(row, patch);
+  if ((phase[row.call_status ?? ""] ?? -1) >= (phase[patch.call_status] ?? -1)) return reconciled;
+  return { ...patch, ...reconciled };
+}
