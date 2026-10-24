@@ -138,7 +138,9 @@ object WinstoneApi {
         client.newCall(req).execute().use { res ->
             val json = JSONObject(res.body?.string() ?: "{}")
             if (!res.isSuccessful) error(json.optString("error", "HTTP ${res.code}"))
-            check(json.optString("recording_id").isNotBlank() && json.optString("upload_status") == "uploaded" && json.optString("checksum") == checksum) {
+            check(com.winstone.connect.data.sync.QueuedAudioIdentity.uploadConfirmed(
+                json.optString("recording_id"), json.optString("upload_status"), json.optString("checksum"), checksum
+            )) {
                 "Audio confirmation missing; original file retained for retry"
             }
             json

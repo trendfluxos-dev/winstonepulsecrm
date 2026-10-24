@@ -1,5 +1,10 @@
 # Roadmap
 
+## Follow-up — resume code-only remediation
+- [x] Extracted Android server-confirmation predicate into testable queue logic and connected upload handling to it; rejects missing/blank identities, blank/mismatched checksums and non-uploaded statuses before durable original release. Added one Kotlin test and three executable TypeScript tests.
+- Follow-up regression: `bunx vitest run --exclude 'tests/*.integration.test.ts' --exclude 'tests/project-photo-access.test.ts' --exclude 'tests/rls.test.ts' --exclude 'tests/staging/**'` — exit 0, **111 files / 774 tests passed**, 20:08:29 UTC, 7.19s. No deployment or database writes; Android runtime tests remain blocked on Java/SDK and a genuine handset.
+- Commit creation is managed by Lovable; this agent does not run git commit/push. Source and tests from the previous pass are present.
+
 ## 2026-10-25 — Production-safe audit remediation (code only)
 - [x] A. Code-only pass: physical call UID propagated through Android lifecycle/audio/report; existing owned recording reused with checksum comparison, cross-call content rejected, stored/available normalized, lifecycle replay cannot erase terminal evidence, durable file queue retains audio until matching server acknowledgement. Audio upload no longer counts as a dial/connected outcome; STT/AI cannot mark upload verified. Real recovery/handset testing remains blocked below.
 - [x] B. Code-only pass: inactive/pending/rejected account and SIM-invalid/conflict responses distinct; legitimate IT recovery surfaced in Android and web. Existing briefing, maintenance, HQ/IT/PIN gates unchanged; recovery hints never authorize access. Four isolated phone-login refusal tests pass.
