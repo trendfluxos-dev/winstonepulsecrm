@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { assignLeadCounts, coordinatorAllocation } from "@/lib/coordinator-deck.functions";
+import { assignLeadCounts, coordinatorAllocation, previewLeadCounts } from "@/lib/coordinator-deck.functions";
 import { useDeckToken } from "@/lib/local-session";
 
 type Row = { key: string; agentId: string; count: string };
@@ -57,13 +57,13 @@ export function AllocationTable({ onAssign }: { onAssign: (agentId: string) => v
           </thead>
           <tbody>
             {(d?.agents ?? []).map((a) => {
-              const remaining = Math.max(0, d!.perAgent - a.today);
+              const remaining = Math.max(0, (d?.perAgent ?? 0) - a.today);
               return (
                 <tr key={a.id} className="border-t border-border/70">
                   <td className="px-4 py-2 font-medium">{a.name}</td>
                   <td className="px-4 py-2 text-muted-foreground">{a.employeeId ?? "—"}</td>
                   <td className="tabular px-4 py-2 text-right">{a.today}</td>
-                  <td className="tabular px-4 py-2 text-right">{d!.perAgent}</td>
+                  <td className="tabular px-4 py-2 text-right">{d?.perAgent ?? 0}</td>
                   <td className={`tabular px-4 py-2 text-right ${remaining === 0 ? "text-success" : ""}`}>{remaining}</td>
                   <td className="px-4 py-2 text-right">
                     <Button size="sm" variant="secondary" onClick={() => onAssign(a.id)}>Assign</Button>
@@ -90,6 +90,8 @@ export function AssignLeadsWorkspace({ initialAgentId, initialCount }: { initial
   const qc = useQueryClient();
   const alloc = useCoordinatorAllocation();
   const assignFn = useServerFn(assignLeadCounts);
+  const previewFn = useServerFn(previewLeadCounts);
+  const preview = useMutation({ mutationFn: () => previewFn({ data: { adminToken, requestId, rows: valid } }), onSuccess: () => setConfirming(true), onError: (e: Error) => toast.error(e.message) });
   const [rows, setRows] = useState<Row[]>(() => [{ ...newRow(initialAgentId), count: initialCount ? String(initialCount) : "" }]);
   const [requestId, setRequestId] = useState(() => crypto.randomUUID());
   const [confirming, setConfirming] = useState(false);
@@ -117,7 +119,7 @@ export function AssignLeadsWorkspace({ initialAgentId, initialCount }: { initial
   };
 
   const run = useMutation({
-    mutationFn: () => assignFn({ data: { adminToken, requestId, rows: valid } }),
+    mutationFn: () => assignFn({ data: { adminToken, requestId, rows: valid, reviewedLeadIds: preview.data?.proposals.flatMap(p => p.leads.map(l => l.id)) } }),
     onSuccess: (res) => {
       const total = res.results.reduce((s, r) => s + r.assigned, 0);
       setLast(res.results);
@@ -187,14 +189,14 @@ export function AssignLeadsWorkspace({ initialAgentId, initialCount }: { initial
                 className="ml-auto"
                 aria-label="Remove row"
                 disabled={rows.length === 1}
-                onClick={() => setRows((rs) => rs.filter((x) => x.key !== r.key))}
+                onClick={() => { setConfirming(false); setRows((rs) => rs.filter((x) => x.key !== r.key)); }}
               >
                 <Trash2 className="size-4" />
               </Button>
             </div>
           );
         })}
-        <Button variant="secondary" size="sm" onClick={() => setRows((rs) => [...rs, newRow()])}>
+        <Button variant="secondary" size="sm" onClick={() => { setConfirming(false); setRows((rs) => [...rs, newRow()]); }}>
           <Plus className="size-4" /> আরেকজন এজেন্ট যোগ করুন
         </Button>
       </div>
@@ -211,12 +213,13 @@ export function AssignLeadsWorkspace({ initialAgentId, initialCount }: { initial
         <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm">
           <p className="mb-2 font-semibold">Preview — নিশ্চিত করুন</p>
           <ul className="space-y-1">
-            {valid.map((v) => {
+            {(preview.data?.proposals ?? []).map((v) => {
               const a = byId.get(v.agentId);
               return (
                 <li key={v.agentId} className="flex justify-between gap-2">
                   <span>{a?.employeeId ? `${a.employeeId} ` : ""}{a?.name}</span>
-                  <span className="tabular font-medium">{v.count}</span>
+                  <div className="min-w-0 text-right"><span className="tabular font-medium">{v.leads.length}/{v.requested}</span>
+                    <ul className="mt-1 space-y-1 text-xs">{v.leads.map(l => <li key={l.id} className="break-words">{l.name} · {l.phone_number} · {l.id}</li>)}</ul></div>
                 </li>
               );
             })}
@@ -229,12 +232,12 @@ export function AssignLeadsWorkspace({ initialAgentId, initialCount }: { initial
 
       <div className="flex flex-wrap gap-2">
         {!confirming ? (
-          <Button size="lg" disabled={!valid.length || dupAgents || available === 0 || alloc.data?.distributionOpen === false} onClick={() => setConfirming(true)}>
+          <Button size="lg" disabled={preview.isPending || !valid.length || dupAgents || available === 0 || alloc.data?.distributionOpen === false} onClick={() => preview.mutate()}>
             Preview
           </Button>
         ) : (
           <>
-            <Button size="lg" onClick={() => run.mutate()} disabled={run.isPending}>
+            <Button size="lg" onClick={() => run.mutate()} disabled={run.isPending || !preview.data}>
               {run.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
               Confirm & assign
             </Button>

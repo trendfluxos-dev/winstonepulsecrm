@@ -40,14 +40,16 @@ export type PoolAgent = { id: string; name: string; employee_id?: string | null 
 
 export async function activeAgents(): Promise<PoolAgent[]> {
   const supabaseAdmin = await admin();
-  const { data } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from("profiles")
-    .select("id, name, employee_id")
+    .select("id, name, employee_id, role, is_active, approval_status")
     .eq("role", "agent")
     .eq("is_active", true)
     .eq("approval_status", "approved")
     .order("name");
-  return data ?? [];
+  if (error) throw new Error(error.message);
+  const { eligibleRoster } = await import("@/lib/assignment-preview");
+  return (data ?? []).filter(eligibleRoster);
 }
 
 /** How many leads are still usable in the database. */
@@ -71,15 +73,16 @@ export async function usablePoolCount(): Promise<number> {
 }
 
 /** Every phone number that already belongs to an agent. */
-async function assignedPhoneKeys(): Promise<Set<string>> {
+export async function assignedPhoneKeys(): Promise<Set<string>> {
   const supabaseAdmin = await admin();
   const keys = new Set<string>();
   for (let from = 0; ; from += 1000) {
-    const { data } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("leads")
       .select("phone_number")
-      .not("assigned_to", "is", null)
+      .or("assigned_to.not.is.null,assigned_agent_id.not.is.null")
       .range(from, from + 999);
+    if (error) throw new Error(error.message);
     (data ?? []).forEach((row) => phoneKeys(row.phone_number).forEach((key) => keys.add(key)));
     if (!data || data.length < 1000) break;
   }
@@ -155,7 +158,7 @@ export async function assignedTodayByAgent(workDate: string): Promise<Map<string
       // Snoozed and unresponsive leads are counted separately, not as active quota.
       .not("work_state", "in", "(snoozed,unresponsive)")
       .in("assignment_source", ["lead_database", "coordinator", "leadhub"])
-      .not("assigned_to", "is", null)
+      .or("assigned_to.not.is.null,assigned_agent_id.not.is.null")
       .range(from, from + 999);
     (data ?? []).forEach((row) => {
       if (!row.assigned_to) return;

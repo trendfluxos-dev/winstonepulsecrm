@@ -388,7 +388,7 @@ export async function ingestRecording(input: {
       duration_seconds: input.durationSeconds,
       audio_url: path,
       is_two_sided: input.isTwoSided,
-      sync_status: "uploaded",
+      sync_status: "uploaded" as const,
       client_upload_id: input.clientUploadId ?? null,
       recorder_source: input.recorderSource ?? null,
       device_id: input.deviceId ?? null,
