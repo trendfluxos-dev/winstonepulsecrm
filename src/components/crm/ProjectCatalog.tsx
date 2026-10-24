@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Building2, MessageSquareText, Plus, TrendingUp } from "lucide-react";
+import { Building2, MessageSquareText, Plus, TrendingUp, UserPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +10,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAdminToken } from "@/lib/local-session";
 import { useLang } from "@/lib/i18n";
 import {
-  addProjectNote, addSalesUpdate, INTERESTS, leadProjectActivity, listProjectNotes, listProjects, PARTIES, saveProject,
+  addProjectNote, addSalesUpdate, captureProjectInterest, INTERESTS, leadProjectActivity, listProjectNotes, listProjects, PARTIES, saveProject,
   type CatalogProject,
 } from "@/lib/projects.functions";
 
 const L = {
+  capture: { bn: "আগ্রহী কাস্টমার লিড হিসেবে সংরক্ষণ", en: "Save interested customer as lead" },
+  custName: { bn: "কাস্টমারের নাম", en: "Customer name" },
+  custPhone: { bn: "ফোন নম্বর", en: "Phone number" },
+  custNote: { bn: "কী জানতে চেয়েছেন (ঐচ্ছিক)", en: "What they asked about (optional)" },
+  saved: { bn: "লিড সংরক্ষণ হয়েছে — LeadHub এজেন্ট নির্ধারণ করবে", en: "Lead saved — LeadHub will assign an agent" },
+  dup: { bn: "এই নম্বরের লিড আগেই আছে — আগ্রহটি সেই লিডে যোগ হয়েছে", en: "This number is already a lead — interest added to it" },
   catalog: { bn: "প্রজেক্ট ক্যাটালগ ও মূল্য", en: "Project catalog & pricing" },
   hqOnly: { bn: "শুধু HQ/IT মূল্য বদলাতে পারে", en: "Only HQ/IT can change prices" },
   add: { bn: "নতুন প্রজেক্ট", en: "New project" },
@@ -151,6 +157,7 @@ export function ProjectCatalogPanel() {
   const q = useProjects();
   const [editing, setEditing] = useState<Partial<CatalogProject> | null | "new">(null);
   const [open, setOpen] = useState<string | null>(null);
+  const [capture, setCapture] = useState<string | null>(null);
   const canEdit = q.data?.canEdit ?? false;
   return (
     <section className="space-y-3 rounded-2xl border border-border bg-card p-4" aria-labelledby="catalog-h">
@@ -181,6 +188,13 @@ export function ProjectCatalogPanel() {
             </dl>
             <Button size="sm" variant="link" className="px-0" onClick={() => setOpen(open === p.id ? null : p.id)}>{t(L.notes)}</Button>
             {open === p.id ? <NotesBlock project={p} canEdit={canEdit} /> : null}
+            {!q.data?.readOnly && p.status === "active" ? (
+              capture === p.id ? <InterestForm project={p} onDone={() => setCapture(null)} /> : (
+                <Button size="sm" variant="outline" className="mt-1 w-full" onClick={() => setCapture(p.id)}>
+                  <UserPlus className="size-4" />{t(L.capture)}
+                </Button>
+              )
+            ) : null}
             </div>
           </article>
         ))}
@@ -267,5 +281,43 @@ export function LeadProjectSales({ leadId }: { leadId: string }) {
         </div>
       ) : null}
     </section>
+  );
+}
+
+/** Capture a customer's interest in one project as an unassigned lead (LeadHub assigns it). */
+function InterestForm({ project, onDone }: { project: CatalogProject; onDone: () => void }) {
+  const t = useT();
+  const adminToken = useAdminToken();
+  const qc = useQueryClient();
+  const fn = useServerFn(captureProjectInterest);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [note, setNote] = useState("");
+  const [interest, setInterest] = useState<(typeof INTERESTS)[number]>("interested");
+  const m = useMutation({
+    mutationFn: () => fn({ data: { adminToken, projectId: project.id, name, phone, interest, note } }),
+    onSuccess: (r) => {
+      toast.success(t(r.duplicate ? L.dup : L.saved));
+      void qc.invalidateQueries();
+      onDone();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+  return (
+    <form className="mt-2 space-y-2 rounded-lg border border-border p-2" onSubmit={(e) => { e.preventDefault(); m.mutate(); }}>
+      <p className="text-xs font-medium">{project.name}</p>
+      <Input required maxLength={120} placeholder={t(L.custName)} aria-label={t(L.custName)} value={name} onChange={(e) => setName(e.target.value)} />
+      <Input required type="tel" inputMode="tel" maxLength={40} placeholder={t(L.custPhone)} aria-label={t(L.custPhone)} value={phone} onChange={(e) => setPhone(e.target.value)} />
+      <select aria-label="interest" className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm" value={interest} onChange={(e) => setInterest(e.target.value as (typeof INTERESTS)[number])}>
+        <option value="interested">আগ্রহী</option>
+        <option value="negotiating">দরদাম চলছে</option>
+        <option value="not_now">এখন নয়</option>
+      </select>
+      <Textarea maxLength={500} rows={2} placeholder={t(L.custNote)} aria-label={t(L.custNote)} value={note} onChange={(e) => setNote(e.target.value)} />
+      <div className="flex gap-2">
+        <Button type="submit" size="sm" disabled={m.isPending || !name.trim() || phone.trim().length < 6}>{m.isPending ? t(L.loading) : t(L.save)}</Button>
+        <Button type="button" size="sm" variant="ghost" onClick={onDone}>{t(L.cancel)}</Button>
+      </div>
+    </form>
   );
 }
