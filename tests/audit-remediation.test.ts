@@ -105,8 +105,8 @@ describe("overdue evidence fairness", () => {
   ] as const)("classifies evidence without employee fault: %j", (patch, classification) => {
     expect(classifyOverdue({ ...row, ...patch }, asOf)).toMatchObject({ classification, faultEligible: false });
   });
-  it("unproven block does not fabricate a system excuse", () => {
-    expect(classifyOverdue({ ...row, systemBlock: { reason: "offline", from: "bad", to: "bad" } }, asOf).classification).toBe("validated_overdue");
+  it("unproven block requires review without fabricating an excuse or employee fault", () => {
+    expect(classifyOverdue({ ...row, systemBlock: { reason: "offline", from: "bad", to: "bad" } }, asOf)).toMatchObject({ classification: "needs_review", faultEligible: false });
   });
   it("excludes unresolved and blocked follow-ups from employee fault KPI", () => {
     const assessments = [classifyOverdue(row, asOf), classifyOverdue({ ...row, ownershipConfirmed: false }, asOf)];
