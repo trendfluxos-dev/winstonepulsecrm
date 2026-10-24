@@ -1,7 +1,8 @@
 # Roadmap
 
 ## 2026-10-24 — Live Messenger request / remove phone guidance
-- [ ] Remove phone setup guidance from Messenger preparation only, per clarification; keep Android call/report/recording sync unchanged.
+- [x] Removed `PhoneSyncGuide` and Desk-phone link from `src/routes/messenger-setup.tsx` and updated its metadata, per owner clarification; Desk guide and Android call/report/recording sync unchanged. No provider/auth/data/secret/deployment change.
+- [x] `bunx vitest run tests/messenger-readiness.test.ts tests/messenger-inbox.test.ts tests/messenger-protocol.test.ts tests/route-role-access.test.ts` — exit 0; 4 files / 50 tests passed, 22:46:12 UTC, 561ms. Automatic harness build OK 22:46:07 UTC. Source check confirms PhoneSyncGuide remains on Desk, absent from Messenger routes; no authenticated production flow attempted.
 - [ ] Live Messenger remains blocked pending verifiable App/Page approval, signed webhook configuration, reviewed durable storage/ownership implementation and separately authorized deployment/schema changes. Existing demo is not a connected Page; do not fabricate live messages or accept callbacks without durable processing.
 
 ## 2026-10-24 — Windsor.ai read-only preparation + audience outreach
