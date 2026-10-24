@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-24 — Windsor.ai read-only preparation + audience outreach
+- [ ] Implement disconnected report UI and server boundary; no provider/DB calls, secrets changes or deployment. Confirm official Windsor endpoint/schema before any future activation.
+- [ ] Run isolated reporting/access tests and record exact results and changed files.
+- [ ] Research relevant communities/forums/directories for Winstone Properties' Bangladesh real-estate audience and draft one post/listing per suitable destination; no external posting or account access.
+- [ ] Inspect uploaded HTML as an inert reference only; pasted `/me` id/name does not establish App/Page approval, ad-account scope or Windsor reporting access.
+
 ## 2026-10-24 — Disabled webhook browser navigation recovery
 - [x] Reproduced direct browser navigation returning intentional 503 JSON. Added 303 setup redirect only for HTML GET without hub.* parameters; verification/machine GET and all POST still refuse with 503. No provider/storage/auth/secret change.
 - [x] `bunx vitest run tests/messenger-inbox.test.ts tests/messenger-protocol.test.ts tests/messenger-readiness.test.ts` — 3 files / 33 tests passed at 22:20:51 UTC. Repeated `python3 /tmp/browser/webhook-recovery/reproduce.py`: same direct navigation now ends at /messenger-setup, HTTP 200 instead of 503; verification remains refused in regression cases. Harness build OK 22:20:45 UTC; no deployment.
