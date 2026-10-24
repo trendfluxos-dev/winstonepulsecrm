@@ -24,7 +24,7 @@ function SetupPage() {
   const steps = [
     { title: { bn: "Meta App অনুমোদন", en: "Meta App approval" }, value: state.appApproval, note: { bn: "App, Live mode ও প্রয়োজনীয় অনুমতির অনুমোদনের প্রমাণ এখনও যাচাই হয়নি।", en: "App identity, Live mode and required permission approvals have not been verified." } },
     { title: { bn: "Page consent", en: "Page consent" }, value: state.pageConsent, note: { bn: "সঠিক Page-এর অনুমতি ও App-এর সঙ্গে সংযোগ যাচাই বাকি। গোপন তথ্য সেভ হওয়া অনুমোদনের প্রমাণ নয়।", en: "Authorization for the correct Page and its association with the App remain unverified. Saved secrets are not proof of consent." } },
-    { title: { bn: "Webhook token ও যাচাই", en: "Webhook token and verification" }, value: state.webhook, note: { bn: "প্রয়োজনীয় App Secret ও verify token সেটআপ বাকি; বর্তমান GET/POST 503 দেয়। শুধু token দিলে ইনবক্স চালু হয় না।", en: "App Secret and verify-token setup remain pending; current GET/POST return 503. A token alone cannot enable the inbox." } },
+    { title: { bn: "Webhook token ও যাচাই", en: "Webhook token and verification" }, value: state.webhook, note: { bn: "প্রয়োজনীয় App Secret ও verify token সেটআপ বাকি; যাচাই ও বার্তা গ্রহণের অনুরোধ 503 দেয়। শুধু token দিলে ইনবক্স চালু হয় না।", en: "App Secret and verify-token setup remain pending; verification and ingestion requests return 503. A token alone cannot enable the inbox." } },
     { title: { bn: "Messenger ইনবক্স", en: "Messenger inbox" }, value: state.inbox, note: { bn: "শুধু নমুনা কথোপকথন। আসল বার্তা গ্রহণ, সংরক্ষণ, অ্যাসাইন ও পাঠানোর যাচাই বাকি।", en: "Sample conversations only. Real ingestion, storage, assignment and sending remain pending." } },
   ];
   return <AppShell><div className="mx-auto max-w-3xl space-y-6">

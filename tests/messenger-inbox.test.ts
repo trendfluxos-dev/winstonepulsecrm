@@ -51,6 +51,22 @@ describe("Facebook not connected", () => {
       expect((await res.json()).code).toBe("FACEBOOK_NOT_CONNECTED");
     }
   });
+  it("human browser navigation goes to setup without accepting verification", async () => {
+    const h = (Webhook.options as any).server.handlers;
+    const res: Response = await h.GET({ request: new Request("http://x/api/public/meta/messenger", { headers: { accept: "text/html" } }) });
+    expect(res.status).toBe(303);
+    expect(res.headers.get("Location")).toBe("/messenger-setup");
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
+  });
+  it("browser-like verification requests still fail closed", async () => {
+    const h = (Webhook.options as any).server.handlers;
+    for (const query of ["hub.mode=subscribe&hub.challenge=123&hub.verify_token=synthetic", "hub.challenge=123", "hub.mode="]) {
+      const res: Response = await h.GET({ request: new Request(`http://x/api/public/meta/messenger?${query}`, { headers: { accept: "text/html" } }) });
+      expect(res.status).toBe(503);
+      expect((await res.json()).code).toBe("FACEBOOK_NOT_CONNECTED");
+      expect(res.headers.get("Location")).toBeNull();
+    }
+  });
   it("messenger code reads no secrets, no database and makes no Meta calls", () => {
     for (const f of ["src/lib/messenger.server.ts", "src/lib/messenger-shared.ts", "src/routes/api/public/meta/messenger.ts", "src/routes/messenger.tsx", "src/components/crm/MessengerInbox.tsx"]) {
       const src = readFileSync(f, "utf8");

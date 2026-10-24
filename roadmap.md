@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-24 — Disabled webhook browser navigation recovery
+- [x] Reproduced direct browser navigation returning intentional 503 JSON. Added 303 setup redirect only for HTML GET without hub.* parameters; verification/machine GET and all POST still refuse with 503. No provider/storage/auth/secret change.
+- [ ] Run regression tests and repeat browser navigation; no deployment.
+
 ## 2026-10-24 — Messenger progress + Facebook-independent phone sync
 - [x] Added /messenger-setup progress page linked from Messenger: unverified App/Page, disabled webhook, demo inbox, explicit activation blockers; no fabricated progress percentage/provider errors or secret values. Status is preparation-only, not a live check.
 - [x] Confirmed phone sync already independent via Android CallSyncQueue/device-token endpoints; added PhoneSyncGuide beside existing Desk SIM setup and on progress page. No queue, SIM, account/briefing or authorization logic changed.
