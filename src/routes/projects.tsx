@@ -8,6 +8,7 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 
 import { AppShell } from "@/components/crm/AppShell";
 import { ProjectCatalogPanel, useProjects } from "@/components/crm/ProjectCatalog";
+import { BrochureZipPanel } from "@/components/crm/BrochureZipPanel";
 import { ProjectImportPanel, ProjectSalesReport } from "@/components/crm/ProjectSalesTools";
 import { Input } from "@/components/ui/input";
 import { useAdminToken } from "@/lib/local-session";
