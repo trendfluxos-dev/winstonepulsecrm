@@ -6,7 +6,9 @@ import { z } from "zod";
  * GET              -> the agent's voice notes, newest first
  * GET ?play=<id>   -> 2-minute playback link for one of the agent's own notes
  * POST             -> { audio_base64, mime_type, duration_seconds } saves a voice note
+ * POST { retry_id } -> retries transcript/summary for one of the agent's failed notes
  */
+const Retry = z.object({ retry_id: z.string().uuid() });
 const Body = z.object({
   audio_base64: z.string().min(64).max(20_000_000),
   mime_type: z.string().max(60),
@@ -54,19 +56,30 @@ export const Route = createFileRoute("/api/public/agent/recorder")({
           .order("created_at", { ascending: false })
           .limit(60);
         if (error) return json({ error: "Recorder history is unavailable" }, 500);
-        return json({ notes: data ?? [] });
+        const { voiceNoteStage } = await import("@/lib/recorder-shared");
+        return json({ notes: (data ?? []).map((n) => ({ ...n, stage: voiceNoteStage(n) })) });
       },
 
       POST: async ({ request }) => {
         const { resolveApiCaller } = await import("@/lib/device-auth.server");
         const caller = await resolveApiCaller(request);
         if (caller.kind !== "device") return json({ error: "Unauthorized" }, 401);
-        const parsed = Body.safeParse(await request.json().catch(() => null));
-        if (!parsed.success) return json({ error: "Invalid recording" }, 400);
-
+        const raw = await request.json().catch(() => null);
         const { requireAgentBriefing } = await import("@/lib/agent-briefing.server");
         const block = await requireAgentBriefing(caller.profile.id);
         if (block) return json({ error: block.reason, briefing: block.briefing }, 423);
+
+        const retry = Retry.safeParse(raw);
+        if (retry.success) {
+          try {
+            const { retryVoiceNote } = await import("@/lib/recorder.server");
+            return json(await retryVoiceNote(caller.profile.id, retry.data.retry_id));
+          } catch (e) {
+            return json({ error: e instanceof Error ? e.message : "Retry failed" }, 400);
+          }
+        }
+        const parsed = Body.safeParse(raw);
+        if (!parsed.success) return json({ error: "Invalid recording" }, 400);
 
         try {
           const bytes = Uint8Array.from(atob(parsed.data.audio_base64), (ch) => ch.charCodeAt(0));

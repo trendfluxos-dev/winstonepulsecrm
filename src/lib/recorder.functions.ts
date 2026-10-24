@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { normaliseInsight, type RecorderInsight } from "@/lib/recorder-shared";
+import { normaliseInsight, voiceNoteStage, type RecorderInsight } from "@/lib/recorder-shared";
 
 /**
  * Recorder page: the agent's call recordings (captured by the Winstone Android
@@ -91,6 +91,7 @@ export const listRecorderHistory = createServerFn({ method: "POST" })
         takeaways: (r.takeaways as string[]) ?? [],
         actionItems: (r.action_items as string[]) ?? [],
         insightReady: r.status === "ready",
+        stage: voiceNoteStage(r),
         error: r.error_message,
       })),
     ].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -116,6 +117,19 @@ export const saveVoiceNote = createServerFn({ method: "POST" })
     const bytes = Uint8Array.from(atob(data.audioBase64), (ch) => ch.charCodeAt(0));
     const { storeVoiceNote } = await import("@/lib/recorder.server");
     return storeVoiceNote(me.profile.id, bytes, data.mimeType, data.durationSeconds);
+  });
+
+export const retryVoiceNoteFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => Token.extend({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data }) => {
+    const me = await workCaller(data.adminToken);
+    const { requireWrite } = await import("@/lib/access.server");
+    requireWrite(me);
+    if (!me.profile?.id) throw new Error("Your staff profile is not ready yet");
+    const { assertBriefingForCaller } = await import("@/lib/agent-briefing.server");
+    await assertBriefingForCaller(me);
+    const { retryVoiceNote } = await import("@/lib/recorder.server");
+    return retryVoiceNote(me.profile.id, data.id);
   });
 
 export const buildCallInsight = createServerFn({ method: "POST" })
