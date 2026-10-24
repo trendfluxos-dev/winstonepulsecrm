@@ -111,7 +111,15 @@ export const registerMyAccount = createServerFn({ method: "POST" })
     const { rosterRole, normalizeName } = await import("@/lib/roster.server");
     const rostered = rosterRole(data.name);
 
+    // Only a confirmed sign-in email may claim a pre-created staff profile.
+    let emailConfirmed = false;
     if (rostered && email) {
+      const { data: me } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+      emailConfirmed =
+        Boolean(me?.user?.email_confirmed_at) &&
+        (me?.user?.email ?? "").toLowerCase() === email.toLowerCase();
+    }
+    if (rostered && email && emailConfirmed) {
       // Link this sign-up to a waiting desk profile ONLY when IT already put
       // this exact (verified) sign-in email on that profile. A matching name
       // alone is never enough — anyone can type a colleague's name.
@@ -545,13 +553,12 @@ export const issuePasswordResetLink = createServerFn({ method: "POST" })
     await supabaseAdmin.auth.admin.updateUserById(profile.user_id, {
       app_metadata: { ...(authUser.user.app_metadata ?? {}), must_change_password: true },
     });
-    const { data: link, error } = await supabaseAdmin.auth.admin.generateLink({
-      type: "recovery",
-      email,
-      options: { redirectTo: `${safeOrigin}/reset-password` },
+    // The recovery link is emailed straight to the account owner; it is never
+    // returned to the IT screen, so IT cannot use it to take over the account.
+    const { error } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
+      redirectTo: `${safeOrigin}/reset-password`,
     });
-    const actionLink = link?.properties?.action_link;
-    if (error || !actionLink) throw new Error(error?.message ?? "লিংক তৈরি হয়নি");
+    if (error) throw new Error(error.message || "লিংক পাঠানো যায়নি");
 
     const { logAudit } = await import("@/lib/audit.server");
     await logAudit({
@@ -567,7 +574,7 @@ export const issuePasswordResetLink = createServerFn({ method: "POST" })
       "পাসওয়ার্ড রিসেট লিংক তৈরি হয়েছে",
       `IT আপনার অ্যাকাউন্টের জন্য একটি পাসওয়ার্ড রিসেট লিংক তৈরি করেছে (${new Date().toLocaleString("en-GB", { timeZone: "Asia/Dhaka" })} ঢাকা)। আপনি না চাইলে এখনই HQ/IT-কে জানান।`,
     );
-    return { link: actionLink, name: profile.name };
+    return { sent: true as const, name: profile.name };
   });
 
 /** After the agent saves a new password, clear the must-change flag. */
