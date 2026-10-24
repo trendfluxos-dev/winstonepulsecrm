@@ -1,4 +1,23 @@
-# Facebook Messenger Shared Inbox — Implementation Plan (plan only)
+# Windsor.ai read-only Facebook Ads preparation
+
+## Scope
+- Add `/facebook-ads` with existing CRM styling and Bengali/English labels, a disconnected notice, bounded reporting-period controls, and clear setup blockers. No sample metrics or campaign/budget controls.
+- Link from existing authority navigation; preserve agent permissions and the separate Messenger and Support inboxes.
+- Add a fail-closed server boundary using the existing full IT PIN verifier without database reads. It reports only configuration presence and an empty report; it cannot contact Windsor or Meta, even when a key is set.
+- The owner must revoke the previously exposed key and later enter a replacement as `WINDSOR_AI_API_KEY` through Project Settings → Secrets. This task neither reads nor changes stored secrets.
+
+## Technical details
+- Pure request validation: strict calendar dates, at most 31 inclusive days, explicit timezone, fixed reporting-field allowlist; reject unknown fields and account/endpoint injection.
+- Read environment configuration only inside the server-function handler after authorization. No provider adapter until the official endpoint, schema, account scope, currency, timezone and pagination/limits are confirmed.
+- Tests cover date boundaries, field validation, full-PIN-only access, disconnected results with and without configuration, and absence of network/database/storage activity.
+- Document repository evidence, remaining owner setup and exact verification in `docs/WINDSOR_AI_SETUP.md` and `roadmap.md`; record the fail-closed architecture in `AGENTS.md`.
+
+## Safeguards and verification
+No deployment, SQL/migrations, production data queries/writes, auth/role/RLS/settings/secret changes, browser credentials or live API calls. Run isolated relevant tests; use automatic build/typecheck results. Signed-in production reporting is intentionally unverified; provider integration remains blocked pending contract confirmation and separate approval.
+
+---
+
+# Prior Facebook Messenger Shared Inbox — Implementation Plan (historical reference)
 
 Nothing has been changed. No code, database, auth, secrets or Meta settings were touched, and no migration was run.
 
