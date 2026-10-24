@@ -189,15 +189,6 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             deviceId: caller.kind === "device" ? caller.device.id : null,
           });
 
-          if (body.duration_seconds > 10) {
-            await logLeadEvent({
-              leadId,
-              agentId: agent?.id ?? null,
-              recordingId,
-              kind: "call_connected",
-              detail: `${body.duration_seconds} সেকেন্ড কথা হয়েছে`,
-            });
-          }
           await logLeadEvent({
             leadId,
             agentId: agent?.id ?? null,
@@ -223,35 +214,11 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             });
           }
 
-          // Transcription + AI analysis must be awaited here: this runs on a
-          // serverless worker that is torn down as soon as the response is
-          // returned, so a fire-and-forget promise never completes. A bounded
-          // race keeps the phone's upload fast; the cron sweep retries the rest.
-          const { analyzeOne } = await import("@/lib/analysis-queue.server");
-          await Promise.race([
-            analyzeOne(recordingId).catch((error) =>
-              console.error("[ingest] analysis failed", error),
-            ),
-            new Promise((resolve) => setTimeout(resolve, 25_000)),
-          ]);
-
-          // Google Drive copy is best-effort and only runs when IT switched it
-          // on with a folder; a Drive failure never fails the phone's upload.
-          void (async () => {
-            try {
-              const { getDriveBackupSettings, backupRecordingToDrive } =
-                await import("@/lib/recording-drive.server");
-              const settings = await getDriveBackupSettings();
-              if (!settings.enabled || !settings.folderId) return;
-              await backupRecordingToDrive(recordingId);
-            } catch (error) {
-              console.error("[ingest] drive backup failed", error);
-            }
-          })();
-
+          // The durable analysis queue is swept separately. Upload confirmation must
+          // not depend on an AI/Drive request or create additional billing on replay.
           const saved = await supabaseAdmin.from("call_recordings").select("checksum, upload_status, analysis_status").eq("id", recordingId).single();
           if (saved.error || !saved.data) throw new Error("Stored audio confirmation unavailable");
-          return json({ recording_id: recordingId, upload_status: saved.data.upload_status, checksum: saved.data.checksum, analysis: saved.data.analysis_status }, 202);
+          return json({ duplicate: false, recording_id: recordingId, upload_status: saved.data.upload_status, checksum: saved.data.checksum, analysis: saved.data.analysis_status }, 202);
         } catch (error) {
           console.error("[ingest] recording failed", error);
           const conflict = error instanceof Error && ["CALL_IDENTITY_CONFLICT", "AUDIO_CHECKSUM_CONFLICT"].includes(error.message);

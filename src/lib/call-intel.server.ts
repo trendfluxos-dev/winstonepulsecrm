@@ -348,14 +348,14 @@ export async function ingestRecording(input: {
 
   const bytes = assertAudioUpload(input.audioBase64, input.fileExtension);
   const agentId = input.agentId ?? lead.assigned_to;
-  const fileName = `${Date.now()}.${input.fileExtension.toLowerCase().replace(/^\./, "")}`;
+  const fileName = `${crypto.randomUUID()}.${input.fileExtension.toLowerCase().replace(/^\./, "")}`;
   // agent/lead/file keeps every object inside an ownership-shaped prefix.
   const path = `uploads/${agentId ?? "unassigned"}/${input.leadId}/${fileName}`;
   const checksum = await audioChecksum(bytes);
   if (input.expectedChecksum && input.expectedChecksum !== checksum) throw new Error("AUDIO_CHECKSUM_CONFLICT");
   const key = input.callUid ?? input.clientUploadId;
   const existingResult = key ? await supabaseAdmin.from("call_recordings")
-    .select("id, agent_id, lead_id, storage_path, audio_url, checksum, upload_status")
+    .select("id, agent_id, lead_id, storage_path, audio_url, checksum, upload_status, call_status, started_at, finished_at, duration_seconds")
     .eq(input.callUid ? "external_call_id" : "client_upload_id", key).maybeSingle() : { data: null, error: null };
   if (existingResult.error) throw new Error(existingResult.error.message);
   const existing = existingResult.data;
@@ -366,7 +366,7 @@ export async function ingestRecording(input: {
   // Identical content is reusable only within the same owned call, never across calls.
   if (!existing && input.clientUploadId) {
     const replay = await supabaseAdmin.from("call_recordings")
-      .select("id, agent_id, lead_id, storage_path, audio_url, checksum, upload_status")
+      .select("id, agent_id, lead_id, storage_path, audio_url, checksum, upload_status, call_status, started_at, finished_at, duration_seconds")
       .eq("client_upload_id", input.clientUploadId).maybeSingle();
     if (replay.error) throw new Error(replay.error.message);
     if (replay.data) {
@@ -385,7 +385,7 @@ export async function ingestRecording(input: {
       agent_id: agentId,
       phone_number: lead.phone_number,
       call_direction: input.direction,
-      duration_seconds: input.durationSeconds,
+      duration_seconds: existing?.duration_seconds ?? input.durationSeconds,
       audio_url: path,
       is_two_sided: input.isTwoSided,
       sync_status: "uploaded" as const,
@@ -394,10 +394,10 @@ export async function ingestRecording(input: {
       device_id: input.deviceId ?? null,
       analysis_status: "pending",
       call_source: input.callSource ?? "android_sim",
-      call_status: "completed",
+      call_status: existing?.call_status ?? "unknown",
       external_call_id: input.callUid ?? input.clientUploadId ?? null,
-      started_at: input.callStartedAt ?? null,
-      finished_at: new Date().toISOString(),
+      started_at: existing?.started_at ?? input.callStartedAt ?? null,
+      finished_at: existing?.finished_at ?? null,
       recording_status: "available",
       upload_status: "uploaded",
       storage_bucket: AUDIO_BUCKET,
@@ -408,13 +408,13 @@ export async function ingestRecording(input: {
       checksum,
     };
   const write = existing
-    ? supabaseAdmin.from("call_recordings").update(recordingValues).eq("id", existing.id).eq("agent_id", agentId ?? "")
+    ? supabaseAdmin.from("call_recordings").update(recordingValues).eq("id", existing.id).is("storage_path", null).is("audio_url", null)
     : supabaseAdmin.from("call_recordings").insert(recordingValues);
   const { data: inserted, error: insertError } = await write.select("id").single();
   if (insertError || !inserted) {
     if (insertError?.code === "23505" && key) {
       const raced = await supabaseAdmin.from("call_recordings")
-        .select("id, agent_id, lead_id, storage_path, audio_url, checksum, upload_status")
+        .select("id, agent_id, lead_id, storage_path, audio_url, checksum, upload_status, call_status, started_at, finished_at, duration_seconds")
         .eq(input.callUid ? "external_call_id" : "client_upload_id", key).maybeSingle();
       if (raced.data) {
         assertAudioIdentity(raced.data, agentId, input.leadId, checksum);
@@ -424,17 +424,8 @@ export async function ingestRecording(input: {
     throw new Error(insertError?.message ?? "Could not save recording");
   }
 
-  await supabaseAdmin
-    .from("leads")
-    .update({
-      call_attempts: lead.call_attempts + 1,
-      last_call_at: new Date().toISOString(),
-      status: lead.status === "pending" ? "contacted" : lead.status,
-      // is_verified is never set from the uploader-supplied two-sided flag;
-      // only a verified connected-call outcome may mark a lead verified.
-    })
-    .eq("id", input.leadId);
-
+  // Uploading/retrying an audio file is not a new dial or a lead outcome.
+  // Lifecycle and submitted reports remain the sole evidence for those facts.
   // Retry-safe job rows: upload done, transcription + AI queued.
   const { queueCallJobs } = await import("@/lib/call-jobs.server");
   await queueCallJobs(inserted.id, true);
