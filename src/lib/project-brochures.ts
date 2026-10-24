@@ -1,23 +1,23 @@
 // One-page brochures split from the official "15 Project Profiles" PDF, stamped with the sales
-// emails + bilingual call-to-action by scripts/brochures/stamp_contact.py (stored as CDN assets).
+// phone/email + bilingual call-to-action by scripts/brochures/stamp_contact.py (stored as CDN assets).
 const B = "/__l5e/assets-v1/";
 const LIST: Array<[string, string]> = [
-  ["winstone dream park", "7480d895-66e8-44ab-86ee-eff22378d6d3/winstone-project-01-brochure.pdf"],
-  ["silver sun", "a69c1de1-246d-4149-807b-d5680a1f90b5/winstone-project-02-brochure.pdf"],
-  ["kanan hill", "e0307dc1-004a-483a-b505-62c119a606c3/winstone-project-03-brochure.pdf"],
-  ["winstone park shouthern", "11399650-42d2-4046-b493-9fe7ee21093c/winstone-project-04-brochure.pdf"],
-  ["winstone park southern", "11399650-42d2-4046-b493-9fe7ee21093c/winstone-project-04-brochure.pdf"],
-  ["dokhonaloy", "3c88e172-db55-448e-b609-9ddd1d1d557b/winstone-project-05-brochure.pdf"],
-  ["winstone lake view height", "d26156bd-b21e-4b5b-a350-dfb92e9b4e36/winstone-project-06-brochure.pdf"],
-  ["metro plaza", "8bb88722-8276-4bbe-b676-00a0cff40f36/winstone-project-07-brochure.pdf"],
-  ["winstone metro view park", "29f28257-4ad3-4989-a1f9-b588f0793165/winstone-project-08-brochure.pdf"],
-  ["winstone 1", "f513ba92-59e6-41dc-93af-96e2f5fc9112/winstone-project-09-brochure.pdf"],
-  ["winstone 2", "ba8e5eab-6899-4e06-bb45-46fab51d2194/winstone-project-10-brochure.pdf"],
-  ["winstone 3", "52f3ca91-7c5b-4673-a9dc-68ddbff8a385/winstone-project-11-brochure.pdf"],
-  ["winstone 4", "d7a35fe2-3613-40d6-8cbd-3dca49aea0c4/winstone-project-12-brochure.pdf"],
-  ["winstone 5", "0c0aefba-5ecd-4b9f-9e0c-4ce712cf99a6/winstone-project-13-brochure.pdf"],
-  ["winstone green view park", "97f73f61-c531-4128-a85f-1143381ec241/winstone-project-14-brochure.pdf"],
-  ["winstone park stone", "3523a99e-86bb-49f5-a238-1bf9a1227674/winstone-project-15-brochure.pdf"],
+  ["winstone dream park", "9fab23cd-2436-46b6-8fbc-6b26ca639fc3/winstone-project-01-brochure.pdf"],
+  ["silver sun", "c2a790ba-f79d-4572-8923-85b58af37442/winstone-project-02-brochure.pdf"],
+  ["kanan hill", "5a53cfd8-f24f-4f13-904b-411dcedaaebc/winstone-project-03-brochure.pdf"],
+  ["winstone park shouthern", "ba3b8843-5e56-49dd-975a-fd0f16b70f7b/winstone-project-04-brochure.pdf"],
+  ["winstone park southern", "ba3b8843-5e56-49dd-975a-fd0f16b70f7b/winstone-project-04-brochure.pdf"],
+  ["dokhonaloy", "b9bd0a28-1472-4e99-9e36-9db62c03263c/winstone-project-05-brochure.pdf"],
+  ["winstone lake view height", "751eae37-84e0-4f67-9b3b-64f5adb228da/winstone-project-06-brochure.pdf"],
+  ["metro plaza", "4fd680d7-7d65-4cf9-a1cf-9e00af14469d/winstone-project-07-brochure.pdf"],
+  ["winstone metro view park", "c7373ea8-535d-4ec5-ba6f-5bd22254e5cd/winstone-project-08-brochure.pdf"],
+  ["winstone 1", "d23f0f64-8d59-4fba-abc8-cae3044d155b/winstone-project-09-brochure.pdf"],
+  ["winstone 2", "dd0ed018-fa34-42f1-8c6e-6c58fb26e2ab/winstone-project-10-brochure.pdf"],
+  ["winstone 3", "ba91fe8a-1015-4bef-8dea-066d59312219/winstone-project-11-brochure.pdf"],
+  ["winstone 4", "a4565fb1-e935-4b02-8b46-077390248702/winstone-project-12-brochure.pdf"],
+  ["winstone 5", "f42a7372-8e32-4a6c-a758-b44a71c12db4/winstone-project-13-brochure.pdf"],
+  ["winstone green view park", "8fcb7434-5d5b-429e-8517-d8727f46982e/winstone-project-14-brochure.pdf"],
+  ["winstone park stone", "3bf35388-eab6-469d-a7e9-1e40b9e96bb0/winstone-project-15-brochure.pdf"],
 ];
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
