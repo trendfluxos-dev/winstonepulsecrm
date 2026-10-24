@@ -1,8 +1,8 @@
 # Roadmap
 
 ## 2026-10-25 — Interactive whole-CRM walkthrough
-- [ ] Add bilingual `/walkthrough` for the four workspaces and primary tasks, step navigation, workspace switching, local resume/reset and links to existing gated pages. No live data, provider calls, changed permissions or automatic business actions.
-- [ ] Test progress/navigation and browser flows, document verification limits; no deployment.
+- [x] Added bilingual `/walkthrough`: 14 steps across Sales Agent, LeadHub Nexus, Executive HQ and IT Console; workspace/step switching, previous/next, local-only resume/reset, completed reading and links to existing gated pages. Entry from home, help and shared navigation. No live data/provider calls, permission changes or automatic business actions.
+- [x] 21 tests passed (`crm-walkthrough`, `route-role-access`); harness build OK. Public browser flow verified all 14 steps, completion, reload resume, reset, workspace tabs and language switch; 1280px/390px screenshots inspected, no overflow or page errors. API traffic intercepted; protected linked workspaces not exercised under the no-production-access boundary. No deploy, SQL, database, auth or secret changes.
 
 ## 2026-10-25 — Five-service integration status page
 - [x] Added public read-only `/integrations` with Messenger, WhatsApp, Windsor.ai, Drive and Winstone OS evidence boundaries, absent verified timestamps, blockers and verification steps. Messenger/Windsor inactive; other three unverified, never assumed disconnected. Navigation and existing progress page linked; no live reads, configuration changes or activation.

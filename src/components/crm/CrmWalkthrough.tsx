@@ -67,7 +67,7 @@ export function CrmWalkthrough() {
         </div>
         <div className="mt-6 max-w-xl">
           <p className="mb-2 flex justify-between gap-3 text-xs text-muted-foreground" aria-live="polite"><span>{t({ bn: "পড়া শেষ", en: "Reviewed" })}</span><span>{progress.completed.length} / {TOTAL}</span></p>
-          <Progress value={progress.completed.length / TOTAL * 100} aria-label={t({ bn: "Walkthrough অগ্রগতি", en: "Walkthrough progress" })} />
+          <Progress value={progress.completed.length / TOTAL * 100} aria-valuenow={progress.completed.length / TOTAL * 100} aria-label={t({ bn: "Walkthrough অগ্রগতি", en: "Walkthrough progress" })} />
           {storageUnavailable && <p className="mt-2 text-xs text-muted-foreground">{t({ bn: "এই ব্রাউজারে অগ্রগতি সংরক্ষণ করা যাচ্ছে না।", en: "Progress cannot be saved in this browser." })}</p>}
         </div>
         <Tabs value={tour.id} onValueChange={workspace => change(restoreTourProgress({ ...progress, workspace, step: 0 }))} className="mt-7">
