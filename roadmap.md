@@ -1,8 +1,11 @@
 # Roadmap
 
 ## 2026-10-25 — Five-service integration status page
-- [ ] Add read-only `/integrations` with Messenger, WhatsApp, Windsor.ai, Drive and Winstone OS preparation/evidence boundaries, last verified time and required verification steps. Link navigation and existing progress page; no live reads, configuration changes or activation.
-- [ ] Run isolated status/regression tests and browser rendering checks; record limits without claiming live delivery.
+- [x] Added public read-only `/integrations` with Messenger, WhatsApp, Windsor.ai, Drive and Winstone OS evidence boundaries, absent verified timestamps, blockers and verification steps. Messenger/Windsor inactive; other three unverified, never assumed disconnected. Navigation and existing progress page linked; no live reads, configuration changes or activation.
+- [x] `bunx vitest run tests/integration-status.test.ts tests/messenger-readiness.test.ts tests/windsor-reporting.test.ts tests/route-role-access.test.ts tests/integration-boundaries.test.ts` — 5 files / 39 tests passed. Harness build OK 23:53:03 UTC. All content routes contain head metadata.
+- [x] Public page browser check passed: five services, Bengali language, OS anchor, 1280px/390px screenshots inspected, no horizontal overflow or page errors. Server/provider/API traffic intercepted; only public presentation verified, no live integration operation claimed. Existing protected diagnostics were not invoked. No deploy, SQL, database, role, auth or secret changes.
+- Changed: `src/lib/integration-status.ts`, `src/components/crm/IntegrationStatusPage.tsx`, `src/routes/integrations.tsx`, `src/components/crm/AppShell.tsx`, `src/components/crm/NavSidebar.tsx`, `src/lib/i18n.ts`, `src/routes/messenger-setup.tsx`, `tests/integration-status.test.ts`, `tests/route-role-access.test.ts`, `AGENTS.md`, `roadmap.md`.
+- Live provider verification remains outside this presentation task: Messenger approvals/storage, WhatsApp signed durable callbacks, Windsor contract/account, Drive owner/file access, OS signed round trip require authorized evidence and existing setup gates; this page does not perform them.
 
 ## 2026-10-24 — Exposed Meta credential replacement
 - [x] Owner saved replacement Page access token in the existing encrypted secret through the secure update form; no values inspected. Added full-IT-PIN-only, no-network storage check on `/inbox`: presence only, actual check time, revocation and production replacement explicitly unverified. Runtime diagnostics use one handler-only secret source, no cached/legacy token fallback. Page ID unchanged; no other configured Meta token was listed.
