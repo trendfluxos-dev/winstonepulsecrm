@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { AppShell } from "@/components/crm/AppShell";
 import { MessengerInbox } from "@/components/crm/MessengerInbox";
+import { CredentialRedactor } from "@/components/crm/CredentialRedactor";
 
 export const Route = createFileRoute("/messenger")({
   head: () => ({
@@ -21,6 +22,7 @@ function MessengerPage() {
   return (
     <AppShell>
       <MessengerInbox />
+      <CredentialRedactor />
     </AppShell>
   );
 }
