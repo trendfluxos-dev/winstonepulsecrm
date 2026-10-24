@@ -258,3 +258,46 @@ export const salesUpdatesReport = createServerFn({ method: "POST" })
       })),
     };
   });
+
+/**
+ * Customer interest captured from a project's profile: creates (or matches by
+ * phone) an UNASSIGNED lead through the shared intake — LeadHub Nexus routes it,
+ * so the daily cap and Friday rules are never bypassed — and logs the interest
+ * on that project in the append-only sales updates.
+ */
+export const captureProjectInterest = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) =>
+    z.object({
+      adminToken: Token, projectId: z.string().uuid(),
+      name: z.string().trim().min(1).max(120), phone: z.string().trim().min(6).max(40),
+      interest: z.enum(INTERESTS).default("interested"), note: txt(500),
+    }).parse(i),
+  )
+  .handler(async ({ data }) => {
+    const { c, db } = await ctx(data.adminToken);
+    if (c.readOnly) throw new Error("Executive HQ is view-only");
+    if (c.scope === "agent") {
+      const { assertAgentBriefing } = await import("@/lib/agent-briefing.server");
+      await assertAgentBriefing(c.agentId!);
+    }
+    const { data: p } = await db.from("project_catalog").select("id, name").eq("id", data.projectId).eq("status", "active").maybeSingle();
+    if (!p) throw new Error("প্রজেক্ট পাওয়া যায়নি");
+    const { intakeLead, InvalidLeadPhoneError } = await import("@/lib/lead-intake.server");
+    let r;
+    try {
+      r = await intakeLead({
+        name: data.name, phoneNumber: data.phone, ownerId: null, source: "project_interest",
+        actorProfileId: c.agentId, actorLabel: c.actor,
+        notes: [`প্রজেক্টে আগ্রহী: ${p.name}`, data.note || null].filter(Boolean).join("\n"),
+      });
+    } catch (e) {
+      if (e instanceof InvalidLeadPhoneError) throw new Error("সঠিক ফোন নম্বর দিন");
+      throw e;
+    }
+    const { error } = await db.from("project_sales_updates").insert({
+      lead_id: r.leadId, project_id: p.id, agent_id: c.scope === "agent" ? c.agentId : null,
+      interest: data.interest, offered_price: null, note: data.note || null, created_by: c.actor,
+    });
+    if (error) throw new Error("আগ্রহ সংরক্ষণ হয়নি");
+    return { leadId: r.leadId, duplicate: Boolean(r.duplicate) };
+  });
