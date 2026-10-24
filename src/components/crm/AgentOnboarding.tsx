@@ -59,8 +59,9 @@ export function AgentOnboarding() {
     mutationFn: (profileId: string) =>
       issue({ data: { adminToken: getAdminToken() ?? "", profileId, origin: window.location.origin } }),
     onSuccess: (res, profileId) => {
-      setShown({ id: profileId, link: res.link });
-      toast.success(`${res.name}-এর জন্য একবার ব্যবহারযোগ্য লিংক তৈরি হয়েছে`);
+      setShown(null);
+      void profileId;
+      toast.success(`${res.name}-এর ইমেইলে একবার ব্যবহারযোগ্য লিংক পাঠানো হয়েছে`);
       void qc.invalidateQueries({ queryKey: agentActivityKey });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "লিংক তৈরি হয়নি"),

@@ -41,6 +41,7 @@ export const createSiteVisit = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { siCaller, leadForCaller } = await import("@/lib/sales-intel.server");
     const c = await siCaller(data.adminToken);
+    if (c.readOnly) throw new Error("Executive HQ is view-only");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const lead = await leadForCaller(supabaseAdmin, c, data.leadId); // ownership check for agents
     const agentId = c.scope === "agent" ? c.agentId : ((lead as { assigned_agent_id?: string | null }).assigned_agent_id ?? null);
@@ -63,6 +64,7 @@ export const setSiteVisitStatus = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { siCaller } = await import("@/lib/sales-intel.server");
     const c = await siCaller(data.adminToken);
+    if (c.readOnly) throw new Error("Executive HQ is view-only");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin.from("site_visits").update({ status: data.status, updated_by: c.actor }).eq("id", data.id);
     if (c.scope === "agent") q = q.eq("agent_id", c.agentId!);
@@ -81,6 +83,7 @@ export const addSiteVisitToTeamCalendar = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { siCaller } = await import("@/lib/sales-intel.server");
     const c = await siCaller(data.adminToken);
+    if (c.readOnly) throw new Error("Executive HQ is view-only");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin.from("site_visits").select("id, lead_id, agent_id, project, visit_at, status, team_calendar_event_id").eq("id", data.id);
     if (c.scope === "agent") q = q.eq("agent_id", c.agentId!);

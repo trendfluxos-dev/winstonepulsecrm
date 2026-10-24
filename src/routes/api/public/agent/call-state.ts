@@ -87,9 +87,13 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
 
         const { data: existing } = await supabaseAdmin
           .from("call_recordings")
-          .select("id, call_status")
+          .select("id, call_status, agent_id, lead_id")
           .eq("external_call_id", body.call_uid)
           .maybeSingle();
+        // A call record may only be updated by the agent who owns it, for the same lead.
+        if (existing && (existing.agent_id !== caller.profile.id || existing.lead_id !== body.lead_id)) {
+          return json({ error: "This call record belongs to another agent or lead" }, 403);
+        }
 
         let recordingId = existing?.id ?? null;
 

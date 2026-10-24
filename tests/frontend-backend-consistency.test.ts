@@ -6,8 +6,14 @@ import { MAINTENANCE_FEE_USD } from "../src/lib/maintenance-rules";
 describe("frontend matches server rules", () => {
   it("lead forms cannot request more than the 50/day database cap", () => {
     expect(MAX_DAILY_LEADS_PER_AGENT).toBe(50);
-    for (const f of ["src/lib/lead-pool.functions.ts", "src/lib/coordinator-deck.functions.ts"])
-      expect(readFileSync(f, "utf8")).not.toMatch(/max\(500\)/);
+    // The read-only listing page size (`limit: ... max(500)`) is not an assignment count.
+    for (const f of ["src/lib/lead-pool.functions.ts", "src/lib/coordinator-deck.functions.ts"]) {
+      const src = readFileSync(f, "utf8")
+        .split("\n")
+        .filter((l) => !/^\s*limit:\s*z\.number\(\)/.test(l))
+        .join("\n");
+      expect(src).not.toMatch(/max\(500\)/);
+    }
   });
   it("billing notices use the 15th 00:00 deadline, not the retired 12th", () => {
     expect(MAINTENANCE_FEE_USD).toBe(35.29);
