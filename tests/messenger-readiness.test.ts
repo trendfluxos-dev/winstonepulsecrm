@@ -10,4 +10,7 @@ it("combined preparation flags neither service as connected and does not infer s
   expect(state.windsor.connected).toBe(false);
   expect(state.windsor.configuration).toBe("not_checked");
   expect(state.noneConnected).toBe(true);
+  expect(state.verification.messenger.checkedAt).toBeNull();
+  expect(state.verification.windsor.checkedAt).toBeNull();
+  expect(state.verification.messenger.outcome).toBe("not_checked");
 });
