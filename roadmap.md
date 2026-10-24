@@ -2,7 +2,7 @@
 
 ## 2026-10-24 — Disabled webhook browser navigation recovery
 - [x] Reproduced direct browser navigation returning intentional 503 JSON. Added 303 setup redirect only for HTML GET without hub.* parameters; verification/machine GET and all POST still refuse with 503. No provider/storage/auth/secret change.
-- [ ] Run regression tests and repeat browser navigation; no deployment.
+- [x] `bunx vitest run tests/messenger-inbox.test.ts tests/messenger-protocol.test.ts tests/messenger-readiness.test.ts` — 3 files / 33 tests passed at 22:20:51 UTC. Repeated `python3 /tmp/browser/webhook-recovery/reproduce.py`: same direct navigation now ends at /messenger-setup, HTTP 200 instead of 503; verification remains refused in regression cases. Harness build OK 22:20:45 UTC; no deployment.
 
 ## 2026-10-24 — Messenger progress + Facebook-independent phone sync
 - [x] Added /messenger-setup progress page linked from Messenger: unverified App/Page, disabled webhook, demo inbox, explicit activation blockers; no fabricated progress percentage/provider errors or secret values. Status is preparation-only, not a live check.
