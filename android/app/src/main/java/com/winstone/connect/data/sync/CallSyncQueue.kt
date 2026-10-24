@@ -35,20 +35,29 @@ object CallSyncQueue {
         twoSided: Boolean,
         incoming: Boolean = false,
         recorderSource: String = "unknown",
+        callUid: String? = null,
+        callStartedAt: String? = null,
     ) {
+        val uploadId = callUid?.let { "audio_$it" } ?: java.util.UUID.randomUUID().toString()
+        // Cache storage can be evicted while offline. Keep queued originals in app files.
+        val dir = File(context.filesDir, "pending_call_audio").apply { mkdirs() }
+        val durable = File(dir, "$uploadId.${file.extension.ifBlank { "m4a" }}")
+        if (!durable.exists()) file.copyTo(durable, overwrite = false)
         enqueue(
             context,
-            unique = "rec_${file.name}",
+            unique = "rec_$uploadId",
             data = Data.Builder()
                 .putString(KEY_KIND, KIND_RECORDING)
                 .putString(KEY_LEAD, leadId)
                 .putString(KEY_PHONE, phoneNumber)
-                .putString(KEY_FILE, file.absolutePath)
+                .putString(KEY_FILE, durable.absolutePath)
                 .putInt(KEY_DURATION, durationSeconds)
                 .putBoolean(KEY_TWO_SIDED, twoSided)
                 .putBoolean(KEY_INCOMING, incoming)
                 .putString(KEY_SOURCE, recorderSource)
-                .putString(KEY_UPLOAD_ID, file.name)
+                .putString(KEY_UPLOAD_ID, uploadId)
+                .putString(KEY_CALL_UID, callUid)
+                .putString(KEY_AT, callStartedAt)
                 .build(),
         )
     }
@@ -60,12 +69,14 @@ object CallSyncQueue {
         phoneNumber: String,
         durationSeconds: Int,
         connected: Boolean,
+        callUid: String? = null,
     ) {
         enqueue(
             context,
-            unique = "report_${leadId}_${System.currentTimeMillis() / 1000}",
+            unique = "report_${callUid ?: java.util.UUID.randomUUID().toString()}",
             data = Data.Builder()
                 .putString(KEY_KIND, KIND_REPORT_OPEN)
+                .putString(KEY_CALL_UID, callUid)
                 .putString(KEY_LEAD, leadId)
                 .putString(KEY_PHONE, phoneNumber)
                 .putInt(KEY_DURATION, durationSeconds)
@@ -245,7 +256,10 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 CallSyncQueue.KIND_RECORDING -> {
                     val path = inputData.getString(CallSyncQueue.KEY_FILE) ?: return Result.failure()
                     val file = File(path)
-                    if (!file.exists()) return Result.failure()
+                    if (!file.exists()) {
+                        SyncStatus.failed(applicationContext, "Original audio file missing — recover the phone recording; no audio uploaded")
+                        return Result.failure()
+                    }
                     WinstoneApi.uploadRecording(
                         leadId = leadId,
                         phoneNumber = inputData.getString(CallSyncQueue.KEY_PHONE).orEmpty(),
@@ -257,6 +271,8 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                         incoming = inputData.getBoolean(CallSyncQueue.KEY_INCOMING, false),
                         clientUploadId = inputData.getString(CallSyncQueue.KEY_UPLOAD_ID),
                         recorderSource = inputData.getString(CallSyncQueue.KEY_SOURCE) ?: "unknown",
+                        callUid = inputData.getString(CallSyncQueue.KEY_CALL_UID),
+                        callStartedAt = inputData.getString(CallSyncQueue.KEY_AT),
                     )
                     file.delete()
                     Result.success()
@@ -300,6 +316,7 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                     WinstoneApi.openReport(
                         leadId = leadId,
                         recordingId = null,
+                        callUid = inputData.getString(CallSyncQueue.KEY_CALL_UID),
                         phoneNumber = inputData.getString(CallSyncQueue.KEY_PHONE),
                         durationSeconds = inputData.getInt(CallSyncQueue.KEY_DURATION, 0),
                         connected = inputData.getBoolean(CallSyncQueue.KEY_CONNECTED, false),
@@ -339,11 +356,11 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 }
 
                 else -> Result.failure()
-            }.also { if (it is Result.Success) SyncStatus.succeeded(applicationContext) }
+            }.also { if (it is Result.Success) SyncStatus.succeeded(applicationContext, kind == CallSyncQueue.KIND_RECORDING) }
         } catch (error: Exception) {
             // 4xx = bad payload, retrying will not help; anything else is transient.
             val message = error.message.orEmpty()
-            val giveUp = message.contains("Invalid payload") || message.contains("Unauthorized")
+            val giveUp = message.contains("Invalid payload")
             // A call recording and its report are the audit trail of the call:
             // never give up on them while the failure could still be the network.
             val keepTrying = !giveUp && (

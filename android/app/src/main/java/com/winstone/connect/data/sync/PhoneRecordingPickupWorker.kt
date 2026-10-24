@@ -33,7 +33,10 @@ class PhoneRecordingPickupWorker(context: Context, params: WorkerParameters) :
 
     override suspend fun doWork(): Result {
         val ctx = applicationContext
-        if (!canReadAudio(ctx)) return Result.success()
+        if (!canReadAudio(ctx)) {
+            SyncStatus.retrying(ctx, "Audio permission required — allow phone recording access in Android Settings")
+            return Result.retry()
+        }
         val start = inputData.getLong(KEY_START, 0L)
         val end = inputData.getLong(KEY_END, 0L)
         val phone = inputData.getString(KEY_PHONE).orEmpty()
@@ -41,11 +44,12 @@ class PhoneRecordingPickupWorker(context: Context, params: WorkerParameters) :
 
         val match = PhoneRecordingMatcher.pick(query(ctx, start), start, end, phone)
         if (match == null) {
+            SyncStatus.retrying(ctx, "No matching phone recording found; call report sync is separate from audio")
             return if (runAttemptCount < MAX_ATTEMPTS) Result.retry() else Result.success()
         }
 
         val ext = match.displayName.substringAfterLast('.', "m4a").lowercase().take(5)
-        val dir = File(ctx.cacheDir, "calls").apply { mkdirs() }
+        val dir = File(ctx.filesDir, "phone_recording_pickup").apply { mkdirs() }
         // Stable name = stable client_upload_id, so a retry never makes a second row.
         val copy = File(dir, "phone_${uid}.$ext")
         val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, match.id)
@@ -74,6 +78,8 @@ class PhoneRecordingPickupWorker(context: Context, params: WorkerParameters) :
             twoSided = true,
             incoming = inputData.getBoolean(KEY_INCOMING, false),
             recorderSource = SOURCE,
+            callUid = uid,
+            callStartedAt = java.time.Instant.ofEpochMilli(start).toString(),
         )
         return Result.success()
     }
@@ -136,13 +142,14 @@ class PhoneRecordingPickupWorker(context: Context, params: WorkerParameters) :
         fun schedule(
             context: Context,
             callStartMs: Long,
+            callUid: String? = null,
             callEndMs: Long,
             phoneNumber: String,
             leadId: String?,
             incoming: Boolean,
         ) {
-            if (!canReadAudio(context) || callStartMs <= 0L) return
-            val uid = "${phoneNumber.filter { it.isDigit() }.takeLast(10)}_$callStartMs"
+            if (callStartMs <= 0L || callUid == null) return
+            val uid = callUid
             val request = OneTimeWorkRequestBuilder<PhoneRecordingPickupWorker>()
                 .setInitialDelay(12, TimeUnit.SECONDS)
                 .setBackoffCriteria(BackoffPolicy.LINEAR, 20, TimeUnit.SECONDS)

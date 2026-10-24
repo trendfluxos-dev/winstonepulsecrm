@@ -25,6 +25,8 @@ object SyncStatus {
         val failed: Int = 0,
         val lastSyncedAtMillis: Long = 0L,
         val lastError: String? = null,
+        val lastAudioUploadedAtMillis: Long = 0L,
+        val lastReportSyncedAtMillis: Long = 0L,
     )
 
     private val _state = MutableStateFlow(Snapshot())
@@ -40,6 +42,8 @@ object SyncStatus {
             failed = p.getInt(K_FAILED, 0).coerceAtLeast(0),
             lastSyncedAtMillis = p.getLong(K_LAST_OK, 0L),
             lastError = p.getString(K_LAST_ERROR, null),
+            lastAudioUploadedAtMillis = p.getLong("last_audio", 0L),
+            lastReportSyncedAtMillis = p.getLong("last_report", 0L),
         )
         _state.value = snap
         return snap
@@ -49,10 +53,12 @@ object SyncStatus {
     fun queued(context: Context) = update(context) { it.copy(pending = it.pending + 1) }
 
     @Synchronized
-    fun succeeded(context: Context) = update(context) {
+    fun succeeded(context: Context, audioUpload: Boolean = false) = update(context) {
         it.copy(
             pending = (it.pending - 1).coerceAtLeast(0),
             lastSyncedAtMillis = System.currentTimeMillis(),
+            lastAudioUploadedAtMillis = if (audioUpload) System.currentTimeMillis() else it.lastAudioUploadedAtMillis,
+            lastReportSyncedAtMillis = if (!audioUpload) System.currentTimeMillis() else it.lastReportSyncedAtMillis,
             lastError = null,
         )
     }
@@ -84,6 +90,8 @@ object SyncStatus {
             .putInt(K_FAILED, next.failed)
             .putLong(K_LAST_OK, next.lastSyncedAtMillis)
             .putString(K_LAST_ERROR, next.lastError)
+            .putLong("last_audio", next.lastAudioUploadedAtMillis)
+            .putLong("last_report", next.lastReportSyncedAtMillis)
             .apply()
     }
 }

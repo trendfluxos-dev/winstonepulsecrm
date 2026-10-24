@@ -96,8 +96,17 @@ object WinstoneApi {
         leadName: String? = null,
         clientUploadId: String? = null,
         recorderSource: String = "unknown",
+        callUid: String? = null,
+        callStartedAt: String? = null,
     ): JSONObject = withContext(Dispatchers.IO) {
         // Multipart: the audio streams straight up, no base64 bloat in memory.
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+        file.inputStream().use { input ->
+            val buffer = ByteArray(8192)
+            var count = input.read(buffer)
+            while (count > 0) { digest.update(buffer, 0, count); count = input.read(buffer) }
+        }
+        val checksum = digest.digest().joinToString("") { "%02x".format(it) }
         val ext = file.extension.ifBlank { "m4a" }
         val body = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
@@ -112,7 +121,10 @@ object WinstoneApi {
                 addFormDataPart("call_direction", if (incoming) "incoming_callback" else "outgoing")
                 addFormDataPart("is_two_sided", twoSided.toString())
                 // Idempotency: a WorkManager retry can never create a second row.
-                addFormDataPart("client_upload_id", clientUploadId ?: file.name)
+                addFormDataPart("client_upload_id", clientUploadId ?: java.util.UUID.randomUUID().toString())
+                callUid?.let { addFormDataPart("call_uid", it) }
+                callStartedAt?.let { addFormDataPart("call_started_at", it) }
+                addFormDataPart("checksum", checksum)
                 addFormDataPart("recorder_source", recorderSource)
                 AgentSession.deviceId?.let { addFormDataPart("device_id", it) }
                 addFormDataPart(
@@ -132,6 +144,9 @@ object WinstoneApi {
         client.newCall(req).execute().use { res ->
             val json = JSONObject(res.body?.string() ?: "{}")
             if (!res.isSuccessful) error(json.optString("error", "HTTP ${res.code}"))
+            check(json.optString("recording_id").isNotBlank() && json.optString("upload_status") == "uploaded" && json.optString("checksum") == checksum) {
+                "Audio confirmation missing; original file retained for retry"
+            }
             json
         }
     }
@@ -240,8 +255,10 @@ object WinstoneApi {
         phoneNumber: String?,
         durationSeconds: Int,
         connected: Boolean,
+        callUid: String? = null,
     ): JSONObject = withContext(Dispatchers.IO) {
         val payload = JSONObject().apply {
+            callUid?.let { put("call_uid", it) }
             put("action", "open")
             put("lead_id", leadId)
             recordingId?.let { put("recording_id", it) }
