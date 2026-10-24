@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-24 — Live Messenger request / remove phone guidance
+- [ ] Remove phone setup guidance from Messenger preparation only, per clarification; keep Android call/report/recording sync unchanged.
+- [ ] Live Messenger remains blocked pending verifiable App/Page approval, signed webhook configuration, reviewed durable storage/ownership implementation and separately authorized deployment/schema changes. Existing demo is not a connected Page; do not fabricate live messages or accept callbacks without durable processing.
+
 ## 2026-10-24 — Windsor.ai read-only preparation + audience outreach
 - [x] Implemented `/facebook-ads` authority-only disconnected preparation and manual full-IT-PIN-only server configuration-presence boundary; no provider/DB calls, secrets changes or deployment. A configured key cannot enable the adapter; no fabricated metrics, campaign/budget actions, exports, schedules or storage.
 - [x] `bunx vitest run tests/windsor-reporting.test.ts tests/windsor-boundary.test.ts tests/route-role-access.test.ts tests/integration-boundaries.test.ts tests/messenger-inbox.test.ts tests/social-moderation.test.ts tests/support-inbox-agent-scope.test.ts` — exit 0, **7 files / 65 tests passed**, 22:42:52 UTC, 656ms. Includes 18 Windsor tests: 1–31 inclusive days, strict calendar dates/fields/timezone, full-PIN-only configuration inspection, disconnected with/without config, no network calls and no extra response properties. Handler tested offline with synthetic config only; production secrets never inspected. Earlier 6-file run: 59 passed. Automatic harness build OK 22:42:44 UTC; no manual build/typecheck (harness handles both). All content-route metadata present, including index and new route.
