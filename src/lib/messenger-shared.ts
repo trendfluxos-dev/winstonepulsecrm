@@ -91,6 +91,13 @@ export function unassignedThreads(view: MessengerView, threads: readonly DemoThr
   return view.canSeeUnassigned ? threads.filter((t) => t.assignedTo === null) : [];
 }
 
+/** Filters only after role scoping; searching never widens ownership. */
+export function filterDemoThreads(view: MessengerView, options: { queue: "mine" | "unassigned"; search: string; status: "all" | DemoThread["status"] }, threads: readonly DemoThread[] = DEMO_THREADS) {
+  const scoped = options.queue === "unassigned" ? unassignedThreads(view, threads) : visibleThreads(view, threads);
+  const search = options.search.trim().toLocaleLowerCase();
+  return scoped.filter((thread) => (options.status === "all" || thread.status === options.status) && (!search || `${thread.customer} ${thread.preview}`.toLocaleLowerCase().includes(search)));
+}
+
 export const NOT_CONNECTED = {
   code: "FACEBOOK_NOT_CONNECTED",
   bn: "Facebook এখনও সংযুক্ত হয়নি",

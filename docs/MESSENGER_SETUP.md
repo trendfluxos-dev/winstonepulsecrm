@@ -1,0 +1,31 @@
+# Messenger continuation — disconnected, code-only
+
+## Verified repository state
+
+- `/messenger` and Desk Messenger share `src/components/crm/MessengerInbox.tsx`: Bengali-first, clearly labelled samples, scoped search/status filtering and phone list → thread → back navigation. No demo row is stored.
+- `src/lib/messenger.functions.ts` uses existing `resolveCaller`; no new roles/auth/policies. Agents without HQ scope see own samples; authority sees all; read-only HQ cannot reply/assign. Existing agent HQ grants resolve to read-only authority here, so agent own-work behavior for those accounts is **not yet implemented**. No authorization widening was done.
+- `src/lib/messenger.server.ts` always selects the disabled adapter. Send/verify/ingest cannot succeed; `/api/public/meta/messenger` GET/POST always return 503 `FACEBOOK_NOT_CONNECTED`, even with valid challenges/signatures.
+- `src/lib/messenger-protocol.server.ts` adds offline HMAC verification, challenge validation and a pure reply preflight. These are **not wired** to the endpoint or send function. They read no configuration, make no network/storage calls and cannot enable Facebook.
+- `/inbox` Support Desk and social moderation stay separate and unchanged. The existing no-Meta-API social rule remains in force; full scope authorization does not override this turn's prohibition on connection/API calls.
+- `.lovable/plan.md` is historical proposal, not deployment evidence. `docs/proposals/messenger-inbox-migration.UNAPPLIED.sql` is unchanged outside migrations. Its append-only triggers remain TODO; it is **not ready to apply**.
+- `.lovable/project.json` contains template/revision metadata only; it establishes no Meta setup. Hosted Meta settings, app existence, Business verification, approved permissions, Page consent and token status are **unverified**. Secrets and browser credentials were not inspected.
+
+## Still absent from this foundation
+
+Persistent threads/messages/unread state; ownership rechecks against stored threads; LeadHub-PIN assignment/unassignment; active-roster checks; canonical lead linking/phone dedupe; durable receipt/outbox idempotency; audit/append-only enforcement; rate limiting/retries; token encryption/expiry/revocation; real delivery/read receipts; privacy/deletion workflow. Search and filtering are demo-only. Offline preflight is not a replacement for server authorization.
+
+## Owner / Page administrator steps (do not perform during this pass)
+
+1. Confirm whether a Meta Developer App already exists. If not, create an app using Meta's current Business/Messenger use case, associate the appropriate Business portfolio and add/configure Messenger for the intended Facebook Page. Complete business verification where Meta requires it; do not assume every permission has identical requirements.
+2. Confirm Page control/admin access and authorize that specific Page through the approved Page-token flow. No account password belongs in the CRM. Review required access: `pages_messaging` for messages, `pages_manage_metadata` for Page webhook subscription; `pages_show_list` if selecting Pages via login, and `pages_read_engagement` only if required for the chosen Page reads. `business_management` is conditional, not a blanket requirement. Confirm exact requirements in the app dashboard/current Meta documentation.
+3. Obtain necessary Advanced Access/App Review before serving people outside app roles; prepare reviewer instructions, a working test Page, consent-flow screencast, verified business details where required and approved privacy/data-deletion URLs. Do not claim App Review or Live mode is complete until verified.
+4. Approve truthful privacy notice and a deletion/retention process before using real messages. Existing zero-data-loss/audit requirements need an explicit privacy-approved retention/redaction design; no unreviewed deletion or invented compliance statement.
+5. In a **separately authorized** change, owner adds server-side configuration through Project Settings → Secrets: `META_APP_ID`, `META_APP_SECRET`, `META_WEBHOOK_VERIFY_TOKEN`, plus a reviewed token-encryption key. Page access tokens must use encrypted server-only storage; never browser code/logs. Token lifetimes vary and can be revoked even if they have no scheduled expiry—do not rely on the old plan's “does not expire” claim.
+6. Separately review schema proposal, explicit grants/RLS, append-only triggers, transaction/receipt/outbox uniqueness, ownership and LeadHub PIN gates. Obtain approval and a verified backup before any migration. No migration or SQL executed here.
+7. Implement and test against an isolated backend/test Page first. Only after separate authorization to enable handlers, configure `https://crm.winstonebd.com/api/public/meta/messenger` with the owner's verification token. **The current URL refuses verification with 503; do not register it as working.** Subscribe to `messages`, `messaging_postbacks`, `message_deliveries`, `message_reads` as needed; subscribe the app to the Page with approved access. Handovers are optional and require a reviewed ownership design.
+8. Enforce server-owned thread access, current 24-hour standard reply window, suppression, briefing and maintenance gates. Do not enable any message tag/extended window on the historical plan's assumption; check current Meta policy and explicit app eligibility. Record accepted vs delivered vs read distinctly. Handle error 190/revocation by stopping sends, bounded rate-limit/5xx retries, and ambiguous send timeouts by reconciliation—not blind resend.
+9. After separate approval, verify duplicate webhooks → one stored message; double-submit → one outbox item; assignment only through LeadHub; only current owner replies; HQ read-only; disconnect stops sends and preserves approved history. Publishing requires a separate explicit request.
+
+## Validation boundaries
+
+Unit tests use synthetic strings only, verify exact raw-body HMAC, malformed challenges, 24h boundary, privacy-safe disabled adapter (no network), scoped filtering, and gate refusals. Existing Support Desk/social/role tests run as regression checks. No live Meta, live database, browser credentials or secrets are used. Real signature ingestion/storage/delivery and authenticated phone navigation remain unverified until permitted isolated setup.
