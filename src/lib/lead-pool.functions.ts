@@ -369,7 +369,8 @@ export const quotaOverview = createServerFn({ method: "GET" })
 
 // ─── HEAD LEAD STORE ────────────────────────────────────────────────────────
 
-const StoreInput = z.object({
+/** Exported for tests: the store listing input (page size capped at 500, not the 50/day assignment cap). */
+export const StoreInput = z.object({
   adminToken: z.string().nullable().optional(),
   q: z.string().trim().max(80).optional(),
   assignment: z.enum(["all", "unassigned", "assigned", "duplicate"]).default("all"),
