@@ -3,6 +3,7 @@ import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { integrationPreparation } from "@/lib/integration-readiness";
+import { MetaConnectionTest } from "@/components/crm/MetaConnectionTest";
 
 /** Public preparation summary only, never a live Meta or secret check. */
 export function MessengerConnectionStatus() {
@@ -17,6 +18,7 @@ export function MessengerConnectionStatus() {
     ].map((label) => <div key={label.en}><dt>{t(label)}</dt><dd className="text-muted-foreground">{t({ bn: "যাচাই বাকি", en: "Unverified" })}</dd></div>)}</dl>
     <p className="text-xs text-muted-foreground">{t({ bn: "সর্বশেষ যাচাই (ঢাকা): পরীক্ষা হয়নি", en: "Last verification (Dhaka): not checked" })}</p>
     <p className="text-xs text-muted-foreground">{t(verification.reason)}</p>
+    <MetaConnectionTest />
     <p className="text-xs text-muted-foreground">{t({ bn: "Signed webhook: সার্ভারে স্বাক্ষর পরীক্ষার ব্যবস্থা আছে; বাস্তব যাচাইয়ের প্রমাণ নেই। গোপন তথ্য সেভ হওয়া মেসেজ সিঙ্কের প্রমাণ নয়।", en: "Signed webhook: server signature validation is implemented; no live verification evidence exists. Saved secrets do not prove message sync." })}</p>
   </section>;
 }

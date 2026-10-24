@@ -1,5 +1,8 @@
 # Roadmap
 
+## 2026-10-24 — Safe manual Meta connection test
+- [ ] Add full-IT-PIN-only bounded read test for configured App/Page identity and both subscription levels; token values never returned/logged. App Review/permission grant cannot be inferred from readable identities; keep them unverified without authoritative evidence. No activation, messages, writes or deployment.
+
 ## 2026-10-24 — Signed webhook boundary / verification timestamps
 - [x] POST signature validation implemented with handler-only `META_APP_SECRET`, exact raw bytes, 262144-byte streamed bound; malformed/mismatched signatures return 401, missing config 503, oversize 413, valid signature still 503 ingestion-not-ready (no data loss through false acknowledgement). GET handshake/adapter remain disabled.
 - [x] `/inbox` shows signed-verification preparation and last-check absence; progress page shows both service blocker reasons and no invented timestamp/provider failure. Updated `docs/MESSENGER_SETUP.md` and `AGENTS.md` boundary.
