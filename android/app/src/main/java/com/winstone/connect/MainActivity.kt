@@ -149,6 +149,9 @@ class MainActivity : ComponentActivity() {
         )
         if (Build.VERSION.SDK_INT >= 28) wanted += Manifest.permission.ANSWER_PHONE_CALLS
         if (Build.VERSION.SDK_INT >= 33) wanted += Manifest.permission.POST_NOTIFICATIONS
+        // Read the phone's own call-recorder files so they reach the CRM.
+        wanted += if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_AUDIO
+        else Manifest.permission.READ_EXTERNAL_STORAGE
         ActivityCompat.requestPermissions(this, wanted.toTypedArray(), 9001)
     }
 

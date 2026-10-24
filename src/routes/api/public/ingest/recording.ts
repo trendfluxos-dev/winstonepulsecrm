@@ -23,7 +23,8 @@ const Payload = z.object({
   sim_number: z.string().trim().max(25).nullable().optional(),
   lead_name: z.string().trim().min(1).max(120).nullable().optional(),
   client_upload_id: z.string().trim().min(6).max(120).nullable().optional(),
-  recorder_source: z.enum(["voice_call", "mic", "unknown"]).default("unknown"),
+  /** phone_recorder = file saved by the phone's own call recorder, picked up after the call. */
+  recorder_source: z.enum(["voice_call", "mic", "phone_recorder", "unknown"]).default("unknown"),
   audio_base64: z.string().min(1).max(33_000_000),
   file_extension: z.string().min(1).max(5).default("mp3"),
   duration_seconds: z.number().int().min(0),
