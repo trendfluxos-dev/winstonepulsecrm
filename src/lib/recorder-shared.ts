@@ -52,3 +52,14 @@ export function voiceNoteStage(row: { status?: string | null; transcript?: strin
   if (row.status === "ready") return "ready";
   return row.transcript && row.transcript.trim() ? "summary_failed" : "transcript_failed";
 }
+
+/** Why the microphone could not start, so the screen can show the right recovery steps. */
+export type MicProblem = "unsupported" | "insecure" | "denied" | "no_device" | "busy" | "unknown";
+
+export function classifyMicError(err: unknown): MicProblem {
+  const name = err && typeof err === "object" && "name" in err ? String((err as { name: unknown }).name) : "";
+  if (name === "NotAllowedError" || name === "PermissionDeniedError" || name === "SecurityError") return "denied";
+  if (name === "NotFoundError" || name === "DevicesNotFoundError" || name === "OverconstrainedError") return "no_device";
+  if (name === "NotReadableError" || name === "TrackStartError" || name === "AbortError") return "busy";
+  return "unknown";
+}

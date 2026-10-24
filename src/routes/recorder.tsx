@@ -9,6 +9,7 @@ import { AppShell } from "@/components/crm/AppShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { classifyMicError, type MicProblem } from "@/lib/recorder-shared";
 import { buildCallInsight, getRecorderPlayback, listRecorderHistory, retryVoiceNoteFn, saveVoiceNote } from "@/lib/recorder.functions";
 
 export const Route = createFileRoute("/recorder")({
@@ -136,7 +137,30 @@ function VoiceNoteRecorder({ onSave }: { onSave: (blob: Blob, seconds: number) =
     return () => clearInterval(t);
   }, [state]);
 
+  const [micProblem, setMicProblem] = useState<MicProblem | null>(null);
+  const [permState, setPermState] = useState<"granted" | "prompt" | "denied" | null>(null);
+
+  useEffect(() => {
+    if (!window.isSecureContext) return setMicProblem("insecure");
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") return setMicProblem("unsupported");
+    let status: PermissionStatus | null = null;
+    navigator.permissions
+      ?.query({ name: "microphone" as PermissionName })
+      .then((s) => {
+        status = s;
+        setPermState(s.state as "granted" | "prompt" | "denied");
+        if (s.state === "denied") setMicProblem("denied");
+        s.onchange = () => {
+          setPermState(s.state as "granted" | "prompt" | "denied");
+          if (s.state !== "denied") setMicProblem((p) => (p === "denied" ? null : p));
+        };
+      })
+      .catch(() => undefined); // Safari/iPhone may not support this query; the prompt still appears on tap.
+    return () => { if (status) status.onchange = null; };
+  }, []);
+
   async function start() {
+    setMicProblem(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mime = pickMime();
@@ -153,8 +177,10 @@ function VoiceNoteRecorder({ onSave }: { onSave: (blob: Blob, seconds: number) =
       r.start(1000);
       rec.current = r;
       setState("recording");
-    } catch {
-      toast.error("মাইক্রোফোন অনুমতি দিন");
+    } catch (e) {
+      const problem = classifyMicError(e);
+      setMicProblem(problem);
+      if (problem === "denied") setPermState("denied");
     }
   }
 
@@ -166,10 +192,16 @@ function VoiceNoteRecorder({ onSave }: { onSave: (blob: Blob, seconds: number) =
             <Square className="mr-2 size-5" /> থামান ও সেভ করুন · {fmtDur(seconds)}
           </Button>
         ) : (
-          <Button size="lg" className="h-16 w-full max-w-xs text-base" disabled={state === "saving"} onClick={start}>
+          <Button size="lg" className="h-16 w-full max-w-xs text-base" disabled={state === "saving" || micProblem === "insecure" || micProblem === "unsupported"} onClick={start}>
             <Mic className="mr-2 size-5" /> {state === "saving" ? "লেখা ও সারাংশ তৈরি হচ্ছে…" : "ভয়েস রেকর্ড শুরু করুন"}
           </Button>
         )}
+        {state === "idle" && !micProblem && permState !== "granted" && (
+          <p className="text-center text-xs text-muted-foreground">
+            রেকর্ড শুরু করলে ব্রাউজার মাইক্রোফোনের অনুমতি চাইবে — "Allow" / "অনুমতি দিন" চাপুন।
+          </p>
+        )}
+        {micProblem && state === "idle" && <MicHelp problem={micProblem} onRetry={start} />}
         {state === "saving" && <StatusLine tone="info" text="অডিও সেভ হচ্ছে → লেখা তৈরি → সারাংশ তৈরি…" />}
         {failed && state === "idle" && (
           <div className="w-full max-w-xs space-y-2">
@@ -281,4 +313,59 @@ function HistoryCard({ item, readOnly }: { item: Item; readOnly: boolean }) {
 function StatusLine({ tone, text }: { tone: "ok" | "error" | "info"; text: string }) {
   const cls = tone === "error" ? "text-destructive" : tone === "ok" ? "text-primary" : "text-muted-foreground";
   return <p className={`text-xs font-medium ${cls}`} role={tone === "error" ? "alert" : "status"}>{text}</p>;
+}
+
+const MIC_HELP: Record<MicProblem, { title: string; steps: string[]; retry: boolean }> = {
+  denied: {
+    title: "মাইক্রোফোনের অনুমতি বন্ধ আছে",
+    steps: [
+      "Android Chrome: ঠিকানার পাশের 🔒 চিহ্নে চাপুন → Permissions → Microphone → Allow।",
+      "iPhone Safari: Settings → Safari → Microphone → Allow, অথবা ঠিকানার পাশের \"aA\" → Website Settings → Microphone → Allow।",
+      "কম্পিউটার: ঠিকানার পাশের 🔒 চিহ্ন → Microphone → Allow।",
+      "তারপর পাতাটি রিফ্রেশ করে আবার চেষ্টা করুন।",
+    ],
+    retry: true,
+  },
+  no_device: {
+    title: "কোনো মাইক্রোফোন পাওয়া যায়নি",
+    steps: ["হেডফোন/মাইক ঠিকমতো লাগানো আছে কি না দেখুন।", "অন্য ফোন বা ব্রাউজারে চেষ্টা করুন।"],
+    retry: true,
+  },
+  busy: {
+    title: "মাইক্রোফোন অন্য কোথাও ব্যবহার হচ্ছে",
+    steps: ["চলমান ফোন কল, WhatsApp/ভিডিও কল বা অন্য রেকর্ডিং অ্যাপ বন্ধ করুন।", "তারপর আবার চেষ্টা করুন।"],
+    retry: true,
+  },
+  insecure: {
+    title: "এই ঠিকানায় রেকর্ডিং চলবে না",
+    steps: ["CRM-টি https:// ঠিকানা থেকে খুলুন (crm.winstonebd.com)।"],
+    retry: false,
+  },
+  unsupported: {
+    title: "এই ব্রাউজারে রেকর্ডিং সমর্থিত নয়",
+    steps: ["Android-এ Chrome, iPhone-এ Safari (iOS 14.3 বা নতুন) ব্যবহার করুন।", "অথবা Winstone অ্যাপের রেকর্ডার ব্যবহার করুন।"],
+    retry: false,
+  },
+  unknown: {
+    title: "রেকর্ডিং শুরু করা যায়নি",
+    steps: ["পাতাটি রিফ্রেশ করে আবার চেষ্টা করুন।", "সমস্যা থাকলে ফোন রিস্টার্ট করুন বা IT-কে জানান।"],
+    retry: true,
+  },
+};
+
+function MicHelp({ problem, onRetry }: { problem: MicProblem; onRetry: () => void }) {
+  const help = MIC_HELP[problem];
+  return (
+    <div role="alert" className="w-full max-w-md space-y-2 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm">
+      <p className="font-medium text-destructive">{help.title}</p>
+      <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
+        {help.steps.map((s) => <li key={s}>{s}</li>)}
+      </ol>
+      {help.retry && (
+        <Button size="sm" variant="outline" onClick={onRetry}>
+          <RotateCw className="mr-1 size-4" /> আবার চেষ্টা করুন
+        </Button>
+      )}
+    </div>
+  );
 }

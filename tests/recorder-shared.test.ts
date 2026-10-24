@@ -26,3 +26,11 @@ describe("Voice note stage", () => {
   it("failed with a transcript means only the summary failed", () =>
     expect(voiceNoteStage({ status: "failed", transcript: "hello" })).toBe("summary_failed"));
 });
+
+import { classifyMicError } from "@/lib/recorder-shared";
+describe("Microphone problem detection", () => {
+  it("blocked permission is 'denied'", () => expect(classifyMicError({ name: "NotAllowedError" })).toBe("denied"));
+  it("no microphone is 'no_device'", () => expect(classifyMicError({ name: "NotFoundError" })).toBe("no_device"));
+  it("mic used by another app is 'busy'", () => expect(classifyMicError({ name: "NotReadableError" })).toBe("busy"));
+  it("anything else is 'unknown'", () => expect(classifyMicError(new Error("x"))).toBe("unknown"));
+});
