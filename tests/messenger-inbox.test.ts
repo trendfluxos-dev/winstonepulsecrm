@@ -52,10 +52,24 @@ describe("Facebook not connected", () => {
     }
   });
   it("messenger code reads no secrets, no database and makes no Meta calls", () => {
-    for (const f of ["src/lib/messenger.server.ts", "src/lib/messenger-shared.ts", "src/routes/api/public/meta/messenger.ts", "src/routes/messenger.tsx"]) {
+    for (const f of ["src/lib/messenger.server.ts", "src/lib/messenger-shared.ts", "src/routes/api/public/meta/messenger.ts", "src/routes/messenger.tsx", "src/components/crm/MessengerInbox.tsx"]) {
       const src = readFileSync(f, "utf8");
       expect(src).not.toMatch(/process\.env|supabaseAdmin|\.from\(|graph\.facebook\.com|access_token/);
     }
+  });
+  it("messenger lives inside the CRM: desk sections, desk tab bar and desk page embed it", () => {
+    const sections = readFileSync("src/lib/page-sections.ts", "utf8");
+    expect(sections).toMatch(/key: "messenger", label: "মেসেঞ্জার"/);
+    const tabBar = readFileSync("src/components/crm/desk/DeskTabBar.tsx", "utf8");
+    expect(tabBar).toMatch(/tab: "messenger", label: \{ bn: "মেসেঞ্জার", en: "Messenger" \}/);
+    const desk = readFileSync("src/routes/desk.tsx", "utf8");
+    expect(desk).toMatch(/<TabsContent value="messenger">\s*<MessengerInbox \/>/);
+  });
+  it("the /messenger page still keeps its own head metadata and reuses the same inbox", () => {
+    const page = readFileSync("src/routes/messenger.tsx", "utf8");
+    expect(page).toMatch(/createFileRoute\("\/messenger"\)/);
+    expect(page).toMatch(/Messenger Inbox — Winstone Pulse/);
+    expect(page).toMatch(/<MessengerInbox \/>/);
   });
   it("proposed migration is not in the applied migrations folder", () => {
     expect(readdirSync("drizzle/migrations").some((f) => /messenger/i.test(f))).toBe(false);
