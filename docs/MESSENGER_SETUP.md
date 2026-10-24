@@ -70,4 +70,10 @@ Use the managed Lovable Cloud encrypted secret store for `META_PAGE_ACCESS_TOKEN
 
 ## Validation boundaries
 
+### Manual safe Meta connection test
+
+`/inbox` includes a full-IT-PIN-only manual test. It reads configured Page identity and Page/app subscriptions with GET requests, server-only Authorization headers, 10-second request deadlines, bounded response bodies and no redirects. No credentials, raw provider responses, IDs or token-derived data are returned or logged; failures are allowlisted codes. The test does not fetch customer conversations, subscribe an app, write data, activate handlers or send messages. Page identity/association and both `messages` subscription levels can be checked, but App Review/Live mode/Advanced Access and `pages_messaging` approval remain **unverified** without authoritative evidence. A subscription is not a successful signed delivery. Results and Dhaka check time remain only in the current UI session; no durable history is claimed.
+
+Reference: https://developers.facebook.com/docs/graph-api/reference/page/subscribed_apps/ and https://developers.facebook.com/docs/graph-api/webhooks/getting-started/webhooks-for-pages/ . No live test performed during implementation.
+
 Unit tests use synthetic strings only, verify exact raw-body HMAC, malformed challenges, 24h boundary, privacy-safe disabled adapter (no network), scoped filtering, and gate refusals. Existing Support Desk/social/role tests run as regression checks. No live Meta, live database, browser credentials or secrets are used. Real signature ingestion/storage/delivery and authenticated phone navigation remain unverified until permitted isolated setup.
