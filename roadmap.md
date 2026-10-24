@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-24 — Inbox verification and Messenger lead provenance
+- [ ] Show unverified Meta App/Page approvals and webhook subscription status in `/inbox`; never infer approval from secrets or Meta Ads. Inspect saved lead provenance for safe display of source/arrival/verification; no fabricated Messenger leads or timestamps.
+- [ ] Meta Ads secure connection card was cancelled before execution by a new message; connection not completed. Live verification still needs authorized Messenger-specific access/evidence, reviewed storage and separate activation safeguards.
+
 ## 2026-10-24 — Combined Messenger / Windsor progress
 - [x] Restored `/messenger-setup` with Messenger and Windsor.ai disconnected statuses, explicit neither-connected notice, and Messenger navigation link; no provider activation, secrets or data changes. Shared browser-safe preparation helper reports Windsor configuration as not checked, never infers secrets absent.
 - [x] `bunx vitest run tests/messenger-readiness.test.ts tests/messenger-inbox.test.ts tests/windsor-reporting.test.ts tests/windsor-boundary.test.ts tests/route-role-access.test.ts` — 5 files / 51 tests passed, exit 0, 23:05:06 UTC. Harness build OK 23:04:57 UTC. Browser attempt blocked all external/backend requests and timed out awaiting the page heading; completed signed-in visual flow is unverified, not claimed passed.
