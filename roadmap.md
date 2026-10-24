@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-24 — Safe manual Meta connection test
+- [x] Added `/inbox` manual full-IT-PIN-only test: configured Page identity, selected App/Page association and both messages subscription levels; GET-only server Authorization, 10s deadlines, 64KB responses, no redirects/raw error logs/token output. Missing configuration and access/subscription failures return safe codes and actual attempt time in Dhaka; no persisted history, customer reads or activation.
+- [x] `bunx vitest run tests/meta-connection-test.test.ts tests/meta-connection-boundary.test.ts tests/messenger-webhook.test.ts tests/messenger-inbox.test.ts tests/messenger-readiness.test.ts tests/integration-boundaries.test.ts` — 6 files / 31 tests passed, exit 0, 23:18:08 UTC; harness build OK 23:18:01 UTC after correcting optional-property/fallback types. Synthetic transport tests only; no live Meta calls, secret changes, DB, migration or deployment.
+- [ ] App Review, Live mode, Advanced Access and messaging grants remain unverified: identity/subscriptions alone do not establish them. Live authorized IT click and actual signed delivery remain untested; connection stays off. Changed: `src/lib/meta-connection-test.server.ts`, `src/lib/meta-connection-test.functions.ts`, `src/components/crm/MetaConnectionTest.tsx`, `src/components/crm/MessengerConnectionStatus.tsx`, `tests/meta-connection-test.test.ts`, `tests/meta-connection-boundary.test.ts`, `AGENTS.md`, `docs/MESSENGER_SETUP.md`, `roadmap.md`.
+
 ## 2026-10-24 — Signed webhook boundary / verification timestamps
 - [x] POST signature validation implemented with handler-only `META_APP_SECRET`, exact raw bytes, 262144-byte streamed bound; malformed/mismatched signatures return 401, missing config 503, oversize 413, valid signature still 503 ingestion-not-ready (no data loss through false acknowledgement). GET handshake/adapter remain disabled.
 - [x] `/inbox` shows signed-verification preparation and last-check absence; progress page shows both service blocker reasons and no invented timestamp/provider failure. Updated `docs/MESSENGER_SETUP.md` and `AGENTS.md` boundary.
