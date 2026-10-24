@@ -1,17 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle, ArrowLeft, Circle, Lock, Smartphone } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Circle, Lock } from "lucide-react";
 import { AppShell } from "@/components/crm/AppShell";
 import { Button } from "@/components/ui/button";
-import { PhoneSyncGuide } from "@/components/crm/PhoneSyncGuide";
 import { useT } from "@/lib/i18n";
 import { messengerPreparation } from "@/lib/messenger-readiness";
 
 export const Route = createFileRoute("/messenger-setup")({
   head: () => ({ meta: [
     { title: "Messenger Setup Progress — Winstone Pulse" },
-    { name: "description", content: "Winstone Messenger setup prerequisites, unverified approvals and independent Android phone sync." },
+    { name: "description", content: "Winstone Messenger setup prerequisites, unverified App and Page approvals and activation blockers." },
     { property: "og:title", content: "Messenger Setup Progress — Winstone Pulse" },
-    { property: "og:description", content: "Honest Messenger preparation status and Facebook-independent phone sync." },
+    { property: "og:description", content: "Honest Messenger preparation status, webhook readiness and activation blockers." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
@@ -37,7 +36,5 @@ function SetupPage() {
       <p className="mt-2 text-sm text-muted-foreground">{t(step.note)}</p>
     </li>)}</ol>
     <section className="space-y-2"><h2 className="flex items-center gap-2 text-base font-semibold"><AlertTriangle className="size-4 text-primary" />{t({ bn: "চালু করার বাধা", en: "Activation blockers" })}</h2><p className="text-sm text-muted-foreground">{t({ bn: "App ও Page অনুমোদনের যাচাই, গোপন webhook সেটআপ, অনুমোদিত তথ্য সংরক্ষণ ও আলাদা পরীক্ষার পরিবেশ দরকার। লাইভ প্রকাশ বা তথ্য কাঠামো বদলের অনুমতি ছাড়া বর্তমান ইনবক্স চালু করা যাবে না।", en: "Verified App/Page approvals, secure webhook configuration, approved message storage and isolated testing are required. The inbox cannot go live without separately authorized deployment and storage changes." })}</p></section>
-    <PhoneSyncGuide />
-    <Button asChild variant="outline"><Link to="/desk"><Smartphone className="size-4" />{t({ bn: "ডেস্কের ফোন সেটআপ", en: "Desk phone setup" })}</Link></Button>
   </div></AppShell>;
 }
