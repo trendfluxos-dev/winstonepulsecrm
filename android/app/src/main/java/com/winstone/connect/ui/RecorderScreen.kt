@@ -193,7 +193,7 @@ private fun RecorderBody(onClose: () -> Unit) {
         )
         Spacer(Modifier.height(12.dp))
         Button(
-            enabled = !saving,
+            enabled = !saving && saveFailed == null,
             modifier = Modifier.fillMaxWidth().height(64.dp),
             colors = if (recorder != null) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error) else ButtonDefaults.buttonColors(),
             onClick = {
