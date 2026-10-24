@@ -41,6 +41,7 @@ import { Route as NewsRouteImport } from './routes/news'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as QualifyRouteImport } from './routes/qualify'
+import { Route as RecorderRouteImport } from './routes/recorder'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RuntimeErrorsRouteImport } from './routes/runtime-errors'
@@ -273,6 +274,11 @@ const ProjectsRoute = ProjectsRouteImport.update({
 const QualifyRoute = QualifyRouteImport.update({
   id: '/qualify',
   path: '/qualify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecorderRoute = RecorderRouteImport.update({
+  id: '/recorder',
+  path: '/recorder',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -696,6 +702,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/projects': typeof ProjectsRoute
   '/qualify': typeof QualifyRoute
+  '/recorder': typeof RecorderRoute
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runtime-errors': typeof RuntimeErrorsRoute
@@ -803,6 +810,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/projects': typeof ProjectsRoute
   '/qualify': typeof QualifyRoute
+  '/recorder': typeof RecorderRoute
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runtime-errors': typeof RuntimeErrorsRoute
@@ -911,6 +919,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/projects': typeof ProjectsRoute
   '/qualify': typeof QualifyRoute
+  '/recorder': typeof RecorderRoute
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/runtime-errors': typeof RuntimeErrorsRoute
@@ -1020,6 +1029,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/projects'
     | '/qualify'
+    | '/recorder'
     | '/reports'
     | '/reset-password'
     | '/runtime-errors'
@@ -1127,6 +1137,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/projects'
     | '/qualify'
+    | '/recorder'
     | '/reports'
     | '/reset-password'
     | '/runtime-errors'
@@ -1234,6 +1245,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/projects'
     | '/qualify'
+    | '/recorder'
     | '/reports'
     | '/reset-password'
     | '/runtime-errors'
@@ -1342,6 +1354,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProjectsRoute: typeof ProjectsRoute
   QualifyRoute: typeof QualifyRoute
+  RecorderRoute: typeof RecorderRoute
   ReportsRoute: typeof ReportsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RuntimeErrorsRoute: typeof RuntimeErrorsRoute
@@ -1641,6 +1654,13 @@ declare module '@tanstack/react-router' {
       path: '/qualify'
       fullPath: '/qualify'
       preLoaderRoute: typeof QualifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recorder': {
+      id: '/recorder'
+      path: '/recorder'
+      fullPath: '/recorder'
+      preLoaderRoute: typeof RecorderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -2190,6 +2210,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProjectsRoute: ProjectsRoute,
   QualifyRoute: QualifyRoute,
+  RecorderRoute: RecorderRoute,
   ReportsRoute: ReportsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RuntimeErrorsRoute: RuntimeErrorsRoute,
