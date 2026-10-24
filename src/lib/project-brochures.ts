@@ -46,3 +46,9 @@ export function allBrochures(): Array<{ url: string; entry: string }> {
   }
   return out;
 }
+
+/** The chosen subset, kept in profile order; unknown entry names are ignored. */
+export function pickBrochures(entries: string[]): Array<{ url: string; entry: string }> {
+  const want = new Set(entries);
+  return allBrochures().filter((b) => want.has(b.entry));
+}
