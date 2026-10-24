@@ -28,3 +28,20 @@ export function brochureFor(name: string): { url: string; filename: string } | n
   if (!hit) return null;
   return { url: B + hit[1], filename: `${name.replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-")}-Brochure.pdf` };
 }
+
+/**
+ * Every distinct brochure in profile order, with the name it carries inside the ZIP.
+ * The two "Park Shouthern/Southern" spellings point at one file, so they collapse to one entry.
+ */
+export function allBrochures(): Array<{ url: string; entry: string }> {
+  const seen = new Set<string>();
+  const out: Array<{ url: string; entry: string }> = [];
+  for (const [key, path] of LIST) {
+    if (seen.has(path)) continue;
+    seen.add(path);
+    const num = /project-(\d+)/.exec(path)?.[1] ?? String(out.length + 1).padStart(2, "0");
+    const title = key.replace(/\b\w/g, (c) => c.toUpperCase()).replace(/\s+/g, "-");
+    out.push({ url: B + path, entry: `${num}-${title}-Brochure.pdf` });
+  }
+  return out;
+}
