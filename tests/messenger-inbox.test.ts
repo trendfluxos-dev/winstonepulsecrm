@@ -55,7 +55,7 @@ describe("Facebook not connected", () => {
     const h = (Webhook.options as any).server.handlers;
     const res: Response = await h.GET({ request: new Request("http://x/api/public/meta/messenger", { headers: { accept: "text/html" } }) });
     expect(res.status).toBe(303);
-    expect(res.headers.get("Location")).toBe("/messenger-setup");
+    expect(res.headers.get("Location")).toBe("/messenger");
     expect(res.headers.get("Cache-Control")).toBe("no-store");
   });
   it("browser-like verification requests still fail closed", async () => {

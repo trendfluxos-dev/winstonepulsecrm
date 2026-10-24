@@ -12,10 +12,10 @@ export const Route = createFileRoute("/api/public/meta/messenger")({
     GET: async ({ request }) => {
       const url = new URL(request.url);
       const verification = [...url.searchParams.keys()].some((key) => key.startsWith("hub."));
-      // Human navigation is not webhook verification: show the setup page,
+      // Human navigation is not webhook verification: show the inbox,
       // not a deliberate 503 that the preview treats as a runtime failure.
       if (!verification && request.headers.get("accept")?.includes("text/html")) {
-        return new Response(null, { status: 303, headers: { Location: "/messenger-setup", "Cache-Control": "no-store" } });
+        return new Response(null, { status: 303, headers: { Location: "/messenger", "Cache-Control": "no-store" } });
       }
       return notConnected();
     },
