@@ -2,7 +2,8 @@
 
 ## 2026-10-24 — Local sensitive-file masking
 - [x] Added local TXT sanitization and download tool on /messenger; whole sensitive lines/next values and token-like strings/long IDs masked, no raw preview or file upload/storage. Original uploaded credentials not copied or read.
-- [ ] Run focused tests and local synthetic-file browser download verification. Automatic detection is conservative, not guaranteed for arbitrary unlabelled passwords; review before sharing.
+- [x] `bunx vitest run tests/credential-redaction.test.ts tests/messenger-inbox.test.ts tests/messenger-protocol.test.ts` — 3 files / 35 tests passed, 21:49:45 UTC. Automatic build OK at 21:49:33 UTC. `python3 /tmp/browser/redaction/check_redaction.py` — synthetic file downloaded with all three sensitive lines fully masked; Clear disabled download; 428px screenshot inspected, no original credentials used. Automatic detection is conservative, not guaranteed for arbitrary unlabelled passwords; review before sharing.
+- Changed: `src/lib/credential-redaction.ts`, `src/components/crm/CredentialRedactor.tsx`, `src/routes/messenger.tsx`, `tests/credential-redaction.test.ts`, `AGENTS.md`, `roadmap.md`. No database, secrets, auth, provider connection or deployment change; read-only uploaded original remains untouched.
 
 ## 2026-10-24 — App verification / Messenger + Lead Ads preparation
 - [x] Inspected recent foundation and prior plan/service/guide/tests; extended existing setup guide with App verification and credential/permission matrix for Messenger, Webhooks and Lead Ads. Preserved UI, service, reply function, endpoint and unapplied proposal; added offline duplicate-parameter/challenge-boundary tests only.
