@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-25 — Interactive whole-CRM walkthrough
+- [ ] Add bilingual `/walkthrough` for the four workspaces and primary tasks, step navigation, workspace switching, local resume/reset and links to existing gated pages. No live data, provider calls, changed permissions or automatic business actions.
+- [ ] Test progress/navigation and browser flows, document verification limits; no deployment.
+
 ## 2026-10-25 — Five-service integration status page
 - [x] Added public read-only `/integrations` with Messenger, WhatsApp, Windsor.ai, Drive and Winstone OS evidence boundaries, absent verified timestamps, blockers and verification steps. Messenger/Windsor inactive; other three unverified, never assumed disconnected. Navigation and existing progress page linked; no live reads, configuration changes or activation.
 - [x] `bunx vitest run tests/integration-status.test.ts tests/messenger-readiness.test.ts tests/windsor-reporting.test.ts tests/route-role-access.test.ts tests/integration-boundaries.test.ts` — 5 files / 39 tests passed. Harness build OK 23:53:03 UTC. All content routes contain head metadata.
