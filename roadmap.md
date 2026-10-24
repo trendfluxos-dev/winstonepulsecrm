@@ -1,7 +1,7 @@
 # Roadmap
 
 ## 2026-10-24 — Encrypted Meta Page secret storage
-- [ ] Owner-authorized secure collection of `META_PAGE_ACCESS_TOKEN` and `META_PAGE_ID` into Lovable Cloud's encrypted secret store, not repository/client files. Secret-name listing confirms neither currently configured; no available workspace connection. Never reuse uploaded credential material or request Facebook passwords. Adapter/endpoint remain disconnected; no deployment/SQL/data/auth changes.
+- [x] Owner saved `META_PAGE_ACCESS_TOKEN` and `META_PAGE_ID` through the secure form into Lovable Cloud's encrypted secret store; tool confirmed both set, no values exposed. No available workspace connection; uploaded credential material not reused and no Facebook password requested. Adapter/endpoint remain disconnected; no deployment/SQL/data/auth changes. Updated `docs/MESSENGER_SETUP.md` and `roadmap.md` only; no runtime code changed, no tests necessary for managed secret creation. Token validity/Page association/App approval remain unverified; no Graph call performed.
 
 ## 2026-10-24 — Local sensitive-file masking
 - [x] Added local TXT sanitization and download tool on /messenger; whole sensitive lines/next values and token-like strings/long IDs masked, no raw preview or file upload/storage. Original uploaded credentials not copied or read.
