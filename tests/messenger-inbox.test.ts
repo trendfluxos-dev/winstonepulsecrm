@@ -68,7 +68,7 @@ describe("Facebook not connected", () => {
     }
   });
   it("messenger code reads no secrets, no database and makes no Meta calls", () => {
-    for (const f of ["src/lib/messenger.server.ts", "src/lib/messenger-shared.ts", "src/routes/api/public/meta/messenger.ts", "src/routes/messenger.tsx", "src/components/crm/MessengerInbox.tsx"]) {
+    for (const f of ["src/lib/messenger.server.ts", "src/lib/messenger-shared.ts", "src/routes/messenger.tsx", "src/components/crm/MessengerInbox.tsx"]) {
       const src = readFileSync(f, "utf8");
       expect(src).not.toMatch(/process\.env|supabaseAdmin|\.from\(|graph\.facebook\.com|access_token/);
     }

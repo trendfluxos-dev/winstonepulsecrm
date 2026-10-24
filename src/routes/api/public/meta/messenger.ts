@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 /**
  * Placeholder for the future Meta Messenger webhook. Facebook is not connected:
- * no verify token, no signature secret, no processing, no database write.
+ * GET handshake remains disabled; POST checks signatures but never accepts messages.
  */
 const notConnected = () =>
   Response.json({ ok: false, code: "FACEBOOK_NOT_CONNECTED", message: "Facebook not connected yet" }, { status: 503 });
@@ -19,6 +19,9 @@ export const Route = createFileRoute("/api/public/meta/messenger")({
       }
       return notConnected();
     },
-    POST: async () => notConnected(),
+    POST: async ({ request }) => {
+      const { inspectSignedWebhook } = await import("@/lib/messenger-webhook.server");
+      return inspectSignedWebhook(request, process.env["META_APP_SECRET"]);
+    },
   } },
 });
