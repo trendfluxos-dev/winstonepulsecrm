@@ -242,7 +242,7 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
         .update({
           ...provider,
           stt_status: "failed",
-          sync_status: stt.status === "failed" ? "failed" : recording.sync_status,
+          // Transcription failure is not an audio upload failure.
         })
         .eq("id", recordingId);
       if (stt.status === "failed") throw new Error(stt.errorMessage ?? "Transcription failed");
@@ -283,7 +283,8 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
         ai_next_action: analysis.next_action,
         ai_temperature: analysis.suggested_temperature,
         ai_grade: analysis.suggested_grade,
-        sync_status: recording.is_two_sided ? "verified" : "uploaded",
+        // Analysis completion and a client two-sided flag do not verify stored audio.
+        sync_status: recording.sync_status,
       })
       .eq("id", recordingId);
     return "done";
