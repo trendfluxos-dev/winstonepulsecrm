@@ -43,6 +43,16 @@ function canTouch(
   return scope === "agent" && Boolean(profileId) && (!assignee || assignee === profileId);
 }
 
+/** Inbox listing: agents see only conversations assigned to them; leads/admins see all. */
+export function inboxVisible(
+  scope: "authority" | "coordinator" | "agent" | "none",
+  profileId: string | null,
+  assignee: string | null,
+) {
+  if (scope === "authority" || scope === "coordinator") return true;
+  return scope === "agent" && Boolean(profileId) && assignee === profileId;
+}
+
 async function requireCustomerAccess(
   db: typeof import("@/integrations/supabase/client.server").supabaseAdmin,
   me: Awaited<ReturnType<typeof caller>>,
@@ -94,9 +104,8 @@ export const listSupportInbox = createServerFn({ method: "POST" })
       : { data: [] };
     const customerById = new Map((customers ?? []).map((c) => [c.id, c]));
 
-    const visible = (rows ?? []).filter((row) =>
-      canTouch(me.scope, me.profile?.id ?? null, row.assignee_profile_id),
-    );
+    // Sales Agent inbox lists only conversations assigned to the signed-in agent.
+    const visible = (rows ?? []).filter((row) => inboxVisible(me.scope, me.profile?.id ?? null, row.assignee_profile_id));
 
     const { data: staff } = await supabaseAdmin
       .from("profiles")
