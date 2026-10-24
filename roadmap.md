@@ -1,9 +1,9 @@
 # Roadmap
 
 ## 2026-10-24 — Messenger tab inside /inbox
-- [ ] Keep Support Desk in its own tab and embed the existing scoped Messenger view in a separate tab; only mount the selected queue.
-- [ ] Show reviewed-lead entry as unavailable for demo/disconnected messages; no fake lead or production write. Real conversion awaits verified stored messages, ownership/dedupe and canonical intake integration.
-- [ ] Run relevant offline tests; no deployment, schema, settings or secret changes.
+- [x] `src/routes/inbox.tsx` now mounts Support Desk and shared Messenger in separate tabs, selected queue only; existing support query/actions unchanged. Updated route metadata. `src/components/crm/MessengerInbox.tsx` shows disabled reviewed-lead action and explains customer details/consent, confirmation and unassigned LeadHub destination; no new intake call or fake lead.
+- [x] `bunx vitest run tests/messenger-inbox.test.ts tests/support-inbox-agent-scope.test.ts tests/route-role-access.test.ts tests/integration-boundaries.test.ts` — 4 files / 40 tests passed, exit 0, 23:00:35 UTC, 801ms. Automatic harness build OK 23:00:30 UTC. No production data reads/writes, deployment, schema, settings or secret changes. Authenticated UI flow not exercised under current production-read boundary; not claimed live-verified.
+- [ ] Actual reviewed Messenger-to-lead conversion blocked by missing verified connection and durable real-message ownership/dedupe; implement canonical intake only after separately approved storage/setup. Samples cannot create leads and new messages are not claimed imported. Changed files: `src/routes/inbox.tsx`, `src/components/crm/MessengerInbox.tsx`, `AGENTS.md`, `roadmap.md`; preferences saved in project memory.
 
 ## 2026-10-24 — Live Messenger request / remove phone guidance
 - [x] Removed `PhoneSyncGuide` and Desk-phone link from `src/routes/messenger-setup.tsx` and updated its metadata, per owner clarification; Desk guide and Android call/report/recording sync unchanged. No provider/auth/data/secret/deployment change.
