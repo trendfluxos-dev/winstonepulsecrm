@@ -1,7 +1,10 @@
 # Roadmap
 
 ## 2026-10-24 — Inbox verification and Messenger lead provenance
-- [ ] Show unverified Meta App/Page approvals and webhook subscription status in `/inbox`; never infer approval from secrets or Meta Ads. Inspect saved lead provenance for safe display of source/arrival/verification; no fabricated Messenger leads or timestamps.
+- [x] Added public preparation summary to `/inbox`: Facebook disconnected, App/Page approvals and Messenger webhook subscription unverified, webhook disabled, progress link. No provider check claimed; Support Desk query/actions unchanged.
+- [x] Lead dossier now displays saved source; exact Messenger sources show original arrival evidence unavailable and verification unverified. Existing schema has source/created_at/is_verified but no signed Messenger arrival/connection evidence; neither CRM creation time nor lead quality flag substitutes for it. Pure classifier excludes Facebook Ads sources.
+- [x] `bunx vitest run tests/lead-provenance.test.ts tests/messenger-inbox.test.ts tests/messenger-readiness.test.ts tests/support-inbox-agent-scope.test.ts tests/route-role-access.test.ts tests/integration-boundaries.test.ts` — 6 files / 44 tests passed, exit 0, 23:13:25 UTC; harness build OK 23:13:20 UTC. Authenticated UI/real Messenger lead flow unverified under current production-read boundary. Changed: `src/lib/lead-provenance.ts`, `src/components/crm/LeadSourceDetails.tsx`, `src/components/crm/MessengerConnectionStatus.tsx`, `src/components/crm/LeadDossier.tsx`, `src/routes/inbox.tsx`, `tests/lead-provenance.test.ts`, `AGENTS.md`, `roadmap.md`.
+- [ ] Original arrival/verified connection display from real receipts blocked by missing reviewed durable Messenger storage and authorized App/Page/subscription evidence. No database/secret/provider/deployment changes or invented lead/timestamp.
 - [ ] Meta Ads secure connection card was cancelled before execution by a new message; connection not completed. Live verification still needs authorized Messenger-specific access/evidence, reviewed storage and separate activation safeguards.
 
 ## 2026-10-24 — Combined Messenger / Windsor progress
