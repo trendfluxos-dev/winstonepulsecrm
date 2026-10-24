@@ -37,8 +37,8 @@ export async function measureAgentDay(agentId: string, day: string): Promise<Acc
       .eq("agent_id", agentId)
       .eq("status", "submitted")
       .in("lead_id", ids)
-      .gte("created_at", start)
-      .lte("created_at", end);
+      .gte("submitted_at", start)
+      .lte("submitted_at", end);
     if (reportError) throw new Error("Accountability report evidence unavailable");
     for (const r of reps ?? []) if (r.lead_id) reported.add(r.lead_id);
   }
