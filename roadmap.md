@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-24 — Messenger progress + Facebook-independent phone sync
+- [ ] Add Messenger progress page with honest unverified App/Page states, webhook/storage blockers and errors; no false connected status.
+- [ ] Inspect existing phone sync and expose Facebook-independent setup guidance without changing SIM/auth/sync security.
+- [ ] Requested live Messenger activation remains pending verified App/Page permissions, app secret/verify token, reviewed storage and separately authorized deployment/migration; do not bypass missing prerequisites.
+
 ## 2026-10-24 — Encrypted Meta Page secret storage
 - [x] Owner saved `META_PAGE_ACCESS_TOKEN` and `META_PAGE_ID` through the secure form into Lovable Cloud's encrypted secret store; tool confirmed both set, no values exposed. No available workspace connection; uploaded credential material not reused and no Facebook password requested. Adapter/endpoint remain disconnected; no deployment/SQL/data/auth changes. Updated `docs/MESSENGER_SETUP.md` and `roadmap.md` only; no runtime code changed, no tests necessary for managed secret creation. Token validity/Page association/App approval remain unverified; no Graph call performed.
 
