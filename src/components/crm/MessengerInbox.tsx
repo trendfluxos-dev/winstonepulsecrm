@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, ArrowLeft, Clock, FlaskConical, Lock, MessageCircle, Search, Send } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Clock, FlaskConical, Lock, MessageCircle, Search, Send, UserPlus } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -133,6 +133,10 @@ function ThreadPane({ thread, canReply, canAssign, onBack }: { thread: DemoThrea
         ))}
       </ol>
       <footer className="border-t border-border p-3">
+        <div className="mb-3 space-y-2">
+          <Button variant="outline" size="sm" disabled><UserPlus className="size-4" />{t({ bn: "যাচাই করে লিড যোগ করুন", en: "Review and add lead" })}</Button>
+          <p className="text-xs text-muted-foreground">{t({ bn: "ডেমো থেকে লিড তৈরি হয় না। আসল সংযোগ চালু হলে নাম, ফোন ও গ্রাহকের সম্মতি যাচাই করে নিশ্চিত করতে হবে; নতুন লিড LeadHub-এর অনির্ধারিত তালিকায় যাবে।", en: "Demo messages cannot create leads. Once live integration is verified, review the name, phone and customer consent before confirming; new leads enter the unassigned LeadHub queue." })}</p>
+        </div>
         {canReply ? (
           <div className="flex gap-2">
             <input disabled aria-label={t({ bn: "উত্তর", en: "Reply" })} placeholder={t({ bn: "Facebook সংযুক্ত হলে উত্তর দেওয়া যাবে", en: "Replies open once Facebook is connected" })}

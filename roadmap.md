@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-24 — Messenger tab inside /inbox
+- [x] `src/routes/inbox.tsx` now mounts Support Desk and shared Messenger in separate tabs, selected queue only; existing support query/actions unchanged. Updated route metadata. `src/components/crm/MessengerInbox.tsx` shows disabled reviewed-lead action and explains customer details/consent, confirmation and unassigned LeadHub destination; no new intake call or fake lead.
+- [x] `bunx vitest run tests/messenger-inbox.test.ts tests/support-inbox-agent-scope.test.ts tests/route-role-access.test.ts tests/integration-boundaries.test.ts` — 4 files / 40 tests passed, exit 0, 23:00:35 UTC, 801ms. Automatic harness build OK 23:00:30 UTC. No production data reads/writes, deployment, schema, settings or secret changes. Authenticated UI flow not exercised under current production-read boundary; not claimed live-verified.
+- [ ] Actual reviewed Messenger-to-lead conversion blocked by missing verified connection and durable real-message ownership/dedupe; implement canonical intake only after separately approved storage/setup. Samples cannot create leads and new messages are not claimed imported. Changed files: `src/routes/inbox.tsx`, `src/components/crm/MessengerInbox.tsx`, `AGENTS.md`, `roadmap.md`; preferences saved in project memory.
+
 ## 2026-10-24 — Live Messenger request / remove phone guidance
 - [x] Removed `PhoneSyncGuide` and Desk-phone link from `src/routes/messenger-setup.tsx` and updated its metadata, per owner clarification; Desk guide and Android call/report/recording sync unchanged. No provider/auth/data/secret/deployment change.
 - [x] `bunx vitest run tests/messenger-readiness.test.ts tests/messenger-inbox.test.ts tests/messenger-protocol.test.ts tests/route-role-access.test.ts` — exit 0; 4 files / 50 tests passed, 22:46:12 UTC, 561ms. Automatic harness build OK 22:46:07 UTC. Source check confirms PhoneSyncGuide remains on Desk, absent from Messenger routes; no authenticated production flow attempted.
