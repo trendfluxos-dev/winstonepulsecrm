@@ -88,8 +88,11 @@ function ProjectsPage() {
             <h1 className="text-2xl font-bold">প্রজেক্ট ডিরেক্টরি</h1>
             <p className="text-sm text-muted-foreground">Winstone Properties — সংরক্ষিত কল রিপোর্ট থেকে বাস্তব চাহিদা</p>
           </div>
-          <a href={profilesPdf.url} download="Winstone-15-Project-Profiles.pdf" className="text-sm text-primary hover:underline">১৫ প্রজেক্ট প্রোফাইল (PDF) ডাউনলোড ↓</a>
-          <Link to="/inventory" className="text-sm text-primary hover:underline">প্রজেক্ট তালিকা পরিচালনা →</Link>
+          <div className="flex flex-col gap-1 sm:items-end">
+            <a href={profilesPdf.url} download="Winstone-15-Project-Profiles.pdf" className="text-sm text-primary hover:underline">১৫ প্রজেক্ট প্রোফাইল (PDF) ডাউনলোড ↓</a>
+            <BrochureZipPanel />
+            <Link to="/inventory" className="text-sm text-primary hover:underline">প্রজেক্ট তালিকা পরিচালনা →</Link>
+          </div>
         </header>
         <ProjectCatalogPanel />
         <HqImport />
