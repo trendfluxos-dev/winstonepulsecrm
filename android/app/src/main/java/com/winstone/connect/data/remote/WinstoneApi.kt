@@ -100,13 +100,7 @@ object WinstoneApi {
         callStartedAt: String? = null,
     ): JSONObject = withContext(Dispatchers.IO) {
         // Multipart: the audio streams straight up, no base64 bloat in memory.
-        val digest = java.security.MessageDigest.getInstance("SHA-256")
-        file.inputStream().use { input ->
-            val buffer = ByteArray(8192)
-            var count = input.read(buffer)
-            while (count > 0) { digest.update(buffer, 0, count); count = input.read(buffer) }
-        }
-        val checksum = digest.digest().joinToString("") { "%02x".format(it) }
+        val checksum = com.winstone.connect.data.sync.QueuedAudioIdentity.checksum(file)
         val ext = file.extension.ifBlank { "m4a" }
         val body = MultipartBody.Builder()
             .setType(MultipartBody.FORM)

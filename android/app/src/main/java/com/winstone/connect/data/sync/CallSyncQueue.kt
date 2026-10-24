@@ -38,7 +38,7 @@ object CallSyncQueue {
         callUid: String? = null,
         callStartedAt: String? = null,
     ) {
-        val uploadId = callUid?.let { "audio_$it" } ?: java.util.UUID.randomUUID().toString()
+        val uploadId = QueuedAudioIdentity.uploadId(callUid)
         // Cache storage can be evicted while offline. Keep queued originals in app files.
         val dir = File(context.filesDir, "pending_call_audio").apply { mkdirs() }
         val durable = File(dir, "$uploadId.${file.extension.ifBlank { "m4a" }}")
