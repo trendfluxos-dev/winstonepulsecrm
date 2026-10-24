@@ -1,5 +1,8 @@
 # Roadmap
 
+## 2026-10-24 — Combined Messenger / Windsor progress
+- [ ] Restore the requested progress page with both disconnected statuses and an explicit notice when neither connection is active; no provider activation, secrets or data changes. Messenger approval evidence remains unverified; live activation still blocked.
+
 ## 2026-10-24 — Close progress page / requested real Messenger sync
 - [x] Closed `/messenger-setup` with a redirect to `/messenger`, removed its entry link, and redirected human webhook navigation to the inbox. Support Desk, disconnected notice, Android sync, roles and data unchanged.
 - [ ] Real-message sync blocked: handler is still a 503 placeholder, offline signature helpers are not wired, stored-message ownership/receipts are absent, App/Page approval and webhook configuration remain unverified. Existing no-production/schema/secrets/deployment safeguards remain; no live Meta call, callbacks accepted or messages imported.
