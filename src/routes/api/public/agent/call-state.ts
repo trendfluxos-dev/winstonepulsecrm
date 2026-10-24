@@ -1,3 +1,4 @@
+import { reconcileLifecycle, recordingAvailability } from "@/lib/call-reconciliation";
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
@@ -87,7 +88,7 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
 
         const { data: existing } = await supabaseAdmin
           .from("call_recordings")
-          .select("id, call_status, agent_id, lead_id")
+          .select("id, call_status, agent_id, lead_id, storage_path, audio_url, upload_status, recording_status")
           .eq("external_call_id", body.call_uid)
           .maybeSingle();
         // A call record may only be updated by the agent who owns it, for the same lead.
@@ -95,6 +96,7 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
           return json({ error: "This call record belongs to another agent or lead" }, 403);
         }
 
+        if (existing) Object.assign(patch, reconcileLifecycle(existing, patch));
         let recordingId = existing?.id ?? null;
 
         if (existing) {
@@ -123,10 +125,11 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
           if (error) {
             const { data: raced } = await supabaseAdmin
               .from("call_recordings")
-              .select("id")
+              .select("id, agent_id, lead_id")
               .eq("external_call_id", body.call_uid)
               .maybeSingle();
-            if (!raced) return json({ error: error.message }, 500);
+            if (!raced) return json({ error: "Call reconciliation failed" }, 500);
+            if (raced.agent_id !== caller.profile.id || raced.lead_id !== body.lead_id) return json({ error: "Call identity conflict" }, 409);
             recordingId = raced.id;
           } else {
             recordingId = inserted?.id ?? null;
@@ -183,7 +186,7 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
           recording_id: recordingId,
           report_id: reportId,
           call_status: body.state,
-          recording_status: recordingStatus,
+          recording_status: existing ? recordingAvailability({ ...existing, ...patch }) : recordingStatus,
         });
       },
     },

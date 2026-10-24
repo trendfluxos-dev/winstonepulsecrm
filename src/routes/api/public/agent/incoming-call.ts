@@ -1,3 +1,4 @@
+import { reconcileLifecycle, recordingAvailability } from "@/lib/call-reconciliation";
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
@@ -174,16 +175,17 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
 
         const { data: existing } = await supabaseAdmin
           .from("call_recordings")
-          .select("id, agent_id")
+          .select("id, agent_id, lead_id, call_status, storage_path, audio_url, upload_status, recording_status")
           .eq("external_call_id", body.call_uid)
           .maybeSingle();
 
         // A call id belongs to the phone that first reported it; another
         // agent's device can never update that row.
-        if (existing && existing.agent_id !== caller.profile.id) {
+        if (existing && (existing.agent_id !== caller.profile.id || existing.lead_id !== leadId)) {
           return json({ error: "call_uid belongs to another agent", code: "call_uid_conflict" }, 409);
         }
 
+        if (existing) Object.assign(patch, reconcileLifecycle(existing, patch));
         let recordingId = existing?.id ?? null;
 
         if (existing) {
@@ -216,10 +218,11 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
           if (error) {
             const { data: raced } = await supabaseAdmin
               .from("call_recordings")
-              .select("id, agent_id")
+              .select("id, agent_id, lead_id, call_status, storage_path, audio_url, upload_status, recording_status")
               .eq("external_call_id", body.call_uid)
               .maybeSingle();
-            if (!raced) return json({ error: error.message }, 500);
+            if (!raced) return json({ error: "Call reconciliation failed" }, 500);
+            if (raced.agent_id !== caller.profile.id || raced.lead_id !== leadId) return json({ error: "Call identity conflict" }, 409);
             if (raced.agent_id !== caller.profile.id) {
               return json({ error: "call_uid belongs to another agent", code: "call_uid_conflict" }, 409);
             }
@@ -297,7 +300,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
           recording_id: recordingId,
           report_id: reportId,
           call_status: body.state,
-          recording_status: recordingStatus,
+          recording_status: existing ? recordingAvailability({ ...existing, ...patch }) : recordingStatus,
         });
       },
     },

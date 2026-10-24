@@ -230,10 +230,17 @@ export async function openCallReport(input: {
 }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+  // Stable recording row links delayed audio to even an already submitted report.
+  if (input.recordingId) {
+    const linked = await supabaseAdmin.from("call_reports").select("id, status")
+      .eq("agent_id", input.agentId).eq("lead_id", input.leadId).eq("recording_id", input.recordingId).maybeSingle();
+    if (linked.error) throw new Error(linked.error.message);
+    if (linked.data) return { id: linked.data.id, reused: true as const, queued: linked.data.status === "queued" };
+  }
   const open = await pendingReportFor(input.agentId);
   if (open) {
     // Same call / same lead: idempotent reuse (WorkManager retry, app restart).
-    if (open.lead_id === input.leadId) {
+    if (open.lead_id === input.leadId && (!input.recordingId || !open.recording_id || open.recording_id === input.recordingId)) {
       if (input.recordingId && !open.recording_id) {
         await supabaseAdmin
           .from("call_reports")
@@ -252,6 +259,7 @@ export async function openCallReport(input: {
       .eq("agent_id", input.agentId)
       .eq("status", "queued")
       .eq("lead_id", input.leadId)
+      .eq("recording_id", input.recordingId ?? "")
       .maybeSingle();
     if (existingQueued.data) {
       if (input.recordingId && !existingQueued.data.recording_id) {
@@ -316,7 +324,7 @@ export async function openCallReport(input: {
     const code = (error as { code?: string } | null)?.code;
     if (code === "23505") {
       const raced = await pendingReportFor(input.agentId);
-      if (raced) return { id: raced.id, reused: true as const };
+      if (raced && raced.lead_id === input.leadId && (!input.recordingId || raced.recording_id === input.recordingId)) return { id: raced.id, reused: true as const };
     }
     throw new Error(error?.message ?? "Could not open post-call report");
   }

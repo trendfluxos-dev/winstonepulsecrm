@@ -22,6 +22,8 @@ const Payload = z.object({
   /** The SIM the call was actually made from. */
   sim_number: z.string().trim().max(25).nullable().optional(),
   lead_name: z.string().trim().min(1).max(120).nullable().optional(),
+  call_uid: z.string().trim().min(6).max(120).nullable().optional(),
+  checksum: z.string().regex(/^[a-f0-9]{64}$/).nullable().optional(),
   client_upload_id: z.string().trim().min(6).max(120).nullable().optional(),
   /** phone_recorder = file saved by the phone's own call recorder, picked up after the call. */
   recorder_source: z.enum(["voice_call", "mic", "phone_recorder", "unknown"]).default("unknown"),
@@ -70,7 +72,7 @@ async function readPayload(request: Request) {
     return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
   };
   const nameParts = (file.name || "recording.m4a").split(".");
-  const ext = text("file_extension") ?? (nameParts.length > 1 ? nameParts.pop()! : "m4a");
+  const ext = text("file_extension") ?? (nameParts.length > 1 ? (nameParts.pop() ?? "m4a") : "m4a");
 
   return Payload.safeParse({
     lead_id: text("lead_id"),
@@ -79,6 +81,8 @@ async function readPayload(request: Request) {
     employee_id: text("employee_id"),
     sim_number: text("sim_number"),
     lead_name: text("lead_name"),
+    call_uid: text("call_uid"),
+    checksum: text("checksum"),
     client_upload_id: text("client_upload_id"),
     recorder_source: text("recorder_source") ?? "unknown",
     audio_base64: toBase64(bytes),
@@ -106,21 +110,6 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
         const body = parsed.data;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-        // Replay protection: same upload id -> same recording row.
-        if (body.client_upload_id) {
-          const { data: existing } = await supabaseAdmin
-            .from("call_recordings")
-            .select("id, analysis_status")
-            .eq("client_upload_id", body.client_upload_id)
-            .maybeSingle();
-          if (existing) {
-            return json(
-              { recording_id: existing.id, duplicate: true, analysis: existing.analysis_status },
-              200,
-            );
-          }
-        }
 
         const { ingestRecording } = await import("@/lib/call-intel.server");
         const { resolveAgent, resolveLeadId } = await import("@/lib/ingest-resolve.server");
@@ -178,12 +167,7 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
               409,
             );
           }
-          if (!ownerId) {
-            await supabaseAdmin
-              .from("leads")
-              .update({ assigned_to: agent.id, assigned_agent_id: agent.id })
-              .eq("id", leadId);
-          }
+          if (!ownerId) return json({ error: "LeadHub assignment required", code: "unassigned_lead" }, 409);
         }
 
         const { logLeadEvent } = await import("@/lib/lead-events.server");
@@ -198,6 +182,9 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             direction: body.call_direction,
             isTwoSided: body.is_two_sided,
             clientUploadId: body.client_upload_id ?? null,
+            callUid: body.call_uid ?? null,
+            expectedChecksum: body.checksum ?? null,
+            callStartedAt: body.call_started_at ?? null,
             recorderSource: body.recorder_source,
             deviceId: caller.kind === "device" ? caller.device.id : null,
           });
@@ -262,10 +249,13 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             }
           })();
 
-          return json({ recording_id: recordingId, analysis: "pending" }, 202);
+          const saved = await supabaseAdmin.from("call_recordings").select("checksum, upload_status, analysis_status").eq("id", recordingId).single();
+          if (saved.error || !saved.data) throw new Error("Stored audio confirmation unavailable");
+          return json({ recording_id: recordingId, upload_status: saved.data.upload_status, checksum: saved.data.checksum, analysis: saved.data.analysis_status }, 202);
         } catch (error) {
           console.error("[ingest] recording failed", error);
-          return json({ error: "Recording could not be stored" }, 500);
+          const conflict = error instanceof Error && ["CALL_IDENTITY_CONFLICT", "AUDIO_CHECKSUM_CONFLICT"].includes(error.message);
+          return json({ error: conflict ? "Call identity or audio checksum does not match; original audio retained" : "Recording could not be stored", code: conflict ? "audio_identity_conflict" : "audio_store_failed" }, conflict ? 409 : 500);
         }
       },
     },
