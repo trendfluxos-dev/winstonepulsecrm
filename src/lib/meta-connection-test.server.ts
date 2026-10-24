@@ -6,7 +6,7 @@ const appSubscriptions = z.object({ data: z.array(z.object({ object: z.string(),
 export type MetaCheck = { checkedAt: string; connected: false; app: string; page: string; webhook: string; permissions: "unverified"; reason: string };
 
 /** Bounded manual GETs only. Never include credentials or provider bodies in output/logs. */
-export async function testMetaConnection(config: { appId?: string; pageId?: string; pageToken?: string; appSecret?: string }, transport: typeof fetch = fetch): Promise<MetaCheck> {
+export async function testMetaConnection(config: { appId?: string | undefined; pageId?: string | undefined; pageToken?: string | undefined; appSecret?: string | undefined }, transport: typeof fetch = fetch): Promise<MetaCheck> {
   const result: MetaCheck = { checkedAt: new Date().toISOString(), connected: false, app: "unverified", page: "unverified", webhook: "unverified", permissions: "unverified", reason: "CONFIGURATION_REQUIRED" };
   const { appId, pageId, pageToken, appSecret } = config;
   if (!appId || !pageId || !pageToken || !appSecret || !/^\d+$/.test(appId) || !/^\d+$/.test(pageId)) return result;

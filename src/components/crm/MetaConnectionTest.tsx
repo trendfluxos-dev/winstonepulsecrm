@@ -25,6 +25,7 @@ export function MetaConnectionTest() {
   const [result, setResult] = useState<MetaCheck | null>(null);
   const [pending, setPending] = useState(false);
   const [denied, setDenied] = useState(false);
+  const reason = result ? reasons[result.reason] : undefined;
   async function check() {
     setPending(true); setDenied(false); setResult(null);
     try { setResult(await inspect({ data: { adminToken } })); }
@@ -34,6 +35,6 @@ export function MetaConnectionTest() {
   return <div className="space-y-2">
     <Button variant="outline" size="sm" disabled={pending} onClick={check}><ShieldCheck className="size-4" />{t(pending ? { bn: "পরীক্ষা চলছে…", en: "Checking…" } : { bn: "নিরাপদ Meta সংযোগ পরীক্ষা", en: "Safe Meta connection test" })}</Button>
     {denied && <p role="alert" className="text-xs text-destructive">{t({ bn: "পরীক্ষা হয়নি; পূর্ণ IT PIN দিয়ে IT Console খুলতে হবে।", en: "Not checked; unlock IT Console with the full IT PIN first." })}</p>}
-    {result && <div role="status" className="space-y-1 text-xs text-muted-foreground"><p>{t({ bn: "সর্বশেষ পরীক্ষা (ঢাকা): ", en: "Last check (Dhaka): " })}{new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "medium" }).format(new Date(result.checkedAt))}</p><p>{t({ bn: "Page পরিচয়: ", en: "Page identity: " })}{t(result.page === "identity_verified" ? { bn: "মিলেছে", en: "Matched" } : { bn: "যাচাই বাকি", en: "Unverified" })}</p><p>{t({ bn: "App/Page subscription: ", en: "App/Page subscription: " })}{t(result.webhook === "subscriptions_verified" ? { bn: "মিলেছে", en: "Matched" } : { bn: "যাচাই বাকি", en: "Unverified" })}</p><p>{t(reasons[result.reason] ?? reasons.META_CHECK_FAILED)}</p></div>}
+    {result && <div role="status" className="space-y-1 text-xs text-muted-foreground"><p>{t({ bn: "সর্বশেষ পরীক্ষা (ঢাকা): ", en: "Last check (Dhaka): " })}{new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "medium" }).format(new Date(result.checkedAt))}</p><p>{t({ bn: "Page পরিচয়: ", en: "Page identity: " })}{t(result.page === "identity_verified" ? { bn: "মিলেছে", en: "Matched" } : { bn: "যাচাই বাকি", en: "Unverified" })}</p><p>{t({ bn: "App/Page subscription: ", en: "App/Page subscription: " })}{t(result.webhook === "subscriptions_verified" ? { bn: "মিলেছে", en: "Matched" } : { bn: "যাচাই বাকি", en: "Unverified" })}</p><p>{t(reason ?? { bn: "Meta পরীক্ষা সম্পন্ন হয়নি।", en: "Meta check did not complete." })}</p></div>}
   </div>;
 }
