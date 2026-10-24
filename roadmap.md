@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-24 — Close progress page / requested real Messenger sync
+- [x] Closed `/messenger-setup` with a redirect to `/messenger`, removed its entry link, and redirected human webhook navigation to the inbox. Support Desk, disconnected notice, Android sync, roles and data unchanged.
+- [ ] Real-message sync blocked: handler is still a 503 placeholder, offline signature helpers are not wired, stored-message ownership/receipts are absent, App/Page approval and webhook configuration remain unverified. Existing no-production/schema/secrets/deployment safeguards remain; no live Meta call, callbacks accepted or messages imported.
+- Verification results pending below; changed files: `src/routes/messenger-setup.tsx`, `src/routes/messenger.tsx`, `src/routes/api/public/meta/messenger.ts`, `tests/messenger-inbox.test.ts`, `docs/MESSENGER_SETUP.md`, `AGENTS.md`, `roadmap.md`.
+
 ## 2026-10-24 — Messenger tab inside /inbox
 - [x] `src/routes/inbox.tsx` now mounts Support Desk and shared Messenger in separate tabs, selected queue only; existing support query/actions unchanged. Updated route metadata. `src/components/crm/MessengerInbox.tsx` shows disabled reviewed-lead action and explains customer details/consent, confirmation and unassigned LeadHub destination; no new intake call or fake lead.
 - [x] `bunx vitest run tests/messenger-inbox.test.ts tests/support-inbox-agent-scope.test.ts tests/route-role-access.test.ts tests/integration-boundaries.test.ts` — 4 files / 40 tests passed, exit 0, 23:00:35 UTC, 801ms. Automatic harness build OK 23:00:30 UTC. No production data reads/writes, deployment, schema, settings or secret changes. Authenticated UI flow not exercised under current production-read boundary; not claimed live-verified.
