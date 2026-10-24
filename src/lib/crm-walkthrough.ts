@@ -78,3 +78,10 @@ export function advanceTour(progress: TourProgress): TourProgress {
   const next = CRM_TOURS[index + 1];
   return next ? { workspace: next.id, step: 0, completed } : { ...safe, completed };
 }
+
+export function previousTour(progress: TourProgress): TourProgress {
+  const safe = restoreTourProgress(progress);
+  if (safe.step > 0) return { ...safe, step: safe.step - 1 };
+  const previous = CRM_TOURS[CRM_TOURS.findIndex(t => t.id === safe.workspace) - 1];
+  return previous ? { ...safe, workspace: previous.id, step: previous.steps.length - 1 } : safe;
+}

@@ -4,6 +4,8 @@ import { BookOpen, LifeBuoy, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 import { listPublishedArticles } from "@/lib/support.functions";
 
 export const Route = createFileRoute("/help")({
@@ -32,6 +34,7 @@ export const Route = createFileRoute("/help")({
 });
 
 function HelpCentre() {
+  const t = useT();
   const [query, setQuery] = useState("");
   const kb = useQuery({ queryKey: ["support", "kb", "public"], queryFn: () => listPublishedArticles() });
 
@@ -57,6 +60,7 @@ function HelpCentre() {
             <LifeBuoy className="size-5 text-primary" />
           </span>
           <h1 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">Help centre</h1>
+          <Button asChild variant="outline" className="mt-4"><Link to="/walkthrough"><BookOpen />{t({ bn: "CRM walkthrough খুলুন", en: "Open CRM walkthrough" })}</Link></Button>
           <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
             Search our guides, or{" "}
             <Link to="/support" className="text-primary underline-offset-2 hover:underline">
