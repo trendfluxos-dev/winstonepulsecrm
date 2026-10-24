@@ -64,6 +64,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TicketsRouteImport } from './routes/tickets'
 import { Route as UnitBoardRouteImport } from './routes/unit-board'
 import { Route as VoiceTranscriptionRouteImport } from './routes/voice-transcription'
+import { Route as WalkthroughRouteImport } from './routes/walkthrough'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as DocsSlugRouteImport } from './routes/docs_.$slug'
 import { Route as HelpSlugRouteImport } from './routes/help_.$slug'
@@ -395,6 +396,11 @@ const UnitBoardRoute = UnitBoardRouteImport.update({
 const VoiceTranscriptionRoute = VoiceTranscriptionRouteImport.update({
   id: '/voice-transcription',
   path: '/voice-transcription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WalkthroughRoute = WalkthroughRouteImport.update({
+  id: '/walkthrough',
+  path: '/walkthrough',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
@@ -761,6 +767,7 @@ export interface FileRoutesByFullPath {
   '/tickets': typeof TicketsRoute
   '/unit-board': typeof UnitBoardRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
+  '/walkthrough': typeof WalkthroughRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/help/$slug': typeof HelpSlugRoute
@@ -875,6 +882,7 @@ export interface FileRoutesByTo {
   '/tickets': typeof TicketsRoute
   '/unit-board': typeof UnitBoardRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
+  '/walkthrough': typeof WalkthroughRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/help/$slug': typeof HelpSlugRoute
@@ -990,6 +998,7 @@ export interface FileRoutesById {
   '/tickets': typeof TicketsRoute
   '/unit-board': typeof UnitBoardRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
+  '/walkthrough': typeof WalkthroughRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs_/$slug': typeof DocsSlugRoute
   '/help_/$slug': typeof HelpSlugRoute
@@ -1106,6 +1115,7 @@ export interface FileRouteTypes {
     | '/tickets'
     | '/unit-board'
     | '/voice-transcription'
+    | '/walkthrough'
     | '/.well-known/oauth-protected-resource'
     | '/docs/$slug'
     | '/help/$slug'
@@ -1220,6 +1230,7 @@ export interface FileRouteTypes {
     | '/tickets'
     | '/unit-board'
     | '/voice-transcription'
+    | '/walkthrough'
     | '/.well-known/oauth-protected-resource'
     | '/docs/$slug'
     | '/help/$slug'
@@ -1334,6 +1345,7 @@ export interface FileRouteTypes {
     | '/tickets'
     | '/unit-board'
     | '/voice-transcription'
+    | '/walkthrough'
     | '/.well-known/oauth-protected-resource'
     | '/docs_/$slug'
     | '/help_/$slug'
@@ -1449,6 +1461,7 @@ export interface RootRouteChildren {
   TicketsRoute: typeof TicketsRoute
   UnitBoardRoute: typeof UnitBoardRoute
   VoiceTranscriptionRoute: typeof VoiceTranscriptionRoute
+  WalkthroughRoute: typeof WalkthroughRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DocsSlugRoute: typeof DocsSlugRoute
   HelpSlugRoute: typeof HelpSlugRoute
@@ -1893,6 +1906,13 @@ declare module '@tanstack/react-router' {
       path: '/voice-transcription'
       fullPath: '/voice-transcription'
       preLoaderRoute: typeof VoiceTranscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/walkthrough': {
+      id: '/walkthrough'
+      path: '/walkthrough'
+      fullPath: '/walkthrough'
+      preLoaderRoute: typeof WalkthroughRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.well-known/oauth-protected-resource': {
@@ -2353,6 +2373,7 @@ const rootRouteChildren: RootRouteChildren = {
   TicketsRoute: TicketsRoute,
   UnitBoardRoute: UnitBoardRoute,
   VoiceTranscriptionRoute: VoiceTranscriptionRoute,
+  WalkthroughRoute: WalkthroughRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DocsSlugRoute: DocsSlugRoute,
