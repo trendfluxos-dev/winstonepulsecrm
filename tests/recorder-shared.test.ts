@@ -17,3 +17,12 @@ describe("Recorder audio type mapping", () => {
   it("iPhone mp4 audio is saved as m4a", () => expect(extensionForMime("audio/mp4")).toBe("m4a"));
   it("Android Chrome webm stays webm", () => expect(extensionForMime("audio/webm;codecs=opus")).toBe("webm"));
 });
+
+import { voiceNoteStage } from "@/lib/recorder-shared";
+describe("Voice note stage", () => {
+  it("ready notes are ready", () => expect(voiceNoteStage({ status: "ready", transcript: "x" })).toBe("ready"));
+  it("failed with no transcript means transcription failed", () =>
+    expect(voiceNoteStage({ status: "failed", transcript: null })).toBe("transcript_failed"));
+  it("failed with a transcript means only the summary failed", () =>
+    expect(voiceNoteStage({ status: "failed", transcript: "hello" })).toBe("summary_failed"));
+});

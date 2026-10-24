@@ -44,3 +44,11 @@ export function extensionForMime(mime: string): "webm" | "m4a" | "ogg" | "wav" |
 export function contentTypeFor(ext: string): string {
   return ext === "webm" ? "audio/webm" : ext === "m4a" ? "audio/mp4" : ext === "ogg" ? "audio/ogg" : ext === "wav" ? "audio/wav" : "audio/mpeg";
 }
+
+/** Where a saved voice note is in its pipeline: audio is saved, then transcript, then AI summary. */
+export type VoiceNoteStage = "ready" | "transcript_failed" | "summary_failed";
+
+export function voiceNoteStage(row: { status?: string | null; transcript?: string | null }): VoiceNoteStage {
+  if (row.status === "ready") return "ready";
+  return row.transcript && row.transcript.trim() ? "summary_failed" : "transcript_failed";
+}
