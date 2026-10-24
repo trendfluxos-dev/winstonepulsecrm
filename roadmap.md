@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-24 — App verification / Messenger + Lead Ads preparation
+- [ ] Inspect recent foundation; extend existing setup guide with App verification and credential/permission matrix for Messenger, Webhooks and Lead Ads. Preserve UI and fail-closed adapter; add missing offline edge-case tests only.
+- [ ] Record exact checks and remaining owner actions. No secret request/change, provider connection, SQL/migration, production data/settings/auth/role/policy change or deployment. Prior secure-form attempt was unavailable and did not run; no credentials saved.
+
 ## 2026-10-24 — Continue disabled Meta/Messenger integration
 - [x] Safe code-only: fixed mobile list/back selection logic, added role-scoped demo search/status filters and accessible design-system controls. Added offline webhook HMAC/challenge and reply-policy preflight helpers; all provider operations remain disabled and helpers are not wired to webhook/send.
 - [x] Current evidence and precise owner setup checklist recorded in docs/MESSENGER_SETUP.md. Meta App/permissions/Page consent are unverified, not assumed missing or connected. No credentials inspected, Graph calls, SQL, database writes, secret/settings changes or deployment.

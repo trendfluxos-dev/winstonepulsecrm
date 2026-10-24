@@ -14,6 +14,43 @@
 
 Persistent threads/messages/unread state; ownership rechecks against stored threads; LeadHub-PIN assignment/unassignment; active-roster checks; canonical lead linking/phone dedupe; durable receipt/outbox idempotency; audit/append-only enforcement; rate limiting/retries; token encryption/expiry/revocation; real delivery/read receipts; privacy/deletion workflow. Search and filtering are demo-only. Offline preflight is not a replacement for server authorization.
 
+## App verification checklist — owner checks, not inferred status
+
+Every item below is **unverified** until the owner checks it in Meta; an uploaded credential document, saved secret or demo screen is not proof.
+
+1. Open Meta for Developers → My Apps under the authorized owner account. Check for the intended existing app before creating anything. If none is found, stop and agree the App creation step separately; this project does not create one.
+2. In the selected app, confirm its identity, owning Business portfolio, administrator access and intended Facebook Page; check available Messenger and Webhooks use cases/products. Do not paste credentials in chat or send screenshots showing secret values.
+3. Review App mode, app-role/test access, permission access levels, review decisions and any required business verification. Development/test access does not prove availability to all CRM agents or real customers.
+4. Confirm the owner controls the intended Page and has permission to authorize it. For Lead Ads, separately confirm lead-access rights in the Business portfolio/Leads Access Manager for the people or integration involved; Page control alone does not establish lead access.
+5. Review privacy policy, data deletion instructions/callback design, retention and consent. Do not register a placeholder privacy URL as a completed policy.
+6. Check the app's Webhooks Page subscriptions and the Page's app subscription separately. An app subscription is not proof that the Page is subscribed, and a subscribed field is not proof the CRM receives or stores it.
+7. Record only non-sensitive verification outcomes with the owner. This repository intentionally has no readiness flag capable of switching on Meta calls. Configuration presence, if added later, must be server-only, authorized, boolean-only and distinct from verified permissions/connection/delivery.
+
+## Credential and permission matrix (not a request for values)
+
+| Capability | Configuration / credential | Permission or owner gate | Status / restriction |
+|---|---|---|---|
+| Identify app | `META_APP_ID` | Owner confirms existing app and administrator access | Unverified; not an access token and not evidence of approval |
+| Verify signed webhook body | `META_APP_SECRET` | App owner obtains it from App settings; server-only | Offline HMAC tested; handler remains disabled |
+| Webhook verification handshake | `META_WEBHOOK_VERIFY_TOKEN` | Shared value owner enters in Meta and authorized project secrets UI | Not requested here; only configure after authorized endpoint is ready; current endpoint returns 503 |
+| Page selection / metadata | `META_PAGE_ID`, appropriately scoped Page token | `pages_show_list` for login Page selection; `pages_read_engagement` only for required reads | Page/app association unverified; no Page lookup performed |
+| Messenger reads/replies | Server-only `META_PAGE_ACCESS_TOKEN` | `pages_messaging`, Page authorization, applicable Advanced Access/App Review; standard 24-hour policy | No outbound messaging or real inbox storage wired |
+| Page webhook subscription | Page token plus app credentials for signature validation | `pages_manage_metadata`; app Webhooks **Page** object and Page app subscription | Fields as needed: `messages`, `messaging_postbacks`, `message_deliveries`, `message_reads`; no subscriptions made |
+| Lead Ads notification | Reviewed Page authorization/token strategy | `pages_manage_metadata` for Page subscription; Page Webhooks `leadgen` field | No Lead Ads endpoint/subscription/import implemented; notification alone is not lead details |
+| Retrieve Lead Ads form responses | Reviewed scoped Page/user/system-user token appropriate to approved flow | `leads_retrieval`, authorized Page/form and Business lead access; additional `pages_read_engagement`, `pages_show_list` or `ads_management` only when the chosen flow/endpoints require them | Owner verifies current Meta requirements and review/access; no live fetch or lead import |
+| Business asset discovery | Approved token appropriate to selected flow | `business_management` only when necessary; do not request broad access by default | Not required merely to show disconnected demo |
+| Encrypted durable token storage | App-owned token-encryption key and reviewed storage | Separate architecture, migration and owner authorization | No key generated, no token copied, no storage/schema change |
+
+Permission names are preparation targets, not a claim that Meta has granted them. Messenger, Webhooks and Lead Ads are separate gates; Meta Ads account connection does not automatically authorize any of them. Verify the current required permissions for the exact app use case and token flow in Meta's dashboard/documentation before requesting access. Never submit a Facebook password to project secrets. Unknown token-like material in uploads remains sensitive and is not copied or reused.
+
+### Lead Ads acceptance gates before any later import
+
+Verify app/Page/form permission and lead access in isolated testing; validate raw signed `leadgen` events and bounded payloads; store replay-safe receipts atomically; retrieve only authorized form data; require documented consent and field mapping; normalize/dedupe phone through canonical intake; never invent missing contact fields or entities. New leads must land unassigned through `intakeLead` and use the existing LeadHub assignment/audit/quota rules. No import, persistence or outbound call is added in this pass.
+
+### Readiness reporting decision
+
+The existing guide is the readiness surface for this pass; the Messenger UI and its “Facebook not connected yet” notice are preserved. No new public diagnostic endpoint or runtime secret reader is introduced: boolean presence cannot establish app existence, token validity, Page consent or permission approval, and a safe owner-only diagnostics surface would require separate review. Owner saves credentials only in authorized Project Settings → Secrets after setup verification, never chat. The attempted secure form in the preceding task was unavailable and did not run; no credential was saved by that attempt. No secret request or settings read/write is performed in this pass.
+
 ## Owner / Page administrator steps (do not perform during this pass)
 
 1. Confirm whether a Meta Developer App already exists. If not, create an app using Meta's current Business/Messenger use case, associate the appropriate Business portfolio and add/configure Messenger for the intended Facebook Page. Complete business verification where Meta requires it; do not assume every permission has identical requirements.
