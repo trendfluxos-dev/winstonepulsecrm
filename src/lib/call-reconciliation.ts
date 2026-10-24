@@ -45,8 +45,8 @@ export function reconcileLifecycle(row: AudioEvidence, incoming: { call_status: 
 }
 
 export function uploadConfirmed(value: { recording_id?: unknown; upload_status?: unknown; checksum?: unknown }, expectedChecksum: string) {
-  return typeof value.recording_id === "string" && value.recording_id.length > 0 &&
-    value.upload_status === "uploaded" && value.checksum === expectedChecksum;
+  return typeof value.recording_id === "string" && value.recording_id.trim().length > 0 &&
+    expectedChecksum.trim().length > 0 && value.upload_status === "uploaded" && value.checksum === expectedChecksum;
 }
 /** Remove stale observation fields as well as preserving statuses on offline replay. */
 export function lifecyclePatch(row: AudioEvidence, patch: { call_status: string; recording_status: string; agent_phone?: string | null; started_at?: string; answered_at?: string; finished_at?: string; duration_seconds?: number }) {

@@ -6,6 +6,11 @@ import java.util.UUID
 
 /** Identity is generated once at enqueue and persisted; filenames never identify a call. */
 object QueuedAudioIdentity {
+    /** Only a matching server acknowledgement permits removing the durable original. */
+    fun uploadConfirmed(recordingId: String?, uploadStatus: String?, returnedChecksum: String?, expectedChecksum: String): Boolean =
+        !recordingId.isNullOrBlank() && uploadStatus == "uploaded" &&
+            expectedChecksum.isNotBlank() && returnedChecksum == expectedChecksum
+
     fun uploadId(callUid: String?, fallbackId: String = UUID.randomUUID().toString()): String =
         callUid?.takeIf { it.isNotBlank() }?.let { "audio_$it" } ?: fallbackId
 

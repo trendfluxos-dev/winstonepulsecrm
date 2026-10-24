@@ -6,6 +6,15 @@ import org.junit.Test
 import java.io.File
 
 class QueuedAudioIdentityTest {
+    @Test fun onlyMatchingServerConfirmationReleasesOriginal() {
+        assertTrue(QueuedAudioIdentity.uploadConfirmed("r", "uploaded", "hash", "hash"))
+        assertFalse(QueuedAudioIdentity.uploadConfirmed(null, "uploaded", "hash", "hash"))
+        assertFalse(QueuedAudioIdentity.uploadConfirmed(" ", "uploaded", "hash", "hash"))
+        assertFalse(QueuedAudioIdentity.uploadConfirmed("r", "pending", "hash", "hash"))
+        assertFalse(QueuedAudioIdentity.uploadConfirmed("r", "verified", "hash", "hash"))
+        assertFalse(QueuedAudioIdentity.uploadConfirmed("r", "uploaded", "other", "hash"))
+        assertFalse(QueuedAudioIdentity.uploadConfirmed("r", "uploaded", "", ""))
+    }
     @Test fun sameCallReusesIdentityAcrossRetries() {
         assertEquals("audio_call-1", QueuedAudioIdentity.uploadId("call-1", "ignored"))
         assertEquals(QueuedAudioIdentity.uploadId("call-1"), QueuedAudioIdentity.uploadId("call-1"))

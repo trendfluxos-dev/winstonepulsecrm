@@ -1,5 +1,9 @@
 # Roadmap
 
+## Follow-up — resume code-only remediation
+- [ ] Extract Android server-confirmation predicate into testable queue logic; add regression coverage for missing/mismatched acknowledgements retaining audio. No deployment or database writes.
+- Commit creation is managed by Lovable; this agent does not run git commit/push. Source and tests from the previous pass are present.
+
 ## 2026-10-25 — Production-safe audit remediation (code only)
 - [x] A. Code-only pass: physical call UID propagated through Android lifecycle/audio/report; existing owned recording reused with checksum comparison, cross-call content rejected, stored/available normalized, lifecycle replay cannot erase terminal evidence, durable file queue retains audio until matching server acknowledgement. Audio upload no longer counts as a dial/connected outcome; STT/AI cannot mark upload verified. Real recovery/handset testing remains blocked below.
 - [x] B. Code-only pass: inactive/pending/rejected account and SIM-invalid/conflict responses distinct; legitimate IT recovery surfaced in Android and web. Existing briefing, maintenance, HQ/IT/PIN gates unchanged; recovery hints never authorize access. Four isolated phone-login refusal tests pass.
