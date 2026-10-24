@@ -47,6 +47,8 @@ data class VoiceNote(
     val takeaways: List<String>,
     val actionItems: List<String>,
     val error: String?,
+    /** ready | transcript_failed | summary_failed — decided by the CRM. */
+    val stage: String,
 )
 
 private object RecorderApi {
@@ -80,6 +82,7 @@ private object RecorderApi {
                 takeaways = strs("takeaways"),
                 actionItems = strs("action_items"),
                 error = o.optString("error_message").takeIf { it.isNotBlank() && it != "null" },
+                stage = o.optString("stage", "ready"),
             )
         }
     }
@@ -91,6 +94,12 @@ private object RecorderApi {
             put("duration_seconds", seconds.coerceAtLeast(1))
         }
         call(builder(url).post(payload.toString().toRequestBody("application/json".toMediaType())).build())
+    }
+
+    /** Retries transcript/summary from the audio already saved in the CRM. Returns the error text, or null on success. */
+    suspend fun retry(id: String): String? = withContext(Dispatchers.IO) {
+        val body = call(builder(url).post(JSONObject().put("retry_id", id).toString().toRequestBody("application/json".toMediaType())).build())
+        if (body.optBoolean("ok")) null else body.optString("error").ifBlank { "আবার ব্যর্থ হয়েছে" }
     }
 
     suspend fun playUrl(id: String): String = withContext(Dispatchers.IO) {
@@ -117,6 +126,8 @@ private fun RecorderBody(onClose: () -> Unit) {
     var seconds by remember { mutableIntStateOf(0) }
     var saving by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf<String?>(null) }
+    var saveFailed by remember { mutableStateOf<Pair<Int, String>?>(null) }
+    var retrying by remember { mutableStateOf<String?>(null) }
     val player = remember { MediaPlayer() }
     val file = remember { File(context.cacheDir, "voice_note.m4a") }
 
@@ -145,21 +156,26 @@ private fun RecorderBody(onClose: () -> Unit) {
             .onFailure { r.release(); message = "মাইক চালু করা যায়নি" }
     }
 
+    fun upload(secs: Int) {
+        saving = true
+        saveFailed = null
+        message = "অডিও সেভ হচ্ছে → লেখা তৈরি → সারাংশ তৈরি…"
+        scope.launch {
+            runCatching { RecorderApi.save(file, secs) }
+                .onSuccess { message = "ভয়েস নোট সেভ হয়েছে"; file.delete(); reload() }
+                // Keep the audio file on the phone so the agent can retry without re-recording.
+                .onFailure { message = null; saveFailed = secs to (it.message ?: "নেটওয়ার্ক সমস্যা") }
+            saving = false
+        }
+    }
+
     fun stopAndSave() {
         val r = recorder ?: return
         recorder = null
         val ok = runCatching { r.stop() }.isSuccess
         r.release()
         if (!ok || seconds < 2) { message = "রেকর্ডিং খুব ছোট — আবার রেকর্ড করুন"; return }
-        saving = true
-        message = "সেভ হচ্ছে, লেখা ও সারসংক্ষেপ তৈরি হচ্ছে…"
-        scope.launch {
-            runCatching { RecorderApi.save(file, seconds) }
-                .onSuccess { message = "ভয়েস নোট সেভ হয়েছে"; reload() }
-                .onFailure { message = "সেভ করা যায়নি: ${it.message}" }
-            file.delete()
-            saving = false
-        }
+        upload(seconds)
     }
 
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -194,6 +210,13 @@ private fun RecorderBody(onClose: () -> Unit) {
             )
         }
         message?.let { Text(it, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp)) }
+        saveFailed?.let { (secs, reason) ->
+            Text("অডিও সেভ হয়নি: $reason", fontSize = 12.sp, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(enabled = !saving, onClick = { upload(secs) }) { Text("আবার চেষ্টা করুন") }
+                TextButton(onClick = { saveFailed = null; file.delete() }) { Text("বাদ দিন") }
+            }
+        }
         Spacer(Modifier.height(12.dp))
         Text("আমার ভয়েস নোট", fontWeight = FontWeight.SemiBold)
         if (loading) LinearProgressIndicator(Modifier.fillMaxWidth().padding(top = 6.dp))
@@ -204,8 +227,33 @@ private fun RecorderBody(onClose: () -> Unit) {
                     Column(Modifier.padding(12.dp)) {
                         Text(n.title, fontWeight = FontWeight.SemiBold)
                         Text("${n.createdAt.take(16).replace('T', ' ')} · ${n.durationSeconds} সেকেন্ড", fontSize = 11.sp)
+                        val (statusText, failed) = when (n.stage) {
+                            "transcript_failed" -> "অডিও সেভ ✓ · লেখা তৈরি হয়নি" to true
+                            "summary_failed" -> "অডিও সেভ ✓ · লেখা ✓ · সারাংশ তৈরি হয়নি" to true
+                            else -> "অডিও সেভ ✓ · লেখা ✓ · সারাংশ ✓" to false
+                        }
+                        Text(statusText, fontSize = 11.sp, fontWeight = FontWeight.Medium,
+                            color = if (failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
                         n.summary?.let { Text(it, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp)) }
-                        if (n.summary == null && n.error != null) Text(n.error, fontSize = 12.sp, color = MaterialTheme.colorScheme.error)
+                        if (failed && n.error != null) Text(n.error, fontSize = 12.sp, color = MaterialTheme.colorScheme.error)
+                        if (failed) {
+                            OutlinedButton(enabled = retrying == null, modifier = Modifier.padding(top = 6.dp), onClick = {
+                                retrying = n.id
+                                scope.launch {
+                                    runCatching { RecorderApi.retry(n.id) }
+                                        .onSuccess { err -> message = err?.let { "আবার ব্যর্থ: $it" } ?: "লেখা ও সারাংশ তৈরি হয়েছে" }
+                                        .onFailure { message = "আবার চেষ্টা করা যায়নি: ${it.message}" }
+                                    retrying = null
+                                    reload()
+                                }
+                            }) {
+                                Text(when {
+                                    retrying == n.id -> "আবার চেষ্টা হচ্ছে…"
+                                    n.stage == "transcript_failed" -> "লেখা ও সারাংশ আবার চেষ্টা করুন"
+                                    else -> "সারাংশ আবার চেষ্টা করুন"
+                                })
+                            }
+                        }
                         if (expanded == n.id) {
                             if (n.takeaways.isNotEmpty()) {
                                 Text("মূল বিষয়", fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 8.dp))
