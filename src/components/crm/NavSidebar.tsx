@@ -63,6 +63,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   "/site-visits": MapPin,
   "/reports": BarChart3,
   "/facebook-ads": BarChart3,
+  "/integrations": Network,
   "/system": Server,
   "/ingest": DatabaseZap,
   "/migration": Boxes,
@@ -84,7 +85,7 @@ const GROUPS: { title: { bn: string; en: string }; routes: string[] }[] = [
   { title: { bn: "সাপোর্ট", en: "Support" }, routes: ["/inbox", "/tickets", "/customers", "/support-admin"] },
   {
     title: { bn: "আইটি ও নিরাপত্তা", en: "IT & security" },
-    routes: ["/system", "/runtime-errors", "/security", "/ingest", "/migration", "/migration-export"],
+    routes: ["/integrations", "/system", "/runtime-errors", "/security", "/ingest", "/migration", "/migration-export"],
   },
   { title: { bn: "সহায়তা", en: "Help" }, routes: ["/docs", "/docs-admin", "/help"] },
 ];

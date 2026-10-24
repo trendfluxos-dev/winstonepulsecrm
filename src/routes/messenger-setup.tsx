@@ -38,6 +38,7 @@ function SetupPage() {
     <header className="space-y-3">
       <Button asChild variant="ghost" size="sm"><Link to="/messenger"><ArrowLeft className="size-4" />Messenger</Link></Button>
       <h1 className="text-xl font-semibold">{t({ bn: "Messenger ও Windsor.ai সংযোগের প্রগ্রেস", en: "Messenger & Windsor.ai connection progress" })}</h1>
+      <Button asChild variant="outline" size="sm"><Link to="/integrations">{t({ bn: "সব সংযোগের অবস্থা ও যাচাইয়ের ধাপ", en: "All integration statuses & verification steps" })}</Link></Button>
     </header>
     {state.noneConnected && <div role="status" className="flex items-start gap-3 border-y border-border bg-muted px-4 py-4"><CircleOff className="mt-0.5 size-5 shrink-0 text-muted-foreground" /><div className="space-y-1"><p className="font-medium">{t({ bn: "কোনো সংযোগ চালু নেই", en: "No connections are active" })}</p><p className="text-sm text-muted-foreground">{t({ bn: "Facebook এখনও সংযুক্ত হয়নি; Windsor.ai রিপোর্টও বন্ধ। এটি প্রস্তুতির অবস্থা, সরাসরি সংযোগ পরীক্ষা নয়।", en: "Facebook is not connected yet; Windsor.ai reporting is also disabled. This is preparation status, not a live connection check." })}</p></div></div>}
     <div className="grid gap-6 md:grid-cols-2">{services.map((service) => <section key={service.name} className="min-w-0 space-y-4">

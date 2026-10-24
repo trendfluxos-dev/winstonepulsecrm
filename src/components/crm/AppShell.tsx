@@ -55,6 +55,7 @@ export const NAV = [
   { to: "/qualify", label: "WhatsApp Qualify", scopes: ["authority", "coordinator", "agent"] },
   { to: "/reports", label: "Reports", scopes: ["authority", "coordinator", "agent"] },
   { to: "/facebook-ads", label: "Facebook Ads Reports", scopes: ["authority"] },
+  { to: "/integrations", label: "Integration Status", scopes: ["authority", "coordinator", "agent", "none"] },
   { to: "/system", label: "IT Console", scopes: ["authority"] },
   { to: "/runtime-errors", label: "Runtime Errors", scopes: ["authority"] },
   { to: "/ingest", label: "Ingest Check", scopes: ["authority"] },

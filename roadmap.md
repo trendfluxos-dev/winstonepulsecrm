@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-25 — Five-service integration status page
+- [ ] Add read-only `/integrations` with Messenger, WhatsApp, Windsor.ai, Drive and Winstone OS preparation/evidence boundaries, last verified time and required verification steps. Link navigation and existing progress page; no live reads, configuration changes or activation.
+- [ ] Run isolated status/regression tests and browser rendering checks; record limits without claiming live delivery.
+
 ## 2026-10-24 — Exposed Meta credential replacement
 - [x] Owner saved replacement Page access token in the existing encrypted secret through the secure update form; no values inspected. Added full-IT-PIN-only, no-network storage check on `/inbox`: presence only, actual check time, revocation and production replacement explicitly unverified. Runtime diagnostics use one handler-only secret source, no cached/legacy token fallback. Page ID unchanged; no other configured Meta token was listed.
 - [ ] Old token revocation/non-use requires owner Meta-side revocation evidence and separately authorized production release/live verification; no deploy, live provider request, old-token comparison, DB/schema/auth changes or activation. Other exposed external tokens must be revoked by their issuing Meta owner.

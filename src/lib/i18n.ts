@@ -48,6 +48,7 @@ export const NAV_LABELS: Record<string, { bn: string; en: string }> = {
   "/qualify": { bn: "WhatsApp কোয়ালিফাই", en: "WhatsApp Qualify" },
   "/reports": { bn: "রিপোর্ট", en: "Reports" },
   "/facebook-ads": { bn: "Facebook Ads রিপোর্ট", en: "Facebook Ads Reports" },
+  "/integrations": { bn: "সংযোগের অবস্থা", en: "Integration Status" },
   "/system": { bn: "আইটি কনসোল", en: "IT Console" },
   "/runtime-errors": { bn: "রানটাইম এরর", en: "Runtime Errors" },
   "/ingest": { bn: "ইনজেস্ট চেক", en: "Ingest Check" },
