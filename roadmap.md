@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-25 — Privacy-safe sync diagnostics (code only)
+- [x] src/lib/sync-diagnostics.ts + Android SyncDiagnostics.kt: allow-listed redaction (fingerprinted call/checksum, no phone/name/audio/transcript/token), failure-reason classifier with bn/en copy, report-vs-audio state (pending until matching ack), idempotent call-UID reconciliation flagging conflicts. tests/sync-diagnostics.test.ts passes. No schema/data change.
+- [ ] Not yet wired into Android workers/IT Console display; Kotlin test blocked (no Java in sandbox).
+
 ## 2026-10-24 — Facebook Messenger inbox foundation (code only)
 - [x] /messenger Bengali-first UI, role-scoped (agents own only; authority sees unassigned; HQ read-only), clearly labelled demo samples; Support /inbox untouched.
 - [x] Not-connected service stub, reply server fn and /api/public/meta/messenger placeholder (503 FACEBOOK_NOT_CONNECTED); no secrets/DB/Meta calls.
