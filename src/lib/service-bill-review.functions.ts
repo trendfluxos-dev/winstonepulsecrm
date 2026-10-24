@@ -28,7 +28,8 @@ export const getServiceBillAlert = createServerFn({ method: "GET" })
  .handler(async ({ data }) => {
   const { resolveCaller } = await import("@/lib/access.server");
   const me = await resolveCaller(data.adminToken ?? null, { skipMaintenance: true });
-  if (me.scope === "none") throw new Error("Sign in required");
+  // Bill details are for HQ / IT Console only, not every signed-in user.
+  if (me.scope !== "authority") throw new Error("HQ or IT Console access required");
   const { currentServiceBill } = await import("@/lib/service-bill-review.server");
   const bill = await currentServiceBill("Authorized Winstone reviewer", null);
   return {

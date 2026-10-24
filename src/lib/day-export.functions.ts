@@ -36,7 +36,7 @@ export type DayCallRow = {
   category: string;
 };
 
-const SIGNED_URL_SECONDS = 6 * 60 * 60;
+const SIGNED_URL_SECONDS = 15 * 60; // short-lived: links stop working soon after access is removed
 const DHAKA_OFFSET_MS = 6 * 60 * 60 * 1000;
 
 function dhakaLabel(iso: string) {

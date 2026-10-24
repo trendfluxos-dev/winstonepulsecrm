@@ -53,7 +53,9 @@ const fmtDate = (d: string) =>
   new Date(`${d}T12:00:00+06:00`).toLocaleDateString("bn-BD", { timeZone: "Asia/Dhaka", day: "numeric", month: "short", year: "numeric" });
 
 function csvCell(v: unknown) {
-  const s = String(v ?? "");
+  let s = String(v ?? "");
+  // Neutralise spreadsheet formulas (=, +, -, @) in staff-written text.
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
