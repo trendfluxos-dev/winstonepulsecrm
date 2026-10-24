@@ -261,7 +261,7 @@ export function LeadProjectSales({ leadId }: { leadId: string }) {
                 <li key={u.project_id} className="flex flex-wrap items-center justify-between gap-2">
                   <span className="min-w-0 break-words font-semibold">{name.get(u.project_id) ?? "—"}</span>
                   <span className="flex items-center gap-2">
-                    <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${tone[u.interest] ?? tone.interested}`}>{t(INTEREST_L[u.interest] ?? INTEREST_L["interested"]!)}</span>
+                    <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${tone[u.interest] ?? tone["interested"]}`}>{t(INTEREST_L[u.interest] ?? INTEREST_L["interested"]!)}</span>
                     <span className="text-[10px] text-muted-foreground">{when(u.created_at)}</span>
                   </span>
                 </li>
