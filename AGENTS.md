@@ -42,3 +42,4 @@
 - Release counts as deployed only when scripts/check-live-release.ts (or IT Console Deployment status) sees /manual version, $35.29 and 50-lead markers live — why: publish requests are not proof.
 - The operations manual's only source is docs/CRM_OPERATIONS_MANUAL.md (parsed by src/lib/manual-source.ts for /manual); rebuild the PDF with `npm run manual:pdf`, and `manual:check` (prebuild + CI) fails on hash/version drift — why: page and PDF can never disagree.
 - Android recordings fall back to the phone's own call-recorder file (PhoneRecordingPickupWorker, recorder_source=phone_recorder) through the same idempotent upload queue; no match = no upload — why: Android 10+ blocks app call-audio capture.
+- Recorder (/recorder) reads agent-own call_recordings plus server-only recorder_insights (voice notes, AI takeaways/action items) via recorder.functions.ts; AI uses the shared ai-model helper and never invents facts — why: one scoped history for calls and notes.
