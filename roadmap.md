@@ -192,3 +192,5 @@
 - [x] Projects page header offers "All brochures (ZIP, 15)": fetches the 15 brochure PDFs, packs them (stored, not re-compressed) and saves one archive; verified in browser — 18 MB ZIP with exactly 15 valid PDFs, no page errors; tests/brochure-zip.test.ts (4) passes.
 - [ ] Sales contact + call-to-action on each brochure — BLOCKED: needs the official sales phone/email (none in the project; won't invent).
 - [x] All 15 per-project brochure links verified signed-in in browser: each downloads a PDF whose title matches its project card.
+- [ ] Pick-and-choose brochure ZIP (download only selected projects).
+- [ ] Stamp info@ + support@winstonebd.com and a Bengali+English call-to-action on all 15 brochures; phone left out until the owner gives the official number.
