@@ -1,5 +1,8 @@
 # Roadmap
 
+## 2026-10-24 — Encrypted Meta Page secret storage
+- [ ] Owner-authorized secure collection of `META_PAGE_ACCESS_TOKEN` and `META_PAGE_ID` into Lovable Cloud's encrypted secret store, not repository/client files. Secret-name listing confirms neither currently configured; no available workspace connection. Never reuse uploaded credential material or request Facebook passwords. Adapter/endpoint remain disconnected; no deployment/SQL/data/auth changes.
+
 ## 2026-10-24 — Local sensitive-file masking
 - [x] Added local TXT sanitization and download tool on /messenger; whole sensitive lines/next values and token-like strings/long IDs masked, no raw preview or file upload/storage. Original uploaded credentials not copied or read.
 - [x] `bunx vitest run tests/credential-redaction.test.ts tests/messenger-inbox.test.ts tests/messenger-protocol.test.ts` — 3 files / 35 tests passed, 21:49:45 UTC. Automatic build OK at 21:49:33 UTC. `python3 /tmp/browser/redaction/check_redaction.py` — synthetic file downloaded with all three sensitive lines fully masked; Clear disabled download; 428px screenshot inspected, no original credentials used. Automatic detection is conservative, not guaranteed for arbitrary unlabelled passwords; review before sharing.

@@ -51,6 +51,10 @@ Verify app/Page/form permission and lead access in isolated testing; validate ra
 
 The existing guide is the readiness surface for this pass; the Messenger UI and its “Facebook not connected yet” notice are preserved. No new public diagnostic endpoint or runtime secret reader is introduced: boolean presence cannot establish app existence, token validity, Page consent or permission approval, and a safe owner-only diagnostics surface would require separate review. Owner saves credentials only in authorized Project Settings → Secrets after setup verification, never chat. The attempted secure form in the preceding task was unavailable and did not run; no credential was saved by that attempt. No secret request or settings read/write is performed in this pass.
 
+### Owner-authorized encrypted Page secret storage (follow-up)
+
+Use the managed Lovable Cloud encrypted secret store for `META_PAGE_ACCESS_TOKEN` and `META_PAGE_ID`, collected only through the secure secrets form or authorized Project Settings → Secrets. Values never belong in source files, `.env` commits, browser storage, downloadable documents or logs. This single-Page configuration does not require a new database table or an additional app-managed encryption key. A future multi-Page token database would still require separate encryption/schema review. These two secret names were not configured when checked in this follow-up; no value was read. Saving configuration does not connect a Page, verify the token or establish App Review. No runtime credential reader is added until a separately authorized server-only integration needs one; the disabled adapter remains unchanged.
+
 ## Owner / Page administrator steps (do not perform during this pass)
 
 1. Confirm whether a Meta Developer App already exists. If not, create an app using Meta's current Business/Messenger use case, associate the appropriate Business portfolio and add/configure Messenger for the intended Facebook Page. Complete business verification where Meta requires it; do not assume every permission has identical requirements.
