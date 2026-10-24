@@ -24,6 +24,7 @@ import { Route as DiagnosticsRouteImport } from './routes/diagnostics'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as DocsAdminRouteImport } from './routes/docs-admin'
+import { Route as FacebookAdsRouteImport } from './routes/facebook-ads'
 import { Route as HandoverRouteImport } from './routes/handover'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as HqRouteImport } from './routes/hq'
@@ -193,6 +194,11 @@ const DocsRoute = DocsRouteImport.update({
 const DocsAdminRoute = DocsAdminRouteImport.update({
   id: '/docs-admin',
   path: '/docs-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FacebookAdsRoute = FacebookAdsRouteImport.update({
+  id: '/facebook-ads',
+  path: '/facebook-ads',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HandoverRoute = HandoverRouteImport.update({
@@ -709,6 +715,7 @@ export interface FileRoutesByFullPath {
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
   '/docs-admin': typeof DocsAdminRoute
+  '/facebook-ads': typeof FacebookAdsRoute
   '/handover': typeof HandoverRoute
   '/help': typeof HelpRoute
   '/hq': typeof HqRoute
@@ -821,6 +828,7 @@ export interface FileRoutesByTo {
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
   '/docs-admin': typeof DocsAdminRoute
+  '/facebook-ads': typeof FacebookAdsRoute
   '/handover': typeof HandoverRoute
   '/help': typeof HelpRoute
   '/hq': typeof HqRoute
@@ -934,6 +942,7 @@ export interface FileRoutesById {
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
   '/docs-admin': typeof DocsAdminRoute
+  '/facebook-ads': typeof FacebookAdsRoute
   '/handover': typeof HandoverRoute
   '/help': typeof HelpRoute
   '/hq': typeof HqRoute
@@ -1048,6 +1057,7 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/docs'
     | '/docs-admin'
+    | '/facebook-ads'
     | '/handover'
     | '/help'
     | '/hq'
@@ -1160,6 +1170,7 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/docs'
     | '/docs-admin'
+    | '/facebook-ads'
     | '/handover'
     | '/help'
     | '/hq'
@@ -1272,6 +1283,7 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/docs'
     | '/docs-admin'
+    | '/facebook-ads'
     | '/handover'
     | '/help'
     | '/hq'
@@ -1385,6 +1397,7 @@ export interface RootRouteChildren {
   DispatchRoute: typeof DispatchRoute
   DocsRoute: typeof DocsRoute
   DocsAdminRoute: typeof DocsAdminRoute
+  FacebookAdsRoute: typeof FacebookAdsRoute
   HandoverRoute: typeof HandoverRoute
   HelpRoute: typeof HelpRoute
   HqRoute: typeof HqRoute
@@ -1587,6 +1600,13 @@ declare module '@tanstack/react-router' {
       path: '/docs-admin'
       fullPath: '/docs-admin'
       preLoaderRoute: typeof DocsAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/facebook-ads': {
+      id: '/facebook-ads'
+      path: '/facebook-ads'
+      fullPath: '/facebook-ads'
+      preLoaderRoute: typeof FacebookAdsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/handover': {
@@ -2273,6 +2293,7 @@ const rootRouteChildren: RootRouteChildren = {
   DispatchRoute: DispatchRoute,
   DocsRoute: DocsRoute,
   DocsAdminRoute: DocsAdminRoute,
+  FacebookAdsRoute: FacebookAdsRoute,
   HandoverRoute: HandoverRoute,
   HelpRoute: HelpRoute,
   HqRoute: HqRoute,
