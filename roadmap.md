@@ -1,7 +1,9 @@
 # Roadmap
 
 ## 2026-10-24 — Combined Messenger / Windsor progress
-- [ ] Restore the requested progress page with both disconnected statuses and an explicit notice when neither connection is active; no provider activation, secrets or data changes. Messenger approval evidence remains unverified; live activation still blocked.
+- [x] Restored `/messenger-setup` with Messenger and Windsor.ai disconnected statuses, explicit neither-connected notice, and Messenger navigation link; no provider activation, secrets or data changes. Shared browser-safe preparation helper reports Windsor configuration as not checked, never infers secrets absent.
+- [x] `bunx vitest run tests/messenger-readiness.test.ts tests/messenger-inbox.test.ts tests/windsor-reporting.test.ts tests/windsor-boundary.test.ts tests/route-role-access.test.ts` — 5 files / 51 tests passed, exit 0, 23:05:06 UTC. Harness build OK 23:04:57 UTC. Browser attempt blocked all external/backend requests and timed out awaiting the page heading; completed signed-in visual flow is unverified, not claimed passed.
+- [ ] Messenger approval evidence remains unverified; live activation blocked by reviewed storage, App/Page approval and signed webhook setup. No live calls, migration or deployment performed. Changed: `src/lib/integration-readiness.ts`, `src/routes/messenger-setup.tsx`, `src/routes/messenger.tsx`, `tests/messenger-readiness.test.ts`, `tests/messenger-inbox.test.ts`, `AGENTS.md`, `docs/MESSENGER_SETUP.md`, `roadmap.md`; latest owner preference supersedes previous progress-page closure.
 
 ## 2026-10-24 — Close progress page / requested real Messenger sync
 - [x] Closed `/messenger-setup` with a redirect to `/messenger`, removed its entry link, and redirected human webhook navigation to the inbox. Support Desk, disconnected notice, Android sync, roles and data unchanged.
