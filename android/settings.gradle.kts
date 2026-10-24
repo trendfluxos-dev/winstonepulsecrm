@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "WinstoneConnect"
 include(":app")
+include(":whisper")
