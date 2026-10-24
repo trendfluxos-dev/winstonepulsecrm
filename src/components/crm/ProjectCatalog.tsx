@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Building2, MessageSquareText, Plus, TrendingUp, UserPlus } from "lucide-react";
+import { Building2, FileDown, MessageSquareText, Plus, TrendingUp, UserPlus } from "lucide-react";
+import { brochureFor } from "@/lib/project-brochures";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -186,7 +187,14 @@ export function ProjectCatalogPanel() {
                 <div key={k} className="min-w-0"><dt className="text-muted-foreground">{t(lbl)}</dt><dd className="break-words font-medium">{k === "price_per_sqft" ? money(Number(p[k])) : String(p[k])}</dd></div>
               ))}
             </dl>
-            <Button size="sm" variant="link" className="px-0" onClick={() => setOpen(open === p.id ? null : p.id)}>{t(L.notes)}</Button>
+            <div className="flex flex-wrap items-center gap-x-4">
+              <Button size="sm" variant="link" className="px-0" onClick={() => setOpen(open === p.id ? null : p.id)}>{t(L.notes)}</Button>
+              {(() => { const b = brochureFor(p.name); return b ? (
+                <a href={b.url} download={b.filename} className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                  <FileDown className="size-4" />{t({ bn: "ব্রোশিওর (PDF)", en: "Brochure (PDF)" })}
+                </a>
+              ) : null; })()}
+            </div>
             {open === p.id ? <NotesBlock project={p} canEdit={canEdit} /> : null}
             {!q.data?.readOnly && p.status === "active" ? (
               capture === p.id ? <InterestForm project={p} onDone={() => setCapture(null)} /> : (
