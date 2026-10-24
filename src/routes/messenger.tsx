@@ -1,4 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Activity } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 
 import { AppShell } from "@/components/crm/AppShell";
 import { MessengerInbox } from "@/components/crm/MessengerInbox";
@@ -19,8 +22,10 @@ export const Route = createFileRoute("/messenger")({
 });
 
 function MessengerPage() {
+  const t = useT();
   return (
     <AppShell>
+      <div className="mb-4"><Button asChild variant="outline" size="sm"><Link to="/messenger-setup"><Activity className="size-4" />{t({ bn: "সংযোগের প্রগ্রেস", en: "Connection progress" })}</Link></Button></div>
       <MessengerInbox />
       <CredentialRedactor />
     </AppShell>
