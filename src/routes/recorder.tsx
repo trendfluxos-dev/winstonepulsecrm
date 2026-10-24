@@ -192,7 +192,7 @@ function VoiceNoteRecorder({ onSave }: { onSave: (blob: Blob, seconds: number) =
             <Square className="mr-2 size-5" /> থামান ও সেভ করুন · {fmtDur(seconds)}
           </Button>
         ) : (
-          <Button size="lg" className="h-16 w-full max-w-xs text-base" disabled={state === "saving"} onClick={start}>
+          <Button size="lg" className="h-16 w-full max-w-xs text-base" disabled={state === "saving" || micProblem === "insecure" || micProblem === "unsupported"} onClick={start}>
             <Mic className="mr-2 size-5" /> {state === "saving" ? "লেখা ও সারাংশ তৈরি হচ্ছে…" : "ভয়েস রেকর্ড শুরু করুন"}
           </Button>
         )}

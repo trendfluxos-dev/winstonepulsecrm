@@ -1,7 +1,12 @@
 package com.winstone.connect.ui
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
+import androidx.core.app.ActivityCompat
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.os.Build
@@ -128,6 +133,8 @@ private fun RecorderBody(onClose: () -> Unit) {
     var expanded by remember { mutableStateOf<String?>(null) }
     var saveFailed by remember { mutableStateOf<Pair<Int, String>?>(null) }
     var retrying by remember { mutableStateOf<String?>(null) }
+    /** null = fine; "denied", "blocked" (never ask again) or "busy" (mic in use / failed to start). */
+    var micProblem by remember { mutableStateOf<String?>(null) }
     val player = remember { MediaPlayer() }
     val file = remember { File(context.cacheDir, "voice_note.m4a") }
 
@@ -152,8 +159,8 @@ private fun RecorderBody(onClose: () -> Unit) {
             r.setAudioSamplingRate(44_100)
             r.setOutputFile(file.absolutePath)
             r.prepare(); r.start()
-        }.onSuccess { seconds = 0; recorder = r; message = null }
-            .onFailure { r.release(); message = "মাইক চালু করা যায়নি" }
+        }.onSuccess { seconds = 0; recorder = r; message = null; micProblem = null }
+            .onFailure { r.release(); micProblem = "busy" }
     }
 
     fun upload(secs: Int) {
@@ -179,7 +186,12 @@ private fun RecorderBody(onClose: () -> Unit) {
     }
 
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) start() else message = "রেকর্ড করতে মাইকের অনুমতি দিন"
+        if (granted) { micProblem = null; start() } else {
+            val activity = context as? Activity
+            // After "Don't ask again" Android stops showing the prompt; only Settings can fix it.
+            val canAsk = activity != null && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.RECORD_AUDIO)
+            micProblem = if (canAsk) "denied" else "blocked"
+        }
     }
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
@@ -208,6 +220,35 @@ private fun RecorderBody(onClose: () -> Unit) {
                 if (recorder != null) "থামান ও সেভ করুন  ${seconds / 60}:${"%02d".format(seconds % 60)}" else "রেকর্ড শুরু করুন",
                 fontSize = 16.sp,
             )
+        }
+        if (micProblem == null && recorder == null &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            Text("রেকর্ড শুরু করলে ফোন মাইকের অনুমতি চাইবে — \"Allow\" / \"অনুমতি দিন\" চাপুন।",
+                fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+        }
+        micProblem?.let { p ->
+            Card(Modifier.fillMaxWidth().padding(top = 8.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    val (title, steps) = when (p) {
+                        "denied" -> "মাইকের অনুমতি দেওয়া হয়নি" to listOf("নিচের \"আবার অনুমতি চান\" চাপুন।", "ফোন জিজ্ঞেস করলে \"Allow\" / \"While using the app\" বেছে নিন।")
+                        "blocked" -> "মাইকের অনুমতি বন্ধ করা আছে" to listOf("\"সেটিংস খুলুন\" চাপুন।", "Permissions → Microphone → Allow বেছে নিন।", "অ্যাপে ফিরে এসে \"আবার চেষ্টা করুন\" চাপুন।")
+                        else -> "মাইক চালু করা যায়নি" to listOf("চলমান ফোন কল, WhatsApp/ভিডিও কল বা অন্য রেকর্ডার অ্যাপ বন্ধ করুন।", "তারপর \"আবার চেষ্টা করুন\" চাপুন।", "তাও না হলে ফোন রিস্টার্ট করুন বা IT-কে জানান।")
+                    }
+                    Text(title, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onErrorContainer)
+                    steps.forEachIndexed { i, s -> Text("${i + 1}. $s", fontSize = 12.sp, color = MaterialTheme.colorScheme.onErrorContainer) }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (p == "blocked") {
+                            Button(onClick = {
+                                context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                            }) { Text("সেটিংস খুলুন") }
+                        }
+                        OutlinedButton(onClick = {
+                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) { micProblem = null; start() }
+                            else permission.launch(Manifest.permission.RECORD_AUDIO)
+                        }) { Text(if (p == "denied") "আবার অনুমতি চান" else "আবার চেষ্টা করুন") }
+                    }
+                }
+            }
         }
         message?.let { Text(it, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp)) }
         saveFailed?.let { (secs, reason) ->
