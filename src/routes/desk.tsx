@@ -1,3 +1,4 @@
+import { accountLock, ACCESS_RECOVERY } from "@/lib/access-recovery";
 import { MyNeglectNotice } from "@/components/crm/LeadNeglectPanel";
 import { PhotoUpload } from "@/components/crm/PhotoUpload";
 import { StaffAvatar } from "@/components/crm/StaffAvatar";
@@ -286,6 +287,8 @@ function DeskPage() {
     );
   }
 
+  const lockReason = account?.signedIn ? accountLock({ is_active: account.active !== false, approval_status: account.approval }) : null;
+  const recovery = lockReason ? ACCESS_RECOVERY[lockReason] : null;
   if (scope === "none") {
     return (
       <AppShell>
@@ -297,14 +300,10 @@ function DeskPage() {
             <>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">
-                  {account.approval === "rejected"
-                    ? t({ bn: "প্রবেশ বাতিল", en: "Access denied" })
-                    : t({ bn: "অনুমোদনের অপেক্ষায়", en: "Awaiting approval" })}
+                  {recovery ? t(recovery.title) : t({ bn: "প্রোফাইল যাচাই প্রয়োজন", en: "Profile review required" })}
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {account.approval === "rejected"
-                    ? t({ bn: "একজন সুপারভাইজার এই অ্যাকাউন্ট বাতিল করেছেন। ভুল মনে হলে টিম লিডের সঙ্গে কথা বলুন।", en: "A supervisor has rejected this account. If this seems wrong, talk to your team lead." })
-                    : t({ bn: "আপনার অ্যাকাউন্ট তৈরি হয়েছে। আইটি কনসোল বা এক্সিকিউটিভ এইচকিউ থেকে শীঘ্রই ডেস্ক খুলে দেওয়া হবে।", en: "Your account has been created. The desk will be unlocked soon from the IT Console or Executive HQ." })}
+                  {recovery ? t(recovery.recovery) : t({ bn: "আইটি কনসোলের কাছে নিজের প্রোফাইল যাচাই করুন।", en: "Ask IT Console to review your own profile." })}
                 </p>
               </div>
               <Button variant="secondary" onClick={() => void signOut()}>

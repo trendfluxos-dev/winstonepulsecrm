@@ -84,7 +84,7 @@ function LeadHubWorkspace() {
   const [assignCount, setAssignCount] = useState<number | null>(null);
   const [draftKey, setDraftKey] = useState(0);
   const allocation = useCoordinatorAllocation();
-  const agentOptions: { id: string; name: string }[] = [];
+  const agentOptions = (allocation.data?.agents ?? []).map(({ id, name }) => ({ id, name }));
   const t = useT();
 
   return (
@@ -108,7 +108,7 @@ function LeadHubWorkspace() {
         ))}
       </nav>
 
-      {section === "overview" && <><DeckKpis /><AllocationTable onAssign={(id) => { setAssignFor(id); setSection("assign"); }} /></>}
+      {section === "overview" && <><DeckKpis /><LeadStorePanel agents={agentOptions} canAssign={false} defaultAssignment="unassigned" title={t({ bn: "অনির্ধারিত লিড — পর্যালোচনার অপেক্ষায়", en: "Unassigned leads — awaiting review" })} /><AllocationTable onAssign={(id) => { setAssignFor(id); setSection("assign"); }} /></>}
       {section === "import" && <div className="space-y-4"><div className="flex justify-end"><CsvImportDialog /></div><HeadLeadIntakePanel /><ImportHistoryPanel /></div>}
       {section === "database" && <LeadStorePanel agents={agentOptions} canAssign={false} title={t({ bn: "মূল লিড ডেটাবেস", en: "Canonical Lead Database" })} />}
       {section === "assign" && <div className="space-y-4"><LeadDatabasePanel /><AssignLeadsWorkspace key={`${assignFor ?? "all"}-${draftKey}`} initialAgentId={assignFor} initialCount={assignCount} /></div>}

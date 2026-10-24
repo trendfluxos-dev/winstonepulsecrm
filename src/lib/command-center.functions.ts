@@ -24,7 +24,7 @@ export const getCommandCenterFeed = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { resolveCaller } = await import("@/lib/access.server");
     const caller = await resolveCaller(data.adminToken ?? null);
-    if (caller.scope === "none") return { reports: [], followUps: [] };
+    if (caller.scope === "none") throw new Error("Sign in required");
     const me = caller.scope === "agent" ? caller.profile?.id : null;
     if (caller.scope === "agent" && !me) throw new Error("Agent profile পাওয়া যায়নি");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -45,10 +45,11 @@ export const getCommandCenterFeed = createServerFn({ method: "POST" })
         return q.order("created_at", { ascending: true }).order("id").range(a, b);
       }),
     ]);
+    const freshness = { generatedAt: new Date().toISOString(), timezone: "Asia/Dhaka", reportsPaged: true, followUpsPaged: true };
     if (me) {
       const { assignedLeadIds, filterAssignedActivity } = await import('@/lib/assigned-lead-scope.server');
       const ids = await assignedLeadIds(me);
-      return { reports: filterAssignedActivity(reports, ids), followUps: filterAssignedActivity(followUps, ids) };
+      return { reports: filterAssignedActivity(reports, ids), followUps: filterAssignedActivity(followUps, ids), freshness };
     }
-    return { reports, followUps };
+    return { reports, followUps, freshness };
   });
