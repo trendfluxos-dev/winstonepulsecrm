@@ -1,3 +1,4 @@
+import profilesPdf from "@/assets/winstone-15-project-profiles.pdf.asset.json";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -87,6 +88,7 @@ function ProjectsPage() {
             <h1 className="text-2xl font-bold">প্রজেক্ট ডিরেক্টরি</h1>
             <p className="text-sm text-muted-foreground">Winstone Properties — সংরক্ষিত কল রিপোর্ট থেকে বাস্তব চাহিদা</p>
           </div>
+          <a href={profilesPdf.url} download="Winstone-15-Project-Profiles.pdf" className="text-sm text-primary hover:underline">১৫ প্রজেক্ট প্রোফাইল (PDF) ডাউনলোড ↓</a>
           <Link to="/inventory" className="text-sm text-primary hover:underline">প্রজেক্ট তালিকা পরিচালনা →</Link>
         </header>
         <ProjectCatalogPanel />
