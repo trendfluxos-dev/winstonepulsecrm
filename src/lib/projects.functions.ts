@@ -68,7 +68,7 @@ export const listProjects = createServerFn({ method: "POST" })
     }));
     const shown = projects.filter((p) => p.image_url?.includes("/object/sign/project-photos/"));
     if (shown.length) await logPhotoView(supabaseAdmin, c, shown.map((p) => p.name)).catch(() => undefined);
-    return { canEdit: c.scope === "authority" && !c.readOnly, projects };
+    return { canEdit: c.scope === "authority" && !c.readOnly, readOnly: Boolean(c.readOnly), projects };
   });
 
 export const saveProject = createServerFn({ method: "POST" })
