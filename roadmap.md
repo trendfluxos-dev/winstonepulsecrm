@@ -190,7 +190,7 @@
 
 ## 2026-10-24 — All 15 brochures as one ZIP
 - [x] Projects page header offers "All brochures (ZIP, 15)": fetches the 15 brochure PDFs, packs them (stored, not re-compressed) and saves one archive; verified in browser — 18 MB ZIP with exactly 15 valid PDFs, no page errors; tests/brochure-zip.test.ts (4) passes.
-- [ ] Add official sales phone to brochures — BLOCKED: owner to supply the number.
+- [x] Updated all 15 brochures with official sales phone 01805049666 and only info@winstonebd.com; bilingual CTA preserved, all PDF contact checks passed and strip visually checked; new versioned assets used by individual links and ZIP. Not published.
 - [x] All 15 per-project brochure links verified signed-in in browser: each downloads a PDF whose title matches its project card.
 - [x] Pick-and-choose brochure ZIP: "Choose projects" list; browser-verified 3-project ZIP on phone width, 7 tests pass.
 - [x] All 15 brochures stamped with info@ + support@winstonebd.com and Bengali+English site-visit CTA (scripts/brochures/stamp_contact.py); no existing text covered; all 15 links re-verified.

@@ -2,8 +2,8 @@
 
 Usage: python3 scripts/brochures/stamp_contact.py <in_dir> <out_dir>
 The block sits in the empty strip above the existing "View project online / Talk to Winstone"
-footer (y 719–755pt from the top on every brochure). The phone number is deliberately absent
-until the owner supplies the official one — never invent contact details.
+footer (y 719–755pt from the top on every brochure). Use only the owner-approved
+sales phone and email.
 """
 import asyncio, sys
 from pathlib import Path
@@ -11,7 +11,8 @@ from playwright.async_api import async_playwright
 from pypdf import PdfReader, PdfWriter
 
 FONTS = Path(__file__).resolve().parents[1] / "manual" / "fonts"
-EMAILS = ["info@winstonebd.com", "support@winstonebd.com"]
+EMAIL = "info@winstonebd.com"
+PHONE = "01805049666"
 CTA_BN = "আজই সাইট ভিজিট বুক করুন — বিস্তারিত জানতে ইমেইল করুন"
 CTA_EN = "Book your site visit today — email us for details"
 
@@ -30,7 +31,7 @@ html, body {{ margin: 0; background: transparent; }}
 .mail i {{ font-style: normal; color: rgb(175,145,48); }}
 </style></head><body><div class="band">
 <div class="cta"><b>{CTA_BN}</b><span>{CTA_EN}</span></div>
-<div class="mail"><i>Email</i> {EMAILS[0]}<br><i>Support</i> {EMAILS[1]}</div>
+<div class="mail"><i>Phone</i> {PHONE}<br><i>Email</i> {EMAIL}</div>
 </div></body></html>"""
 
 async def overlay(path: Path):
