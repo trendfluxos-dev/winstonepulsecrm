@@ -60,10 +60,10 @@ const stepIds = new Set(CRM_TOURS.flatMap(t => t.steps.map(s => s.id)));
 export function restoreTourProgress(value: unknown): TourProgress {
   if (!value || typeof value !== "object") return { ...INITIAL_TOUR_PROGRESS, completed: [] };
   const v = value as Record<string, unknown>;
-  const workspace = typeof v.workspace === "string" && workspaceIds.has(v.workspace as TourWorkspace) ? v.workspace as TourWorkspace : "agent";
+  const workspace = typeof v["workspace"] === "string" && workspaceIds.has(v["workspace"] as TourWorkspace) ? v["workspace"] as TourWorkspace : "agent";
   const tour = CRM_TOURS.find(t => t.id === workspace);
-  const step = typeof v.step === "number" && Number.isInteger(v.step) ? Math.max(0, Math.min(v.step, (tour?.steps.length ?? 1) - 1)) : 0;
-  const completed = Array.isArray(v.completed) ? [...new Set(v.completed.filter((id): id is string => typeof id === "string" && stepIds.has(id)))] : [];
+  const step = typeof v["step"] === "number" && Number.isInteger(v["step"]) ? Math.max(0, Math.min(v["step"], (tour?.steps.length ?? 1) - 1)) : 0;
+  const completed = Array.isArray(v["completed"]) ? [...new Set(v["completed"].filter((id): id is string => typeof id === "string" && stepIds.has(id)))] : [];
   return { workspace, step, completed };
 }
 
