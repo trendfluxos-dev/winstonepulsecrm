@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Follow-up — resume code-only remediation
+- [ ] Further requested execution: prevent malformed blocker or self-referential replacement evidence from being treated as validated employee fault; add isolated fairness tests. Execution tools available, no approval refusal encountered; workspace credit balance not queried. No deployment or database writes.
 - [x] Extracted Android server-confirmation predicate into testable queue logic and connected upload handling to it; rejects missing/blank identities, blank/mismatched checksums and non-uploaded statuses before durable original release. Added one Kotlin test and three executable TypeScript tests.
 - Follow-up regression: `bunx vitest run --exclude 'tests/*.integration.test.ts' --exclude 'tests/project-photo-access.test.ts' --exclude 'tests/rls.test.ts' --exclude 'tests/staging/**'` — exit 0, **111 files / 774 tests passed**, 20:08:29 UTC, 7.19s. No deployment or database writes; Android runtime tests remain blocked on Java/SDK and a genuine handset.
 - Commit creation is managed by Lovable; this agent does not run git commit/push. Source and tests from the previous pass are present.
