@@ -1,14 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import {
-  MAX_VOICE_NOTE_BYTES,
-  MIN_VOICE_NOTE_BYTES,
-  contentTypeFor,
-  extensionForMime,
-  normaliseInsight,
-  type RecorderInsight,
-} from "@/lib/recorder-shared";
+import { normaliseInsight, type RecorderInsight } from "@/lib/recorder-shared";
 
 /**
  * Recorder page: the agent's call recordings (captured by the Winstone Android
