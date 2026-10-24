@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Mic, Phone, PhoneIncoming, Play, Sparkles, Square } from "lucide-react";
+import { Mic, Phone, PhoneIncoming, Play, RotateCw, Sparkles, Square } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
