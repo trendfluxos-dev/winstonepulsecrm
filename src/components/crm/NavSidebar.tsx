@@ -76,6 +76,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   "/customers": Users,
   "/support-admin": Headset,
   "/help": HelpCircle,
+  "/walkthrough": BookOpen,
 };
 
 const GROUPS: { title: { bn: string; en: string }; routes: string[] }[] = [
@@ -87,7 +88,7 @@ const GROUPS: { title: { bn: string; en: string }; routes: string[] }[] = [
     title: { bn: "আইটি ও নিরাপত্তা", en: "IT & security" },
     routes: ["/integrations", "/system", "/runtime-errors", "/security", "/ingest", "/migration", "/migration-export"],
   },
-  { title: { bn: "সহায়তা", en: "Help" }, routes: ["/docs", "/docs-admin", "/help"] },
+  { title: { bn: "সহায়তা", en: "Help" }, routes: ["/walkthrough", "/docs", "/docs-admin", "/help"] },
 ];
 
 const FOCUS = "outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";

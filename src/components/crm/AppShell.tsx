@@ -70,6 +70,7 @@ export const NAV = [
   { to: "/customers", label: "Customers", scopes: ["authority", "coordinator", "agent"] },
   { to: "/support-admin", label: "Support Admin", scopes: ["authority", "coordinator"] },
   { to: "/help", label: "Help Centre", scopes: ["authority", "coordinator", "agent", "none"] },
+  { to: "/walkthrough", label: "CRM Walkthrough", scopes: ["authority", "coordinator", "agent", "none"] },
 ] as const satisfies ReadonlyArray<{ to: string; label: string; scopes: readonly Scope[] }>;
 
 /** Screens whose actions the server refuses for read-only Executive HQ sessions. */
