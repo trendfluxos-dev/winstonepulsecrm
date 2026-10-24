@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-25 — Meta Integration & Webhook Control Center
+- [ ] Use uploaded HTML only as a privacy-safe reference; add status/configuration/permission/diagnostic views and isolated synthetic simulator, without credentials or customer samples.
+- [ ] Validate signed payloads after raw-byte HMAC checks; preserve disabled handshake/ingestion and require durable idempotency before activation. No Meta calls, secrets, SQL, production writes, auth/roles or deployment changes.
+- [ ] Add targeted tests, setup/security documentation and browser verification; report exact files and activation blockers.
+
 ## 2026-10-25 — Interactive whole-CRM walkthrough
 - [x] Added bilingual `/walkthrough`: 14 steps across Sales Agent, LeadHub Nexus, Executive HQ and IT Console; workspace/step switching, previous/next, local-only resume/reset, completed reading and links to existing gated pages. Entry from home, help and shared navigation. No live data/provider calls, permission changes or automatic business actions.
 - [x] 21 tests passed (`crm-walkthrough`, `route-role-access`); harness build OK. Public browser flow verified all 14 steps, completion, reload resume, reset, workspace tabs and language switch; 1280px/390px screenshots inspected, no overflow or page errors. API traffic intercepted; protected linked workspaces not exercised under the no-production-access boundary. No deploy, SQL, database, auth or secret changes.
