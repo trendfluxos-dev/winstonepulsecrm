@@ -1,10 +1,11 @@
-/** Offline protocol helpers only. Not wired to the disabled webhook or Send API. */
-export async function matchesWebhookSignature(rawBody: string, signature: string | null, appSecret: string): Promise<boolean> {
+/** Signature validation only; does not enable ingestion or sending. */
+export async function matchesWebhookSignature(rawBody: string | Uint8Array, signature: string | null, appSecret: string): Promise<boolean> {
   if (!appSecret || !signature || !/^sha256=[a-f0-9]{64}$/.test(signature)) return false;
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey("raw", encoder.encode(appSecret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
   const bytes = Uint8Array.from(signature.slice(7).match(/../g) ?? [], (byte) => Number.parseInt(byte, 16));
-  return crypto.subtle.verify("HMAC", key, bytes, encoder.encode(rawBody));
+  const data = typeof rawBody === "string" ? encoder.encode(rawBody) : Uint8Array.from(rawBody);
+  return crypto.subtle.verify("HMAC", key, bytes, data);
 }
 
 /** Exact challenge validation; caller must separately confirm integration is enabled. */

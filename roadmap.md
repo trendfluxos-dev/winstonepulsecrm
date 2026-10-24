@@ -1,5 +1,8 @@
 # Roadmap
 
+## 2026-10-24 — Signed webhook boundary / verification timestamps
+- [ ] Add bounded raw-byte signature verification before POST refusal; no success acknowledgement/storage/activation. Show honest last-check absence and blocker reasons for Messenger/Windsor; durable last-check evidence requires separately reviewed storage.
+
 ## 2026-10-24 — Inbox verification and Messenger lead provenance
 - [x] Added public preparation summary to `/inbox`: Facebook disconnected, App/Page approvals and Messenger webhook subscription unverified, webhook disabled, progress link. No provider check claimed; Support Desk query/actions unchanged.
 - [x] Lead dossier now displays saved source; exact Messenger sources show original arrival evidence unavailable and verification unverified. Existing schema has source/created_at/is_verified but no signed Messenger arrival/connection evidence; neither CRM creation time nor lead quality flag substitutes for it. Pure classifier excludes Facebook Ads sources.
