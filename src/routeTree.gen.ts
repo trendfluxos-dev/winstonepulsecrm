@@ -78,6 +78,7 @@ import { Route as ApiPublicAgentIncomingCallRouteImport } from './routes/api/pub
 import { Route as ApiPublicAgentLoginRouteImport } from './routes/api/public/agent/login'
 import { Route as ApiPublicAgentNoticesRouteImport } from './routes/api/public/agent/notices'
 import { Route as ApiPublicAgentPresenceRouteImport } from './routes/api/public/agent/presence'
+import { Route as ApiPublicAgentRecorderRouteImport } from './routes/api/public/agent/recorder'
 import { Route as ApiPublicAgentRemindersRouteImport } from './routes/api/public/agent/reminders'
 import { Route as ApiPublicAgentReportRouteImport } from './routes/api/public/agent/report'
 import { Route as ApiPublicAgentSupportRouteImport } from './routes/api/public/agent/support'
@@ -465,6 +466,11 @@ const ApiPublicAgentPresenceRoute = ApiPublicAgentPresenceRouteImport.update({
   path: '/api/public/agent/presence',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentRecorderRoute = ApiPublicAgentRecorderRouteImport.update({
+  id: '/api/public/agent/recorder',
+  path: '/api/public/agent/recorder',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAgentRemindersRoute = ApiPublicAgentRemindersRouteImport.update({
   id: '/api/public/agent/reminders',
   path: '/api/public/agent/reminders',
@@ -739,6 +745,7 @@ export interface FileRoutesByFullPath {
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/notices': typeof ApiPublicAgentNoticesRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
+  '/api/public/agent/recorder': typeof ApiPublicAgentRecorderRoute
   '/api/public/agent/reminders': typeof ApiPublicAgentRemindersRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
   '/api/public/agent/support': typeof ApiPublicAgentSupportRoute
@@ -847,6 +854,7 @@ export interface FileRoutesByTo {
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/notices': typeof ApiPublicAgentNoticesRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
+  '/api/public/agent/recorder': typeof ApiPublicAgentRecorderRoute
   '/api/public/agent/reminders': typeof ApiPublicAgentRemindersRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
   '/api/public/agent/support': typeof ApiPublicAgentSupportRoute
@@ -956,6 +964,7 @@ export interface FileRoutesById {
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
   '/api/public/agent/notices': typeof ApiPublicAgentNoticesRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
+  '/api/public/agent/recorder': typeof ApiPublicAgentRecorderRoute
   '/api/public/agent/reminders': typeof ApiPublicAgentRemindersRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
   '/api/public/agent/support': typeof ApiPublicAgentSupportRoute
@@ -1066,6 +1075,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/login'
     | '/api/public/agent/notices'
     | '/api/public/agent/presence'
+    | '/api/public/agent/recorder'
     | '/api/public/agent/reminders'
     | '/api/public/agent/report'
     | '/api/public/agent/support'
@@ -1174,6 +1184,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/login'
     | '/api/public/agent/notices'
     | '/api/public/agent/presence'
+    | '/api/public/agent/recorder'
     | '/api/public/agent/reminders'
     | '/api/public/agent/report'
     | '/api/public/agent/support'
@@ -1282,6 +1293,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/login'
     | '/api/public/agent/notices'
     | '/api/public/agent/presence'
+    | '/api/public/agent/recorder'
     | '/api/public/agent/reminders'
     | '/api/public/agent/report'
     | '/api/public/agent/support'
@@ -1391,6 +1403,7 @@ export interface RootRouteChildren {
   ApiPublicAgentLoginRoute: typeof ApiPublicAgentLoginRoute
   ApiPublicAgentNoticesRoute: typeof ApiPublicAgentNoticesRoute
   ApiPublicAgentPresenceRoute: typeof ApiPublicAgentPresenceRoute
+  ApiPublicAgentRecorderRoute: typeof ApiPublicAgentRecorderRoute
   ApiPublicAgentRemindersRoute: typeof ApiPublicAgentRemindersRoute
   ApiPublicAgentReportRoute: typeof ApiPublicAgentReportRoute
   ApiPublicAgentSupportRoute: typeof ApiPublicAgentSupportRoute
@@ -1915,6 +1928,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentPresenceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent/recorder': {
+      id: '/api/public/agent/recorder'
+      path: '/api/public/agent/recorder'
+      fullPath: '/api/public/agent/recorder'
+      preLoaderRoute: typeof ApiPublicAgentRecorderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/agent/reminders': {
       id: '/api/public/agent/reminders'
       path: '/api/public/agent/reminders'
@@ -2248,6 +2268,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAgentLoginRoute: ApiPublicAgentLoginRoute,
   ApiPublicAgentNoticesRoute: ApiPublicAgentNoticesRoute,
   ApiPublicAgentPresenceRoute: ApiPublicAgentPresenceRoute,
+  ApiPublicAgentRecorderRoute: ApiPublicAgentRecorderRoute,
   ApiPublicAgentRemindersRoute: ApiPublicAgentRemindersRoute,
   ApiPublicAgentReportRoute: ApiPublicAgentReportRoute,
   ApiPublicAgentSupportRoute: ApiPublicAgentSupportRoute,

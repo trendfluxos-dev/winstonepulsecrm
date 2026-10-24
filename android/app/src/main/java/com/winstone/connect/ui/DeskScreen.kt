@@ -41,6 +41,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Button
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -110,6 +111,7 @@ fun DeskScreen(
     val state by vm.state.collectAsStateSafe()
     val snackbar = remember { SnackbarHostState() }
     var tab by remember { mutableStateOf(TAB_HOME) }
+    var showRecorder by remember { mutableStateOf(false) }
     val callScope = rememberCoroutineScope()
     var callBlocked by remember { mutableStateOf<String?>(null) }
     var briefing by remember { mutableStateOf<org.json.JSONObject?>(null) }
@@ -415,6 +417,11 @@ fun DeskScreen(
                             items(calls) { CallCard(it, leads) }
                         }
                         else -> {
+                            item {
+                                Button(onClick = { showRecorder = true }, modifier = Modifier.fillMaxWidth()) {
+                                    Text("রেকর্ডার — ভয়েস নোট")
+                                }
+                            }
                             item { StatusCards(state) }
                             item {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -429,6 +436,8 @@ fun DeskScreen(
             }
         }
     }
+
+    if (showRecorder) RecorderScreen(onClose = { showRecorder = false })
 
     if (showNewLead) {
         NewLeadDialog(

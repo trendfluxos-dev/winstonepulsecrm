@@ -1,14 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import {
-  MAX_VOICE_NOTE_BYTES,
-  MIN_VOICE_NOTE_BYTES,
-  contentTypeFor,
-  extensionForMime,
-  normaliseInsight,
-  type RecorderInsight,
-} from "@/lib/recorder-shared";
+import { normaliseInsight, type RecorderInsight } from "@/lib/recorder-shared";
 
 /**
  * Recorder page: the agent's call recordings (captured by the Winstone Android
@@ -121,50 +114,8 @@ export const saveVoiceNote = createServerFn({ method: "POST" })
     await assertBriefingForCaller(me);
 
     const bytes = Uint8Array.from(atob(data.audioBase64), (ch) => ch.charCodeAt(0));
-    if (bytes.byteLength < MIN_VOICE_NOTE_BYTES) throw new Error("Recording too short — please record again");
-    if (bytes.byteLength > MAX_VOICE_NOTE_BYTES) throw new Error("Recording too long — keep notes under ~10 minutes");
-
-    const ext = extensionForMime(data.mimeType);
-    const contentType = contentTypeFor(ext);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const path = `voice-notes/${me.profile.id}/${crypto.randomUUID()}.${ext}`;
-    const up = await supabaseAdmin.storage.from("call-audio").upload(path, bytes, { contentType });
-    if (up.error) throw new Error("Could not save the audio");
-
-    const { transcribeWithAdapter } = await import("@/lib/stt-provider.server");
-    const stt = await transcribeWithAdapter(bytes, `note.${ext}`, contentType);
-    const transcript = stt.status === "failed" ? "" : stt.transcript.trim();
-
-    let insight: RecorderInsight | null = null;
-    let errorMessage: string | null = stt.status === "failed" ? (stt.errorMessage ?? "Transcription failed") : null;
-    if (transcript) {
-      try {
-        insight = await buildInsight(transcript);
-      } catch (e) {
-        errorMessage = e instanceof Error ? e.message : "AI summary failed";
-      }
-    } else if (!errorMessage) errorMessage = "No speech was heard in this recording";
-
-    const { data: row, error } = await supabaseAdmin
-      .from("recorder_insights")
-      .insert({
-        agent_id: me.profile.id,
-        source: "voice",
-        storage_path: path,
-        mime_type: contentType,
-        duration_seconds: data.durationSeconds,
-        transcript: transcript || null,
-        title: insight?.title || null,
-        summary: insight?.summary || null,
-        takeaways: insight?.takeaways ?? [],
-        action_items: insight?.actionItems ?? [],
-        status: insight ? "ready" : "failed",
-        error_message: errorMessage,
-      })
-      .select("id")
-      .single();
-    if (error) throw new Error("Could not save the voice note");
-    return { id: row.id, ok: Boolean(insight), error: errorMessage };
+    const { storeVoiceNote } = await import("@/lib/recorder.server");
+    return storeVoiceNote(me.profile.id, bytes, data.mimeType, data.durationSeconds);
   });
 
 export const buildCallInsight = createServerFn({ method: "POST" })
