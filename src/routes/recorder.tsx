@@ -9,7 +9,7 @@ import { AppShell } from "@/components/crm/AppShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { buildCallInsight, getRecorderPlayback, listRecorderHistory, saveVoiceNote } from "@/lib/recorder.functions";
+import { buildCallInsight, getRecorderPlayback, listRecorderHistory, retryVoiceNoteFn, saveVoiceNote } from "@/lib/recorder.functions";
 
 export const Route = createFileRoute("/recorder")({
   head: () => ({
@@ -109,6 +109,22 @@ function RecorderPage() {
 
 function VoiceNoteRecorder({ onSave }: { onSave: (blob: Blob, seconds: number) => Promise<void> }) {
   const [state, setState] = useState<"idle" | "recording" | "saving">("idle");
+  const [failed, setFailed] = useState<{ blob: Blob; seconds: number; reason: string } | null>(null);
+
+  async function trySave(blob: Blob, secs: number) {
+    setState("saving");
+    try {
+      await onSave(blob, secs);
+      setFailed(null);
+    } catch (e) {
+      const reason = e instanceof Error ? e.message : "সেভ হয়নি";
+      setFailed({ blob, seconds: secs, reason });
+      toast.error(reason);
+    } finally {
+      setState("idle");
+      setSeconds(0);
+    }
+  }
   const [seconds, setSeconds] = useState(0);
   const rec = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
@@ -131,15 +147,7 @@ function VoiceNoteRecorder({ onSave }: { onSave: (blob: Blob, seconds: number) =
         stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(chunks.current, { type: r.mimeType || mime || "audio/webm" });
         const secs = Math.max(1, Math.round((Date.now() - started.current) / 1000));
-        setState("saving");
-        try {
-          await onSave(blob, secs);
-        } catch (e) {
-          toast.error(e instanceof Error ? e.message : "সেভ হয়নি");
-        } finally {
-          setState("idle");
-          setSeconds(0);
-        }
+        await trySave(blob, secs);
       };
       started.current = Date.now();
       r.start(1000);
@@ -162,6 +170,18 @@ function VoiceNoteRecorder({ onSave }: { onSave: (blob: Blob, seconds: number) =
             <Mic className="mr-2 size-5" /> {state === "saving" ? "লেখা ও সারাংশ তৈরি হচ্ছে…" : "ভয়েস রেকর্ড শুরু করুন"}
           </Button>
         )}
+        {state === "saving" && <StatusLine tone="info" text="অডিও সেভ হচ্ছে → লেখা তৈরি → সারাংশ তৈরি…" />}
+        {failed && state === "idle" && (
+          <div className="w-full max-w-xs space-y-2">
+            <StatusLine tone="error" text={`অডিও সেভ হয়নি: ${failed.reason}`} />
+            <div className="flex gap-2">
+              <Button size="sm" className="flex-1" onClick={() => trySave(failed.blob, failed.seconds)}>
+                <RotateCw className="mr-1 size-4" /> আবার চেষ্টা করুন
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setFailed(null)}>বাদ দিন</Button>
+            </div>
+          </div>
+        )}
         <p className="text-center text-xs text-muted-foreground">মিটিং, সাইট ভিজিট বা কলের পরের নোট — Android ও iPhone দুটোতেই চলে</p>
       </CardContent>
     </Card>
@@ -179,6 +199,17 @@ function HistoryCard({ item, readOnly }: { item: Item; readOnly: boolean }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["recorder-history"] }),
     onError: (e) => toast.error((e as Error).message),
   });
+  const retryFn = useServerFn(retryVoiceNoteFn);
+  const retry = useMutation({
+    mutationFn: () => retryFn({ data: { id: item.id } }),
+    onSuccess: (r) => {
+      if (r.ok) toast.success("লেখা ও সারাংশ তৈরি হয়েছে");
+      else toast.error(r.error ?? "আবার ব্যর্থ হয়েছে");
+      return qc.invalidateQueries({ queryKey: ["recorder-history"] });
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+  const stage = "stage" in item ? item.stage : null;
   const Icon = item.kind === "voice" ? Mic : item.direction === "incoming_callback" ? PhoneIncoming : Phone;
 
   return (
@@ -195,6 +226,14 @@ function HistoryCard({ item, readOnly }: { item: Item; readOnly: boolean }) {
           <Badge variant="outline">{item.kind === "voice" ? "ভয়েস" : "কল"}</Badge>
         </button>
 
+        {stage === "ready" && <StatusLine tone="ok" text="অডিও সেভ ✓ · লেখা ✓ · সারাংশ ✓" />}
+        {stage === "transcript_failed" && <StatusLine tone="error" text="অডিও সেভ ✓ · লেখা তৈরি হয়নি" />}
+        {stage === "summary_failed" && <StatusLine tone="error" text="অডিও সেভ ✓ · লেখা ✓ · সারাংশ তৈরি হয়নি" />}
+        {stage && stage !== "ready" && !readOnly && (
+          <Button size="sm" variant="outline" disabled={retry.isPending} onClick={() => retry.mutate()}>
+            <RotateCw className="mr-1 size-4" /> {retry.isPending ? "আবার চেষ্টা হচ্ছে…" : stage === "transcript_failed" ? "লেখা ও সারাংশ আবার চেষ্টা করুন" : "সারাংশ আবার চেষ্টা করুন"}
+          </Button>
+        )}
         {item.summary && <p className="text-sm">{item.summary}</p>}
 
         {open && (
@@ -237,4 +276,9 @@ function HistoryCard({ item, readOnly }: { item: Item; readOnly: boolean }) {
       </CardContent>
     </Card>
   );
+}
+
+function StatusLine({ tone, text }: { tone: "ok" | "error" | "info"; text: string }) {
+  const cls = tone === "error" ? "text-destructive" : tone === "ok" ? "text-primary" : "text-muted-foreground";
+  return <p className={`text-xs font-medium ${cls}`} role={tone === "error" ? "alert" : "status"}>{text}</p>;
 }
