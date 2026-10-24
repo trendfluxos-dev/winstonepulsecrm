@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessengerInbox } from "@/components/crm/MessengerInbox";
+import { MessengerConnectionStatus } from "@/components/crm/MessengerConnectionStatus";
 import { useT } from "@/lib/i18n";
 import { useAdminToken } from "@/lib/local-session";
 import { listSupportInbox } from "@/lib/support-staff.functions";
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/inbox")({
 function InboxPage() {
   const t = useT();
   const [queue, setQueue] = useState("support");
-  return <AppShell><Tabs value={queue} onValueChange={setQueue}>
+  return <AppShell><MessengerConnectionStatus /><Tabs value={queue} onValueChange={setQueue}>
     <TabsList className="mb-4"><TabsTrigger value="support">Support Desk</TabsTrigger><TabsTrigger value="messenger">{t({ bn: "Messenger", en: "Messenger" })}</TabsTrigger></TabsList>
     <TabsContent value="support">{queue === "support" && <SupportInbox />}</TabsContent>
     <TabsContent value="messenger">{queue === "messenger" && <MessengerInbox />}</TabsContent>
