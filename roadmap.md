@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-24 — Messenger tab inside /inbox
+- [ ] Keep Support Desk in its own tab and embed the existing scoped Messenger view in a separate tab; only mount the selected queue.
+- [ ] Show reviewed-lead entry as unavailable for demo/disconnected messages; no fake lead or production write. Real conversion awaits verified stored messages, ownership/dedupe and canonical intake integration.
+- [ ] Run relevant offline tests; no deployment, schema, settings or secret changes.
+
 ## 2026-10-24 — Live Messenger request / remove phone guidance
 - [x] Removed `PhoneSyncGuide` and Desk-phone link from `src/routes/messenger-setup.tsx` and updated its metadata, per owner clarification; Desk guide and Android call/report/recording sync unchanged. No provider/auth/data/secret/deployment change.
 - [x] `bunx vitest run tests/messenger-readiness.test.ts tests/messenger-inbox.test.ts tests/messenger-protocol.test.ts tests/route-role-access.test.ts` — exit 0; 4 files / 50 tests passed, 22:46:12 UTC, 561ms. Automatic harness build OK 22:46:07 UTC. Source check confirms PhoneSyncGuide remains on Desk, absent from Messenger routes; no authenticated production flow attempted.
