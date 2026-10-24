@@ -1,5 +1,14 @@
 # Roadmap
 
+## 2026-10-25 — Production-safe audit remediation (code only)
+- [ ] A. Reconcile Android call/report/audio identifiers, server-confirmed statuses, checksum dedupe and durable recovery.
+- [ ] B. Distinguish access-lock causes and legitimate recovery without changing authorization or billing enforcement.
+- [ ] C. Evidence-based unassigned queue, canonical dedupe/eligible roster and human-reviewed assignment preview/history.
+- [ ] D. Deterministic overdue evidence classification and exclusion of unresolved/system-blocked employee fault.
+- [ ] E. Field dictionary, Asia/Dhaka periods and honest coverage/freshness labels.
+- [ ] F. Run available isolated tests; record exact outcomes and external blockers. No publication, live business reads, DB/schema/data changes, or mutating SQL.
+- Backend readiness checked only: Lovable Cloud auth/database responding normally; no business data queried.
+
 ## Active
 - [x] HQ WhatsApp agent summary date range and filtered formula-safe CSV implemented: 21 targeted tests pass, harness build OK; signed-in preview selects Oct 13–19/reset, desktop/428px checked without errors/overflow. Existing feed empty; populated totals/export unit-tested, no customer writes or access changes.
 - [x] HQ WhatsApp range/CSV published to crm.winstonebd.com: fresh signed-in live HQ selects Oct 13–19 and resets to all dates, export correctly disabled on empty feed; desktop/428px screenshots confirm controls, no page errors or overflow. Populated CSV covered by regression tests, not fabricated live rows.
