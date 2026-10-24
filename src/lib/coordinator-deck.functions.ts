@@ -119,7 +119,7 @@ async function buildAssignmentPreview(rows: Array<{ agentId: string; count: numb
   const agents = new Map((await pool.activeAgents()).map(a => [a.id, a]));
   const today = pool.dhakaToday(); const held = await pool.assignedTodayByAgent(today); const plan = await pool.dailyPlan();
   const taken = await pool.assignedPhoneKeys();
-  const candidates = [];
+  const candidates: import("@/lib/assignment-preview").PreviewLead[] = [];
   for (let offset = 0; offset < 20000; offset += 1000) {
     const page = await supabaseAdmin.from("leads").select("id, name, phone_number, created_at")
       .is("assigned_to", null).is("assigned_agent_id", null).eq("status", "pending")
