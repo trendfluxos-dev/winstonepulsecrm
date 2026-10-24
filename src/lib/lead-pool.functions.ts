@@ -378,7 +378,8 @@ const StoreInput = z.object({
   source: z.string().trim().max(60).nullable().optional(),
   temperature: z.string().trim().max(20).nullable().optional(),
   quality: z.enum(["any", "missing_reference", "invalid_phone"]).default("any"),
-  limit: z.number().int().min(1).max(MAX_DAILY_LEADS_PER_AGENT).default(200),
+  // Read-only listing page size (NOT the 50/day assignment cap).
+  limit: z.number().int().min(1).max(500).default(200),
 });
 
 const BD_MOBILE = /^(?:\+?88)?01[3-9]\d{8}$/;
