@@ -253,14 +253,15 @@ export async function openCallReport(input: {
     // A different call while a report is still open: never fold it into the
     // previous lead's report. It waits in the queue and becomes the next popup
     // as soon as the open one is submitted, so every call keeps its own report.
-    const existingQueued = await supabaseAdmin
+    let queuedQuery = supabaseAdmin
       .from("call_reports")
       .select("id, recording_id")
       .eq("agent_id", input.agentId)
       .eq("status", "queued")
-      .eq("lead_id", input.leadId)
-      .eq("recording_id", input.recordingId ?? "")
-      .maybeSingle();
+      .eq("lead_id", input.leadId);
+    queuedQuery = input.recordingId ? queuedQuery.eq("recording_id", input.recordingId) : queuedQuery.is("recording_id", null);
+    const existingQueued = await queuedQuery.maybeSingle();
+    if (existingQueued.error) throw new Error(existingQueued.error.message);
     if (existingQueued.data) {
       if (input.recordingId && !existingQueued.data.recording_id) {
         await supabaseAdmin
