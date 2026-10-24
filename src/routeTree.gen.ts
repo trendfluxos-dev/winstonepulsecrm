@@ -35,6 +35,7 @@ import { Route as LeadhubRouteImport } from './routes/leadhub'
 import { Route as LiveLeadsRouteImport } from './routes/live-leads'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as MessengerRouteImport } from './routes/messenger'
 import { Route as MigrationRouteImport } from './routes/migration'
 import { Route as MigrationExportRouteImport } from './routes/migration-export'
 import { Route as NewsRouteImport } from './routes/news'
@@ -108,6 +109,7 @@ import { Route as ApiPublicIngestOutcomeRouteImport } from './routes/api/public/
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
 import { Route as ApiPublicIngestReprocessRouteImport } from './routes/api/public/ingest/reprocess'
 import { Route as ApiPublicIntegrationsStatusRouteImport } from './routes/api/public/integrations/status'
+import { Route as ApiPublicMetaMessengerRouteImport } from './routes/api/public/meta/messenger'
 import { Route as ApiPublicOsEventsRouteImport } from './routes/api/public/os/events'
 import { Route as ApiPublicPaddleWebhookRouteImport } from './routes/api/public/paddle/webhook'
 import { Route as ApiPublicReportsSummaryRouteImport } from './routes/api/public/reports/summary'
@@ -245,6 +247,11 @@ const ManualRoute = ManualRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessengerRoute = MessengerRouteImport.update({
+  id: '/messenger',
+  path: '/messenger',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MigrationRoute = MigrationRouteImport.update({
@@ -631,6 +638,11 @@ const ApiPublicIntegrationsStatusRoute =
     path: '/api/public/integrations/status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicMetaMessengerRoute = ApiPublicMetaMessengerRouteImport.update({
+  id: '/api/public/meta/messenger',
+  path: '/api/public/meta/messenger',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicOsEventsRoute = ApiPublicOsEventsRouteImport.update({
   id: '/api/public/os/events',
   path: '/api/public/os/events',
@@ -702,6 +714,7 @@ export interface FileRoutesByFullPath {
   '/live-leads': typeof LiveLeadsRoute
   '/manual': typeof ManualRoute
   '/mcp': typeof McpRoute
+  '/messenger': typeof MessengerRoute
   '/migration': typeof MigrationRoute
   '/migration-export': typeof MigrationExportRoute
   '/news': typeof NewsRoute
@@ -775,6 +788,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
   '/api/public/os/events': typeof ApiPublicOsEventsRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
@@ -811,6 +825,7 @@ export interface FileRoutesByTo {
   '/live-leads': typeof LiveLeadsRoute
   '/manual': typeof ManualRoute
   '/mcp': typeof McpRoute
+  '/messenger': typeof MessengerRoute
   '/migration': typeof MigrationRoute
   '/migration-export': typeof MigrationExportRoute
   '/news': typeof NewsRoute
@@ -884,6 +899,7 @@ export interface FileRoutesByTo {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
   '/api/public/os/events': typeof ApiPublicOsEventsRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
@@ -921,6 +937,7 @@ export interface FileRoutesById {
   '/live-leads': typeof LiveLeadsRoute
   '/manual': typeof ManualRoute
   '/mcp': typeof McpRoute
+  '/messenger': typeof MessengerRoute
   '/migration': typeof MigrationRoute
   '/migration-export': typeof MigrationExportRoute
   '/news': typeof NewsRoute
@@ -994,6 +1011,7 @@ export interface FileRoutesById {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
   '/api/public/os/events': typeof ApiPublicOsEventsRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
@@ -1032,6 +1050,7 @@ export interface FileRouteTypes {
     | '/live-leads'
     | '/manual'
     | '/mcp'
+    | '/messenger'
     | '/migration'
     | '/migration-export'
     | '/news'
@@ -1105,6 +1124,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/meta/messenger'
     | '/api/public/os/events'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
@@ -1141,6 +1161,7 @@ export interface FileRouteTypes {
     | '/live-leads'
     | '/manual'
     | '/mcp'
+    | '/messenger'
     | '/migration'
     | '/migration-export'
     | '/news'
@@ -1214,6 +1235,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/meta/messenger'
     | '/api/public/os/events'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
@@ -1250,6 +1272,7 @@ export interface FileRouteTypes {
     | '/live-leads'
     | '/manual'
     | '/mcp'
+    | '/messenger'
     | '/migration'
     | '/migration-export'
     | '/news'
@@ -1323,6 +1346,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/meta/messenger'
     | '/api/public/os/events'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
@@ -1360,6 +1384,7 @@ export interface RootRouteChildren {
   LiveLeadsRoute: typeof LiveLeadsRoute
   ManualRoute: typeof ManualRoute
   McpRoute: typeof McpRoute
+  MessengerRoute: typeof MessengerRoute
   MigrationRoute: typeof MigrationRoute
   MigrationExportRoute: typeof MigrationExportRoute
   NewsRoute: typeof NewsRoute
@@ -1433,6 +1458,7 @@ export interface RootRouteChildren {
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
   ApiPublicIngestReprocessRoute: typeof ApiPublicIngestReprocessRoute
   ApiPublicIntegrationsStatusRoute: typeof ApiPublicIntegrationsStatusRoute
+  ApiPublicMetaMessengerRoute: typeof ApiPublicMetaMessengerRoute
   ApiPublicOsEventsRoute: typeof ApiPublicOsEventsRoute
   ApiPublicPaddleWebhookRoute: typeof ApiPublicPaddleWebhookRoute
   ApiPublicReportsSummaryRoute: typeof ApiPublicReportsSummaryRoute
@@ -1625,6 +1651,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messenger': {
+      id: '/messenger'
+      path: '/messenger'
+      fullPath: '/messenger'
+      preLoaderRoute: typeof MessengerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/migration': {
@@ -2138,6 +2171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIntegrationsStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/meta/messenger': {
+      id: '/api/public/meta/messenger'
+      path: '/api/public/meta/messenger'
+      fullPath: '/api/public/meta/messenger'
+      preLoaderRoute: typeof ApiPublicMetaMessengerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/os/events': {
       id: '/api/public/os/events'
       path: '/api/public/os/events'
@@ -2224,6 +2264,7 @@ const rootRouteChildren: RootRouteChildren = {
   LiveLeadsRoute: LiveLeadsRoute,
   ManualRoute: ManualRoute,
   McpRoute: McpRoute,
+  MessengerRoute: MessengerRoute,
   MigrationRoute: MigrationRoute,
   MigrationExportRoute: MigrationExportRoute,
   NewsRoute: NewsRoute,
@@ -2298,6 +2339,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
   ApiPublicIngestReprocessRoute: ApiPublicIngestReprocessRoute,
   ApiPublicIntegrationsStatusRoute: ApiPublicIntegrationsStatusRoute,
+  ApiPublicMetaMessengerRoute: ApiPublicMetaMessengerRoute,
   ApiPublicOsEventsRoute: ApiPublicOsEventsRoute,
   ApiPublicPaddleWebhookRoute: ApiPublicPaddleWebhookRoute,
   ApiPublicReportsSummaryRoute: ApiPublicReportsSummaryRoute,
