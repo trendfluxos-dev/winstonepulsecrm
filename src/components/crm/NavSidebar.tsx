@@ -62,6 +62,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   "/news": Newspaper,
   "/site-visits": MapPin,
   "/reports": BarChart3,
+  "/facebook-ads": BarChart3,
   "/system": Server,
   "/ingest": DatabaseZap,
   "/migration": Boxes,
@@ -79,7 +80,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
 const GROUPS: { title: { bn: string; en: string }; routes: string[] }[] = [
   { title: { bn: "প্রধান", en: "Main" }, routes: ["/", "/desk", "/coach"] },
   { title: { bn: "লিড ও বিক্রয়", en: "Leads & sales" }, routes: ["/leadhub", "/live-leads", "/booking-review", "/sales-intel", "/news", "/site-visits", "/projects", "/inventory", "/unit-board", "/qualify", "/reports"] },
-  { title: { bn: "ম্যানেজমেন্ট", en: "Management" }, routes: ["/hq", "/contributions", "/audit-log", "/staff-portal"] },
+  { title: { bn: "ম্যানেজমেন্ট", en: "Management" }, routes: ["/hq", "/contributions", "/audit-log", "/staff-portal", "/facebook-ads"] },
   { title: { bn: "সাপোর্ট", en: "Support" }, routes: ["/inbox", "/tickets", "/customers", "/support-admin"] },
   {
     title: { bn: "আইটি ও নিরাপত্তা", en: "IT & security" },
