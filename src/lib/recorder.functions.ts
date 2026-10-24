@@ -216,7 +216,7 @@ export const getRecorderPlayback = createServerFn({ method: "POST" })
     const row = q.data as { agent_id: string; storage_path: string | null; audio_url?: string | null } | null;
     if (!row) throw new Error("Recording not found");
     if (me.scope !== "authority" && row.agent_id !== me.profile?.id) throw new Error("This recording belongs to another agent");
-    const path = row.storage_path || row.audio_url;
+    const path = data.kind === "call" ? row.audio_url || row.storage_path : row.storage_path;
     if (!path) throw new Error("This recording has no audio");
     const { data: signed, error } = await supabaseAdmin.storage.from("call-audio").createSignedUrl(path, 2 * 60);
     if (error || !signed) throw new Error("Could not create playback link");
