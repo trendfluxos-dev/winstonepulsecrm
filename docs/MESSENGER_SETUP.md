@@ -70,6 +70,17 @@ Use the managed Lovable Cloud encrypted secret store for `META_PAGE_ACCESS_TOKEN
 
 ## Validation boundaries
 
+### Exposed-token replacement and confirmation
+
+Replace only through the managed secure update form or Project Settings → Secrets, never through CRM inputs, uploads, chat or source edits. The owner saved a replacement `META_PAGE_ACCESS_TOKEN` through the secure form in this follow-up; no value was available to the assistant. `META_PAGE_ID` is a Page identifier, not a revocable access token, and was not changed. Other exposed user/system-user tokens must also be revoked at their issuing Meta authorization; they are not configured token sources in the current CRM.
+
+1. In the issuing Meta app/business authorization, revoke the exposed token/authorization using the applicable owner controls; merely issuing a new token is not proof the previous one stopped working. Review affected app/system-user grants and issue a least-privilege replacement for the intended Page. Do not submit old tokens here to test them.
+2. Save the replacement in the existing managed Page-token secret. Do not retain a backup token or fallback in app code. Current Meta diagnostics read that single configuration inside the handler on every request; the Messenger adapter still refuses ingestion/replies.
+3. `/inbox` → Check secure storage requires full IT PIN, performs no provider or database calls, returns configuration presence and actual attempt time only, and cannot certify a changed value or revocation. No hashes, fragments, lengths or credential comparisons are exposed. Results are session-only, not a rotation audit record.
+4. Preview receives updated secrets immediately; production replacement requires separately authorized publishing and a subsequent live check. No publication occurred in this task, so production may still hold the prior configuration. Provider revocation must not wait for publishing. After separate release authorization, check the published credential-backed flow and review Meta-side revocation evidence without exposing tokens. Until both are established, report old-token non-use/revocation as **unverified**, not complete.
+
+The storage check never claims App/Page permissions or delivery, enables Messenger, or accepts user assertions as provider proof. No live old-token test or persistent audit storage was added.
+
 ### Manual safe Meta connection test
 
 `/inbox` includes a full-IT-PIN-only manual test. It reads configured Page identity and Page/app subscriptions with GET requests, server-only Authorization headers, 10-second request deadlines, bounded response bodies and no redirects. No credentials, raw provider responses, IDs or token-derived data are returned or logged; failures are allowlisted codes. The test does not fetch customer conversations, subscribe an app, write data, activate handlers or send messages. Page identity/association and both `messages` subscription levels can be checked, but App Review/Live mode/Advanced Access and `pages_messaging` approval remain **unverified** without authoritative evidence. A subscription is not a successful signed delivery. Results and Dhaka check time remain only in the current UI session; no durable history is claimed.
