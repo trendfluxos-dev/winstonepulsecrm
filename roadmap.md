@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-24 — Exposed Meta credential replacement
+- [x] Owner saved replacement Page access token in the existing encrypted secret through the secure update form; no values inspected. Added full-IT-PIN-only, no-network storage check on `/inbox`: presence only, actual check time, revocation and production replacement explicitly unverified. Runtime diagnostics use one handler-only secret source, no cached/legacy token fallback. Page ID unchanged; no other configured Meta token was listed.
+- [ ] Old token revocation/non-use requires owner Meta-side revocation evidence and separately authorized production release/live verification; no deploy, live provider request, old-token comparison, DB/schema/auth changes or activation. Other exposed external tokens must be revoked by their issuing Meta owner.
+- Verification pending: targeted offline credential-safety and Messenger regression tests; authenticated live check prohibited by current production boundary.
+
 ## 2026-10-24 — Safe manual Meta connection test
 - [x] Added `/inbox` manual full-IT-PIN-only test: configured Page identity, selected App/Page association and both messages subscription levels; GET-only server Authorization, 10s deadlines, 64KB responses, no redirects/raw error logs/token output. Missing configuration and access/subscription failures return safe codes and actual attempt time in Dhaka; no persisted history, customer reads or activation.
 - [x] `bunx vitest run tests/meta-connection-test.test.ts tests/meta-connection-boundary.test.ts tests/messenger-webhook.test.ts tests/messenger-inbox.test.ts tests/messenger-readiness.test.ts tests/integration-boundaries.test.ts` — 6 files / 31 tests passed, exit 0, 23:18:08 UTC; harness build OK 23:18:01 UTC after correcting optional-property/fallback types. Synthetic transport tests only; no live Meta calls, secret changes, DB, migration or deployment.

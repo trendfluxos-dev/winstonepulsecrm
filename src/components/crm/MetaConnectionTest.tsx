@@ -4,7 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useAdminToken } from "@/lib/local-session";
-import { inspectMetaConnection } from "@/lib/meta-connection-test.functions";
+import { inspectMetaConnection, inspectMetaCredentialSafety } from "@/lib/meta-connection-test.functions";
 import type { MetaCheck } from "@/lib/meta-connection-test.server";
 
 const reasons: Record<string, { bn: string; en: string }> = {
@@ -22,6 +22,10 @@ export function MetaConnectionTest() {
   const t = useT();
   const adminToken = useAdminToken();
   const inspect = useServerFn(inspectMetaConnection);
+  const inspectSafety = useServerFn(inspectMetaCredentialSafety);
+  const [safety, setSafety] = useState<Awaited<ReturnType<typeof inspectMetaCredentialSafety>> | null>(null);
+  const [safetyPending, setSafetyPending] = useState(false);
+  const [safetyDenied, setSafetyDenied] = useState(false);
   const [result, setResult] = useState<MetaCheck | null>(null);
   const [pending, setPending] = useState(false);
   const [denied, setDenied] = useState(false);
@@ -32,7 +36,23 @@ export function MetaConnectionTest() {
     catch { setDenied(true); }
     finally { setPending(false); }
   }
+  async function checkSafety() {
+    setSafetyPending(true); setSafetyDenied(false); setSafety(null);
+    try { setSafety(await inspectSafety({ data: { adminToken } })); }
+    catch { setSafetyDenied(true); }
+    finally { setSafetyPending(false); }
+  }
   return <div className="space-y-2">
+    <div className="space-y-2 text-xs text-muted-foreground">
+      <p>{t({ bn: "উন্মুক্ত token বদল: Meta-তে পুরোনো অনুমোদন বাতিল করুন, নতুন Page token তৈরি করুন এবং Project Settings → Secrets-এর বিদ্যমান META_PAGE_ACCESS_TOKEN বদলান। এখানে token লিখবেন না।", en: "Exposed token replacement: revoke the old authorization in Meta, issue a new Page token, and replace the existing META_PAGE_ACCESS_TOKEN in Project Settings → Secrets. Do not enter tokens here." })}</p>
+      <Button variant="outline" size="sm" disabled={safetyPending} onClick={checkSafety}><ShieldCheck className="size-4" />{t(safetyPending ? { bn: "পরীক্ষা চলছে…", en: "Checking…" } : { bn: "নিরাপদ সংরক্ষণ পরীক্ষা", en: "Check secure storage" })}</Button>
+      {safetyDenied && <p role="alert" className="text-destructive">{t({ bn: "পরীক্ষা হয়নি; পূর্ণ IT PIN প্রয়োজন।", en: "Not checked; full IT PIN required." })}</p>}
+      {safety && <div role="status" className="space-y-1">
+        <p>{t({ bn: "সংরক্ষণ পরীক্ষা (ঢাকা): ", en: "Storage check (Dhaka): " })}{new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "medium" }).format(new Date(safety.checkedAt))}</p>
+        <p>{t(safety.configured ? { bn: "সার্ভারের গোপন সংরক্ষণে Page token সেট আছে; মান বা নতুন/পুরোনো পরিচয় প্রকাশ/যাচাই করা হয়নি।", en: "A Page token is set in server secret storage; its value and whether it is new or old were not exposed or verified." } : { bn: "সার্ভারের গোপন সংরক্ষণে Page token সেট নেই।", en: "No Page token is set in server secret storage." })}</p>
+        <p>{t({ bn: "পুরোনো token Meta-তে বাতিল এবং লাইভ সিস্টেমে নতুন token ব্যবহার—দুটিই অযাচাইকৃত। প্রকাশের আলাদা অনুমতি ও পরবর্তী লাইভ পরীক্ষা দরকার; মেসেজ সিঙ্ক বন্ধ।", en: "Old-token revocation in Meta and replacement in production are both unverified. Separately authorized publishing and a subsequent live check are required; message sync remains disabled." })}</p>
+      </div>}
+    </div>
     <Button variant="outline" size="sm" disabled={pending} onClick={check}><ShieldCheck className="size-4" />{t(pending ? { bn: "পরীক্ষা চলছে…", en: "Checking…" } : { bn: "নিরাপদ Meta সংযোগ পরীক্ষা", en: "Safe Meta connection test" })}</Button>
     {denied && <p role="alert" className="text-xs text-destructive">{t({ bn: "পরীক্ষা হয়নি; পূর্ণ IT PIN দিয়ে IT Console খুলতে হবে।", en: "Not checked; unlock IT Console with the full IT PIN first." })}</p>}
     {result && <div role="status" className="space-y-1 text-xs text-muted-foreground"><p>{t({ bn: "সর্বশেষ পরীক্ষা (ঢাকা): ", en: "Last check (Dhaka): " })}{new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "medium" }).format(new Date(result.checkedAt))}</p><p>{t({ bn: "Page পরিচয়: ", en: "Page identity: " })}{t(result.page === "identity_verified" ? { bn: "মিলেছে", en: "Matched" } : { bn: "যাচাই বাকি", en: "Unverified" })}</p><p>{t({ bn: "App/Page subscription: ", en: "App/Page subscription: " })}{t(result.webhook === "subscriptions_verified" ? { bn: "মিলেছে", en: "Matched" } : { bn: "যাচাই বাকি", en: "Unverified" })}</p><p>{t(reason ?? { bn: "Meta পরীক্ষা সম্পন্ন হয়নি।", en: "Meta check did not complete." })}</p></div>}
