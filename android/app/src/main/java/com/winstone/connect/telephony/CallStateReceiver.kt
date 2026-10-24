@@ -38,6 +38,7 @@ class CallStateReceiver : BroadcastReceiver() {
             TelephonyManager.EXTRA_STATE_OFFHOOK -> {
                 if (lastState == TelephonyManager.EXTRA_STATE_OFFHOOK) return
                 lastState = state
+                offHookAt = System.currentTimeMillis()
                 CallRecordingService.start(app)
                 val rec = recorder(app)
                 val started = rec.start(LiveCallLauncher.activeLeadId)
@@ -99,6 +100,24 @@ class CallStateReceiver : BroadcastReceiver() {
                     )
                 } else if (captured != null) {
                     captured.first.delete()
+                }
+
+                // The app could not capture both sides itself: pick up the file
+                // the phone's own call recorder saved (if it has one turned on).
+                if (wasOnCall && !(captured != null && uploadable)) {
+                    val number = when {
+                        outgoing -> LiveCallLauncher.activePhone.orEmpty()
+                        DialerCallTracker.callUid != null -> DialerCallTracker.number.orEmpty()
+                        else -> IncomingCallTracker.number.orEmpty()
+                    }
+                    com.winstone.connect.data.sync.PhoneRecordingPickupWorker.schedule(
+                        context = app,
+                        callStartMs = offHookAt,
+                        callEndMs = System.currentTimeMillis(),
+                        phoneNumber = number,
+                        leadId = if (outgoing) endedLeadId else null,
+                        incoming = !outgoing && DialerCallTracker.callUid == null,
+                    )
                 }
 
                 val duration = captured?.second ?: 0
@@ -248,6 +267,7 @@ class CallStateReceiver : BroadcastReceiver() {
     companion object {
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         private var lastState: String? = null
+        private var offHookAt: Long = 0L
         private var shared: CallRecorder? = null
 
         /** One recorder per process so OFFHOOK and IDLE talk to the same instance. */
