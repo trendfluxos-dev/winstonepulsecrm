@@ -1081,7 +1081,8 @@ private fun StatusCards(state: DeskUiState) {
         WinCard {
             Text("সিঙ্ক", fontWeight = FontWeight.Bold)
             Text(
-                if (state.error == null) "সার্ভারের সাথে সংযোগ ঠিক আছে"
+                if (state.error == null && state.lastSyncedAt != null) "সর্বশেষ পড়া সফল হয়েছে; অডিও আপলোড আলাদা"
+                else if (state.error == null) "সার্ভারের নিশ্চিত তথ্যের অপেক্ষায়"
                 else "সংযোগে সমস্যা: ${state.error}",
                 fontSize = 13.sp,
                 color = if (state.error == null) WinGreen else WinRed,
@@ -1095,6 +1096,15 @@ private fun StatusCards(state: DeskUiState) {
                 "পাঠানোর অপেক্ষায়: ${state.sync.pending} · ব্যর্থ: ${state.sync.failed}",
                 fontSize = 12.sp,
                 color = if (state.sync.failed > 0) WinRed else WinInkMuted,
+            )
+            val syncTime = java.text.SimpleDateFormat("dd MMM HH:mm", java.util.Locale.getDefault()).apply { timeZone = java.util.TimeZone.getTimeZone("Asia/Dhaka") }
+            Text(
+                "অডিও সার্ভারে নিশ্চিত: ${if (state.sync.lastAudioUploadedAtMillis > 0) syncTime.format(java.util.Date(state.sync.lastAudioUploadedAtMillis)) else "যাচাই হয়নি"}",
+                fontSize = 12.sp, color = WinInkMuted,
+            )
+            Text(
+                "রিপোর্ট সার্ভারে নিশ্চিত: ${if (state.sync.lastReportSyncedAtMillis > 0) syncTime.format(java.util.Date(state.sync.lastReportSyncedAtMillis)) else "যাচাই হয়নি"} · Asia/Dhaka",
+                fontSize = 12.sp, color = WinInkMuted,
             )
             state.sync.lastError?.let {
                 Text("শেষ সমস্যা: $it", fontSize = 11.sp, color = WinRed)

@@ -164,11 +164,12 @@ export const assignLeadCounts = createServerFn({ method: "POST" })
     const { logAudit } = await import("@/lib/audit.server");
 
     // Same requestId already ran (double click / retry) → return that result.
-    const { data: prior } = await supabaseAdmin
+    const { data: prior, error: priorError } = await supabaseAdmin
       .from("audit_logs")
       .select("metadata")
       .eq("action", "lead_assigned")
       .contains("metadata", { requestId: data.requestId });
+    if (priorError) throw new Error("Assignment replay history unavailable");
     if (prior && prior.length) {
       const results = prior.map((p) => {
         const m = (p.metadata ?? {}) as { agentId?: string; count?: number; requested?: number };
@@ -205,9 +206,10 @@ export const assignLeadCounts = createServerFn({ method: "POST" })
         moved = (updated ?? []).map(r => r.id);
       }
       if (moved.length) {
-        await supabaseAdmin.from("lead_assignments").insert(
+        const historyWrite = await supabaseAdmin.from("lead_assignments").insert(
           moved.map((id) => ({ lead_id: id, from_agent_id: null, to_agent_id: agent.id, source: "leadhub_count" })),
         );
+        if (historyWrite.error) throw new Error("Assignment saved but history write failed; IT review required before retry");
       }
       await logAudit({
         action: "lead_assigned",

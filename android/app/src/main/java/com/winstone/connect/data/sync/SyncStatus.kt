@@ -53,12 +53,12 @@ object SyncStatus {
     fun queued(context: Context) = update(context) { it.copy(pending = it.pending + 1) }
 
     @Synchronized
-    fun succeeded(context: Context, audioUpload: Boolean = false) = update(context) {
+    fun succeeded(context: Context, audioUpload: Boolean = false, reportSync: Boolean = false) = update(context) {
         it.copy(
             pending = (it.pending - 1).coerceAtLeast(0),
             lastSyncedAtMillis = System.currentTimeMillis(),
             lastAudioUploadedAtMillis = if (audioUpload) System.currentTimeMillis() else it.lastAudioUploadedAtMillis,
-            lastReportSyncedAtMillis = if (!audioUpload) System.currentTimeMillis() else it.lastReportSyncedAtMillis,
+            lastReportSyncedAtMillis = if (reportSync) System.currentTimeMillis() else it.lastReportSyncedAtMillis,
             lastError = null,
         )
     }

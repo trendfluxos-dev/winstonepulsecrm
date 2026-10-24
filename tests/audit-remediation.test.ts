@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { audioChecksum, audioStored, assertAudioIdentity, recordingAvailability, reconcileLifecycle, uploadConfirmed } from "@/lib/call-reconciliation";
+import { audioChecksum, audioStored, assertAudioIdentity, recordingAvailability, reconcileLifecycle, lifecyclePatch, uploadConfirmed } from "@/lib/call-reconciliation";
 import { accountLock, ACCESS_RECOVERY } from "@/lib/access-recovery";
 import { selectAssignmentCandidates, eligibleRoster, assertPreviewUnchanged } from "@/lib/assignment-preview";
 import { classifyOverdue, faultOverdueCount, type OverdueEvidence } from "@/lib/overdue-evidence";
@@ -16,6 +16,9 @@ describe("call reconciliation evidence", () => {
   it("replay keeps terminal lifecycle and confirmed audio", () => {
     expect(reconcileLifecycle(row, { call_status: "initiated", recording_status: "unknown" })).toEqual({ call_status: "completed", recording_status: "available" });
     expect(reconcileLifecycle(row, { call_status: "no_answer", recording_status: "not_available" }).call_status).toBe("completed");
+  });
+  it("stale lifecycle replay cannot erase timestamps or duration", () => {
+    expect(lifecyclePatch(row, { call_status: "ringing", recording_status: "unknown", duration_seconds: 0 })).toEqual({ call_status: "completed", recording_status: "available" });
   });
   it("accepts same owned call checksum idempotently", () => {
     expect(() => assertAudioIdentity(row, "a", "l", "hash")).not.toThrow();

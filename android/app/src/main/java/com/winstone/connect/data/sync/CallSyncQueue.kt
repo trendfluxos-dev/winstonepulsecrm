@@ -356,7 +356,7 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 }
 
                 else -> Result.failure()
-            }.also { if (it is Result.Success) SyncStatus.succeeded(applicationContext, kind == CallSyncQueue.KIND_RECORDING) }
+            }.also { if (it is Result.Success) SyncStatus.succeeded(applicationContext, kind == CallSyncQueue.KIND_RECORDING, kind == CallSyncQueue.KIND_REPORT_OPEN || kind == CallSyncQueue.KIND_REPORT_SUBMIT) }
         } catch (error: Exception) {
             // 4xx = bad payload, retrying will not help; anything else is transient.
             val message = error.message.orEmpty()
