@@ -855,6 +855,13 @@
       "when": 1792760743126,
       "tag": "0121_daily_lead_cap_and_architecture_charge",
       "breakpoints": true
+    },
+    {
+      "idx": 122,
+      "version": "7",
+      "when": 1792861176726,
+      "tag": "0122_create_recorder_insights",
+      "breakpoints": true
     }
   ]
 }

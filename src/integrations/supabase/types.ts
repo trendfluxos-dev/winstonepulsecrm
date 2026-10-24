@@ -3925,6 +3925,78 @@ export type Database = {
         }
         Relationships: []
       }
+      recorder_insights: {
+        Row: {
+          action_items: Json
+          agent_id: string
+          created_at: string
+          duration_seconds: number
+          error_message: string | null
+          id: string
+          mime_type: string | null
+          recording_id: string | null
+          source: string
+          status: string
+          storage_path: string | null
+          summary: string | null
+          takeaways: Json
+          title: string | null
+          transcript: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_items?: Json
+          agent_id: string
+          created_at?: string
+          duration_seconds?: number
+          error_message?: string | null
+          id?: string
+          mime_type?: string | null
+          recording_id?: string | null
+          source: string
+          status?: string
+          storage_path?: string | null
+          summary?: string | null
+          takeaways?: Json
+          title?: string | null
+          transcript?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_items?: Json
+          agent_id?: string
+          created_at?: string
+          duration_seconds?: number
+          error_message?: string | null
+          id?: string
+          mime_type?: string | null
+          recording_id?: string | null
+          source?: string
+          status?: string
+          storage_path?: string | null
+          summary?: string | null
+          takeaways?: Json
+          title?: string | null
+          transcript?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recorder_insights_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recorder_insights_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "call_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recording_doc_backups: {
         Row: {
           created_at: string
