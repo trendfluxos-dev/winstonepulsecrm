@@ -26,6 +26,7 @@ import { AppShell } from "@/components/crm/AppShell";
 import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
 import { MyCallLog } from "@/components/crm/MyCallLog";
 import { MyPhoneSetup } from "@/components/crm/MyPhoneSetup";
+import { PhoneSyncGuide } from "@/components/crm/PhoneSyncGuide";
 import { MyProfileCard } from "@/components/crm/MyProfileCard";
 import { CarryOverLeads } from "@/components/crm/CarryOverLeads";
 import { LeadDayBoard } from "@/components/crm/LeadDayBoard";
@@ -377,6 +378,7 @@ function DeskPage() {
             <div className="space-y-4 border-t border-border p-3 sm:p-4">
               <MyProfileCard />
               <MyPhoneSetup />
+              <PhoneSyncGuide />
             </div>
           </details>
 

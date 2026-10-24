@@ -36,6 +36,7 @@ import { Route as LiveLeadsRouteImport } from './routes/live-leads'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MessengerRouteImport } from './routes/messenger'
+import { Route as MessengerSetupRouteImport } from './routes/messenger-setup'
 import { Route as MigrationRouteImport } from './routes/migration'
 import { Route as MigrationExportRouteImport } from './routes/migration-export'
 import { Route as NewsRouteImport } from './routes/news'
@@ -252,6 +253,11 @@ const McpRoute = McpRouteImport.update({
 const MessengerRoute = MessengerRouteImport.update({
   id: '/messenger',
   path: '/messenger',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessengerSetupRoute = MessengerSetupRouteImport.update({
+  id: '/messenger-setup',
+  path: '/messenger-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MigrationRoute = MigrationRouteImport.update({
@@ -715,6 +721,7 @@ export interface FileRoutesByFullPath {
   '/manual': typeof ManualRoute
   '/mcp': typeof McpRoute
   '/messenger': typeof MessengerRoute
+  '/messenger-setup': typeof MessengerSetupRoute
   '/migration': typeof MigrationRoute
   '/migration-export': typeof MigrationExportRoute
   '/news': typeof NewsRoute
@@ -826,6 +833,7 @@ export interface FileRoutesByTo {
   '/manual': typeof ManualRoute
   '/mcp': typeof McpRoute
   '/messenger': typeof MessengerRoute
+  '/messenger-setup': typeof MessengerSetupRoute
   '/migration': typeof MigrationRoute
   '/migration-export': typeof MigrationExportRoute
   '/news': typeof NewsRoute
@@ -938,6 +946,7 @@ export interface FileRoutesById {
   '/manual': typeof ManualRoute
   '/mcp': typeof McpRoute
   '/messenger': typeof MessengerRoute
+  '/messenger-setup': typeof MessengerSetupRoute
   '/migration': typeof MigrationRoute
   '/migration-export': typeof MigrationExportRoute
   '/news': typeof NewsRoute
@@ -1051,6 +1060,7 @@ export interface FileRouteTypes {
     | '/manual'
     | '/mcp'
     | '/messenger'
+    | '/messenger-setup'
     | '/migration'
     | '/migration-export'
     | '/news'
@@ -1162,6 +1172,7 @@ export interface FileRouteTypes {
     | '/manual'
     | '/mcp'
     | '/messenger'
+    | '/messenger-setup'
     | '/migration'
     | '/migration-export'
     | '/news'
@@ -1273,6 +1284,7 @@ export interface FileRouteTypes {
     | '/manual'
     | '/mcp'
     | '/messenger'
+    | '/messenger-setup'
     | '/migration'
     | '/migration-export'
     | '/news'
@@ -1385,6 +1397,7 @@ export interface RootRouteChildren {
   ManualRoute: typeof ManualRoute
   McpRoute: typeof McpRoute
   MessengerRoute: typeof MessengerRoute
+  MessengerSetupRoute: typeof MessengerSetupRoute
   MigrationRoute: typeof MigrationRoute
   MigrationExportRoute: typeof MigrationExportRoute
   NewsRoute: typeof NewsRoute
@@ -1658,6 +1671,13 @@ declare module '@tanstack/react-router' {
       path: '/messenger'
       fullPath: '/messenger'
       preLoaderRoute: typeof MessengerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messenger-setup': {
+      id: '/messenger-setup'
+      path: '/messenger-setup'
+      fullPath: '/messenger-setup'
+      preLoaderRoute: typeof MessengerSetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/migration': {
@@ -2265,6 +2285,7 @@ const rootRouteChildren: RootRouteChildren = {
   ManualRoute: ManualRoute,
   McpRoute: McpRoute,
   MessengerRoute: MessengerRoute,
+  MessengerSetupRoute: MessengerSetupRoute,
   MigrationRoute: MigrationRoute,
   MigrationExportRoute: MigrationExportRoute,
   NewsRoute: NewsRoute,
