@@ -183,3 +183,5 @@
 - [ ] 5 call reports with impossible durations (up to 234083s, no device duration) — needs HQ/IT review; data left untouched
 - [x] Unit inventory JSON backup export/validate/safe-merge/full-restore (preview only)
 - [ ] Unit inventory real-DB E2E: blocked — needs an isolated staging backend (preview and live share one DB)
+
+- [ ] Connect Google Ads in the new workspace — deferred by owner: connect last, once the project is complete.
