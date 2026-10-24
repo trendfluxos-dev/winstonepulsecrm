@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { notConnectedMessengerService } from "@/lib/messenger.server";
 import { DEMO_THREADS, messengerView, unassignedThreads, visibleThreads, withinMessagingWindow } from "@/lib/messenger-shared";
 import { Route as Webhook } from "@/routes/api/public/meta/messenger";
+import { Route as Setup } from "@/routes/messenger-setup";
 
 const agent = messengerView({ scope: "agent", readOnly: false });
 const hq = messengerView({ scope: "authority", readOnly: true });
@@ -51,12 +52,22 @@ describe("Facebook not connected", () => {
       expect((await res.json()).code).toBe("FACEBOOK_NOT_CONNECTED");
     }
   });
-  it("human browser navigation goes to setup without accepting verification", async () => {
+  it("human browser navigation goes to inbox without accepting verification", async () => {
     const h = (Webhook.options as any).server.handlers;
     const res: Response = await h.GET({ request: new Request("http://x/api/public/meta/messenger", { headers: { accept: "text/html" } }) });
     expect(res.status).toBe(303);
-    expect(res.headers.get("Location")).toBe("/messenger-setup");
+    expect(res.headers.get("Location")).toBe("/messenger");
     expect(res.headers.get("Cache-Control")).toBe("no-store");
+  });
+  it("the closed progress route redirects to the inbox", () => {
+    const beforeLoad = Setup.options.beforeLoad;
+    expect(typeof beforeLoad).toBe("function");
+    try {
+      (beforeLoad as () => void)();
+      throw new Error("Expected redirect");
+    } catch (error) {
+      expect((error as { options?: { to?: string; replace?: boolean } }).options).toMatchObject({ to: "/messenger", replace: true });
+    }
   });
   it("browser-like verification requests still fail closed", async () => {
     const h = (Webhook.options as any).server.handlers;
