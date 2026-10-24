@@ -43,6 +43,24 @@ describe("offline Messenger webhook protocol", () => {
     invalid.set("hub.mode", "unsubscribe");
     expect(webhookChallenge(invalid, token)).toBeNull();
   });
+  it("rejects duplicate mode or challenge even when the first value matches", () => {
+    for (const field of ["hub.mode", "hub.challenge"]) {
+      const params = new URLSearchParams(challenge);
+      params.append(field, params.get(field) ?? "");
+      expect(webhookChallenge(params, token)).toBeNull();
+    }
+  });
+  it("bounds the offline numeric challenge without coercing its exact value", () => {
+    const params = new URLSearchParams(challenge);
+    params.set("hub.challenge", "0".repeat(100));
+    expect(webhookChallenge(params, token)).toBe("0".repeat(100));
+    params.set("hub.challenge", "1".repeat(101));
+    expect(webhookChallenge(params, token)).toBeNull();
+    for (const value of ["", " 123", "123\n", "1.5", "-1"]) {
+      params.set("hub.challenge", value);
+      expect(webhookChallenge(params, token)).toBeNull();
+    }
+  });
   it("valid protocol inputs cannot enable the adapter or trigger network I/O", async () => {
     const fetch = vi.spyOn(globalThis, "fetch").mockImplementation(() => { throw new Error("Network prohibited"); });
     try {
