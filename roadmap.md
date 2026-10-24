@@ -185,3 +185,4 @@
 - [ ] Unit inventory real-DB E2E: blocked — needs an isolated staging backend (preview and live share one DB)
 
 - [ ] Connect Google Ads in the new workspace — deferred by owner: connect last, once the project is complete.
+- [ ] Auto Call Recorder (Android + iOS): recording, auto transcript, AI summary w/ takeaways + action items, call history, mobile/Capacitor-ready
