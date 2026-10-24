@@ -1,7 +1,10 @@
 # Roadmap
 
 ## 2026-10-24 — Signed webhook boundary / verification timestamps
-- [ ] Add bounded raw-byte signature verification before POST refusal; no success acknowledgement/storage/activation. Show honest last-check absence and blocker reasons for Messenger/Windsor; durable last-check evidence requires separately reviewed storage.
+- [x] POST signature validation implemented with handler-only `META_APP_SECRET`, exact raw bytes, 262144-byte streamed bound; malformed/mismatched signatures return 401, missing config 503, oversize 413, valid signature still 503 ingestion-not-ready (no data loss through false acknowledgement). GET handshake/adapter remain disabled.
+- [x] `/inbox` shows signed-verification preparation and last-check absence; progress page shows both service blocker reasons and no invented timestamp/provider failure. Updated `docs/MESSENGER_SETUP.md` and `AGENTS.md` boundary.
+- [x] `bunx vitest run tests/messenger-webhook.test.ts tests/messenger-protocol.test.ts tests/messenger-inbox.test.ts tests/messenger-readiness.test.ts tests/windsor-boundary.test.ts tests/integration-boundaries.test.ts` — 6 files / 48 tests passed, exit 0, 23:15:44 UTC. Harness build OK 23:15:39 UTC. Synthetic raw bytes tested; real Meta/credential/DB calls and signed-in UI not exercised.
+- [ ] Durable verification time/failure history and live App/Page/subscription confirmation blocked by missing reviewed storage/authorized evidence. No schema, data, secret change or deployment. Changed: `src/lib/messenger-webhook.server.ts`, `src/lib/messenger-protocol.server.ts`, `src/routes/api/public/meta/messenger.ts`, `src/lib/integration-readiness.ts`, `src/routes/messenger-setup.tsx`, `src/components/crm/MessengerConnectionStatus.tsx`, `tests/messenger-webhook.test.ts`, `tests/messenger-inbox.test.ts`, `tests/messenger-readiness.test.ts`, `AGENTS.md`, `docs/MESSENGER_SETUP.md`, `roadmap.md`.
 
 ## 2026-10-24 — Inbox verification and Messenger lead provenance
 - [x] Added public preparation summary to `/inbox`: Facebook disconnected, App/Page approvals and Messenger webhook subscription unverified, webhook disabled, progress link. No provider check claimed; Support Desk query/actions unchanged.
