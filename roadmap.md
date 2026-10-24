@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-24 — Continue disabled Meta/Messenger integration
+- [ ] Safe code-only: fix mobile list/back navigation, add scoped demo search/status filters, offline webhook signature/policy helpers and tests; keep all provider operations disabled.
+- [ ] Record current evidence, exact test results and owner setup checklist in docs/MESSENGER_SETUP.md. Meta App/permissions/Page consent are unverified, not assumed missing or connected. No credentials inspected, Graph calls, SQL, database writes, secret/settings changes or deployment.
+
 ## 2026-10-25 — Privacy-safe sync diagnostics (code only)
 - [x] src/lib/sync-diagnostics.ts + Android SyncDiagnostics.kt: allow-listed redaction (fingerprinted call/checksum, no phone/name/audio/transcript/token), failure-reason classifier with bn/en copy, report-vs-audio state (pending until matching ack), idempotent call-UID reconciliation flagging conflicts. tests/sync-diagnostics.test.ts passes. No schema/data change.
 - [ ] Not yet wired into Android workers/IT Console display; Kotlin test blocked (no Java in sandbox).
