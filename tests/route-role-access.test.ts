@@ -22,7 +22,7 @@ describe("route-by-role UI gates", () => {
   });
   it("every page route file is in the reviewed inventory", () => {
     const files = readdirSync("src/routes").filter((f) => f.endsWith(".tsx") && f !== "__root.tsx");
-    expect(files.length).toBe(54);
+    expect(files.length).toBe(55);
   });
 });
 

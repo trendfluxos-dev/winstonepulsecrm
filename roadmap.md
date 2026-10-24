@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-24 — Facebook Messenger inbox foundation (code only)
+- [x] /messenger Bengali-first UI, role-scoped (agents own only; authority sees unassigned; HQ read-only), clearly labelled demo samples; Support /inbox untouched.
+- [x] Not-connected service stub, reply server fn and /api/public/meta/messenger placeholder (503 FACEBOOK_NOT_CONNECTED); no secrets/DB/Meta calls.
+- [ ] Blocked (manual): Meta Business verification, App + App Review (pages_messaging etc.), Page admin consent, secrets, review/apply docs/proposals/messenger-inbox-migration.UNAPPLIED.sql.
+
 ## Follow-up — resume code-only remediation
 - [x] Further requested execution: malformed blocker intervals/reasons and self-referential history links now require review, not validated employee fault; added six isolated fairness cases, including KPI exclusion and a valid out-of-window block that does not excuse overdue work. Execution tools available, no approval refusal encountered; workspace credit balance not queried. No deployment or database writes.
 - Fairness follow-up command: `bunx vitest run --exclude 'tests/*.integration.test.ts' --exclude 'tests/project-photo-access.test.ts' --exclude 'tests/rls.test.ts' --exclude 'tests/staging/**'` — initial run 779 passed / 1 prior expectation failed; updated the prior test to require unresolved-evidence review. Final run exit 0, **112 files / 780 tests passed**, 20:10:12 UTC, 5.64s. Android, genuine handset, historical evidence and transaction/deep-scan blockers below remain open; no live business reads or writes.

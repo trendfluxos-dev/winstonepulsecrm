@@ -62,6 +62,7 @@ export const NAV = [
   { to: "/security", label: "PIN & Access", scopes: ["authority", "coordinator", "agent"] },
   { to: "/docs", label: "Docs", scopes: ["authority", "coordinator", "agent", "none"] },
   { to: "/docs-admin", label: "Docs Admin", scopes: ["authority", "coordinator"] },
+  { to: "/messenger", label: "Messenger", scopes: ["authority", "coordinator", "agent"] },
   { to: "/inbox", label: "Support Inbox", scopes: ["authority", "coordinator", "agent"] },
   { to: "/tickets", label: "Tickets", scopes: ["authority", "coordinator", "agent"] },
   { to: "/customers", label: "Customers", scopes: ["authority", "coordinator", "agent"] },
