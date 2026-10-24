@@ -20,6 +20,7 @@ export const PAGE_SECTIONS = {
     { key: "queue", label: "কার্ড ভিউ", en: "Card view" },
     { key: "calls", label: "কল রেকর্ড", en: "Call records" },
     { key: "whatsapp", label: "হোয়াটসঅ্যাপ", en: "WhatsApp" },
+    { key: "messenger", label: "মেসেঞ্জার", en: "Messenger" },
     { key: "calendar", label: "ফলো-আপ ক্যালেন্ডার", en: "Follow-up calendar" },
     { key: "outlook", label: "আউটলুক", en: "Outlook" },
     { key: "reports", label: "আমার রিপোর্ট", en: "My reports" },

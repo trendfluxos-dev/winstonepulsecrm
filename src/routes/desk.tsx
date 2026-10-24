@@ -48,6 +48,7 @@ import { TeamSupportInbox } from "@/components/crm/TeamSupportInbox";
 import { TeamSupportPanel } from "@/components/crm/TeamSupportPanel";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { WhatsappInbox } from "@/components/crm/WhatsappInbox";
+import { MessengerInbox } from "@/components/crm/MessengerInbox";
 import { Button } from "@/components/ui/button";
 import { DeskTabBar } from "@/components/crm/desk/DeskTabBar";
 import { SocialDesk } from "@/components/crm/social/SocialDesk";
@@ -471,6 +472,9 @@ function DeskPage() {
           </TabsContent>
           <TabsContent value="whatsapp">
             <WhatsappInbox />
+          </TabsContent>
+          <TabsContent value="messenger">
+            <MessengerInbox />
           </TabsContent>
           <TabsContent value="calendar" className="space-y-4">
             <FollowUpsInRange />
