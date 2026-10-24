@@ -91,7 +91,6 @@ export function AssignLeadsWorkspace({ initialAgentId, initialCount }: { initial
   const alloc = useCoordinatorAllocation();
   const assignFn = useServerFn(assignLeadCounts);
   const previewFn = useServerFn(previewLeadCounts);
-  const preview = useMutation({ mutationFn: () => previewFn({ data: { adminToken, requestId, rows: valid } }), onSuccess: () => setConfirming(true), onError: (e: Error) => toast.error(e.message) });
   const [rows, setRows] = useState<Row[]>(() => [{ ...newRow(initialAgentId), count: initialCount ? String(initialCount) : "" }]);
   const [requestId, setRequestId] = useState(() => crypto.randomUUID());
   const [confirming, setConfirming] = useState(false);
@@ -112,6 +111,7 @@ export function AssignLeadsWorkspace({ initialAgentId, initialCount }: { initial
   const quotaExceeded = Math.max(0, rawRequested - requested);
   const shortage = Math.max(0, requested - available);
   const dupAgents = new Set(valid.map((r) => r.agentId)).size !== valid.length;
+  const preview = useMutation({ mutationFn: () => previewFn({ data: { adminToken, requestId, rows: valid } }), onSuccess: () => setConfirming(true), onError: (e: Error) => toast.error(e.message) });
 
   const update = (key: string, patch: Partial<Row>) => {
     setRows((rs) => rs.map((r) => (r.key === key ? { ...r, ...patch } : r)));
@@ -216,7 +216,7 @@ export function AssignLeadsWorkspace({ initialAgentId, initialCount }: { initial
             {(preview.data?.proposals ?? []).map((v) => {
               const a = byId.get(v.agentId);
               return (
-                <li key={v.agentId} className="flex justify-between gap-2">
+                <li key={v.agentId} className="flex flex-col justify-between gap-2 sm:flex-row">
                   <span>{a?.employeeId ? `${a.employeeId} ` : ""}{a?.name}</span>
                   <div className="min-w-0 text-right"><span className="tabular font-medium">{v.leads.length}/{v.requested}</span>
                     <ul className="mt-1 space-y-1 text-xs">{v.leads.map(l => <li key={l.id} className="break-words">{l.name} · {l.phone_number} · {l.id}</li>)}</ul></div>
@@ -225,7 +225,7 @@ export function AssignLeadsWorkspace({ initialAgentId, initialCount }: { initial
             })}
           </ul>
           <p className="mt-2 text-xs text-muted-foreground">
-            মোট {requested} চাওয়া · {available} উপলব্ধ{shortage ? ` · ${shortage} কম` : ""}
+            মোট {requested} চাওয়া · {preview.data?.scanned ?? 0}টি প্রার্থী পরীক্ষা · {preview.data?.truncated ? "সীমিত নমুনা" : "সম্পূর্ণ প্রার্থী তালিকা"} · Asia/Dhaka
           </p>
         </div>
       )}

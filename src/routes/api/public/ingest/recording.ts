@@ -153,7 +153,7 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
         if (!leadId) return json({ error: "Unknown lead" }, 404);
 
         // Ownership is never moved by a sync: a lead already held by another
-        // agent stays with them, and an unheld lead goes to the caller's desk.
+        // agent stays with them; unheld leads require LeadHub assignment.
         if (agent?.id) {
           const { data: leadOwner } = await supabaseAdmin
             .from("leads")
@@ -199,8 +199,10 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
               : "এক পক্ষের অডিও — এই ফোনে কল অডিও পাওয়া যায়নি",
           });
 
-          // Every completed call gets a reportable lifecycle, recording or not.
-          if (agent?.id) {
+          // Only observed lifecycle evidence may open a connected-call report.
+          const lifecycle = await supabaseAdmin.from("call_recordings").select("call_status, duration_seconds, started_at").eq("id", recordingId).single();
+          if (lifecycle.error) throw new Error("Call evidence unavailable");
+          if (agent?.id && lifecycle.data && ["completed", "no_answer", "failed"].includes(lifecycle.data.call_status ?? "")) {
             const { openCallReport } = await import("@/lib/call-reports.server");
             await openCallReport({
               leadId,
@@ -208,9 +210,9 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
               recordingId,
               deviceId: caller.kind === "device" ? caller.device.id : null,
               phoneNumber: body.phone_number ?? null,
-              callStartedAt: body.call_started_at ?? null,
-              durationSeconds: body.duration_seconds,
-              connected: body.duration_seconds > 5,
+              callStartedAt: lifecycle.data.started_at,
+              durationSeconds: lifecycle.data.duration_seconds,
+              connected: lifecycle.data.call_status === "completed",
             });
           }
 
@@ -221,7 +223,7 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
           return json({ duplicate: false, recording_id: recordingId, upload_status: saved.data.upload_status, checksum: saved.data.checksum, analysis: saved.data.analysis_status }, 202);
         } catch (error) {
           console.error("[ingest] recording failed", error);
-          const conflict = error instanceof Error && ["CALL_IDENTITY_CONFLICT", "AUDIO_CHECKSUM_CONFLICT"].includes(error.message);
+          const conflict = error instanceof Error && ["CALL_IDENTITY_CONFLICT", "AUDIO_CHECKSUM_CONFLICT", "AUDIO_CONTENT_ALREADY_LINKED"].includes(error.message);
           return json({ error: conflict ? "Call identity or audio checksum does not match; original audio retained" : "Recording could not be stored", code: conflict ? "audio_identity_conflict" : "audio_store_failed" }, conflict ? 409 : 500);
         }
       },

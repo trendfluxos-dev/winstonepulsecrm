@@ -375,6 +375,13 @@ export async function ingestRecording(input: {
     }
   }
 
+  if (!existing && agentId) {
+    const content = await supabaseAdmin.from("call_recordings").select("id, external_call_id")
+      .eq("agent_id", agentId).eq("lead_id", input.leadId).eq("checksum", checksum).limit(1).maybeSingle();
+    if (content.error) throw new Error(content.error.message);
+    if (content.data) throw new Error("AUDIO_CONTENT_ALREADY_LINKED");
+  }
+
   const { error: uploadError } = await supabaseAdmin.storage
     .from(AUDIO_BUCKET)
     .upload(path, bytes, { contentType: mimeFor(input.fileExtension) });

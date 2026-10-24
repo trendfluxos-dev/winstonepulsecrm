@@ -5,7 +5,7 @@ vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: {
   from: (table: string) => {
     let values: Record<string, unknown> | null = null;
     const b: Record<string, (...args: any[]) => any> = {};
-    for (const key of ["select", "eq", "is"]) b[key] = () => b;
+    for (const key of ["select", "eq", "is", "limit"]) b[key] = () => b;
     b.update = b.insert = (v: Record<string, unknown>) => { values = v; m.writes.push(table); return b; };
     b.maybeSingle = async () => ({ data: m.recording, error: null });
     b.single = async () => ({ data: table === "leads" ? { id: "l", assigned_to: "a", phone_number: "01805049666" } : { id: "r" }, error: null });
