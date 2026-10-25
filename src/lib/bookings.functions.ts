@@ -150,6 +150,8 @@ export const setLeadArea = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { siCaller, leadForCaller } = await import("@/lib/sales-intel.server");
     const c = await siCaller(data.adminToken);
+    // Read-only Executive HQ sessions may view but never change lead data.
+    if (c.readOnly) throw new Error("Executive HQ is view-only");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await leadForCaller(supabaseAdmin, c, data.leadId); // ownership check for agents
     const { error } = await supabaseAdmin

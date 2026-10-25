@@ -3,20 +3,39 @@ import { z } from "zod";
 
 import { AppConfigSchema, DEFAULT_CONFIG, parseConfig } from "@/lib/crm-config";
 
-/** Live rules for every device. Contains no personal data, so it needs no PIN. */
-export const getAppConfig = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
-    .from("app_config")
-    .select("data, updated_at")
-    .eq("id", "default")
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  return {
-    config: parseConfig(data?.data ?? {}),
-    updatedAt: data?.updated_at ?? null,
-  };
-});
+/**
+ * Live rules for every device. The MCP allow-list (mcpAllowedEmails) is
+ * internal configuration: it is only included when the caller presents a
+ * valid master/IT PIN. Everyone else receives the config with it stripped.
+ */
+export const getAppConfig = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) =>
+    z.object({ adminToken: z.string().nullable().optional() }).parse(input ?? {}),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin
+      .from("app_config")
+      .select("data, updated_at")
+      .eq("id", "default")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    const config = parseConfig(row?.data ?? {});
+    let includeAllowlist = false;
+    if (data.adminToken) {
+      try {
+        const { requireAdminToken } = await import("@/lib/admin-gate.server");
+        requireAdminToken(data.adminToken);
+        includeAllowlist = true;
+      } catch {
+        includeAllowlist = false;
+      }
+    }
+    return {
+      config: includeAllowlist ? config : { ...config, mcpAllowedEmails: [] },
+      updatedAt: row?.updated_at ?? null,
+    };
+  });
 
 /** Saves the IT customizer. Master or IT console PIN required. */
 export const saveAppConfig = createServerFn({ method: "POST" })
