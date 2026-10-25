@@ -8,6 +8,7 @@ import {
   parseAiModelChoice,
   requireAiKey,
   resolveAiProvider,
+  withLastSuccess,
 } from "@/lib/ai-providers";
 
 describe("parseAiModelChoice", () => {
