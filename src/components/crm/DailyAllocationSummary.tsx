@@ -35,7 +35,33 @@ export function DailyAllocationSummary({ surface }: { surface: "hq" | "leadhub" 
         <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           {[{ label: t({ bn: "নতুন লিড বণ্টিত", en: "New leads assigned" }), value: d.total }, { label: t({ bn: "সক্রিয় এজেন্ট", en: "Active agents" }), value: d.agents.length }, { label: t({ bn: "৫০ পূর্ণ করেছেন", en: "Received all 50" }), value: d.completeCount }, { label: t({ bn: "বণ্টন বাকি", en: "Still to assign" }), value: d.remaining }].map(item => <div key={item.label}><dt className="text-xs text-muted-foreground">{item.label}</dt><dd className="tabular-nums text-lg font-semibold">{item.value}</dd></div>)}
         </dl>
-        {surface !== "self" && <ul className="grid gap-2 md:grid-cols-2" aria-label={t({ bn: "এজেন্টভিত্তিক বণ্টন সারাংশ", en: "Per-agent distribution summary" })}>{d.agents.map(agent => <li key={agent.id} className="flex min-w-0 items-center justify-between gap-3 border-b border-border py-2 text-sm"><span className="min-w-0 break-words font-medium">{agent.name}</span><span className="shrink-0 text-right"><span className={agent.zeroAlert ? "tabular-nums font-semibold text-warning" : "tabular-nums font-semibold"}>{agent.received}/{d.quota}</span><span className="block text-xs text-muted-foreground">{!d.distributionOpen ? t({ bn: "বণ্টন বন্ধ", en: "Paused" }) : t({ bn: `বাকি ${agent.remaining}`, en: `${agent.remaining} remaining` })}</span></span></li>)}</ul>}
+        <ul className="grid gap-3 md:hidden" aria-label={t({ bn: "এজেন্টভিত্তিক বণ্টন সারাংশ", en: "Per-agent distribution summary" })}>
+          {d.agents.map(agent => <li key={agent.id} className="rounded-md border border-border p-3">
+            <p className="break-words text-sm font-semibold">{agent.name}</p>
+            <dl className="mt-3 grid grid-cols-3 gap-2 text-sm">
+              <div><dt className="text-xs text-muted-foreground">{t({ bn: "দৈনিক লক্ষ্য", en: "Daily target" })}</dt><dd className="tabular-nums font-semibold">{d.quota}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">{t({ bn: "লিড পেয়েছেন", en: "Received" })}</dt><dd className={agent.zeroAlert ? "tabular-nums font-semibold text-warning" : "tabular-nums font-semibold"}>{agent.received}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">{t({ bn: "বাকি", en: "Remaining" })}</dt><dd className="tabular-nums font-semibold">{d.distributionOpen ? agent.remaining : t({ bn: "বণ্টন বন্ধ", en: "Paused" })}</dd></div>
+            </dl>
+          </li>)}
+        </ul>
+        <div className="hidden md:block">
+          <table className="w-full table-fixed text-sm">
+            <caption className="sr-only">{t({ bn: "এজেন্টভিত্তিক দৈনিক লক্ষ্য, প্রাপ্ত লিড ও বাকি লিড", en: "Daily target, received leads and remaining leads per agent" })}</caption>
+            <thead className="border-b border-border text-xs text-muted-foreground"><tr>
+              <th className="w-2/5 py-2 text-left font-medium">{t({ bn: "এজেন্ট", en: "Agent" })}</th>
+              <th className="py-2 text-right font-medium">{t({ bn: "দৈনিক লক্ষ্য", en: "Daily target" })}</th>
+              <th className="py-2 text-right font-medium">{t({ bn: "লিড পেয়েছেন", en: "Received" })}</th>
+              <th className="py-2 text-right font-medium">{t({ bn: "বাকি", en: "Remaining" })}</th>
+            </tr></thead>
+            <tbody>{d.agents.map(agent => <tr key={agent.id} className="border-b border-border">
+              <th scope="row" className="break-words py-3 pr-3 text-left font-medium">{agent.name}</th>
+              <td className="py-3 text-right tabular-nums">{d.quota}</td>
+              <td className={agent.zeroAlert ? "py-3 text-right tabular-nums font-semibold text-warning" : "py-3 text-right tabular-nums font-semibold"}>{agent.received}</td>
+              <td className="py-3 text-right tabular-nums">{d.distributionOpen ? agent.remaining : t({ bn: "বণ্টন বন্ধ", en: "Paused" })}</td>
+            </tr>)}</tbody>
+          </table>
+        </div>
       </>}
     </>}
   </section>;
