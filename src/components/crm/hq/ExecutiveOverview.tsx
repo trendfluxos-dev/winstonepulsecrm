@@ -253,7 +253,7 @@ export function ExecutiveOverview({
         </div>
 
         <div className="card-elevated p-4">
-          <h3 className="text-sm font-semibold">লিড সোর্স</h3>
+          <h3 className="text-sm font-semibold">{t({ bn: "লিড কোথা থেকে আসছে", en: "Where leads come from" })}</h3>
           <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
             <div className="relative h-40 w-40 shrink-0">
               <ResponsiveContainer width="100%" height="100%">
@@ -285,7 +285,7 @@ export function ExecutiveOverview({
               <div className="pointer-events-none absolute inset-0 grid place-items-center">
                 <div className="text-center">
                   <p className="tabular text-lg font-bold leading-none">{kpi.total}</p>
-                  <p className="text-[10px] text-muted-foreground">লিড</p>
+                  <p className="text-[10px] text-muted-foreground">{t({ bn: "লিড", en: "leads" })}</p>
                 </div>
               </div>
             </div>
@@ -302,14 +302,14 @@ export function ExecutiveOverview({
                 </li>
               ))}
               {sources.length === 0 && (
-                <li className="text-[11px] text-muted-foreground">কোনো লিড নেই।</li>
+                <li className="text-[11px] text-muted-foreground">{t({ bn: "এখনো কোনো লিড নেই।", en: "No leads yet." })}</li>
               )}
             </ul>
           </div>
         </div>
 
         <div className="card-elevated p-4">
-          <h3 className="text-sm font-semibold">টিম পারফরম্যান্স</h3>
+          <h3 className="text-sm font-semibold">{t({ bn: "এজেন্টদের ফলাফল", en: "Agent performance" })}</h3>
           <ol className="mt-3 space-y-2.5">
             {team.map((row, i) => {
               const pct = Math.round((row.connected / teamMax) * 100);
@@ -326,7 +326,7 @@ export function ExecutiveOverview({
                         {row.profile.name}
                       </span>
                       <span className="block text-[10px] text-muted-foreground">
-                        {row.dials} কল · {row.connected} কথা · {row.closedWon} বুকিং
+                        {t({ bn: `${row.dials} কল · ${row.connected} কথা · ${row.closedWon} বুকিং`, en: `${row.dials} calls · ${row.connected} talked · ${row.closedWon} bookings` })}
                       </span>
                       <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-muted">
                         <span
