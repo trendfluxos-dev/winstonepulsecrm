@@ -1,12 +1,12 @@
 # Roadmap
 
 ## Per-agent allocation targets, progress and publication
-- [ ] Keep the hard cap at 50; append-only IT-managed targets within 1–50, shared server percentage/remaining, HQ/LeadHub/self display.
-- [ ] Publish and verify live release and active-agent scoped views; never fabricate assignment or work.
+- [x] Hard cap/routing unchanged; append-only IT-managed targets 1–50 with effective Dhaka day, shared server percentage/remaining. 24 targeted tests, semantic colors and harness build pass; schema presence verified.
+- [x] Published; live manual v1.6.0/$35.29/50 markers pass. Signed-in live HQ shows all 8 active agents, 8 progress bars, 75 unique new receipts, 5 zero warnings, mobile/desktop refresh without overflow/errors. Self/LeadHub scope unit-tested; separate signed-in agent views and real IT edit/read-back not exercised without their authorized sessions/full IT PIN. No target values or assignments changed.
 
 ## Bengali daily accountability presentation — Zahid Hasan Emon
-- [ ] Read day-by-day saved staff evidence from verified available history; distinguish unknown launch date, sync gaps, allocation failures and confirmed neglect.
-- [ ] Create detailed Bengali PDF presented by Zahid Hasan Emon, IT Department, Winstone Properties Limited; inspect every page, exclude customer/secret details.
+- [x] Read bounded agent-day aggregates and 53 saved reviews, 4163 reports across 8 active agents; first report 2026-09-13, exact first launch unverified. Missing activity/overdue never labelled confirmed negligence.
+- [x] Delivered 40-page Bengali PDF, all 43 Dhaka dates per agent, saved reviews, comparison, limits and action plan, requested presenter attribution. Inspected all final page renders; fixed table/footer collision. No customer PII/secrets; no production records changed.
 
 ## HQ screenshot — false no-call/untouched claims
 - [x] Diagnose recording-only counts, omitted submitted reports, browser-local day and unsupported inactivity claims.
