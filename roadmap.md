@@ -1,5 +1,12 @@
 # Roadmap
 
+## 2026-10-25 — Sync enable/disable audit log (owner request 00:54 UTC)
+- [x] `messenger_sync_decisions` (0127, append-only, service_role-only, RLS on): every sync enable/disable decision records staff, Dhaka time, verification snapshot (verified/missing tracks) and reason.
+- [x] `src/lib/messenger-sync-decisions.ts` + `.functions.ts`: IT-only recording; an enable decision is refused server-side unless all four verification tracks' latest outcome is "verified" (VERIFICATION_INCOMPLETE with the missing tracks); disable always allowed; reasons validated so no token-like text is stored.
+- [x] Webhook POST gate now needs BOTH the env switch AND a latest audit "enable" decision — fail-closed on any lookup error. UI: `MessengerSyncAudit.tsx` on /inbox shows current decision, history and the IT form.
+- [x] 6 files / 65 tests passed 00:57 UTC (new: 10 sync-decision tests).
+- [ ] Still blocking real sync: `META_APP_SECRET` + `META_WEBHOOK_VERIFY_TOKEN` unsaved (secure form cancelled by owner), Meta-side webhook registration, and the four verification tracks themselves.
+
 ## 2026-10-25 — Safe Meta verification checklist on /inbox
 - [x] Owner request 00:49 UTC done: `meta_verification_records` (0126, append-only, service_role-only) + `src/lib/meta-verification.ts` (4 fixed tracks: app_review, live_mode, page_consent, messages_subscription) + `meta-verification.functions.ts` (IT-only record, staff read) + checklist UI in `MetaVerificationReport.tsx` with real Dhaka timestamps. `validateEvidenceNote` rejects any note that changes under credential redaction — no access token can be stored as evidence.
 
