@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-25 — HQ AI status indicator + Meta activated (01:22 UTC)
+- [x] Owner added `MODEL_API_KEY` via secure form; presence verified (never displayed). Active model set to `meta` in app_config (owner request, 01:19 UTC).
+- [x] HQ panel status indicator: active model + last successful AI call time (Dhaka), secret-free. `withLastSuccess` merges timestamp into app_config without dropping the model choice; recording is best-effort and never breaks AI calls. 3 new tests (16 total, all passing).
+
 ## 2026-10-25 — Zero-setup AI default; Meta picker gated on configuration (01:13 UTC)
 - [x] OpenAI/Gemini via the already-provisioned Lovable AI Gateway remain the zero-setup default (`openai`); no account/key/action needed from the user.
 - [x] `isProviderConfigured` (presence-only, secret-safe) added to `ai-providers.ts`; `getAiModelStatus` exposes `metaConfigured` to staff UI; `setAiModelChoice` now refuses to store an unconfigured provider (fail-closed at the write path, not just at call time).
