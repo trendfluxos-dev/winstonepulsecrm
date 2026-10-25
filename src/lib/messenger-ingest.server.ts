@@ -79,8 +79,8 @@ export async function ingestMessengerWebhook(input: {
   bytes: Uint8Array;
   signature: string | null;
   appSecret: string | undefined;
-  store?: MessengerStore;
-  enabled?: boolean;
+  store?: MessengerStore | undefined;
+  enabled?: boolean | undefined;
 }): Promise<MessengerIngestOutcome> {
   if (!input.appSecret) return refusal(503, "FACEBOOK_NOT_CONNECTED");
   const signature = input.signature;

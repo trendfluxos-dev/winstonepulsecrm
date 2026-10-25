@@ -55,29 +55,27 @@ export function parseMetaWebhookBytes(bytes: Uint8Array): { ok: true; events: Me
   const events: MetaWebhookEvent[] = [];
   for (const entry of parsed.data.entry) {
     for (const item of entry.messaging) {
-      events.push({
-        pageId: entry.id,
-        senderId: item.sender.id,
-        timestamp: item.timestamp,
-        message: item.message
-          ? {
-              mid: item.message.mid,
-              ...(item.message.text !== undefined ? { text: item.message.text } : {}),
-              ...(item.message.is_echo !== undefined ? { isEcho: item.message.is_echo } : {}),
-            }
-          : undefined,
-        delivery: item.delivery
-          ? { watermark: item.delivery.watermark, ...(item.delivery.mids !== undefined ? { mids: item.delivery.mids } : {}) }
-          : undefined,
-        read: item.read ? { watermark: item.read.watermark } : undefined,
-        postback: item.postback
-          ? {
-              ...(item.postback.title !== undefined ? { title: item.postback.title } : {}),
-              ...(item.postback.payload !== undefined ? { payload: item.postback.payload } : {}),
-              ...(item.postback.mid !== undefined ? { mid: item.postback.mid } : {}),
-            }
-          : undefined,
-      });
+      const event: MetaWebhookEvent = { pageId: entry.id, senderId: item.sender.id, timestamp: item.timestamp };
+      if (item.message) {
+        const message: MetaWebhookEvent["message"] = { mid: item.message.mid };
+        if (item.message.text !== undefined) message.text = item.message.text;
+        if (item.message.is_echo !== undefined) message.isEcho = item.message.is_echo;
+        event.message = message;
+      }
+      if (item.delivery) {
+        const delivery: MetaWebhookEvent["delivery"] = { watermark: item.delivery.watermark };
+        if (item.delivery.mids !== undefined) delivery.mids = item.delivery.mids;
+        event.delivery = delivery;
+      }
+      if (item.read) event.read = { watermark: item.read.watermark };
+      if (item.postback) {
+        const postback: MetaWebhookEvent["postback"] = {};
+        if (item.postback.title !== undefined) postback.title = item.postback.title;
+        if (item.postback.payload !== undefined) postback.payload = item.postback.payload;
+        if (item.postback.mid !== undefined) postback.mid = item.postback.mid;
+        event.postback = postback;
+      }
+      events.push(event);
     }
   }
   return { ok: true, events };
