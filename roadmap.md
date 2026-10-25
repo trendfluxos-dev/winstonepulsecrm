@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-25 — Meta Model API (Muse Spark) as optional AI provider (01:06 UTC, preparation only)
+- [x] Extended the existing shared AI helper (no parallel path): new pure module `src/lib/ai-providers.ts` (choice parsing, provider resolution, fail-closed secret-safe key check); `ai-model.server.ts` routes `meta` → `https://api.meta.ai/v1/chat/completions`, model `muse-spark-1.3`, key `MODEL_API_KEY` read only inside the handler. OpenAI/Gemini behavior unchanged; provider error bodies no longer logged (status only).
+- [x] HQ model picker (`AiTeamSummary.tsx`) + `setAiModel` zod enum now accept `meta`. New `tests/ai-providers.test.ts` (12 tests: selection, resolution, missing-key fail-closed, no cross-provider key fallback, secret-safe errors). 2 files / 37 tests passed 01:09 UTC. Docs: `docs/AI_PROVIDERS.md` with exact secret setup + never-commit warning.
+- [ ] Compatibility blocker documented: current adapter is chat-completions HTTP, not the Responses API — `reasoning.encrypted_content`/high reasoning unsupported until a reviewed adapter change. No live Meta API request sent; no key requested/stored; no deploy.
+
 ## 2026-10-25 — Messenger review pass + store defect fix (01:04 UTC)
 - [x] Full review of the Meta/Messenger pipeline: 16 files / 116 tests passed; live preview probes confirmed fail-closed — unsigned POST 503, fake-signed POST 503, wrong-verify-token handshake 503, human GET 303 → /messenger. No secrets, no Meta calls, no migrations, no gate changes.
 - [x] Fixed one real defect: `recordStatus` in `messenger-store.server.ts` crashed (23502 on NOT NULL thread_id) when a delivery/read/echo event arrived for a never-seen thread; it now skips gracefully (receipt still records the event). New `tests/messenger-store.test.ts` (3 tests: missing thread, existing thread, missing table). 4 files / 29 tests passed 01:05 UTC.
