@@ -105,7 +105,7 @@ export function PipelineBoard() {
   return (
     <section className="space-y-4" aria-labelledby="pipeline-title">
       <SectionTitle
-        title={t({ bn: "পাইপলাইন", en: "Pipeline" })}
+        title={t({ bn: "কাজের ধাপ", en: "Work stages" })}
         sub={t({ bn: "আপনার লিড ধাপ অনুযায়ী। ধাপ বদলায় শুধু কল রিপোর্টে।", en: "Your leads by stage. Stages change only through call reports." })}
       />
       <SearchBox value={q} onChange={setQ} placeholder={t({ bn: "নাম বা নম্বর খুঁজুন…", en: "Search leads…" })} />

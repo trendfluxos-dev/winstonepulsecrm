@@ -124,7 +124,7 @@ function ControlBoard() {
       { key: "pending", label: "নতুন / বাকি" },
       { key: "contacted", label: "কথা হয়েছে" },
       { key: "follow_up", label: "ফলো-আপ" },
-      { key: "closed", label: "বন্ধ" },
+      { key: "closed", label: "কাজ শেষ" },
     ];
     return order.map((o) => ({
       label: o.label,
