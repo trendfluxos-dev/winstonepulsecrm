@@ -114,8 +114,19 @@ export function withLastFailure(
     ...(typeof existing.model === "string" && existing.model ? { model: existing.model } : {}),
     ...(typeof existing.last_success_at === "string" ? { last_success_at: existing.last_success_at } : {}),
     last_error_at: at,
-    last_error_status: status,
+    last_error_status: safeFailureStatus(status),
   };
+}
+
+/**
+ * A failed call that never produced an HTTP status (network error, unreadable
+ * answer) is stored with this marker so the HQ panel can still show when the
+ * latest attempt failed. Nothing but the marker is ever stored.
+ */
+export const AI_NO_RESPONSE_STATUS = 0;
+
+function safeFailureStatus(status: number): number {
+  return Number.isFinite(status) ? Math.trunc(status) : AI_NO_RESPONSE_STATUS;
 }
 
 /** Error text shown to staff must never carry provider responses or keys. */
@@ -124,3 +135,17 @@ export function aiCallFailureMessage(status: number): string {
   if (status === 429) return "AI is busy right now — try again in a moment";
   return "The AI service is unavailable right now";
 }
+
+/**
+ * Short, secret-free reason for a recorded failure status. Only the status
+ * number is ever stored, so this is the safe way to explain it in staff UI.
+ */
+export function aiFailureLabel(status: number): { bn: string; en: string } {
+  if (status === AI_NO_RESPONSE_STATUS) return { bn: "কোনো উত্তর আসেনি", en: "no usable answer" };
+  if (status === 401) return { bn: "প্ৰবেশাধিকার গ্ৰহণযোগ্য নয়", en: "access not accepted" };
+  if (status === 402 || status === 403) return { bn: "বিলিং/ক্ৰেডিত", en: "billing/credits" };
+  if (status === 429) return { bn: "AI ব্যস্ত", en: "AI busy" };
+  if (status >= 500) return { bn: "AI সিেবৱা অনুপলভ্য", en: "service unavailable" };
+  return { bn: "অনুেরোধ গ্ৰহীত হয়নি", en: "request refused" };
+}
+
