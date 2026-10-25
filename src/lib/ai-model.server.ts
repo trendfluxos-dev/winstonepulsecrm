@@ -134,23 +134,7 @@ export async function aiChatJson<T>(args: { system: string; user: string }): Pro
   const text = payload.choices?.[0]?.message?.content ?? "";
   try {
     const parsed = JSON.parse(text) as T;
-    // Record the last successful call for the HQ status indicator. This is
-    // best-effort: a recording failure must never break the AI call itself.
-    try {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data } = await supabaseAdmin
-        .from("app_config")
-        .select("data")
-        .eq("id", "ai")
-        .maybeSingle();
-      await supabaseAdmin.from("app_config").upsert({
-        id: "ai",
-        data: withLastSuccess(data?.data, new Date().toISOString()),
-        updated_at: new Date().toISOString(),
-      });
-    } catch {
-      // Status recording is optional telemetry — ignore failures.
-    }
+    await recordAiStatus((data) => withLastSuccess(data, new Date().toISOString()));
     return parsed;
   } catch {
     throw new Error("The AI returned an unreadable answer — please retry");
