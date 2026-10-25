@@ -3368,6 +3368,36 @@ export type Database = {
         }
         Relationships: []
       }
+      meta_verification_records: {
+        Row: {
+          actor: string | null
+          actor_label: string | null
+          created_at: string
+          id: string
+          note: string
+          outcome: string
+          track: string
+        }
+        Insert: {
+          actor?: string | null
+          actor_label?: string | null
+          created_at?: string
+          id?: string
+          note: string
+          outcome: string
+          track: string
+        }
+        Update: {
+          actor?: string | null
+          actor_label?: string | null
+          created_at?: string
+          id?: string
+          note?: string
+          outcome?: string
+          track?: string
+        }
+        Relationships: []
+      }
       objection_answers: {
         Row: {
           answer: string
