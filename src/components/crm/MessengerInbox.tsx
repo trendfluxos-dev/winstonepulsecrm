@@ -9,6 +9,7 @@ import { useAdminToken } from "@/lib/local-session";
 import { getMessengerStatus } from "@/lib/messenger.functions";
 import { filterDemoThreads, NOT_CONNECTED, withinMessagingWindow, type DemoThread } from "@/lib/messenger-shared";
 import { MessengerLeadDetails } from "@/components/crm/MessengerLeadDetails";
+import { Switch } from "@/components/ui/switch";
 
 /**
  * Messenger inbox body shared by the /messenger page and the agent desk tab.
@@ -26,6 +27,7 @@ export function MessengerInbox() {
   const [selected, setSelected] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | DemoThread["status"]>("all");
+  const [sampleDetails, setSampleDetails] = useState(false);
 
   const view = status.data?.view;
   if (status.isLoading) {
@@ -74,6 +76,7 @@ export function MessengerInbox() {
       </div>
 
       <div className="mb-3 flex flex-wrap gap-2">
+        <label className="flex w-full items-center gap-2 text-xs text-muted-foreground"><Switch checked={sampleDetails} onCheckedChange={setSampleDetails} aria-label={t({ bn: "নমুনা লিডের বিস্তারিত", en: "Sample lead details" })} />{t({ bn: "নমুনা লিডের বিস্তারিত", en: "Sample lead details" })}</label>
         <label className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-md border border-border bg-background px-3">
           <Search className="size-4 shrink-0 text-muted-foreground" />
           <input aria-label={t({ bn: "কথোপকথন খুঁজুন", en: "Search conversations" })} value={search} onChange={(event) => { setSearch(event.target.value); setSelected(null); }} placeholder={t({ bn: "কথোপকথন খুঁজুন", en: "Search conversations" })} className="min-w-0 w-full bg-transparent text-sm outline-none" />
@@ -105,7 +108,7 @@ export function MessengerInbox() {
             </li>
           ))}
         </ul>
-        {active ? <div className={`${mobileThreadOpen ? "min-w-0" : "hidden min-w-0 md:block"}`}><div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_240px]"><ThreadPane thread={active} canReply={view.canReply && active.assignedTo === "me"} canAssign={view.canAssign} onBack={() => setSelected(null)} /><MessengerLeadDetails key={active.id} connected={Boolean(status.data?.connected)} thread={active} /></div></div> : null}
+        {active ? <div className={`${mobileThreadOpen ? "min-w-0" : "hidden min-w-0 md:block"}`}><div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_240px]"><ThreadPane thread={active} canReply={view.canReply && active.assignedTo === "me"} canAssign={view.canAssign} onBack={() => setSelected(null)} /><MessengerLeadDetails key={active.id} connected={Boolean(status.data?.connected)} thread={active} sampleMode={sampleDetails} /></div></div> : null}
       </div>
     </div>
   );
