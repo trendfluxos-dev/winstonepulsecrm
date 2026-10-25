@@ -9,8 +9,8 @@ export type MessengerConnection = { connected: false; reason: typeof NOT_CONNECT
 
 export interface MessengerService {
   connection(): Promise<MessengerConnection>;
-  verifyWebhook(params: URLSearchParams): Promise<{ ok: false; status: 503 }>;
-  ingestWebhook(rawBody: string, signature: string | null): Promise<{ ok: false; status: 503 }>;
+  verifyWebhook(params: URLSearchParams): Promise<{ ok: false; status: 403 }>;
+  ingestWebhook(rawBody: string, signature: string | null): Promise<{ ok: false; status: 403 }>;
   sendReply(input: { threadId: string; text: string; requestId: string }): Promise<{ ok: false; reason: typeof NOT_CONNECTED.code }>;
 }
 
@@ -19,10 +19,10 @@ export const notConnectedMessengerService: MessengerService = {
     return { connected: false, reason: NOT_CONNECTED.code };
   },
   async verifyWebhook() {
-    return { ok: false, status: 503 };
+    return { ok: false, status: 403 };
   },
   async ingestWebhook() {
-    return { ok: false, status: 503 };
+    return { ok: false, status: 403 };
   },
   async sendReply() {
     return { ok: false, reason: NOT_CONNECTED.code };

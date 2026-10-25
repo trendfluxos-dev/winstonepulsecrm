@@ -17,7 +17,9 @@ export async function inspectSignedWebhook(
   appSecret: string | undefined,
   options: { store?: MessengerStore; enabled?: boolean } = {},
 ) {
-  if (!appSecret) return refusal(503, "FACEBOOK_NOT_CONNECTED");
+  // 403, not 503: Meta only needs a non-200 to treat delivery as failed,
+  // and a 5xx response blanks the preview with a runtime-error overlay.
+  if (!appSecret) return refusal(403, "FACEBOOK_NOT_CONNECTED");
   const signature = request.headers.get("x-hub-signature-256");
   if (!signature || !/^sha256=[a-f0-9]{64}$/.test(signature)) return refusal(401, "INVALID_WEBHOOK_SIGNATURE");
   const reader = request.body?.getReader();

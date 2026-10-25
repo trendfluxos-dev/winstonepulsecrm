@@ -4,10 +4,12 @@ import { createFileRoute } from "@tanstack/react-router";
  * Meta Messenger webhook. GET answers Meta's subscription handshake only when
  * the server-side verify token is configured and matches exactly; POST checks
  * raw-byte signatures and stores messages only while the ingestion switch is
- * on. Human browser navigation still redirects to the inbox.
+ * on. Human browser navigation still redirects to the inbox. Fail-closed
+ * refusals use 403 (never 5xx): Meta treats any non-200 as a failed
+ * verification/delivery, and a 5xx would blank the preview as a runtime error.
  */
 const notConnected = () =>
-  Response.json({ ok: false, code: "FACEBOOK_NOT_CONNECTED", message: "Facebook not connected yet" }, { status: 503 });
+  Response.json({ ok: false, code: "FACEBOOK_NOT_CONNECTED", message: "Facebook not connected yet" }, { status: 403 });
 
 export const Route = createFileRoute("/api/public/meta/messenger")({
   server: { handlers: {
