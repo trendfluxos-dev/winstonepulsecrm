@@ -78,7 +78,7 @@ export function ReportsFilterBar({
     const se = SENTIMENTS.find((s) => s.key === filters.sentiment);
     active.push({
       key: "sentiment",
-      label: `${t({ bn: "কথার ধরন", en: "Mood" })}: ${se?.label ?? filters.sentiment}`,
+      label: `${t({ bn: "কথার ধরন", en: "Mood" })}: ${se ? t(se.label) : filters.sentiment}`,
       clear: () => patch({ sentiment: "all" }),
     });
   }
@@ -179,7 +179,7 @@ export function ReportsFilterBar({
               <SelectItem value="all">{t({ bn: "সব ধরনের", en: "All moods" })}</SelectItem>
               {SENTIMENTS.map((s) => (
                 <SelectItem key={s.key} value={s.key}>
-                  {s.label}
+                  {t(s.label)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -193,7 +193,7 @@ export function ReportsFilterBar({
               size="sm"
               onClick={() => patch(defaultFilters(p.days))}
             >
-              {p.label}
+              {t(p.label)}
             </Button>
           ))}
           <Button variant="ghost" size="sm" onClick={() => setFilters(defaultFilters(30))}>
