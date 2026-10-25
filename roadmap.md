@@ -432,3 +432,4 @@
 - [x] META_APP_SECRET + META_WEBHOOK_VERIFY_TOKEN saved (encrypted store, in dev env); webhook live-configured: wrong-token GET 403, unsigned POST 401.
 - [ ] User: Meta Dashboard → Webhooks → Page → callback https://crm.winstonebd.com/api/public/meta/messenger + same verify token → Verify and Save → subscribe `messages` (needs publish for live URL).
 - [ ] Then: 4 evidence tracks in /inbox Meta tab → IT enable decision → real-message test.
+- [x] Google Sheets linked to project; Daily Lead Report sync built (lead-report-sheet.server/.functions.ts, IT Console panel on /system, day-tab mirror, formula-safe cells, metrics + audit). Verified live: tab 2026-10-25 with 500 assigned leads written and read back.
