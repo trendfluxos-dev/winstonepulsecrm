@@ -3,6 +3,7 @@ import {
   LEAD_REPORT_HEADER,
   dhakaDateLabel,
   toLeadReportLine,
+  planScheduledLeadReportRows,
   type LeadReportRow,
 } from "@/lib/lead-report-sheet.server";
 
@@ -44,5 +45,31 @@ describe("lead report sheet rows", () => {
     expect(dhakaDateLabel(new Date("2026-10-25T02:00:00Z"))).toBe("2026-10-25");
     // 2026-10-24 20:00 UTC is 2026-10-25 02:00 in Dhaka — next day.
     expect(dhakaDateLabel(new Date("2026-10-24T20:00:00Z"))).toBe("2026-10-25");
+  });
+
+  it("preserves existing HQ notes and payments when updating the same lead", () => {
+    const existing = toLeadReportLine(row, "old");
+    existing[11] = "Reviewed by HQ";
+    existing[12] = "35.29";
+    const updates = planScheduledLeadReportRows([existing], [row], "new");
+    expect(updates[0]?.rowNumber).toBe(2);
+    expect(updates[0]?.values[11]).toBe("Reviewed by HQ");
+    expect(updates[0]?.values[12]).toBe("35.29");
+  });
+
+  it("appends new leads without deleting or replacing older rows", () => {
+    const updates = planScheduledLeadReportRows([toLeadReportLine(row, "old")], [{ ...row, leadId: "new-id" }], "new");
+    expect(updates).toHaveLength(1);
+    expect(updates[0]?.rowNumber).toBe(3);
+    expect(updates[0]?.values[13]).toBe("new-id");
+  });
+
+  it("an empty CRM result never clears existing sheet rows", () => {
+    expect(planScheduledLeadReportRows([toLeadReportLine(row, "old")], [], "new")).toEqual([]);
+  });
+
+  it("blocks ambiguous duplicate IDs before replacing any rows", () => {
+    const existing = toLeadReportLine(row, "old");
+    expect(() => planScheduledLeadReportRows([existing, existing], [row], "new")).toThrow("Duplicate lead IDs");
   });
 });
