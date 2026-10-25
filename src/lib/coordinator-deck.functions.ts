@@ -139,6 +139,13 @@ async function buildAssignmentPreview(rows: Array<{ agentId: string; count: numb
     leads.forEach(l => { eligible.delete(l.id); extractBangladeshPhones(l.phone_number ?? "").forEach(k => taken.add(k)); });
     return { agentId: row.agentId, name: agent?.name ?? null, requested: row.count, capacity, leads };
   });
+  if (showBantScores) {
+    const { latestBantTotals } = await import("@/lib/lead-bant.server");
+    const totals = await latestBantTotals(candidates.map(l => l.id));
+    for (const proposal of proposals) {
+      proposal.leads = proposal.leads.map(l => ({ ...l, bantTotal: totals.get(l.id) ?? null }));
+    }
+  }
   return { today, generatedAt: new Date().toISOString(), scanned: candidates.length, truncated: candidates.length >= 20000, proposals };
 }
 export const previewLeadCounts = createServerFn({ method: "POST" })
