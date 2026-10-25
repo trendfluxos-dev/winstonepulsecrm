@@ -1,9 +1,11 @@
 # Roadmap
 
 ## 2026-10-25 — Meta Integration & Webhook Control Center
-- [ ] Use uploaded HTML only as a privacy-safe reference; add status/configuration/permission/diagnostic views and isolated synthetic simulator, without credentials or customer samples.
-- [ ] Validate signed payloads after raw-byte HMAC checks; preserve disabled handshake/ingestion and require durable idempotency before activation. No Meta calls, secrets, SQL, production writes, auth/roles or deployment changes.
-- [ ] Add targeted tests, setup/security documentation and browser verification; report exact files and activation blockers.
+- [x] Used uploaded HTML only as a privacy-safe reference; added authority-gated `/meta-control-center` with status/configuration/permission/diagnostic tabs and fixed synthetic simulator. No copied scripts, credentials or customer samples; no token inputs or real lead creation.
+- [x] Added bounded UTF-8/Page event validation after exact raw-byte HMAC; disabled handshake/ingestion preserved. Valid signed events still 503, signed malformed payloads now 400. Durable atomic production idempotency remains blocked on separately approved storage/schema; local simulator never substitutes for it. No Meta calls, secret changes, SQL, production writes, auth/role changes or deployment.
+- [x] 71 tests passed across seven relevant files; harness build OK. Signed-out authority gate verified. Isolated browser presentation harness verified all tabs, five presets, duplicate/conflict handling, reset, absent credential inputs and mobile no overflow; screenshots inspected. No provider traffic; authenticated CRM access and real receipt/delivery remain unverified under no-production-access constraint.
+- Changed: `src/lib/meta-webhook-payload.ts`, `src/lib/meta-control-center.ts`, `src/lib/messenger-webhook.server.ts`, `src/components/crm/MetaControlCenter.tsx`, `src/routes/meta-control-center.tsx`, `src/components/crm/AppShell.tsx`, `src/components/crm/NavSidebar.tsx`, `src/lib/i18n.ts`, `tests/meta-control-center.test.ts`, `tests/messenger-webhook.test.ts`, `tests/route-role-access.test.ts`, `docs/META_CONTROL_CENTER.md`, `docs/MESSENGER_SETUP.md`, `AGENTS.md`, `roadmap.md`.
+- Activation blockers: authoritative App/Page/permission/subscription evidence; reviewed durable receipt/message storage and atomic idempotency; genuine-message ownership/canonical intake; separately authorized deployment and signed durable read-back. HTML credential revocation must be completed by owner at Meta; no revocation claimed.
 
 ## 2026-10-25 — Interactive whole-CRM walkthrough
 - [x] Added bilingual `/walkthrough`: 14 steps across Sales Agent, LeadHub Nexus, Executive HQ and IT Console; workspace/step switching, previous/next, local-only resume/reset, completed reading and links to existing gated pages. Entry from home, help and shared navigation. No live data/provider calls, permission changes or automatic business actions.
