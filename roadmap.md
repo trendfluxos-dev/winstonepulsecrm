@@ -1,5 +1,9 @@
 # Roadmap
 
+## Daily Lead Report — publish and activate at 17:35 Dhaka
+- [ ] Publish the existing callback and verify the live endpoint; preserve the active managed 11:35 UTC schedule without creating a duplicate.
+- [ ] Verify targeted schedule/sheet tests and release markers. First scheduled export remains unverified until the scheduled run reports success.
+
 ## Current checks — report schedule, Messenger samples, Meta and today's allocation
 - [x] Daily report schedule read back active at 17:35 Dhaka after the 17:30 summary; do not duplicate/change it. Published callback POST returned 404, so live execution is not ready.
 - [x] Add off-by-default local-only sample details: complete demo-1, optional-field gaps demo-2 and unlinked empty demo-3/4. 31 tests pass, colors pass, browser verified complete/missing/empty with zero page errors; harness build OK. No CRM records or demo-to-live lookup.
