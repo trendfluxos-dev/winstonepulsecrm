@@ -19,7 +19,6 @@ import {
   type AiModelChoice,
 } from "@/lib/ai-providers";
 
-/** Best-effort status recording for the HQ indicator; never breaks AI calls. */
 /** Stored shape of the ai config row: model choice plus safe call markers. */
 type AiStatusRecord = {
   model?: string;
@@ -28,7 +27,9 @@ type AiStatusRecord = {
   last_error_status?: number;
 };
 
+/** Best-effort status recording for the HQ indicator; never breaks AI calls. */
 async function recordAiStatus(merge: (data: unknown) => AiStatusRecord): Promise<void> {
+
 
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
