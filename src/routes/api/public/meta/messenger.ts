@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 /**
- * Placeholder for the future Meta Messenger webhook. Facebook is not connected:
- * GET handshake remains disabled; POST checks signatures but never accepts messages.
+ * Meta Messenger webhook. GET answers Meta's subscription handshake only when
+ * the server-side verify token is configured and matches exactly; POST checks
+ * raw-byte signatures and stores messages only while the ingestion switch is
+ * on. Human browser navigation still redirects to the inbox.
  */
 const notConnected = () =>
   Response.json({ ok: false, code: "FACEBOOK_NOT_CONNECTED", message: "Facebook not connected yet" }, { status: 503 });
@@ -12,9 +14,19 @@ export const Route = createFileRoute("/api/public/meta/messenger")({
     GET: async ({ request }) => {
       const url = new URL(request.url);
       const verification = [...url.searchParams.keys()].some((key) => key.startsWith("hub."));
+      if (verification) {
+        const token = process.env["META_WEBHOOK_VERIFY_TOKEN"];
+        if (!token) return notConnected();
+        const { webhookChallenge } = await import("@/lib/messenger-protocol.server");
+        const challenge = webhookChallenge(url.searchParams, token);
+        if (!challenge) {
+          return Response.json({ ok: false, code: "INVALID_VERIFY_TOKEN" }, { status: 403, headers: { "Cache-Control": "no-store" } });
+        }
+        return new Response(challenge, { status: 200, headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
+      }
       // Human navigation is not webhook verification: show the inbox,
       // not a deliberate 503 that the preview treats as a runtime failure.
-      if (!verification && request.headers.get("accept")?.includes("text/html")) {
+      if (request.headers.get("accept")?.includes("text/html")) {
         return new Response(null, { status: 303, headers: { Location: "/messenger", "Cache-Control": "no-store" } });
       }
       return notConnected();
