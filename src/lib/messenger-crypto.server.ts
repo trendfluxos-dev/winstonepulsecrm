@@ -53,13 +53,13 @@ export async function decryptMessageBody(
 ): Promise<string | null> {
   const key = await messageKey(env);
   if (!key) return null;
-  const parts = ciphertext.split(".");
-  if (parts.length !== 3 || parts[0] !== "v1") return null;
+  const [version, ivPart, ctPart] = ciphertext.split(".");
+  if (version !== "v1" || !ivPart || !ctPart) return null;
   try {
     const plaintext = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: unb64url(parts[1]) as BufferSource },
+      { name: "AES-GCM", iv: unb64url(ivPart) as BufferSource },
       key,
-      unb64url(parts[2]) as BufferSource,
+      unb64url(ctPart) as BufferSource,
     );
     return decoder.decode(plaintext);
   } catch {
