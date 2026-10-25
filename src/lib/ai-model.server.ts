@@ -7,6 +7,7 @@
  * there is no silent fallback to another provider.
  */
 import {
+  isProviderConfigured,
   parseAiModelChoice,
   requireAiKey,
   resolveAiProvider,
@@ -27,7 +28,28 @@ export async function getAiModelChoice(): Promise<AiModelChoice> {
   return parseAiModelChoice(value);
 }
 
+/**
+ * Current choice plus presence-only configuration flags, so staff UI can mark
+ * a provider as "setup required" instead of letting it look connected.
+ */
+export async function getAiModelStatus(): Promise<{
+  model: AiModelChoice;
+  metaConfigured: boolean;
+}> {
+  const model = await getAiModelChoice();
+  return { model, metaConfigured: isProviderConfigured("meta", process.env) };
+}
+
 export async function setAiModelChoice(model: AiModelChoice): Promise<void> {
+  // Fail-closed at the write path too: an unconfigured provider must not be
+  // stored as the active choice, or every AI feature would start failing.
+  if (!isProviderConfigured(model, process.env)) {
+    throw new Error(
+      model === "meta"
+        ? "Meta Model API is not configured"
+        : "AI service is not configured",
+    );
+  }
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { error } = await supabaseAdmin
     .from("app_config")

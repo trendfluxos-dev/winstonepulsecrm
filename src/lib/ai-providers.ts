@@ -51,6 +51,18 @@ export function resolveAiProvider(choice: AiModelChoice): AiProviderConfig {
 }
 
 /**
+ * Presence-only configuration check: true when the provider's server key
+ * exists. Never returns or logs the key itself — safe to show in staff UI as
+ * a "configured / setup required" badge.
+ */
+export function isProviderConfigured(
+  choice: AiModelChoice,
+  env: Record<string, string | undefined>,
+): boolean {
+  return Boolean(env[resolveAiProvider(choice).keyEnv]);
+}
+
+/**
  * Return the provider key or throw a generic, secret-safe message. The error
  * never names or contains the key, and a missing key always refuses the call
  * (fail-closed) rather than falling back to another provider.

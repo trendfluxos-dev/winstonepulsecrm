@@ -4,6 +4,7 @@ import {
   AI_MODEL_IDS,
   META_MODEL_API_BASE_URL,
   aiCallFailureMessage,
+  isProviderConfigured,
   parseAiModelChoice,
   requireAiKey,
   resolveAiProvider,
@@ -62,6 +63,25 @@ describe("requireAiKey — fail-closed, secret-safe", () => {
 
   it("returns the key when configured", () => {
     expect(requireAiKey("meta", { MODEL_API_KEY: "k" })).toBe("k");
+  });
+});
+
+describe("isProviderConfigured — presence-only, secret-safe", () => {
+  it("reports meta as unconfigured without MODEL_API_KEY", () => {
+    expect(isProviderConfigured("meta", {})).toBe(false);
+    expect(isProviderConfigured("meta", { MODEL_API_KEY: "" })).toBe(false);
+    expect(isProviderConfigured("meta", { MODEL_API_KEY: "k" })).toBe(true);
+  });
+
+  it("reports gateway providers by LOVABLE_API_KEY presence only", () => {
+    expect(isProviderConfigured("openai", { LOVABLE_API_KEY: "k" })).toBe(true);
+    expect(isProviderConfigured("gemini", { LOVABLE_API_KEY: "k" })).toBe(true);
+    expect(isProviderConfigured("openai", {})).toBe(false);
+  });
+
+  it("never crosses providers — a meta key does not configure the gateway", () => {
+    expect(isProviderConfigured("openai", { MODEL_API_KEY: "k" })).toBe(false);
+    expect(isProviderConfigured("meta", { LOVABLE_API_KEY: "k" })).toBe(false);
   });
 });
 

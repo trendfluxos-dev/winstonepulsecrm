@@ -13,13 +13,23 @@ in `src/lib/ai-providers.ts` (pure, testable, no environment reads).
 | `gemini` | `google/gemini-3.8-flash` | Lovable AI Gateway | `LOVABLE_API_KEY` |
 | `meta` (opt-in) | `muse-spark-1.3` | `https://api.meta.ai/v1/chat/completions` | `MODEL_API_KEY` |
 
+## Zero-setup default
+
+OpenAI and Gemini run through the Lovable AI Gateway, which is already
+provisioned — **no account, key, or manual setup is required**, and `openai`
+is the default. These are the recommended choices.
+
 ## Enabling Meta Model API (Muse Spark)
+
+Meta is opt-in and needs manual setup. Until then the HQ picker shows it as
+**"setup required"** (disabled), and the server refuses to store `meta` as
+the active choice — it can never look connected while unconfigured.
 
 1. Obtain a Meta Model API key from your Meta developer account.
 2. In Lovable: **Project Settings → Secrets → Add secret**, name it exactly
    `MODEL_API_KEY`, paste the key, save.
 3. In the CRM, HQ/IT opens the AI team summary panel and switches the model to
-   **Meta (Muse Spark 1.3)**.
+   **Meta (Muse Spark 1.3)** — the option unlocks once the key is present.
 
 Rules that must never change:
 
