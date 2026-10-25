@@ -3,6 +3,7 @@ import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { integrationPreparation } from "@/lib/integration-readiness";
+import { MESSENGER_RETENTION_NOTE } from "@/lib/messenger-retention";
 import { MetaConnectionTest } from "@/components/crm/MetaConnectionTest";
 import { MetaVerificationReport } from "@/components/crm/MetaVerificationReport";
 import { MessengerDeliveryStatus } from "@/components/crm/MessengerDeliveryStatus";
@@ -22,6 +23,7 @@ export function MessengerConnectionStatus() {
     <p className="text-xs text-muted-foreground">{t(verification.reason)}</p>
     <MetaVerificationReport />
     <MessengerDeliveryStatus />
+    <p className="text-xs text-muted-foreground">{t(MESSENGER_RETENTION_NOTE)}</p>
     <MetaConnectionTest />
     <p className="text-xs text-muted-foreground">{t({ bn: "Signed webhook: সার্ভারে স্বাক্ষর পরীক্ষার ব্যবস্থা আছে; বাস্তব যাচাইয়ের প্রমাণ নেই। গোপন তথ্য সেভ হওয়া মেসেজ সিঙ্কের প্রমাণ নয়।", en: "Signed webhook: server signature validation is implemented; no live verification evidence exists. Saved secrets do not prove message sync." })}</p>
   </section>;

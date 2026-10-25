@@ -114,6 +114,7 @@ import { Route as ApiPublicIngestOutcomeRouteImport } from './routes/api/public/
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
 import { Route as ApiPublicIngestReprocessRouteImport } from './routes/api/public/ingest/reprocess'
 import { Route as ApiPublicIntegrationsStatusRouteImport } from './routes/api/public/integrations/status'
+import { Route as ApiPublicJobsMessengerRetentionRouteImport } from './routes/api/public/jobs/messenger-retention'
 import { Route as ApiPublicMetaMessengerRouteImport } from './routes/api/public/meta/messenger'
 import { Route as ApiPublicOsEventsRouteImport } from './routes/api/public/os/events'
 import { Route as ApiPublicPaddleWebhookRouteImport } from './routes/api/public/paddle/webhook'
@@ -668,6 +669,12 @@ const ApiPublicIntegrationsStatusRoute =
     path: '/api/public/integrations/status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsMessengerRetentionRoute =
+  ApiPublicJobsMessengerRetentionRouteImport.update({
+    id: '/api/public/jobs/messenger-retention',
+    path: '/api/public/jobs/messenger-retention',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicMetaMessengerRoute = ApiPublicMetaMessengerRouteImport.update({
   id: '/api/public/meta/messenger',
   path: '/api/public/meta/messenger',
@@ -823,6 +830,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
   '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
   '/api/public/os/events': typeof ApiPublicOsEventsRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
@@ -939,6 +947,7 @@ export interface FileRoutesByTo {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
   '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
   '/api/public/os/events': typeof ApiPublicOsEventsRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
@@ -1056,6 +1065,7 @@ export interface FileRoutesById {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
   '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
   '/api/public/os/events': typeof ApiPublicOsEventsRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
@@ -1174,6 +1184,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/messenger-retention'
     | '/api/public/meta/messenger'
     | '/api/public/os/events'
     | '/api/public/paddle/webhook'
@@ -1290,6 +1301,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/messenger-retention'
     | '/api/public/meta/messenger'
     | '/api/public/os/events'
     | '/api/public/paddle/webhook'
@@ -1406,6 +1418,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/messenger-retention'
     | '/api/public/meta/messenger'
     | '/api/public/os/events'
     | '/api/public/paddle/webhook'
@@ -1523,6 +1536,7 @@ export interface RootRouteChildren {
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
   ApiPublicIngestReprocessRoute: typeof ApiPublicIngestReprocessRoute
   ApiPublicIntegrationsStatusRoute: typeof ApiPublicIntegrationsStatusRoute
+  ApiPublicJobsMessengerRetentionRoute: typeof ApiPublicJobsMessengerRetentionRoute
   ApiPublicMetaMessengerRoute: typeof ApiPublicMetaMessengerRoute
   ApiPublicOsEventsRoute: typeof ApiPublicOsEventsRoute
   ApiPublicPaddleWebhookRoute: typeof ApiPublicPaddleWebhookRoute
@@ -2271,6 +2285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIntegrationsStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/messenger-retention': {
+      id: '/api/public/jobs/messenger-retention'
+      path: '/api/public/jobs/messenger-retention'
+      fullPath: '/api/public/jobs/messenger-retention'
+      preLoaderRoute: typeof ApiPublicJobsMessengerRetentionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/meta/messenger': {
       id: '/api/public/meta/messenger'
       path: '/api/public/meta/messenger'
@@ -2444,6 +2465,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
   ApiPublicIngestReprocessRoute: ApiPublicIngestReprocessRoute,
   ApiPublicIntegrationsStatusRoute: ApiPublicIntegrationsStatusRoute,
+  ApiPublicJobsMessengerRetentionRoute: ApiPublicJobsMessengerRetentionRoute,
   ApiPublicMetaMessengerRoute: ApiPublicMetaMessengerRoute,
   ApiPublicOsEventsRoute: ApiPublicOsEventsRoute,
   ApiPublicPaddleWebhookRoute: ApiPublicPaddleWebhookRoute,
