@@ -203,6 +203,15 @@ export function AiTeamSummary() {
         </p>
       )}
 
+      {model.data?.model === "vertex" && !model.data.vertexConfigured && (
+        <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+          {t({
+            bn: "Google Vertex AI নির্বাচিত, কিন্তু সার্ভারে service-account কনফিগারেশন নেই — AI কাজ করবে না। OpenAI বা Gemini বেছে নিন।",
+            en: "Google Vertex AI is selected but no service account is configured on the server — AI features will fail. Switch to OpenAI or Gemini.",
+          })}
+        </p>
+      )}
+
       <Button size="sm" variant="outline" disabled={run.isPending} onClick={() => run.mutate()}>
         {run.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
         {t({ bn: "আজকের সারাংশ বানান", en: "Generate today's summary" })}
