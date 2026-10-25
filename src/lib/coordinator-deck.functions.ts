@@ -153,7 +153,7 @@ export const previewLeadCounts = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await fullDeck(data.adminToken);
     const { assertDistributionDay } = await import("@/lib/business-day"); assertDistributionDay();
-    return buildAssignmentPreview(data.rows);
+    return buildAssignmentPreview(data.rows, data.showBantScores ?? false);
   });
 
 /**
