@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { integrationStatus, type IntegrationStatus } from "@/lib/integration-status";
 import { WorkspaceRoadmap } from "@/components/crm/WorkspaceRoadmap";
+import { DriveKnowledgePanel } from "@/components/crm/DriveKnowledgePanel";
 
 const ICONS = { messenger: MessageCircle, whatsapp: MessageCircle, windsor: BarChart3, drive: FolderOpen, os: Cloud };
 
@@ -47,6 +48,7 @@ export function IntegrationStatusPage() {
       </section>;
     })}</div>
     <WorkspaceRoadmap />
+    <DriveKnowledgePanel />
     <p className="border-t border-border pt-4 text-xs text-muted-foreground">{t({ bn: "গোপন তথ্য, অনুমতি ও live ডেটা অপরিবর্তিত। এই পাতায় কোনো সংযোগ চালু, মেসেজ পাঠানো বা তথ্য সিঙ্ক হয় না। অন্য পাতার পরীক্ষা বর্তমান প্রবেশাধিকার মেনেই চলবে।", en: "Credentials, permissions and live data are unchanged. This page does not activate connections, send messages or sync data. Other pages retain their existing access checks." })}</p>
   </div>;
 }
