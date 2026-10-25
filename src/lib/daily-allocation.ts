@@ -10,11 +10,12 @@ export function summarizeDailyAllocation(day: string, agents: AllocationAgent[],
   for (const receipt of receipts) {
     if (receipt.work_date === day) unique.get(receipt.agent_id)?.add(receipt.lead_id);
   }
+  const distributionOpen = isDistributionDay(day);
   const rows = agents.map(agent => {
     const received = unique.get(agent.id)?.size ?? 0;
-    return { ...agent, received, remaining: Math.max(0, MAX_DAILY_LEADS_PER_AGENT - received) };
+    return { ...agent, received, remaining: distributionOpen ? Math.max(0, MAX_DAILY_LEADS_PER_AGENT - received) : 0,
+      zeroAlert: distributionOpen && received === 0 };
   });
-  const distributionOpen = isDistributionDay(day);
   return {
     day, distributionOpen, quota: MAX_DAILY_LEADS_PER_AGENT, agents: rows,
     total: rows.reduce((sum, row) => sum + row.received, 0),

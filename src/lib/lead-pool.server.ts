@@ -148,25 +148,15 @@ export async function rolloverPendingLeads(workDate: string = dhakaToday()): Pro
  * full round, so calling it twice in one day can never double-assign.
  */
 export async function assignedTodayByAgent(workDate: string): Promise<Map<string, number>> {
-  const supabaseAdmin = await admin();
-  const counts = new Map<string, number>();
-  for (let from = 0; ; from += 1000) {
-    const { data } = await supabaseAdmin
-      .from("leads")
-      .select("assigned_to")
-      .eq("work_date", workDate)
-      // Snoozed and unresponsive leads are counted separately, not as active quota.
-      .not("work_state", "in", "(snoozed,unresponsive)")
-      .in("assignment_source", ["lead_database", "coordinator", "leadhub"])
-      .or("assigned_to.not.is.null,assigned_agent_id.not.is.null")
-      .range(from, from + 999);
-    (data ?? []).forEach((row) => {
-      if (!row.assigned_to) return;
-      counts.set(row.assigned_to, (counts.get(row.assigned_to) ?? 0) + 1);
-    });
-    if (!data || data.length < 1000) break;
+  const { readAllocationReceipts } = await import("@/lib/allocation-ledger.server");
+  const receipts = await readAllocationReceipts(workDate);
+  const unique = new Map<string, Set<string>>();
+  for (const row of receipts) {
+    const leads = unique.get(row.agent_id) ?? new Set<string>();
+    leads.add(row.lead_id);
+    unique.set(row.agent_id, leads);
   }
-  return counts;
+  return new Map([...unique].map(([id, leads]) => [id, leads.size]));
 }
 
 /**

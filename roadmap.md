@@ -1,5 +1,9 @@
 # Roadmap
 
+## Align allocation logic and deploy
+- [x] Use one fail-closed unique-assignment receipt reader for distribution capacity, LeadHub allocation and daily summary; server computes Friday/zero-row conditions, UI renders them.
+- [ ] Run regression tests and signed-in refresh; publish and verify live release plus new summary.
+
 ## Daily new-lead allocation alerts
 - [x] Add read-only Dhaka-day ledger summary for active eligible agents in HQ/LeadHub and self-only Desk notice; Friday stays neutral, no assignment or schedule changes.
 - [x] 28 targeted tests pass (zero/partial/50/Friday/unique-day counts and access boundaries); harness build OK, semantic colors pass. Signed-in HQ and refresh show 75 new assignments across 8 active agents, 5 with zero; mobile list has no horizontal overflow. No records, assignments or deployment changed. LeadHub/self scopes tested; their signed-in UI was not separately exercised.
