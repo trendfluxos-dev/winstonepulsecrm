@@ -8,9 +8,24 @@ async function request(body: Uint8Array) {
   return new Request("http://localhost/webhook", { method: "POST", body: Uint8Array.from(body), headers: { "x-hub-signature-256": signature } });
 }
 it("valid exact raw bytes never acknowledge unpersisted messages", async () => {
-  const response = await inspectSignedWebhook(await request(new Uint8Array([255, 0, 128, 65])), secret);
+  const body = new TextEncoder().encode(JSON.stringify({ object: "page", entry: [{ id: "0", time: 0, messaging: [{ sender: { id: "0" }, recipient: { id: "0" }, timestamp: 0, message: { mid: "SYNTHETIC_TEST" } }] }] }));
+  const response = await inspectSignedWebhook(await request(body), secret);
   expect(response.status).toBe(503);
   expect(await response.json()).toEqual({ ok: false, code: "MESSENGER_INGESTION_NOT_READY" });
+});
+it("rejects signed invalid UTF-8 or payloads after signature verification", async () => {
+  for (const bytes of [new Uint8Array([255, 0, 128, 65]), new TextEncoder().encode('{"object":"page","entry":[]}')]) {
+    const response = await inspectSignedWebhook(await request(bytes), secret);
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ ok: false, code: "INVALID_WEBHOOK_PAYLOAD" });
+  }
+});
+it("validates signature before attempting to parse a malformed payload", async () => {
+  expect((await inspectSignedWebhook(await request(new Uint8Array([255])), "wrong")).status).toBe(401);
+});
+it("replayed valid signed events remain unaccepted without durable storage", async () => {
+  const bytes = new TextEncoder().encode(JSON.stringify({ object: "page", entry: [{ id: "0", time: 0, messaging: [{ sender: { id: "0" }, recipient: { id: "0" }, timestamp: 0, message: { mid: "REPLAY_SYNTHETIC" } }] }] }));
+  for (let i = 0; i < 2; i++) expect((await inspectSignedWebhook(await request(bytes), secret)).status).toBe(503);
 });
 it("refuses invalid signatures before ingestion", async () => {
   const response = await inspectSignedWebhook(await request(new TextEncoder().encode("synthetic")), "wrong");
