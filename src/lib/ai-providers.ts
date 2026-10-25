@@ -84,18 +84,72 @@ export function requireAiKey(
 }
 
 /**
+ * One safe entry in the recent-call history shown on the HQ panel: an ISO
+ * time, whether the call succeeded, and — for failures — only the HTTP
+ * status number. Prompts, answers, error bodies and keys are never stored.
+ */
+export type AiCallHistoryEntry = { at: string; ok: boolean; status?: number };
+
+/** The history is a small rolling window, newest first. */
+export const AI_HISTORY_LIMIT = 10;
+
+type AiStatusShape = {
+  model?: unknown;
+  last_success_at?: unknown;
+  last_error_at?: unknown;
+  last_error_status?: unknown;
+  history?: unknown;
+};
+
+/** Read only well-formed safe entries from stored config; drop anything else. */
+export function readAiHistory(data: unknown): AiCallHistoryEntry[] {
+  const raw = (data as AiStatusShape | null)?.history;
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(
+      (e): e is AiCallHistoryEntry =>
+        Boolean(e) &&
+        typeof (e as AiCallHistoryEntry).at === "string" &&
+        typeof (e as AiCallHistoryEntry).ok === "boolean",
+    )
+    .map((e) => ({
+      at: e.at,
+      ok: e.ok,
+      ...(typeof e.status === "number" && Number.isFinite(e.status)
+        ? { status: Math.trunc(e.status) }
+        : {}),
+    }));
+}
+
+function pushHistory(data: unknown, entry: AiCallHistoryEntry): AiCallHistoryEntry[] {
+  return [entry, ...readAiHistory(data)].slice(0, AI_HISTORY_LIMIT);
+}
+
+/**
  * Merge a last-successful-call timestamp into the stored ai config without
- * dropping the model choice. Pure and secret-free: only a model name and an
- * ISO timestamp are ever stored here.
+ * dropping the model choice or the failure markers. Pure and secret-free:
+ * only a model name, ISO times, a status number and the safe history are
+ * ever stored here.
  */
 export function withLastSuccess(
   data: unknown,
   at: string,
-): { model?: string; last_success_at: string } {
-  const model = (data as { model?: unknown } | null)?.model;
+): {
+  model?: string;
+  last_success_at: string;
+  last_error_at?: string;
+  last_error_status?: number;
+  history: AiCallHistoryEntry[];
+} {
+  const existing = (data ?? {}) as AiStatusShape;
   return {
-    ...(typeof model === "string" && model ? { model } : {}),
+    ...(typeof existing.model === "string" && existing.model ? { model: existing.model } : {}),
+    ...(typeof existing.last_error_at === "string" ? { last_error_at: existing.last_error_at } : {}),
+    ...(typeof existing.last_error_status === "number"
+      ? { last_error_status: existing.last_error_status }
+      : {}),
     last_success_at: at,
+    history: pushHistory(data, { at, ok: true }),
   };
 }
 
@@ -108,13 +162,21 @@ export function withLastFailure(
   data: unknown,
   at: string,
   status: number,
-): { model?: string; last_success_at?: string; last_error_at: string; last_error_status: number } {
-  const existing = (data ?? {}) as { model?: unknown; last_success_at?: unknown };
+): {
+  model?: string;
+  last_success_at?: string;
+  last_error_at: string;
+  last_error_status: number;
+  history: AiCallHistoryEntry[];
+} {
+  const existing = (data ?? {}) as AiStatusShape;
+  const safeStatus = safeFailureStatus(status);
   return {
     ...(typeof existing.model === "string" && existing.model ? { model: existing.model } : {}),
     ...(typeof existing.last_success_at === "string" ? { last_success_at: existing.last_success_at } : {}),
     last_error_at: at,
-    last_error_status: safeFailureStatus(status),
+    last_error_status: safeStatus,
+    history: pushHistory(data, { at, ok: false, status: safeStatus }),
   };
 }
 
