@@ -91,7 +91,7 @@ export async function ingestMessengerWebhook(input: {
   if (!parsed.ok) return refusal(400, "INVALID_WEBHOOK_PAYLOAD");
 
   // Durable storage and Meta approvals are unverified: refuse before any write.
-  if (input.enabled ?? !messengerIngestionEnabled()) return refusal(503, "MESSENGER_INGESTION_NOT_READY");
+  if (!(input.enabled ?? messengerIngestionEnabled())) return refusal(503, "MESSENGER_INGESTION_NOT_READY");
 
   const store = input.store ?? (await import("@/lib/messenger-store.server")).supabaseMessengerStore();
   let stored = 0;
