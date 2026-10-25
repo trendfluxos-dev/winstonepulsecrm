@@ -102,6 +102,8 @@ const BatchInput = z.object({
   adminToken: z.string().nullable().optional(),
   requestId: z.string().uuid(),
   reviewedLeadIds: z.array(z.string().uuid()).max(2000).optional(),
+  /** When true, annotate preview leads with their latest AI BANT total (display signal only; selection order and all gates are unchanged). */
+  showBantScores: z.boolean().optional(),
   rows: z
     .array(z.object({ agentId: z.string().uuid(), count: z.number().int().min(1).max(MAX_DAILY_LEADS_PER_AGENT) }))
     .min(1)
