@@ -192,3 +192,5 @@
 - [x] Projects page header offers "All brochures (ZIP, 15)": fetches the 15 brochure PDFs, packs them (stored, not re-compressed) and saves one archive; verified in browser — 18 MB ZIP with exactly 15 valid PDFs, no page errors; tests/brochure-zip.test.ts (4) passes.
 
 - [ ] Verify all 15 brochure links download the correct PDF in browser (owner request 2026-10-24 18:27 UTC)
+
+- [ ] Executive HQ accountability presentation PDF (24 slides, Bengali, with CRM evidence, 13 Sep–24 Oct 2026) — owner request 2026-10-25 05:00 UTC
