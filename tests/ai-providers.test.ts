@@ -8,6 +8,7 @@ import {
   parseAiModelChoice,
   requireAiKey,
   resolveAiProvider,
+  withLastFailure,
   withLastSuccess,
 } from "@/lib/ai-providers";
 
