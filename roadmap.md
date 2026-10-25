@@ -1,10 +1,15 @@
 # Roadmap
 
+## Daily Lead Report — publish and activate at 17:35 Dhaka
+- [x] Publish the existing callback; live POST now returns 401 without managed authentication (not 404). Active managed 11:35 UTC / 17:35 Dhaka schedule preserved without duplication.
+- [x] 12 targeted schedule/sheet tests pass; live release checker confirms v1.6.0, $35.29 and 50-lead markers deployed.
+- [ ] First scheduled export remains unverified until today's 17:35 Dhaka run reports success; managed delivery may spread by about 30 seconds. No immediate export or extra job created.
+
 ## Current checks — report schedule, Messenger samples, Meta and today's allocation
-- [x] Daily report schedule read back active at 17:35 Dhaka after the 17:30 summary; do not duplicate/change it. Published callback POST returned 404, so live execution is not ready.
+- [x] Daily report schedule read back active at 17:35 Dhaka after the 17:30 summary; do not duplicate/change it. Callback published and live unauthenticated POST now returns 401, superseding the previous 404.
 - [x] Add off-by-default local-only sample details: complete demo-1, optional-field gaps demo-2 and unlinked empty demo-3/4. 31 tests pass, colors pass, browser verified complete/missing/empty with zero page errors; harness build OK. No CRM records or demo-to-live lookup.
 - [x] Read-only today check (2026-10-25 Dhaka): all 8 active approved agents have 0 ledger assignments today and no matching assignment audit rows; all have older currently assigned leads (50–505 each). No assignment performed.
-- [ ] Published callback and first scheduled report execution await publication; no publish requested unambiguously by “when published”. Nothing will execute after this turn except the existing configured job.
+- [ ] Callback publication completed by explicit owner request; first scheduled report execution awaits the 17:35 Dhaka run. Nothing will execute after this turn except the existing configured jobs.
 - [ ] Inventory activation blocked by owner-provided sheet URL/tab (still absent); no Daily Lead Report substitution.
 - [ ] Meta messages subscription cannot be verified without provider authorization; stored App Review/Live mode/Page consent/messages subscription evidence and sync-enable decision are empty. Keep sync off; no invented evidence or Meta activation.
 
@@ -24,7 +29,7 @@
 - [x] Add a managed authenticated daily callback after the evening shift summary (17:35 Asia/Dhaka).
 - [x] Verify synthetic authentication, payload validation and sync results: 12 tests pass; preview unauthenticated POST returns 401; harness build OK. Automatic updates verify a retained backup, match lead IDs, preserve HQ notes/payments and never clear older rows; manual sync remains unchanged.
 - [x] Register and read back managed schedule `winstone-lead-report-after-shift`, daily 11:35 UTC, active; do not modify the existing unmanaged `winstone-daily-sheet-sync` job.
-- [ ] Live execution awaits publication of the new callback (not requested in this turn) and its first scheduled run; no real lead export was performed during verification. Schedule timing may spread up to about 30 seconds.
+- [ ] Callback publication completed and live authentication refusal verified on 2026-10-25; first scheduled run remains unverified. No immediate real lead export performed during verification. Schedule timing may spread up to about 30 seconds.
 
 ## 2026-10-25 — Google Calendar linked; site-visit calendar sync live-capable (03:15 UTC)
 - [x] Google Calendar connection (Zahid's Google Calendar 2) linked to the project; gateway read verified (calendar list OK, primary calendar Asia/Dhaka, events write scope configured).
