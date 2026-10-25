@@ -62,7 +62,7 @@ export const getAiModel = createServerFn({ method: "GET" })
     const c = await resolveCaller(data.adminToken ?? null);
     if (c.scope === "none") throw new Error("Sign in required");
     const m = await import("@/lib/ai-model.server");
-    return { model: await m.getAiModelChoice() };
+    return m.getAiModelStatus();
   });
 
 export const setAiModel = createServerFn({ method: "POST" })
