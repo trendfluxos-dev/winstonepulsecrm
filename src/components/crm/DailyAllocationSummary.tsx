@@ -11,7 +11,7 @@ export function DailyAllocationSummary({ surface }: { surface: "hq" | "leadhub" 
   const t = useT();
   const authorityToken = useAdminToken();
   const deckToken = useDeckToken();
-  const { data: account } = useMyAccount();
+  const { account } = useMyAccount();
   const adminToken = surface === "leadhub" ? deckToken : surface === "hq" ? authorityToken : null;
   const read = useServerFn(getDailyAllocation);
   const query = useQuery({
