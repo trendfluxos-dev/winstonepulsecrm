@@ -36,6 +36,9 @@ export function ReportsFilterBar({
   agents,
   sources,
   visible,
+  matchedAgents,
+  matchedLeads,
+  matchedCalls,
 }: {
   filters: ReportFilters;
   patch: (next: Partial<ReportFilters>) => void;
