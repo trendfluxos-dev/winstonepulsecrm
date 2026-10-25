@@ -2,7 +2,7 @@
 
 ## Explicit daily target / received / remaining
 - [x] Show labelled target, received and remaining for every active agent on HQ/LeadHub and self-only Desk; compact mobile rows and desktop table, same server values.
-- [ ] Verify signed-in desktop/mobile display and targeted regressions; no data or deployment changes requested.
+- [x] Signed-in HQ shows all 8 agents with explicit target/received/remaining; refreshed desktop table and mobile cards verified, no horizontal overflow or page errors. 17 targeted tests pass, semantic colors pass, harness build OK. No data or deployment changes.
 
 ## Align allocation logic and deploy
 - [x] Use one fail-closed unique-assignment receipt reader for distribution capacity, LeadHub allocation and daily summary; server computes Friday/zero-row conditions, UI renders them.
