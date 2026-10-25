@@ -154,28 +154,28 @@ function EntryHall() {
             icon={<Smartphone />}
             illustration={<SmartphoneIllustration />}
             title="Android"
-            subtitle="Mobile-first CRM"
+            subtitle={t({ bn: "মোবাইলে কাজের জন্য", en: "Mobile-first CRM" })}
             onClick={() => chooseMode("android")}
           />
           <ModeCard
             icon={<Globe />}
             illustration={<WebIllustration />}
             title="Web / iOS"
-            subtitle="Responsive CRM"
+            subtitle={t({ bn: "যেকোনো ব্রাউজারে", en: "Responsive CRM" })}
             onClick={() => chooseMode("web")}
           />
           <ModeCard
             icon={<Monitor />}
             illustration={<DesktopIllustration />}
             title="Desktop"
-            subtitle="Full CRM Workspace"
+            subtitle={t({ bn: "পুরো ডেস্কটপ ভিউ", en: "Full CRM Workspace" })}
             onClick={() => chooseMode("desktop")}
           />
           <ModeCard
             icon={<ShieldCheck />}
             illustration={<span className="grid h-16 w-full shrink-0 place-items-center rounded-md bg-secondary text-gold sm:h-24 sm:w-24 lg:w-28"><ShieldCheck className="size-10" /></span>}
             title="IT Console"
-            subtitle="Secure administration"
+            subtitle={t({ bn: "নিরাপদ প্রশাসন", en: "Secure administration" })}
             onClick={() => openPin("/system")}
           />
         </div>
@@ -200,10 +200,10 @@ function EntryHall() {
             ))}
           </div>
           <Button size="lg" className="btn-enter mt-4 w-full rounded-md text-base font-bold" onClick={startRole}>
-            Get started <ChevronRight className="size-5" />
+            {t({ bn: "শুরু করুন", en: "Get started" })} <ChevronRight className="size-5" />
           </Button>
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            Optional — pick a device above so we remember your preferred view.
+            {t({ bn: "ঐচ্ছিক — উপরে ডিভাইস বেছে নিলে আপনার পছন্দ মনে রাখা হবে।", en: "Optional — pick a device above so we remember your preferred view." })}
           </p>
         </div>
 
@@ -213,7 +213,7 @@ function EntryHall() {
           id="workspace-signin"
           className="font-hand mt-12 scroll-mt-6 text-center text-3xl font-semibold tracking-normal sm:text-4xl"
         >
-          Sign in to your workspace
+          {t({ bn: "আপনার কর্মঘরে প্রবেশ করুন", en: "Sign in to your workspace" })}
           <span aria-hidden className="mx-auto mt-2 block h-0.5 w-12 bg-gold" />
         </h2>
         <div className="mt-5 grid gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4">
