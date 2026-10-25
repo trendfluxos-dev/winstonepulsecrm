@@ -12,6 +12,7 @@ import {
   requireAiKey,
   resolveAiProvider,
   aiCallFailureMessage,
+  withLastSuccess,
   type AiModelChoice,
 } from "@/lib/ai-providers";
 

@@ -83,6 +83,22 @@ export function requireAiKey(
   return key;
 }
 
+/**
+ * Merge a last-successful-call timestamp into the stored ai config without
+ * dropping the model choice. Pure and secret-free: only a model name and an
+ * ISO timestamp are ever stored here.
+ */
+export function withLastSuccess(
+  data: unknown,
+  at: string,
+): { model?: string; last_success_at: string } {
+  const model = (data as { model?: unknown } | null)?.model;
+  return {
+    ...(typeof model === "string" && model ? { model } : {}),
+    last_success_at: at,
+  };
+}
+
 /** Error text shown to staff must never carry provider responses or keys. */
 export function aiCallFailureMessage(status: number): string {
   if (status === 402 || status === 403) return "AI credits are exhausted — please try again later";
