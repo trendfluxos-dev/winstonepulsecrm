@@ -3,7 +3,7 @@
  * generated admin client inside the handler, never from browser code.
  *
  * A missing table is reported as `storage_unavailable`, which keeps the webhook
- * refusing with 503 — the pipeline never claims a message was stored when the
+ * refusing with 403 — the pipeline never claims a message was stored when the
  * reviewed migration has not been applied.
  */
 import type { MessengerStore, ReceiptClaim, StoredInbound } from "@/lib/messenger-ingest.server";
