@@ -196,51 +196,6 @@ export type Database = {
           },
         ]
       }
-      agent_daily_target_history: {
-        Row: {
-          actor_label: string
-          actor_profile_id: string | null
-          agent_id: string
-          created_at: string
-          effective_day: string
-          id: string
-          target: number
-        }
-        Insert: {
-          actor_label?: string
-          actor_profile_id?: string | null
-          agent_id: string
-          created_at?: string
-          effective_day: string
-          id?: string
-          target: number
-        }
-        Update: {
-          actor_label?: string
-          actor_profile_id?: string | null
-          agent_id?: string
-          created_at?: string
-          effective_day?: string
-          id?: string
-          target?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "agent_daily_target_history_actor_profile_id_fkey"
-            columns: ["actor_profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agent_daily_target_history_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       agent_devices: {
         Row: {
           android_version: string | null

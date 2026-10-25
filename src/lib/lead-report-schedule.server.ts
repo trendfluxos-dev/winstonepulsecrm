@@ -3,7 +3,7 @@ import { authenticateCronRequest } from "@/integrations/supabase/cron-auth";
 
 export const LEAD_REPORT_SCHEDULE = {
   name: "winstone-lead-report-after-shift",
-  schedule: "30 11 * * *",
+  schedule: "35 11 * * *",
   targetPath: "/api/public/jobs/lead-report-sheet",
   body: { kind: "daily" },
 } as const;

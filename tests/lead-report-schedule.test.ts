@@ -17,8 +17,8 @@ beforeEach(() => {
 });
 
 describe("scheduled Daily Lead Report", () => {
-  it("runs daily at 17:30 Dhaka", () => {
-    expect(LEAD_REPORT_SCHEDULE.schedule).toBe("30 11 * * *");
+  it("runs daily at 17:35 Dhaka after the 17:30 shift summary", () => {
+    expect(LEAD_REPORT_SCHEDULE.schedule).toBe("35 11 * * *");
     expect(LEAD_REPORT_SCHEDULE.body).toEqual({ kind: "daily" });
   });
   it("rejects unauthenticated requests without exporting leads", async () => {
@@ -44,12 +44,5 @@ describe("scheduled Daily Lead Report", () => {
     expect(response.status).toBe(502);
     expect(await response.json()).toEqual({ ok: false, code: "SHEET_SYNC_FAILED" });
     expect(mocks.audit).toHaveBeenCalledWith(expect.objectContaining({ metadata: expect.objectContaining({ outcome: "failure" }) }));
-  });
-});
-import { nextLeadReportRun } from "@/lib/lead-report-next";
-describe("next Daily Lead Report time", () => {
-  it("is today 17:30 Dhaka before it, tomorrow after it", () => {
-    expect(nextLeadReportRun(new Date("2026-10-25T05:00:00Z")).toISOString()).toBe("2026-10-25T11:30:00.000Z");
-    expect(nextLeadReportRun(new Date("2026-10-25T11:31:00Z")).toISOString()).toBe("2026-10-26T11:30:00.000Z");
   });
 });

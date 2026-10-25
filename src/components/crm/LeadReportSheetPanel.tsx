@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { leadReportSheetStatus, pushLeadReportSheet } from "@/lib/lead-report-sheet.functions";
 import { useAdminToken } from "@/lib/local-session";
-import { nextLeadReportRun } from "@/lib/lead-report-next";
 
 function dhakaTime(iso: string | null | undefined) {
   if (!iso) return "—";
@@ -53,9 +52,6 @@ export function LeadReportSheetPanel() {
             বরাদ্দকৃত লিডের স্ন্যাপশট প্রতিদিনের ঢাকা-তারিখের ট্যাবে Google Sheet-এ যায়। সর্বশেষ
             জমা: {dhakaTime(last?.lastSyncedAt)}
             {last?.tab ? ` · ট্যাব ${last.tab} · ${last.rowCount ?? 0}টি লিড` : ""}
-          </p>
-          <p className="text-xs font-medium">
-            পরবর্তী স্বয়ংক্রিয় সিঙ্ক: {dhakaTime(nextLeadReportRun(new Date()).toISOString())} (প্রতিদিন বিকেল ৫:৩০, ঢাকা; ~৩০ সেকেন্ড দেরি হতে পারে)
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
