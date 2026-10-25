@@ -5,6 +5,7 @@
 - [x] Published; live manual v1.6.0/$35.29/50 markers pass. Signed-in live HQ shows all 8 active agents, 8 progress bars, 75 unique new receipts, 5 zero warnings, mobile/desktop refresh without overflow/errors. Self/LeadHub scope unit-tested; separate signed-in agent views and real IT edit/read-back not exercised without their authorized sessions/full IT PIN. No target values or assignments changed.
 
 ## Bengali daily accountability presentation — Zahid Hasan Emon
+- [ ] Revise the Bengali PDF with per-day evidence index, source formulas, verification states and report references; preserve original and visually inspect every revised page.
 - [x] Read bounded agent-day aggregates and 53 saved reviews, 4163 reports across 8 active agents; first report 2026-09-13, exact first launch unverified. Missing activity/overdue never labelled confirmed negligence.
 - [x] Delivered 40-page Bengali PDF, all 43 Dhaka dates per agent, saved reviews, comparison, limits and action plan, requested presenter attribution. Inspected all final page renders; fixed table/footer collision. No customer PII/secrets; no production records changed.
 
