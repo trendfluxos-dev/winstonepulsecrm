@@ -177,9 +177,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             {scope !== "none" && !adminToken && (
               <button
                 type="button"
-                aria-label="Sign out"
+                aria-label={t({ bn: "সাইন আউট", en: "Sign out" })}
                 onClick={() => {
-                  void signOut().then(() => toast.info("Signed out"));
+                  void signOut().then(() => toast.info(t({ bn: "সাইন আউট হয়েছো", en: "Signed out" })));
                 }}
                 className="inline-flex h-8 min-w-8 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-2 text-xs font-semibold text-muted-foreground transition-all duration-300 hover:text-foreground hover:shadow-sm sm:px-3"
               >

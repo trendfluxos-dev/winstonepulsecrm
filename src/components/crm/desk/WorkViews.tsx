@@ -105,7 +105,7 @@ export function PipelineBoard() {
   return (
     <section className="space-y-4" aria-labelledby="pipeline-title">
       <SectionTitle
-        title={t({ bn: "পাইপলাইন", en: "Pipeline" })}
+        title={t({ bn: "কাজের ধাপ", en: "Work stages" })}
         sub={t({ bn: "আপনার লিড ধাপ অনুযায়ী। ধাপ বদলায় শুধু কল রিপোর্টে।", en: "Your leads by stage. Stages change only through call reports." })}
       />
       <SearchBox value={q} onChange={setQ} placeholder={t({ bn: "নাম বা নম্বর খুঁজুন…", en: "Search leads…" })} />
@@ -392,7 +392,7 @@ export function OutlookView() {
   const max = Math.max(1, ...weeks.map((w) => w.n));
   return (
     <section className="space-y-4">
-      <SectionTitle title={t({ bn: "আউটলুক", en: "Outlook" })} sub={t({ bn: "সামনের কাজ — শুধু আসল সংখ্যা।", en: "What's ahead — real counts only." })} />
+      <SectionTitle title={t({ bn: "আজকের অবস্থা", en: "Today's status" })} sub={t({ bn: "সামনের কাজ — শুধু আসল সংখ্যা।", en: "What's ahead — real counts only." })} />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard loading={isPending} label={t({ bn: "সক্রিয় হট লিড", en: "Active hot leads" })} value={num(hot, lang)} icon={<Flame />} tone="destructive" />
         <StatCard loading={isPending} label={t({ bn: "৭ দিনে ফলো-আপ", en: "Follow-ups in 7 days" })} value={num(dueWeek, lang)} icon={<CalendarClock />} tone="chart4" />

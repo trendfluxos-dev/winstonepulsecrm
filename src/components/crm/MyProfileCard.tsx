@@ -13,11 +13,13 @@ import { StaffAvatar } from "@/components/crm/StaffAvatar";
 import { MaintenanceProfileNotice } from "@/components/crm/MaintenanceNotice";
 import { updateMyProfile } from "@/lib/accounts.functions";
 import { useMyAccount, useSignOut } from "@/lib/session";
+import { useT } from "@/lib/i18n";
 
 const HUES = [200, 260, 320, 20, 60, 140];
 
 /** Agents and coordinators keep their own name, phone and avatar colour here. */
 export function MyProfileCard() {
+  const t = useT();
   const { account } = useMyAccount();
   const queryClient = useQueryClient();
   const save = useServerFn(updateMyProfile);
@@ -94,7 +96,7 @@ export function MyProfileCard() {
               setOpen((v) => !v);
             }}
           >
-            <Palette className="size-4" /> Edit profile
+            <Palette className="size-4" /> {t({ bn: "প্রোফাইল বদল", en: "Edit profile" })}
           </Button>
           <Button
             variant="secondary"
@@ -110,7 +112,7 @@ export function MyProfileCard() {
             className="flex-1 sm:flex-none"
             onClick={() => void signOut()}
           >
-            <LogOut className="size-4" /> Sign out
+            <LogOut className="size-4" /> {t({ bn: "সাইন আউট", en: "Sign out" })}
           </Button>
         </div>
       </div>

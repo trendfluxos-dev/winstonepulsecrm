@@ -82,8 +82,8 @@ function ControlBoardPage() {
         surface="hq"
         allow={["authority"]}
         icon={<ShieldCheck className="size-7" />}
-        title="এক্সিকিউটিভ এইচকিউ (Executive HQ)"
-        description="ম্যানেজমেন্টের কেন্দ্রীয় ড্যাশবোর্ড — লাইভ টিম পারফরম্যান্স, এজেন্ট পারফরম্যান্স আপডেট, লিডারবোর্ড, কল/রিপোর্ট মেট্রিক ও বিজনেস অ্যানালিটিক্স। শুধু দেখা ও পর্যালোচনা; পিন লাগবে।"
+        title="এক্সিকিউটিভ HQ (ম্যানেজমেন্ট প্যানেল)"
+        description="পুরো দলের আজকের অবস্থা — কে কতখানি কাজ করেছো, লিড কোন ধাপে আছো, কল ও বুকিংএর হিসাব। শুধু দেখা ও পর্যালোচনো; পিন লাগবো।"
       >
         <ControlBoard />
       </RoleGate>
@@ -124,7 +124,7 @@ function ControlBoard() {
       { key: "pending", label: "নতুন / বাকি" },
       { key: "contacted", label: "কথা হয়েছে" },
       { key: "follow_up", label: "ফলো-আপ" },
-      { key: "closed", label: "বন্ধ" },
+      { key: "closed", label: "কাজ শেষ" },
     ];
     return order.map((o) => ({
       label: o.label,
@@ -151,9 +151,9 @@ function ControlBoard() {
 
   const sentimentRows = useMemo(() => {
     const labels: Record<string, string> = {
-      positive: "পজিটিভ",
-      neutral: "নিউট্রাল",
-      negative: "নেগেটিভ",
+      positive: "ভালো কথো",
+      neutral: "সাধারণ কথো",
+      negative: "খারাপ কথো",
     };
     const counts = new Map<string, number>();
     for (const call of calls) {
