@@ -8,6 +8,8 @@ import {
   Users,
 } from "lucide-react";
 import { useMemo } from "react";
+import { useT } from "@/lib/i18n";
+
 import {
   CartesianGrid,
   Cell,
@@ -82,6 +84,7 @@ export function ExecutiveOverview({
   events: LeadEvent[];
   onSelectAgent?: (agentId: string) => void;
 }) {
+  const t = useT();
   const kpi = useMemo(() => {
     const today = dhakaDay(new Date());
     const connected = calls.filter((c) => c.duration_seconds > CONNECTED_THRESHOLD_SECONDS);
@@ -106,20 +109,23 @@ export function ExecutiveOverview({
   }, [calls, leads]);
 
   const funnel = useMemo(() => {
-    const steps = [
-      { label: "নতুন লিড", value: leads.length },
+    const steps: { label: { bn: string; en: string }; value: number }[] = [
+      { label: { bn: "নতুন লিড", en: "New leads" }, value: leads.length },
       {
-        label: "যোগাযোগ হয়েছে",
+        label: { bn: "যোগাযোগ হয়েছে", en: "Contacted" },
         value: leads.filter((l) => l.status !== "pending").length,
       },
       {
-        label: "কোয়ালিফাইড",
+        label: { bn: "সম্ভাব্য (হট+ওয়ার্ম)", en: "Qualified" },
         value: leads.filter((l) => l.temperature === "hot" || l.temperature === "warm").length,
       },
-      { label: "ফলো-আপ", value: leads.filter((l) => l.status === "follow_up").length },
-      { label: "আলোচনা চলছে", value: leads.filter((l) => l.temperature === "hot").length },
+      { label: { bn: "ফলো-আপ", en: "Follow-up" }, value: leads.filter((l) => l.status === "follow_up").length },
       {
-        label: "বুকিং",
+        label: { bn: "আলোচনা চলছে", en: "In negotiation" },
+        value: leads.filter((l) => l.temperature === "hot").length,
+      },
+      {
+        label: { bn: "বুকিং", en: "Booked" },
         value: leads.filter((l) => l.status === "closed" && l.outcome_category === "deal_won")
           .length,
       },
