@@ -341,7 +341,7 @@ export function ExecutiveOverview({
               );
             })}
             {team.length === 0 && (
-              <li className="text-[11px] text-muted-foreground">এখনো কোনো এজেন্ট নেই।</li>
+              <li className="text-[11px] text-muted-foreground">{t({ bn: "এখনো কোনো এজেন্ট নেই।", en: "No agents yet." })}</li>
             )}
           </ol>
         </div>
@@ -349,7 +349,7 @@ export function ExecutiveOverview({
 
       <div className="grid gap-3 xl:grid-cols-3">
         <div className="card-elevated p-4 xl:col-span-1">
-          <h3 className="text-sm font-semibold">কল অ্যাক্টিভিটি ট্রেন্ড</h3>
+          <h3 className="text-sm font-semibold">{t({ bn: "কল কমছে বাড়ছে", en: "Call trend" })}</h3>
           <div className="mt-2 h-40">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trend}>
@@ -384,7 +384,7 @@ export function ExecutiveOverview({
                 <Line
                   type="monotone"
                   dataKey="calls"
-                  name="কল"
+                  name={t({ bn: "কল", en: "Calls" })}
                   stroke="var(--chart-1)"
                   strokeWidth={2}
                   dot={{ r: 2.5, fill: "var(--chart-1)" }}
@@ -395,16 +395,16 @@ export function ExecutiveOverview({
         </div>
 
         <div className="card-elevated p-4">
-          <h3 className="text-sm font-semibold">রূপান্তরের হার</h3>
+          <h3 className="text-sm font-semibold">{t({ bn: "কতটুকু সফল হচ্ছে", en: "Success rates" })}</h3>
           <div className="mt-3 grid grid-cols-3 gap-2">
-            <Gauge label="কথা হওয়ার হার" value={kpi.contactRate} color="var(--chart-1)" />
-            <Gauge label="কোয়ালিফাইড হার" value={kpi.qualifiedRate} color="var(--chart-2)" />
-            <Gauge label="বুকিং হার" value={kpi.wonRate} color="var(--chart-3)" />
+            <Gauge label={t({ bn: "কথা হওয়ার হার", en: "Talk rate" })} value={kpi.contactRate} color="var(--chart-1)" />
+            <Gauge label={t({ bn: "সম্ভাব্য হার", en: "Qualified rate" })} value={kpi.qualifiedRate} color="var(--chart-2)" />
+            <Gauge label={t({ bn: "বুকিং হার", en: "Booking rate" })} value={kpi.wonRate} color="var(--chart-3)" />
           </div>
         </div>
 
         <div className="card-elevated p-4">
-          <h3 className="text-sm font-semibold">সাম্প্রতিক কাজ</h3>
+          <h3 className="text-sm font-semibold">{t({ bn: "সাম্প্রতিক কাজ", en: "Recent activity" })}</h3>
           <ul className="mt-3 space-y-2">
             {recent.map((row) => (
               <li key={row.id} className="flex items-center gap-2 text-[11px]">
@@ -414,7 +414,7 @@ export function ExecutiveOverview({
               </li>
             ))}
             {recent.length === 0 && (
-              <li className="text-[11px] text-muted-foreground">কোনো কাজের রেকর্ড নেই।</li>
+              <li className="text-[11px] text-muted-foreground">{t({ bn: "এখনো কোনো কাজের রেকর্ড নেই।", en: "No activity records yet." })}</li>
             )}
           </ul>
         </div>
