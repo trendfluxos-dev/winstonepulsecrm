@@ -1,5 +1,12 @@
 # Roadmap
 
+## 2026-10-25 — Targets, 5:30 sync, neglect deck, publish
+- [x] Per-agent daily target (1–50, HQ authority only, audited; 50 hard cap unchanged) with fill % and progress bar on HQ/LeadHub/Desk. Browser: set 40 → 100% shown, reverted to 50; audit rows saved.
+- [x] Daily Lead Report schedule moved to 17:30 Dhaka (11:30 UTC); /system shows next scheduled sync time.
+- [x] Project photos finding: rule requires active staff; finding already ignored. Separate active service-bill finding left for owner decision.
+- [x] Bengali neglect presentation PDF (29 slides, day-by-day per agent since launch) in Files.
+- [ ] Publish and live check; active agents' own Desk view needs their sign-in (not available to me).
+
 ## HQ screenshot — false no-call/untouched claims
 - [x] Diagnose recording-only counts, omitted submitted reports, browser-local day and unsupported inactivity claims.
 - [x] Reconciled command-center evidence, distinguished unknown phone sync, excluded saved attempts/last-call markers and removed unsupported projections. 12 tests, colors and harness build pass; signed-in HQ English/Bangla and desktop/428px inspected, no overflow/errors. Live read-back: 212 pending without evidence, zero recorded calls today; actual phone sync remains unverified. No data or deployment changes.
