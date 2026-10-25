@@ -429,3 +429,6 @@
 - [ ] Meta real-message test: BLOCKED — META_APP_SECRET + META_WEBHOOK_VERIFY_TOKEN absent from secret store; enable decision also blocked on 4 unverified tracks.
 - [x] Implemented plan phases 1-5,7-8: migration 0129 (lead_consent_events, n8n_event_receipts, lead_bant_scores — append-only, server-only), lead-bant.ts/.server.ts, n8n-pipeline.ts/.server.ts, /api/public/n8n/leads (fail-closed), Nexus preview showBantScores signal, 17 new tests pass, build OK.
 - [ ] Enable pipeline: needs N8N_WEBHOOK_SECRET (shared with n8n) + N8N_PIPELINE_ENABLED=true after owner approves consent policy; GHL not built (needs explicit approval).
+- [x] META_APP_SECRET + META_WEBHOOK_VERIFY_TOKEN saved (encrypted store, in dev env); webhook live-configured: wrong-token GET 403, unsigned POST 401.
+- [ ] User: Meta Dashboard → Webhooks → Page → callback https://crm.winstonebd.com/api/public/meta/messenger + same verify token → Verify and Save → subscribe `messages` (needs publish for live URL).
+- [ ] Then: 4 evidence tracks in /inbox Meta tab → IT enable decision → real-message test.
