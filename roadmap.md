@@ -1,5 +1,8 @@
 # Roadmap
 
+## 2026-10-25 — Safe Meta verification checklist on /inbox (in progress)
+- [ ] Owner request 00:49 UTC: recordable evidence checklist for App Review, Live mode, Page messaging consent and messages subscription — append-only records, no access token storage (token-like notes rejected).
+
 ## 2026-10-25 — Messenger retention + webhook handshake activation (in progress)
 - [ ] Retention policy + automatic deletion for encrypted Messenger messages (owner request 00:46 UTC): retention window, scheduled cleanup, reviewed exception to the append-only trigger for expired rows only.
 - [x] Webhook GET subscription handshake wired (exact verify-token match → 200 challenge; mismatch → 403; unconfigured → 503); human navigation still 303s to /messenger.
