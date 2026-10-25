@@ -3,7 +3,7 @@
 ## 2026-10-25 — Zero-setup AI default; Meta picker gated on configuration (01:13 UTC)
 - [x] OpenAI/Gemini via the already-provisioned Lovable AI Gateway remain the zero-setup default (`openai`); no account/key/action needed from the user.
 - [x] `isProviderConfigured` (presence-only, secret-safe) added to `ai-providers.ts`; `getAiModelStatus` exposes `metaConfigured` to staff UI; `setAiModelChoice` now refuses to store an unconfigured provider (fail-closed at the write path, not just at call time).
-- [x] HQ picker (`AiTeamSummary.tsx`): Meta option disabled and labelled "setup required" until `MODEL_API_KEY` exists; warning banner if a stored `meta` choice is unconfigured. 3 new tests (19 total in `tests/ai-providers.test.ts`). Docs updated. No secrets requested/created, no live calls, no deploy.
+- [x] HQ picker (`AiTeamSummary.tsx`): Meta option disabled and labelled "setup required" until `MODEL_API_KEY` exists; warning banner if a stored `meta` choice is unconfigured. 3 new tests (13 total in `tests/ai-providers.test.ts`, all passing). Docs updated. No secrets requested/created, no live calls, no deploy.
 
 ## 2026-10-25 — Meta Model API (Muse Spark) as optional AI provider (01:06 UTC, preparation only)
 - [x] Extended the existing shared AI helper (no parallel path): new pure module `src/lib/ai-providers.ts` (choice parsing, provider resolution, fail-closed secret-safe key check); `ai-model.server.ts` routes `meta` → `https://api.meta.ai/v1/chat/completions`, model `muse-spark-1.3`, key `MODEL_API_KEY` read only inside the handler. OpenAI/Gemini behavior unchanged; provider error bodies no longer logged (status only).
