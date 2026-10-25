@@ -862,6 +862,13 @@
       "when": 1792861176726,
       "tag": "0122_create_recorder_insights",
       "breakpoints": true
+    },
+    {
+      "idx": 123,
+      "version": "7",
+      "when": 1792887078535,
+      "tag": "0123_messenger_durable_storage",
+      "breakpoints": true
     }
   ]
 }
