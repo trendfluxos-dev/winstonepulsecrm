@@ -27,7 +27,7 @@ export function AiTeamSummary() {
 
   const model = useQuery({ queryKey: ["ai-model"], queryFn: () => modelGet() });
   const switchModel = useMutation({
-    mutationFn: (next: "openai" | "gemini" | "meta") => modelSet({ data: { adminToken: adminToken ?? "", model: next } }),
+    mutationFn: (next: "openai" | "gemini" | "meta" | "vertex") => modelSet({ data: { adminToken: adminToken ?? "", model: next } }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["ai-model"] });
       toast.success(t({ bn: "AI মডেল বদলানো হয়েছে", en: "AI model updated" }));
@@ -70,7 +70,7 @@ export function AiTeamSummary() {
             className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground"
             value={model.data?.model ?? "openai"}
             disabled={switchModel.isPending}
-            onChange={(e) => switchModel.mutate(e.target.value as "openai" | "gemini" | "meta")}
+            onChange={(e) => switchModel.mutate(e.target.value as "openai" | "gemini" | "meta" | "vertex")}
           >
             <option value="openai">OpenAI (GPT-6 Astra)</option>
             <option value="gemini">Gemini (3.8 Flash)</option>
@@ -78,6 +78,11 @@ export function AiTeamSummary() {
               {model.data?.metaConfigured
                 ? "Meta (Muse Spark 1.3)"
                 : t({ bn: "Meta (Muse Spark 1.3) — সেটআপ প্রয়োজন", en: "Meta (Muse Spark 1.3) — setup required" })}
+            </option>
+            <option value="vertex" disabled={!model.data?.vertexConfigured}>
+              {model.data?.vertexConfigured
+                ? "Google Vertex AI (Gemini 2.5 Flash)"
+                : t({ bn: "Google Vertex AI — সেটআপ প্রয়োজন", en: "Google Vertex AI — setup required" })}
             </option>
           </select>
         </label>
@@ -91,9 +96,11 @@ export function AiTeamSummary() {
             <span className="font-medium text-foreground">
               {model.data.model === "meta"
                 ? "Meta (Muse Spark 1.3)"
-                : model.data.model === "gemini"
-                  ? "Gemini (3.8 Flash)"
-                  : "OpenAI (GPT-6 Astra)"}
+                : model.data.model === "vertex"
+                  ? "Google Vertex AI (Gemini 2.5 Flash)"
+                  : model.data.model === "gemini"
+                    ? "Gemini (3.8 Flash)"
+                    : "OpenAI (GPT-6 Astra)"}
             </span>
           </span>
           <span aria-hidden>·</span>
@@ -192,6 +199,15 @@ export function AiTeamSummary() {
           {t({
             bn: "Meta মডেল নির্বাচিত, কিন্তু সার্ভারে এর কনফিগারেশন নেই — AI কাজ করবে না। OpenAI বা Gemini বেছে নিন।",
             en: "Meta is selected but not configured on the server — AI features will fail. Switch to OpenAI or Gemini.",
+          })}
+        </p>
+      )}
+
+      {model.data?.model === "vertex" && !model.data.vertexConfigured && (
+        <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+          {t({
+            bn: "Google Vertex AI নির্বাচিত, কিন্তু সার্ভারে service-account কনফিগারেশন নেই — AI কাজ করবে না। OpenAI বা Gemini বেছে নিন।",
+            en: "Google Vertex AI is selected but no service account is configured on the server — AI features will fail. Switch to OpenAI or Gemini.",
           })}
         </p>
       )}
