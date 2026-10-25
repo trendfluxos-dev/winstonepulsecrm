@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Loader2, LogIn, UserPlus } from "lucide-react";
+import { Eye, EyeOff, IdCard, Loader2, Lock, LogIn, Phone, User, UserPlus } from "lucide-react";
+import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -49,6 +50,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const signIn = useMutation({
     mutationFn: async () => {
@@ -97,134 +99,216 @@ function AuthPage() {
     password.length >= 6 &&
     (!isSignup || name.trim().length >= 2);
 
+  const submit = () => {
+    if (!canSubmit || busy) return;
+    if (isSignup) signUp.mutate();
+    else signIn.mutate();
+  };
+  const errorMessage = (signIn.error ?? signUp.error)?.message;
+
   return (
-    <div className="theme-light grid min-h-dvh lg:grid-cols-2">
-      <aside className="hidden flex-col justify-between bg-secondary p-12 lg:flex">
-        <span className="text-sm font-semibold tracking-tight">WINSTONE PULSE</span>
+    <div className="theme-light grid min-h-dvh bg-background lg:grid-cols-2">
+      <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-border bg-secondary p-12 lg:flex">
+        <div className="absolute inset-x-12 top-24 h-px bg-accent" aria-hidden />
+        <span className="text-sm font-semibold tracking-[0.2em]">WINSTONE PULSE</span>
         <div>
-          <h2 className="text-5xl font-bold leading-tight tracking-tight">
+          <h2 className="text-5xl font-semibold leading-tight tracking-tight">
             Call smarter,
             <br />
             close more homes.
           </h2>
           <p className="mt-4 max-w-md text-lg text-muted-foreground">
-            The Premium Real Estate CRM for your sales floor. Find. Build. Invest.
+            The Premium Real Estate CRM. PULSE — Find. Build. Invest.
           </p>
+          <div className="mt-10 max-w-sm rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+              Booking status · preview
+            </p>
+            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+              {[
+                ["Leads", "50"],
+                ["Visits", "6"],
+                ["Bookings", "2"],
+              ].map(([k, v]) => (
+                <div key={k} className="rounded-xl bg-secondary p-3">
+                  <p className="text-2xl font-semibold">{v}</p>
+                  <p className="text-[11px] text-muted-foreground">{k}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-secondary">
+              <div className="h-full w-2/3 rounded-full bg-accent" />
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">Illustrative sample, not live data</p>
+          </div>
         </div>
         <p className="text-xs text-muted-foreground">© 2026 Winstone Properties Ltd.</p>
       </aside>
+
       <div className="flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md p-2 sm:p-6">
-        <Link to="/" className="flex items-center gap-3">
-          <img
-            src={logoAsset.url}
-            alt="Winstone logo"
-            className="size-11 rounded-full object-cover ring-1 ring-border"
-          />
-          <span>
-            <span className="block text-sm font-bold tracking-tight">Winstone Pulse</span>
-            <span className="block text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-              {ROLE_LABEL[role]}
+        <div className="w-full max-w-md">
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src={logoAsset.url}
+              alt="Winstone logo"
+              className="size-11 rounded-full object-cover ring-1 ring-border"
+            />
+            <span>
+              <span className="block text-sm font-bold tracking-tight">Winstone Pulse</span>
+              <span className="block text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                {ROLE_LABEL[role]}
+              </span>
             </span>
-          </span>
-        </Link>
+          </Link>
 
-        <h1 className="mt-6 text-xl font-bold tracking-tight">
-          {isSignup ? "Create your account" : "Sign in to your desk"}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {isSignup
-            ? "A supervisor approves new accounts before the floor data opens up."
-            : "Use your phone number, Employee ID or email."}
-        </p>
+          <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {isSignup ? "Create your account" : "Sign in to your desk"}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {isSignup
+                ? "A supervisor approves new accounts before the floor data opens up."
+                : "Use your phone number, Employee ID or email."}
+            </p>
 
-        <div className="mt-5 space-y-3">
-          {isSignup && (
-            <>
-              <div className="space-y-1.5">
-                <Label htmlFor="name">Full name</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Mst. Soniya Yeasmin"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="01805049668"
-                  inputMode="tel"
-                />
-              </div>
-            </>
-          )}
-          <div className="space-y-1.5">
-            <Label htmlFor="email">{isSignup ? "Email" : "Phone / Employee ID / Email"}</Label>
-            <Input
-              id="email"
-              type={isSignup ? "email" : "text"}
-              autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={isSignup ? "you@winstonebd.com" : "01805049668 or WIN2601"}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete={isSignup ? "new-password" : "current-password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && canSubmit && !busy) {
-                  if (isSignup) signUp.mutate();
-                  else signIn.mutate();
-                }
+            <form
+              className="mt-6 space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                submit();
               }}
-            />
+            >
+              {isSignup && (
+                <>
+                  <IconField id="name" label="Full name" icon={<User className="size-4" />}>
+                    <Input
+                      id="name"
+                      className="h-11 pl-9"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Mst. Soniya Yeasmin"
+                    />
+                  </IconField>
+                  <IconField id="phone" label="Phone" icon={<Phone className="size-4" />}>
+                    <Input
+                      id="phone"
+                      className="h-11 pl-9"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="01805049668"
+                      inputMode="tel"
+                    />
+                  </IconField>
+                </>
+              )}
+              <IconField
+                id="email"
+                label={isSignup ? "Email" : "Phone / Employee ID / Email"}
+                icon={<IdCard className="size-4" />}
+              >
+                <Input
+                  id="email"
+                  className="h-11 pl-9"
+                  type={isSignup ? "email" : "text"}
+                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={isSignup ? "you@winstonebd.com" : "01805049668 or WIN2601"}
+                />
+              </IconField>
+
+              <IconField id="password" label="Password" icon={<Lock className="size-4" />}>
+                <Input
+                  id="password"
+                  className="h-11 pl-9 pr-10"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete={isSignup ? "new-password" : "current-password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 6 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </IconField>
+
+              {!isSignup && (
+                <div className="flex justify-end">
+                  <Link
+                    to="/reset-password"
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              )}
+
+              <Button type="submit" className="h-11 w-full" disabled={!canSubmit || busy}>
+                {busy ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : isSignup ? (
+                  <UserPlus className="size-4" />
+                ) : (
+                  <LogIn className="size-4" />
+                )}
+                {isSignup ? "Create account" : "Sign in"}
+              </Button>
+
+              {errorMessage && (
+                <p role="alert" className="text-center text-sm text-destructive">
+                  {errorMessage}
+                </p>
+              )}
+            </form>
+
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              {isSignup ? "Already have an account? " : "New here? "}
+              <Link
+                to="/auth"
+                search={{ role, mode: isSignup ? "signin" : "signup" }}
+                className="font-semibold text-foreground hover:underline"
+              >
+                {isSignup ? "Sign in" : "Create account"}
+              </Link>
+            </p>
           </div>
 
-          <Button
-            className="w-full"
-            disabled={!canSubmit || busy}
-            onClick={() => (isSignup ? signUp.mutate() : signIn.mutate())}
-          >
-            {busy ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : isSignup ? (
-              <UserPlus className="size-4" />
-            ) : (
-              <LogIn className="size-4" />
-            )}
-            {isSignup ? "Create account" : "Sign in"}
-          </Button>
-
-          <p className="text-center text-sm text-muted-foreground">
-            {isSignup ? "Already have an account? " : "New here? "}
-            <Link
-              to="/auth"
-              search={{ role, mode: isSignup ? "signin" : "signup" }}
-              className="font-semibold text-primary hover:underline"
-            >
-              {isSignup ? "Sign in" : "Create account"}
-            </Link>
-          </p>
-          <p className="text-center text-xs text-muted-foreground">
+          <p className="mt-6 text-center text-xs text-muted-foreground">
             <Link to="/" className="hover:underline">
               Back to the entry hall
             </Link>
           </p>
         </div>
+      </div>
     </div>
-    </div>
+  );
+}
+
+function IconField({
+  id,
+  label,
+  icon,
+  children,
+}: {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="relative">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          {icon}
+        </span>
+        {children}
+      </div>
     </div>
   );
 }
