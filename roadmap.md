@@ -410,3 +410,8 @@
 ## 2026-10-25 — Google Vertex AI provider (guarded)
 - [x] Fourth AI provider `vertex` in the shared helper: service-account OAuth (vertex-auth.server.ts), OpenAI-compatible Vertex endpoint, fail-closed without GOOGLE_VERTEX_SERVICE_ACCOUNT; HQ picker option with setup-required label; 34 tests pass, build OK.
 - [ ] Blocked: saved secret is currently an empty JSON object — needs the real service-account key file (client_email, private_key, project_id). Provider stays "setup required" until then. User declined the re-entry form for now.
+
+## 2026-10-25 — Meta secrets added + Vertex key file
+- [ ] Verify META_APP_SECRET + META_WEBHOOK_VERIFY_TOKEN now live (probe handshake/signature behavior).
+- [ ] Replace empty GOOGLE_VERTEX_SERVICE_ACCOUNT with uploaded service-account key file (daring-pier-450522).
+- [ ] Messenger sync enable decision: requires all four verification tracks verified first — record evidence, then IT enable decision.
