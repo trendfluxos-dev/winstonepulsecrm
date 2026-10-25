@@ -201,6 +201,33 @@ export function AiTeamSummary() {
         {t({ bn: "আজকের সারাংশ বানান", en: "Generate today's summary" })}
       </Button>
 
+      {run.isError && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3"
+        >
+          <p className="text-xs text-destructive">
+            {run.error instanceof Error
+              ? run.error.message
+              : t({ bn: "সারাংশ বানানো যায়নি", en: "The summary could not be generated" })}
+          </p>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={run.isPending}
+            onClick={() => run.mutate()}
+            aria-label={t({ bn: "সারাংশ আবার চালান", en: "Run the summary again" })}
+          >
+            {run.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <RefreshCw className="size-4" aria-hidden />
+            )}
+            {t({ bn: "আবার চেষ্টা করুন", en: "Try again" })}
+          </Button>
+        </div>
+      )}
+
       {run.data && (
         <div className="space-y-3">
           <p className="whitespace-pre-line rounded-lg border border-border bg-card p-3 text-sm">
