@@ -9,13 +9,17 @@
  * sent anywhere except the provider endpoint.
  */
 
-export type AiModelChoice = "openai" | "gemini" | "meta";
+export type AiModelChoice = "openai" | "gemini" | "meta" | "vertex";
 
 export const AI_MODEL_IDS: Record<AiModelChoice, string> = {
   openai: "openai/gpt-6-astra",
   gemini: "google/gemini-3.8-flash",
   meta: "muse-spark-1.3",
+  vertex: "google/gemini-2.5-flash",
 };
+
+/** Default Vertex AI location; the server may override with GOOGLE_VERTEX_LOCATION. */
+export const VERTEX_DEFAULT_LOCATION = "us-central1";
 
 export const META_MODEL_API_BASE_URL = "https://api.meta.ai/v1";
 const LOVABLE_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -24,14 +28,14 @@ export type AiProviderConfig = {
   endpoint: string;
   model: string;
   /** Name of the server-only environment variable holding the key. */
-  keyEnv: "LOVABLE_API_KEY" | "MODEL_API_KEY";
+  keyEnv: "LOVABLE_API_KEY" | "MODEL_API_KEY" | "GOOGLE_VERTEX_SERVICE_ACCOUNT";
   /** gpt-6-astra requires an explicit reasoning effort and rejects temperature. */
   reasoningEffort?: "low";
 };
 
 /** Stored choice → provider. Unknown/absent values fall back to OpenAI. */
 export function parseAiModelChoice(value: unknown): AiModelChoice {
-  return value === "gemini" || value === "meta" ? value : "openai";
+  return value === "gemini" || value === "meta" || value === "vertex" ? value : "openai";
 }
 
 export function resolveAiProvider(choice: AiModelChoice): AiProviderConfig {
@@ -40,6 +44,15 @@ export function resolveAiProvider(choice: AiModelChoice): AiProviderConfig {
       endpoint: `${META_MODEL_API_BASE_URL}/chat/completions`,
       model: AI_MODEL_IDS.meta,
       keyEnv: "MODEL_API_KEY",
+    };
+  }
+  if (choice === "vertex") {
+    // Vertex uses the OpenAI-compatible endpoint; project/location come from
+    // the service-account JSON at call time, so only the host pattern is fixed.
+    return {
+      endpoint: `https://${VERTEX_DEFAULT_LOCATION}-aiplatform.googleapis.com`,
+      model: AI_MODEL_IDS.vertex,
+      keyEnv: "GOOGLE_VERTEX_SERVICE_ACCOUNT",
     };
   }
   return {
