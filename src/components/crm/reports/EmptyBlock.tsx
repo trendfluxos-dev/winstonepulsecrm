@@ -1,6 +1,7 @@
 import { CircleSlash, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 
 /** Shared empty state used by charts, breakdown cards and the agent table. */
 export function EmptyBlock({
@@ -14,6 +15,7 @@ export function EmptyBlock({
   onReset?: () => void;
   compact?: boolean;
 }) {
+  const t = useT();
   return (
     <div
       className={`mt-3 rounded-xl border border-dashed border-border text-center ${
@@ -25,7 +27,7 @@ export function EmptyBlock({
       <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
       {onReset && (
         <Button variant="outline" size="sm" className="mt-3" onClick={onReset}>
-          <RotateCcw className="size-4" /> Adjust filters
+          <RotateCcw className="size-4" /> {t({ bn: "ফিল্টার ঠিক করুন", en: "Adjust filters" })}
         </Button>
       )}
     </div>
