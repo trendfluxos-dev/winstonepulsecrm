@@ -68,7 +68,7 @@ export const getAiModel = createServerFn({ method: "GET" })
 export const setAiModel = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) =>
     z
-      .object({ adminToken: z.string().min(1), model: z.enum(["openai", "gemini"]) })
+      .object({ adminToken: z.string().min(1), model: z.enum(["openai", "gemini", "meta"]) })
       .parse(i),
   )
   .handler(async ({ data }) => {

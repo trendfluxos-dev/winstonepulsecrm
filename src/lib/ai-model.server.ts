@@ -1,16 +1,20 @@
 /**
  * Shared AI gateway helper. One model switch for every CRM AI feature:
- * HQ picks OpenAI or Gemini once (app_config row id "ai") and every feature
- * follows it. The key stays server-side.
+ * HQ picks OpenAI, Gemini or Meta (Muse Spark) once (app_config row id "ai")
+ * and every feature follows it. Keys stay server-side: OpenAI/Gemini go
+ * through the Lovable AI Gateway with LOVABLE_API_KEY; Meta goes to the
+ * Meta Model API with MODEL_API_KEY. A missing key refuses the call —
+ * there is no silent fallback to another provider.
  */
-const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
+import {
+  parseAiModelChoice,
+  requireAiKey,
+  resolveAiProvider,
+  aiCallFailureMessage,
+  type AiModelChoice,
+} from "@/lib/ai-providers";
 
-export type AiModelChoice = "openai" | "gemini";
-
-export const AI_MODEL_IDS: Record<AiModelChoice, string> = {
-  openai: "openai/gpt-6-astra",
-  gemini: "google/gemini-3.8-flash",
-};
+export type { AiModelChoice };
 
 export async function getAiModelChoice(): Promise<AiModelChoice> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -20,7 +24,7 @@ export async function getAiModelChoice(): Promise<AiModelChoice> {
     .eq("id", "ai")
     .maybeSingle();
   const value = (data?.data as { model?: string } | null)?.model;
-  return value === "gemini" ? "gemini" : "openai";
+  return parseAiModelChoice(value);
 }
 
 export async function setAiModelChoice(model: AiModelChoice): Promise<void> {
@@ -31,35 +35,32 @@ export async function setAiModelChoice(model: AiModelChoice): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
-/** One JSON-mode chat call through the Lovable AI Gateway. Throws a safe message on failure. */
+/** One JSON-mode chat call through the selected provider. Throws a safe message on failure. */
 export async function aiChatJson<T>(args: { system: string; user: string }): Promise<T> {
-  const key = process.env["LOVABLE_API_KEY"];
-  if (!key) throw new Error("AI service is not configured");
-
   const choice = await getAiModelChoice();
+  const provider = resolveAiProvider(choice);
+  const key = requireAiKey(choice, process.env);
+
   const body: Record<string, unknown> = {
-    model: AI_MODEL_IDS[choice],
+    model: provider.model,
     messages: [
       { role: "system", content: args.system },
       { role: "user", content: args.user },
     ],
     response_format: { type: "json_object" },
   };
-  // gpt-6-astra requires an explicit reasoning effort and rejects temperature.
-  if (choice === "openai") body["reasoning_effort"] = "low";
+  if (provider.reasoningEffort) body["reasoning_effort"] = provider.reasoningEffort;
 
-  const res = await fetch(GATEWAY, {
+  const res = await fetch(provider.endpoint, {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    console.error("ai gateway error", res.status, detail);
-    if (res.status === 402 || res.status === 403)
-      throw new Error("AI credits are exhausted — please try again later");
-    if (res.status === 429) throw new Error("AI is busy right now — try again in a moment");
-    throw new Error("The AI service is unavailable right now");
+    // Status only — provider error bodies can echo request data and must
+    // never reach logs or staff screens.
+    console.error("ai provider error", choice, res.status);
+    throw new Error(aiCallFailureMessage(res.status));
   }
   const payload = (await res.json()) as {
     choices?: { message?: { content?: string | null } }[];
