@@ -35,6 +35,8 @@ export function messengerView(caller: { scope: MessengerScope; readOnly: boolean
 
 export type DemoThread = {
   id: string;
+  /** Only a genuine stored inbound message may populate this; demos never do. */
+  storedMessageId?: string;
   customer: string;
   preview: string;
   assignedTo: "me" | "other" | null;

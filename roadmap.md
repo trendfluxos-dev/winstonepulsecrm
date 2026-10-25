@@ -1,5 +1,11 @@
 # Roadmap
 
+## Messenger — lead details beside messages
+- [x] Add read-only linked-lead sidebar beside the selected conversation (stacked below on smaller screens); saved inbound message IDs only, independent thread and current lead ownership checks. Demo/disconnected data never reads real leads; Meta activation unchanged.
+- [x] 42 targeted Messenger/inventory tests pass, semantic colors pass, harness build OK. Signed-in browser shows inactive sidebar with no runtime errors; job remains 401 without managed auth. Tests now isolate environment flags rather than depend on real Meta settings.
+- [ ] Live lead-detail proof awaits approved Meta activation and future stored-message inbox wiring; existing inbox still supplies demos and the service remains fail-closed. No real messages, leads, settings, secrets or deployment changed.
+
+
 ## Inventory & pricing sheet — listings and integrations roadmap
 - [ ] Owner chose to provide the existing inventory/pricing sheet link; link and tab name still pending. Accessible Zahid's Drive (2) lists only Daily Lead Report; no inventory sheet found.
 - [x] Add authenticated, read-only cached sheet sync beside /projects and /unit-board listings; preserve canonical CRM inventory/bookings, verified snapshot backups and safe failure state.

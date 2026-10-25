@@ -5,6 +5,22 @@ import { NOT_CONNECTED, messengerView } from "@/lib/messenger-shared";
 
 const Base = z.object({ adminToken: z.string().nullable().optional() });
 
+/** Read-only saved message → linked lead; disconnected paths never read customer rows. */
+export const getMessengerLeadDetails = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => Base.extend({ messageId: z.string().uuid() }).parse(input))
+  .handler(async ({ data }) => {
+    const { resolveCaller } = await import("@/lib/access.server");
+    const caller = await resolveCaller(data.adminToken ?? null);
+    if (!messengerView(caller).canOpen) return { ok: false as const, code: "UNAVAILABLE" as const };
+    const { getMessengerService } = await import("@/lib/messenger.server");
+    const connection = await getMessengerService().connection();
+    if (!connection.connected) return { ok: false as const, code: "DISCONNECTED" as const };
+    const { readMessengerLinkedLead, messengerLeadDetailStore } = await import("@/lib/messenger-lead-details.server");
+    try {
+      return await readMessengerLinkedLead(caller, connection.connected, data.messageId, await messengerLeadDetailStore());
+    } catch { return { ok: false as const, code: "UNAVAILABLE" as const }; }
+  });
+
 /** Role view + connection state. Uses the existing caller check; reads no Messenger data. */
 export const getMessengerStatus = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Base.parse(input ?? {}))
