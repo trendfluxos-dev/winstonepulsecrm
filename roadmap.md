@@ -1,5 +1,9 @@
 # Roadmap
 
+## HQ screenshot — false no-call/untouched claims
+- [x] Diagnose recording-only counts, omitted submitted reports, browser-local day and unsupported inactivity claims.
+- [ ] Reconcile with command-center evidence, distinguish unknown phone sync, respect saved attempt markers, translate and verify phone/desktop view; no data or deployment changes.
+
 ## Safari lazy-route recovery
 - [x] Identify reported expression in TanStack lazy module lookup; fresh signed-in HQ does not reproduce, existing recovery missed Safari's undefined module signature.
 - [x] Root and global recovery now share one narrow classifier. Five unit tests pass; normal and exact Safari-signature browser recovery pass (one coalesced probe, reload, nonblank result, bounded fallback). Signed-in HQ boot/refresh has no page errors; harness build and colors OK. Original stale bundle state not reproducible; no deployment performed.
