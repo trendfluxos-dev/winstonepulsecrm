@@ -1,4 +1,5 @@
 import { HubSyncStatusPanel } from "@/components/crm/HubAlerts";
+import { DistributionFailurePanel } from "@/components/crm/DistributionFailurePanel";
 import { SystemManualCard } from "@/components/crm/SystemManualCard";
 import { DeploymentStatusPanel } from "@/components/crm/DeploymentStatusPanel";
 import { PAGE_SECTIONS, sectionSearch, useSection } from "@/lib/page-sections";
@@ -21,6 +22,7 @@ import { MaintenancePanel } from "@/components/crm/MaintenancePanel";
 import { OsSyncPanel } from "@/components/crm/OsSyncPanel";
 import { LoginFailuresPanel, MonthlySummaryPanel } from "@/components/crm/SecurityMonitorPanel";
 import { YearArchivePanel } from "@/components/crm/YearArchivePanel";
+import { LeadReportSheetPanel } from "@/components/crm/LeadReportSheetPanel";
 import { ReportSheetPanel } from "@/components/crm/ReportSheetPanel";
 import { SheetSyncHealthPanel } from "@/components/crm/SheetSyncHealthPanel";
 import { BackendHealthPanel } from "@/components/crm/BackendHealthPanel";
@@ -176,6 +178,7 @@ function SystemBoard() {
 
       {sec === "calls" && (
         <div className="space-y-6">
+          <DistributionFailurePanel />
           <CallOpsPanel showControls />
           <RecordingPipelinePanel />
           <SyncedCallsPanel />
@@ -183,6 +186,7 @@ function SystemBoard() {
           <DriveBackupPanel />
           <DocSummaryPanel />
           <ReportSheetPanel />
+          <LeadReportSheetPanel />
           <ShiftSummaryPanel scope="it" />
         </div>
       )}

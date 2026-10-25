@@ -14,4 +14,12 @@ describe("caught route import recovery", () => {
     expect(isModuleLoadError(new Error("Report submission failed"))).toBe(false);
     expect(isModuleLoadError(null)).toBe(false);
   });
+  it("recognizes Safari's missing lazy-route module namespace", () => {
+    expect(isModuleLoadError(new TypeError("undefined is not an object (evaluating 'e[t??`default`]')"))).toBe(true);
+    expect(isModuleLoadError(new TypeError("undefined is not an object (evaluating 'res[key??`default`]')"))).toBe(true);
+  });
+  it("does not reload for unrelated undefined data", () => {
+    expect(isModuleLoadError(new TypeError("undefined is not an object (evaluating 'lead.name')"))).toBe(false);
+    expect(isModuleLoadError(new TypeError("Cannot read properties of undefined (reading 'default')"))).toBe(false);
+  });
 });

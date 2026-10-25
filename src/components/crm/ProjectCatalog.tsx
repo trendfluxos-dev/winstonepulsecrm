@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Building2, MessageSquareText, Plus, TrendingUp, UserPlus } from "lucide-react";
+import { Building2, FileDown, MessageSquareText, Plus, TrendingUp, UserPlus } from "lucide-react";
+import { brochureFor } from "@/lib/project-brochures";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -186,7 +187,14 @@ export function ProjectCatalogPanel() {
                 <div key={k} className="min-w-0"><dt className="text-muted-foreground">{t(lbl)}</dt><dd className="break-words font-medium">{k === "price_per_sqft" ? money(Number(p[k])) : String(p[k])}</dd></div>
               ))}
             </dl>
-            <Button size="sm" variant="link" className="px-0" onClick={() => setOpen(open === p.id ? null : p.id)}>{t(L.notes)}</Button>
+            <div className="flex flex-wrap items-center gap-x-4">
+              <Button size="sm" variant="link" className="px-0" onClick={() => setOpen(open === p.id ? null : p.id)}>{t(L.notes)}</Button>
+              {(() => { const b = brochureFor(p.name); return b ? (
+                <a href={b.url} download={b.filename} className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                  <FileDown className="size-4" />{t({ bn: "ব্রোশিওর (PDF)", en: "Brochure (PDF)" })}
+                </a>
+              ) : null; })()}
+            </div>
             {open === p.id ? <NotesBlock project={p} canEdit={canEdit} /> : null}
             {!q.data?.readOnly && p.status === "active" ? (
               capture === p.id ? <InterestForm project={p} onDone={() => setCapture(null)} /> : (
@@ -235,6 +243,33 @@ export function LeadProjectSales({ leadId }: { leadId: string }) {
   return (
     <section className="space-y-2 rounded-2xl border border-border bg-card p-3 text-sm" aria-labelledby={`ps-${leadId}`}>
       <h3 id={`ps-${leadId}`} className="flex items-center gap-1.5 text-xs font-semibold"><TrendingUp className="size-3.5 text-primary" />{t(L.sales)}</h3>
+      {(() => {
+        // Latest saved interest per project (updates arrive newest first)
+        const latest = new Map<string, (typeof updates)[number]>();
+        for (const u of updates) if (!latest.has(u.project_id)) latest.set(u.project_id, u);
+        if (!latest.size) return act.isSuccess ? <p className="rounded-md bg-muted/50 p-2 text-xs text-muted-foreground">{t({ bn: "এখনো কোনো আগ্রহী প্রজেক্ট সংরক্ষিত নেই", en: "No project interest saved yet" })}</p> : null;
+        const tone: Record<string, string> = {
+          interested: "border-success/40 bg-success/15 text-foreground",
+          negotiating: "border-warning/50 bg-warning/15 text-foreground",
+          not_now: "border-border bg-muted text-muted-foreground",
+        };
+        return (
+          <div className="rounded-md border border-primary/30 bg-primary/5 p-2">
+            <p className="mb-1.5 text-[11px] font-semibold text-muted-foreground">{t({ bn: "আগ্রহী প্রজেক্ট (সর্বশেষ অবস্থা)", en: "Interested projects (latest)" })}</p>
+            <ul className="space-y-1.5">
+              {[...latest.values()].map((u) => (
+                <li key={u.project_id} className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="min-w-0 break-words font-semibold">{name.get(u.project_id) ?? "—"}</span>
+                  <span className="flex items-center gap-2">
+                    <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${tone[u.interest] ?? tone["interested"]}`}>{t(INTEREST_L[u.interest] ?? INTEREST_L["interested"]!)}</span>
+                    <span className="text-[10px] text-muted-foreground">{when(u.created_at)}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })()}
       {projects.isLoading ? <p role="status" className="text-xs text-muted-foreground">{t(L.loading)}</p> : null}
       {projects.data && !active.length ? <p className="text-xs text-muted-foreground">{t(L.empty)}</p> : null}
       {active.length ? (

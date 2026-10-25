@@ -862,6 +862,62 @@
       "when": 1792861176726,
       "tag": "0122_create_recorder_insights",
       "breakpoints": true
+    },
+    {
+      "idx": 123,
+      "version": "7",
+      "when": 1792887078535,
+      "tag": "0123_messenger_durable_storage",
+      "breakpoints": true
+    },
+    {
+      "idx": 124,
+      "version": "7",
+      "when": 1792887230023,
+      "tag": "0124_messenger_message_encryption",
+      "breakpoints": true
+    },
+    {
+      "idx": 125,
+      "version": "7",
+      "when": 1792889247420,
+      "tag": "0125_messenger_retention_policy",
+      "breakpoints": true
+    },
+    {
+      "idx": 126,
+      "version": "7",
+      "when": 1792889378136,
+      "tag": "0126_meta_verification_records",
+      "breakpoints": true
+    },
+    {
+      "idx": 127,
+      "version": "7",
+      "when": 1792889750534,
+      "tag": "0127_messenger_sync_decisions_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 128,
+      "version": "7",
+      "when": 1792892977162,
+      "tag": "0128_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 129,
+      "version": "7",
+      "when": 1792895079710,
+      "tag": "0129_ai_lead_pipeline_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 130,
+      "version": "7",
+      "when": 1792900256172,
+      "tag": "0130_filter_eligible_uses_phone_keys",
+      "breakpoints": true
     }
   ]
 }

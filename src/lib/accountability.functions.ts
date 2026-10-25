@@ -119,3 +119,51 @@ export const reviewAccountability = createServerFn({ method: "POST" })
     });
     return { ok: true, status };
   });
+
+/** Executive HQ only (HQ PIN session): approve every waiting review (review_required + hold) in one click. */
+export const approveAllAccountability = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => TokenInput.extend({ days: z.number().int().min(1).max(90).optional() }).parse(input))
+  .handler(async ({ data }) => {
+    const { adminTokenScope } = await import("@/lib/admin-gate.server");
+    if (adminTokenScope(data.adminToken ?? null) !== "hq") {
+      throw new Error("Only Executive HQ can review or unlock — IT and other roles cannot");
+    }
+    const { dhakaDate } = await import("@/lib/accountability");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("agent_accountability_reviews")
+      .select("id, agent_id, business_date, unlock_for_date, status, review_history")
+      .neq("status", "approved")
+      .gte("business_date", dhakaDate(-(data.days ?? 30)))
+      .limit(500);
+    if (error) throw new Error(error.message);
+    const at = new Date().toISOString();
+    const by = "Executive HQ";
+    const note = "Bulk approval (Approve all)";
+    const { logAudit } = await import("@/lib/audit.server");
+    let approved = 0;
+    for (const row of rows ?? []) {
+      const history = Array.isArray(row.review_history) ? row.review_history : [];
+      const { error: upErr } = await supabaseAdmin
+        .from("agent_accountability_reviews")
+        .update({
+          status: "approved",
+          reviewed_by: by,
+          reviewed_at: at,
+          approval_note: note,
+          review_history: [...history, { action: "approve", at, by, note }],
+        } as never)
+        .eq("id", row.id)
+        .neq("status", "approved");
+      if (upErr) continue;
+      approved++;
+      await logAudit({
+        action: "accountability_reviewed",
+        entityType: "agent_accountability_review",
+        entityId: row.id,
+        actorLabel: by,
+        metadata: { agent_id: row.agent_id, business_date: row.business_date, unlock_for_date: row.unlock_for_date, decision: "approve", bulk: true, previous_status: row.status },
+      });
+    }
+    return { ok: true, approved, total: rows?.length ?? 0 };
+  });

@@ -7,7 +7,7 @@ import { SectionGroup, GroupState } from "@/components/crm/groups";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { listAccountabilityReviews, reviewAccountability } from "@/lib/accountability.functions";
+import { approveAllAccountability, listAccountabilityReviews, reviewAccountability } from "@/lib/accountability.functions";
 import { STATUS_LABEL, type AccountabilityStatus } from "@/lib/accountability";
 import { useAdminToken } from "@/lib/local-session";
 
@@ -50,6 +50,16 @@ export function AccountabilityReviewPanel({ surface }: { surface: "hq" | "it" })
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
 
+  const approveAll = useServerFn(approveAllAccountability);
+  const all = useMutation({
+    mutationFn: () => approveAll({ data: { adminToken, days: 30 } }),
+    onSuccess: (r) => {
+      toast.success(`${r.approved} of ${r.total} reviews approved`);
+      qc.invalidateQueries({ queryKey: ["accountability-reviews"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not approve"),
+  });
+
   const rows = q.data?.reviews ?? [];
   const canApprove = surface === "hq" && Boolean(q.data?.canApprove);
   const open = rows.find((r) => r.id === openId) ?? null;
@@ -76,6 +86,17 @@ export function AccountabilityReviewPanel({ surface }: { surface: "hq" | "it" })
         <GroupState kind="empty" message="No pending-review records in the last 30 days" />
       ) : (
         <>
+        {canApprove && waiting > 0 ? (
+          <div className="mb-3 flex justify-end">
+            <Button
+              className="w-full sm:w-auto"
+              disabled={all.isPending}
+              onClick={() => { if (window.confirm(`Approve next-day unlock for all ${waiting} waiting reviews (including ones on hold)?`)) all.mutate(); }}
+            >
+              {all.isPending ? "Approving…" : `Approve all (${waiting})`}
+            </Button>
+          </div>
+        ) : null}
         <ul className="space-y-2 md:hidden">
           {rows.map((r) => {
             const agent = r.agent as { name?: string; employee_id?: string } | null;

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowUpRight,
+  BookOpen,
   BarChart3,
   ChevronRight,
   Globe,
@@ -23,6 +24,7 @@ import desktopAsset from "@/assets/device-desktop.png.asset.json";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -54,6 +56,7 @@ const ROLES: { key: RoleKey; label: string; icon: typeof BarChart3 }[] = [
 ];
 
 function EntryHall() {
+  const t = useT();
   const navigate = useNavigate();
   const { scope } = useMyAccount();
   const [pinOpen, setPinOpen] = useState(false);
@@ -116,6 +119,7 @@ function EntryHall() {
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
               Leads, calls, follow-ups and team performance. One connected workspace for your sales floor.
             </p>
+            <Button asChild variant="outline" className="mt-5"><Link to="/walkthrough"><BookOpen />{t({ bn: "CRM walkthrough দেখুন", en: "Explore the CRM walkthrough" })}</Link></Button>
             <div className="mt-8 grid overflow-hidden rounded-xl border border-border bg-card sm:mt-10 sm:grid-cols-3">
               {[
                 { icon: Headphones, label: "Manage your team", sub: "Agents, roles & performance" },

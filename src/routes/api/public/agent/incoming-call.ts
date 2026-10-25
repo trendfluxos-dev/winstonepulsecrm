@@ -1,3 +1,4 @@
+import { lifecyclePatch, recordingAvailability } from "@/lib/call-reconciliation";
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
@@ -118,7 +119,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
             // A call the agent dialled from the phone is not a callback.
             name: body.contact_name?.trim() || `${outgoing ? "কল" : "ফিরতি কল"} ${phone}`,
             phoneNumber: phone,
-            ownerId: caller.profile.id,
+            ownerId: null,
             ownerName: caller.profile.name,
             referenceBy: outgoing ? "ফোন থেকে কল" : "কলব্যাক",
             notes: outgoing
@@ -135,22 +136,9 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
             );
           leadId = intake.leadId;
           created = !intake.duplicate;
-        } else if (!leadOwnerId(found)) {
-          // Unowned lead called this agent: it becomes theirs, like a web callback.
-          const canClaim = new Set(await eligibleLeadIds([leadId])).has(leadId);
-          if (canClaim) {
-            await supabaseAdmin
-              .from("leads")
-              .update({
-                assigned_to: caller.profile.id,
-                assigned_agent_id: caller.profile.id,
-                assignment_source: outgoing ? "dialer_claim" : "callback_claim",
-              })
-              .eq("id", leadId)
-              .is("assigned_to", null)
-              .is("assigned_agent_id", null);
-          }
         }
+        // A phone observation never assigns a lead or bypasses LeadHub review.
+        if (!found || leadOwnerId(found) !== caller.profile.id) return json({ error: "LeadHub assignment required before this call can sync", code: "unassigned_or_foreign_lead" }, 409);
 
         const recordingStatus =
           body.recording_supported === false
@@ -174,22 +162,23 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
 
         const { data: existing } = await supabaseAdmin
           .from("call_recordings")
-          .select("id, agent_id")
+          .select("id, agent_id, lead_id, call_status, storage_path, audio_url, upload_status, recording_status")
           .eq("external_call_id", body.call_uid)
           .maybeSingle();
 
         // A call id belongs to the phone that first reported it; another
         // agent's device can never update that row.
-        if (existing && existing.agent_id !== caller.profile.id) {
+        if (existing && (existing.agent_id !== caller.profile.id || existing.lead_id !== leadId)) {
           return json({ error: "call_uid belongs to another agent", code: "call_uid_conflict" }, 409);
         }
 
+        const acceptedPatch = existing ? lifecyclePatch(existing, patch) : patch;
         let recordingId = existing?.id ?? null;
 
         if (existing) {
           await supabaseAdmin
             .from("call_recordings")
-            .update(patch)
+            .update(acceptedPatch)
             .eq("id", existing.id)
             .eq("agent_id", caller.profile.id);
         } else {
@@ -216,10 +205,11 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
           if (error) {
             const { data: raced } = await supabaseAdmin
               .from("call_recordings")
-              .select("id, agent_id")
+              .select("id, agent_id, lead_id, call_status, storage_path, audio_url, upload_status, recording_status")
               .eq("external_call_id", body.call_uid)
               .maybeSingle();
-            if (!raced) return json({ error: error.message }, 500);
+            if (!raced) return json({ error: "Call reconciliation failed" }, 500);
+            if (raced.agent_id !== caller.profile.id || raced.lead_id !== leadId) return json({ error: "Call identity conflict" }, 409);
             if (raced.agent_id !== caller.profile.id) {
               return json({ error: "call_uid belongs to another agent", code: "call_uid_conflict" }, 409);
             }
@@ -297,7 +287,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
           recording_id: recordingId,
           report_id: reportId,
           call_status: body.state,
-          recording_status: recordingStatus,
+          recording_status: existing ? recordingAvailability({ ...existing, ...acceptedPatch }) : recordingStatus,
         });
       },
     },

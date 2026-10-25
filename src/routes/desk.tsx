@@ -1,3 +1,5 @@
+import { accountLock, ACCESS_RECOVERY } from "@/lib/access-recovery";
+import { DailyAllocationSummary } from "@/components/crm/DailyAllocationSummary";
 import { MyNeglectNotice } from "@/components/crm/LeadNeglectPanel";
 import { PhotoUpload } from "@/components/crm/PhotoUpload";
 import { StaffAvatar } from "@/components/crm/StaffAvatar";
@@ -25,6 +27,7 @@ import { AppShell } from "@/components/crm/AppShell";
 import { CommandAgentPanel } from "@/components/crm/CommandAgentPanel";
 import { MyCallLog } from "@/components/crm/MyCallLog";
 import { MyPhoneSetup } from "@/components/crm/MyPhoneSetup";
+import { PhoneSyncGuide } from "@/components/crm/PhoneSyncGuide";
 import { MyProfileCard } from "@/components/crm/MyProfileCard";
 import { CarryOverLeads } from "@/components/crm/CarryOverLeads";
 import { LeadDayBoard } from "@/components/crm/LeadDayBoard";
@@ -47,6 +50,7 @@ import { TeamSupportInbox } from "@/components/crm/TeamSupportInbox";
 import { TeamSupportPanel } from "@/components/crm/TeamSupportPanel";
 import { SnapshotSkeleton } from "@/components/crm/SnapshotSkeleton";
 import { WhatsappInbox } from "@/components/crm/WhatsappInbox";
+import { MessengerInbox } from "@/components/crm/MessengerInbox";
 import { Button } from "@/components/ui/button";
 import { DeskTabBar } from "@/components/crm/desk/DeskTabBar";
 import { SocialDesk } from "@/components/crm/social/SocialDesk";
@@ -286,6 +290,8 @@ function DeskPage() {
     );
   }
 
+  const lockReason = account?.signedIn ? accountLock({ is_active: account.active !== false, approval_status: account.approval }) : null;
+  const recovery = lockReason ? ACCESS_RECOVERY[lockReason] : null;
   if (scope === "none") {
     return (
       <AppShell>
@@ -297,14 +303,10 @@ function DeskPage() {
             <>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">
-                  {account.approval === "rejected"
-                    ? t({ bn: "প্রবেশ বাতিল", en: "Access denied" })
-                    : t({ bn: "অনুমোদনের অপেক্ষায়", en: "Awaiting approval" })}
+                  {recovery ? t(recovery.title) : t({ bn: "প্রোফাইল যাচাই প্রয়োজন", en: "Profile review required" })}
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {account.approval === "rejected"
-                    ? t({ bn: "একজন সুপারভাইজার এই অ্যাকাউন্ট বাতিল করেছেন। ভুল মনে হলে টিম লিডের সঙ্গে কথা বলুন।", en: "A supervisor has rejected this account. If this seems wrong, talk to your team lead." })
-                    : t({ bn: "আপনার অ্যাকাউন্ট তৈরি হয়েছে। আইটি কনসোল বা এক্সিকিউটিভ এইচকিউ থেকে শীঘ্রই ডেস্ক খুলে দেওয়া হবে।", en: "Your account has been created. The desk will be unlocked soon from the IT Console or Executive HQ." })}
+                  {recovery ? t(recovery.recovery) : t({ bn: "আইটি কনসোলের কাছে নিজের প্রোফাইল যাচাই করুন।", en: "Ask IT Console to review your own profile." })}
                 </p>
               </div>
               <Button variant="secondary" onClick={() => void signOut()}>
@@ -368,6 +370,7 @@ function DeskPage() {
           {tab === "today" && (
             <>
           <OfficialNewsStrip />
+          <DailyAllocationSummary surface="self" />
 
           <details className="group card-elevated overflow-hidden">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold [&::-webkit-details-marker]:hidden">
@@ -377,6 +380,7 @@ function DeskPage() {
             <div className="space-y-4 border-t border-border p-3 sm:p-4">
               <MyProfileCard />
               <MyPhoneSetup />
+              <PhoneSyncGuide />
             </div>
           </details>
 
@@ -472,6 +476,9 @@ function DeskPage() {
           </TabsContent>
           <TabsContent value="whatsapp">
             <WhatsappInbox />
+          </TabsContent>
+          <TabsContent value="messenger">
+            <MessengerInbox />
           </TabsContent>
           <TabsContent value="calendar" className="space-y-4">
             <FollowUpsInRange />

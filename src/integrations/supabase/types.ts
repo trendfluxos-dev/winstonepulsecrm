@@ -1222,6 +1222,36 @@ export type Database = {
           },
         ]
       }
+      credential_incidents: {
+        Row: {
+          actor: string | null
+          actor_label: string | null
+          created_at: string
+          id: string
+          note: string
+          service: string
+          status: string
+        }
+        Insert: {
+          actor?: string | null
+          actor_label?: string | null
+          created_at?: string
+          id?: string
+          note: string
+          service: string
+          status: string
+        }
+        Update: {
+          actor?: string | null
+          actor_label?: string | null
+          created_at?: string
+          id?: string
+          note?: string
+          service?: string
+          status?: string
+        }
+        Relationships: []
+      }
       crm_activities: {
         Row: {
           actor_user_id: string
@@ -2221,6 +2251,51 @@ export type Database = {
           },
         ]
       }
+      lead_bant_scores: {
+        Row: {
+          authority: number | null
+          budget: number | null
+          confidence: string | null
+          created_at: string
+          created_by: string | null
+          evidence: Json
+          id: string
+          lead_id: string
+          model: string
+          need: number | null
+          timeline: number | null
+          total: number
+        }
+        Insert: {
+          authority?: number | null
+          budget?: number | null
+          confidence?: string | null
+          created_at?: string
+          created_by?: string | null
+          evidence?: Json
+          id?: string
+          lead_id: string
+          model: string
+          need?: number | null
+          timeline?: number | null
+          total: number
+        }
+        Update: {
+          authority?: number | null
+          budget?: number | null
+          confidence?: string | null
+          created_at?: string
+          created_by?: string | null
+          evidence?: Json
+          id?: string
+          lead_id?: string
+          model?: string
+          need?: number | null
+          timeline?: number | null
+          total?: number
+        }
+        Relationships: []
+      }
       lead_classifications: {
         Row: {
           agent_id: string | null
@@ -2278,6 +2353,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lead_consent_events: {
+        Row: {
+          action: string
+          actor: string | null
+          actor_label: string | null
+          consent_text: string | null
+          created_at: string
+          id: string
+          lead_id: string | null
+          phone: string
+          purpose: string
+          source: string | null
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          actor_label?: string | null
+          consent_text?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          phone: string
+          purpose: string
+          source?: string | null
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          actor_label?: string | null
+          consent_text?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          phone?: string
+          purpose?: string
+          source?: string | null
+        }
+        Relationships: []
       }
       lead_daily_assignment_ledger: {
         Row: {
@@ -3139,6 +3253,318 @@ export type Database = {
           lease_until?: string
           skipped?: number | null
           started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      messenger_messages: {
+        Row: {
+          body: string | null
+          body_ciphertext: string | null
+          created_at: string
+          delivery_status: string | null
+          direction: string
+          error_code: string | null
+          id: string
+          lead_id: string | null
+          mid: string | null
+          sent_by: string | null
+          thread_id: string
+        }
+        Insert: {
+          body?: string | null
+          body_ciphertext?: string | null
+          created_at?: string
+          delivery_status?: string | null
+          direction: string
+          error_code?: string | null
+          id?: string
+          lead_id?: string | null
+          mid?: string | null
+          sent_by?: string | null
+          thread_id: string
+        }
+        Update: {
+          body?: string | null
+          body_ciphertext?: string | null
+          created_at?: string
+          delivery_status?: string | null
+          direction?: string
+          error_code?: string | null
+          id?: string
+          lead_id?: string | null
+          mid?: string | null
+          sent_by?: string | null
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messenger_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "messenger_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messenger_outbox: {
+        Row: {
+          attempts: number
+          body: string
+          created_at: string
+          created_by: string | null
+          last_error: string | null
+          next_retry_at: string | null
+          request_id: string
+          sent_mid: string | null
+          thread_id: string
+        }
+        Insert: {
+          attempts?: number
+          body: string
+          created_at?: string
+          created_by?: string | null
+          last_error?: string | null
+          next_retry_at?: string | null
+          request_id: string
+          sent_mid?: string | null
+          thread_id: string
+        }
+        Update: {
+          attempts?: number
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          last_error?: string | null
+          next_retry_at?: string | null
+          request_id?: string
+          sent_mid?: string | null
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messenger_outbox_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "messenger_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messenger_sync_decisions: {
+        Row: {
+          action: string
+          actor: string | null
+          actor_label: string | null
+          created_at: string
+          id: string
+          missing_tracks: string[]
+          reason: string
+          verified_tracks: string[]
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          actor_label?: string | null
+          created_at?: string
+          id?: string
+          missing_tracks?: string[]
+          reason: string
+          verified_tracks?: string[]
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          actor_label?: string | null
+          created_at?: string
+          id?: string
+          missing_tracks?: string[]
+          reason?: string
+          verified_tracks?: string[]
+        }
+        Relationships: []
+      }
+      messenger_thread_events: {
+        Row: {
+          action: string
+          actor: string | null
+          created_at: string
+          detail: Json
+          id: string
+          thread_id: string
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          thread_id: string
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messenger_thread_events_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "messenger_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messenger_threads: {
+        Row: {
+          assigned_agent_id: string | null
+          created_at: string
+          id: string
+          last_inbound_at: string | null
+          last_message_at: string | null
+          lead_id: string | null
+          page_id: string
+          psid: string
+          status: string
+          unread_count: number
+        }
+        Insert: {
+          assigned_agent_id?: string | null
+          created_at?: string
+          id?: string
+          last_inbound_at?: string | null
+          last_message_at?: string | null
+          lead_id?: string | null
+          page_id: string
+          psid: string
+          status?: string
+          unread_count?: number
+        }
+        Update: {
+          assigned_agent_id?: string | null
+          created_at?: string
+          id?: string
+          last_inbound_at?: string | null
+          last_message_at?: string | null
+          lead_id?: string | null
+          page_id?: string
+          psid?: string
+          status?: string
+          unread_count?: number
+        }
+        Relationships: []
+      }
+      messenger_webhook_receipts: {
+        Row: {
+          event_key: string
+          payload_sha256: string
+          processed_at: string | null
+          received_at: string
+        }
+        Insert: {
+          event_key: string
+          payload_sha256: string
+          processed_at?: string | null
+          received_at?: string
+        }
+        Update: {
+          event_key?: string
+          payload_sha256?: string
+          processed_at?: string | null
+          received_at?: string
+        }
+        Relationships: []
+      }
+      meta_page_connections: {
+        Row: {
+          connected_at: string
+          connected_by: string | null
+          id: string
+          last_validated_at: string | null
+          page_id: string
+          page_name: string | null
+          scopes: string[]
+          status: string
+          token_ciphertext: string | null
+        }
+        Insert: {
+          connected_at?: string
+          connected_by?: string | null
+          id?: string
+          last_validated_at?: string | null
+          page_id: string
+          page_name?: string | null
+          scopes?: string[]
+          status?: string
+          token_ciphertext?: string | null
+        }
+        Update: {
+          connected_at?: string
+          connected_by?: string | null
+          id?: string
+          last_validated_at?: string | null
+          page_id?: string
+          page_name?: string | null
+          scopes?: string[]
+          status?: string
+          token_ciphertext?: string | null
+        }
+        Relationships: []
+      }
+      meta_verification_records: {
+        Row: {
+          actor: string | null
+          actor_label: string | null
+          created_at: string
+          id: string
+          note: string
+          outcome: string
+          track: string
+        }
+        Insert: {
+          actor?: string | null
+          actor_label?: string | null
+          created_at?: string
+          id?: string
+          note: string
+          outcome: string
+          track: string
+        }
+        Update: {
+          actor?: string | null
+          actor_label?: string | null
+          created_at?: string
+          id?: string
+          note?: string
+          outcome?: string
+          track?: string
+        }
+        Relationships: []
+      }
+      n8n_event_receipts: {
+        Row: {
+          created_at: string
+          event_key: string
+          id: string
+          payload_sha256: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          event_key: string
+          id?: string
+          payload_sha256: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          event_key?: string
+          id?: string
+          payload_sha256?: string
           status?: string
         }
         Relationships: []

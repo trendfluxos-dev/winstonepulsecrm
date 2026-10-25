@@ -54,6 +54,9 @@ export const NAV = [
   { to: "/unit-board", label: "Unit Board", scopes: ["authority", "coordinator", "agent"] },
   { to: "/qualify", label: "WhatsApp Qualify", scopes: ["authority", "coordinator", "agent"] },
   { to: "/reports", label: "Reports", scopes: ["authority", "coordinator", "agent"] },
+  { to: "/facebook-ads", label: "Facebook Ads Reports", scopes: ["authority"] },
+  { to: "/integrations", label: "Integration Status", scopes: ["authority", "coordinator", "agent", "none"] },
+  { to: "/meta-control-center", label: "Meta Control Center", scopes: ["authority"] },
   { to: "/system", label: "IT Console", scopes: ["authority"] },
   { to: "/runtime-errors", label: "Runtime Errors", scopes: ["authority"] },
   { to: "/ingest", label: "Ingest Check", scopes: ["authority"] },
@@ -62,11 +65,13 @@ export const NAV = [
   { to: "/security", label: "PIN & Access", scopes: ["authority", "coordinator", "agent"] },
   { to: "/docs", label: "Docs", scopes: ["authority", "coordinator", "agent", "none"] },
   { to: "/docs-admin", label: "Docs Admin", scopes: ["authority", "coordinator"] },
+  { to: "/messenger", label: "Messenger", scopes: ["authority", "coordinator", "agent"] },
   { to: "/inbox", label: "Support Inbox", scopes: ["authority", "coordinator", "agent"] },
   { to: "/tickets", label: "Tickets", scopes: ["authority", "coordinator", "agent"] },
   { to: "/customers", label: "Customers", scopes: ["authority", "coordinator", "agent"] },
   { to: "/support-admin", label: "Support Admin", scopes: ["authority", "coordinator"] },
   { to: "/help", label: "Help Centre", scopes: ["authority", "coordinator", "agent", "none"] },
+  { to: "/walkthrough", label: "CRM Walkthrough", scopes: ["authority", "coordinator", "agent", "none"] },
 ] as const satisfies ReadonlyArray<{ to: string; label: string; scopes: readonly Scope[] }>;
 
 /** Screens whose actions the server refuses for read-only Executive HQ sessions. */
