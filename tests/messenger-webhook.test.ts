@@ -10,7 +10,7 @@ async function request(body: Uint8Array) {
 it("valid exact raw bytes never acknowledge unpersisted messages while the switch is off", async () => {
   const body = new TextEncoder().encode(JSON.stringify({ object: "page", entry: [{ id: "0", time: 0, messaging: [{ sender: { id: "0" }, recipient: { id: "0" }, timestamp: 0, message: { mid: "SYNTHETIC_TEST" } }] }] }));
   const response = await inspectSignedWebhook(await request(body), secret, { enabled: false });
-  expect(response.status).toBe(503);
+  expect(response.status).toBe(403);
   expect(await response.json()).toEqual({ ok: false, code: "MESSENGER_INGESTION_NOT_READY" });
 });
 it("with the switch on, a signed event is stored once and a replay is a duplicate", async () => {
@@ -45,7 +45,7 @@ it("validates signature before attempting to parse a malformed payload", async (
 });
 it("replayed valid signed events remain unaccepted while the switch is off", async () => {
   const bytes = new TextEncoder().encode(JSON.stringify({ object: "page", entry: [{ id: "0", time: 0, messaging: [{ sender: { id: "0" }, recipient: { id: "0" }, timestamp: 0, message: { mid: "REPLAY_SYNTHETIC" } }] }] }));
-  for (let i = 0; i < 2; i++) expect((await inspectSignedWebhook(await request(bytes), secret, { enabled: false })).status).toBe(503);
+  for (let i = 0; i < 2; i++) expect((await inspectSignedWebhook(await request(bytes), secret, { enabled: false })).status).toBe(403);
 });
 it("refuses invalid signatures before ingestion", async () => {
   const response = await inspectSignedWebhook(await request(new TextEncoder().encode("synthetic")), "wrong");
@@ -57,6 +57,6 @@ it("bounds signed body to 262144 bytes", async () => {
 });
 it("missing server configuration refuses without revealing secrets", async () => {
   const response = await inspectSignedWebhook(await request(new Uint8Array([1])), undefined);
-  expect(response.status).toBe(503);
+  expect(response.status).toBe(403);
   expect(await response.json()).toEqual({ ok: false, code: "FACEBOOK_NOT_CONNECTED" });
 });
