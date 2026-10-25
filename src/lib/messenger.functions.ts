@@ -28,3 +28,48 @@ export const sendMessengerReply = createServerFn({ method: "POST" })
     const { getMessengerService } = await import("@/lib/messenger.server");
     return getMessengerService().sendReply(data);
   });
+
+/**
+ * Staff-confirmed conversion of one genuinely stored message into an unassigned
+ * lead. The role is re-checked server-side, the message must exist in durable
+ * storage, and while Facebook is not connected the call always refuses — demo
+ * rows can never become CRM records.
+ */
+export const reviewMessengerLead = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    Base.extend({
+      messageId: z.string().min(1).max(200),
+      name: z.string().min(1).max(200),
+      phone: z.string().min(1).max(60),
+      consentConfirmed: z.boolean(),
+    }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { resolveCaller } = await import("@/lib/access.server");
+    const caller = await resolveCaller(data.adminToken ?? null);
+    const view = messengerView(caller);
+    if (!view.canOpen || view.readOnly) return { ok: false as const, code: "FORBIDDEN" as const };
+    if (caller.scope === "agent") {
+      const { assertBriefingForCaller } = await import("@/lib/agent-briefing.server");
+      await assertBriefingForCaller(caller);
+    }
+
+    const { getMessengerService } = await import("@/lib/messenger.server");
+    const connection = await getMessengerService().connection();
+    if (!connection.connected) return { ok: false as const, code: "FACEBOOK_NOT_CONNECTED" as const };
+
+    const { reviewMessengerMessage } = await import("@/lib/messenger-review.server");
+    const { supabaseMessengerReviewStore } = await import("@/lib/messenger-store.server");
+    const { intakeLead } = await import("@/lib/lead-intake.server");
+    return reviewMessengerMessage(
+      {
+        messageId: data.messageId,
+        name: data.name,
+        phone: data.phone,
+        consentConfirmed: data.consentConfirmed,
+        actorProfileId: caller.profile?.id ?? null,
+        actorLabel: caller.profile?.name ?? caller.label ?? null,
+      },
+      { store: supabaseMessengerReviewStore(), intake: intakeLead },
+    );
+  });

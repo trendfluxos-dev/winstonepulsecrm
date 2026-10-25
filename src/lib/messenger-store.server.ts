@@ -7,6 +7,7 @@
  * reviewed migration has not been applied.
  */
 import type { MessengerStore, ReceiptClaim, StoredInbound } from "@/lib/messenger-ingest.server";
+import type { ReviewStore, StoredMessage } from "@/lib/messenger-review.server";
 
 /** Postgres codes that mean "the reviewed storage is not here yet". */
 const MISSING_STORAGE_CODES = new Set(["42P01", "42703"]);
