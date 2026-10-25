@@ -100,7 +100,7 @@ function EntryHall() {
             </span>
           </span>
           <span className="inline-flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
-            <span aria-hidden className="size-1.5 rounded-full bg-live" /> Server online
+            <span aria-hidden className="size-1.5 rounded-full bg-live" /> {t({ bn: "সার্ভার চালু আছে", en: "Server online" })}
           </span>
         </div>
       </div>
@@ -117,14 +117,14 @@ function EntryHall() {
               The Premium Real Estate CRM.
             </p>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Leads, calls, follow-ups and team performance. One connected workspace for your sales floor.
+              {t({ bn: "লিড, কল, ফলো-আপ আর টিমের ফলাফল — আপনার সেলস টিমের সব কাজ এক জায়গায়।", en: "Leads, calls, follow-ups and team performance. One connected workspace for your sales floor." })}
             </p>
             <Button asChild variant="outline" className="mt-5"><Link to="/walkthrough"><BookOpen />{t({ bn: "CRM walkthrough দেখুন", en: "Explore the CRM walkthrough" })}</Link></Button>
             <div className="mt-8 grid overflow-hidden rounded-xl border border-border bg-card sm:mt-10 sm:grid-cols-3">
               {[
-                { icon: Headphones, label: "Manage your team", sub: "Agents, roles & performance" },
-                { icon: BarChart3, label: "Track your pipeline", sub: "Leads, follow-ups & bookings" },
-                { icon: Smartphone, label: "Review call activity", sub: "Call reports & customer history" },
+                { icon: Headphones, label: t({ bn: "টিম সামলান", en: "Manage your team" }), sub: t({ bn: "এজেন্ট, ভূমিকা ও ফলাফল", en: "Agents, roles & performance" }) },
+                { icon: BarChart3, label: t({ bn: "কাজের ধাপ দেখুন", en: "Track your pipeline" }), sub: t({ bn: "লিড, ফলো-আপ ও বুকিং", en: "Leads, follow-ups & bookings" }) },
+                { icon: Smartphone, label: t({ bn: "কলের কাজ দেখুন", en: "Review call activity" }), sub: t({ bn: "কল রিপোর্ট ও কাস্টমারের ইতিহাস", en: "Call reports & customer history" }) },
               ].map(({ icon: Icon, label, sub }) => (
                 <span key={label} className="flex items-center gap-3 border-border p-4 text-left text-sm font-semibold text-foreground [&:not(:first-child)]:border-t sm:p-5 sm:[&:not(:first-child)]:border-l sm:[&:not(:first-child)]:border-t-0">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full text-gold ring-1 ring-gold/40">
@@ -142,11 +142,11 @@ function EntryHall() {
         </header>
 
         <h2 className="mt-10 text-center text-xl font-bold tracking-tight sm:text-3xl">
-          Choose Your Workspace
+          {t({ bn: "আপনার কর্মঘর বেছে নিন", en: "Choose Your Workspace" })}
           <span aria-hidden className="mx-auto mt-2 block h-0.5 w-12 bg-gold" />
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
-          Select the mode you are using — the Winstone Pulse Gateway opens the same CRM on every device.
+          {t({ bn: "যে ডিভাইসে কাজ করেন সেটা বেছে নিন — প্রতিটি ডিভাইসে একই CRM খোলে।", en: "Select the mode you are using — the Winstone Pulse Gateway opens the same CRM on every device." })}
         </p>
 
         <div className="mt-5 grid grid-cols-2 gap-2 sm:mt-8 sm:gap-4 lg:grid-cols-4">
@@ -181,7 +181,7 @@ function EntryHall() {
         </div>
 
         <p className="mt-5 text-center text-[10px] font-medium uppercase sm:mt-8 sm:text-xs tracking-[0.2em] text-muted-foreground">
-          One CRM. One data layer. Every device.
+          {t({ bn: "এক CRM · এক ডেটা · প্রতিটি ডিভাইস", en: "One CRM. One data layer. Every device." })}
         </p>
 
         <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
