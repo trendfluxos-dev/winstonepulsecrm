@@ -1,4 +1,3 @@
-import { lifecyclePatch, recordingAvailability } from "@/lib/call-reconciliation";
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
@@ -88,7 +87,7 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
 
         const { data: existing } = await supabaseAdmin
           .from("call_recordings")
-          .select("id, call_status, agent_id, lead_id, storage_path, audio_url, upload_status, recording_status")
+          .select("id, call_status, agent_id, lead_id")
           .eq("external_call_id", body.call_uid)
           .maybeSingle();
         // A call record may only be updated by the agent who owns it, for the same lead.
@@ -96,11 +95,10 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
           return json({ error: "This call record belongs to another agent or lead" }, 403);
         }
 
-        const acceptedPatch = existing ? lifecyclePatch(existing, patch) : patch;
         let recordingId = existing?.id ?? null;
 
         if (existing) {
-          await supabaseAdmin.from("call_recordings").update(acceptedPatch).eq("id", existing.id);
+          await supabaseAdmin.from("call_recordings").update(patch).eq("id", existing.id);
         } else {
           const { data: inserted, error } = await supabaseAdmin
             .from("call_recordings")
@@ -125,11 +123,10 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
           if (error) {
             const { data: raced } = await supabaseAdmin
               .from("call_recordings")
-              .select("id, agent_id, lead_id")
+              .select("id")
               .eq("external_call_id", body.call_uid)
               .maybeSingle();
-            if (!raced) return json({ error: "Call reconciliation failed" }, 500);
-            if (raced.agent_id !== caller.profile.id || raced.lead_id !== body.lead_id) return json({ error: "Call identity conflict" }, 409);
+            if (!raced) return json({ error: error.message }, 500);
             recordingId = raced.id;
           } else {
             recordingId = inserted?.id ?? null;
@@ -186,7 +183,7 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
           recording_id: recordingId,
           report_id: reportId,
           call_status: body.state,
-          recording_status: existing ? recordingAvailability({ ...existing, ...acceptedPatch }) : recordingStatus,
+          recording_status: recordingStatus,
         });
       },
     },

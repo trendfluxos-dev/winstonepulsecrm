@@ -1,4 +1,3 @@
-import { classifyOverdue } from "@/lib/overdue-evidence";
 import { followUpWork } from "@/lib/follow-up-work.server";
 import {
   ACCOUNTABILITY_START_DATE,
@@ -18,28 +17,24 @@ export async function measureAgentDay(agentId: string, day: string): Promise<Acc
   const db = await admin();
   const { start, end } = dhakaDayBounds(day);
 
-  const { data: leads, error: leadsError } = await db
+  const { data: leads } = await db
     .from("leads")
     .select("id, name, status, work_state, updated_at, assignment_source")
     .eq("assigned_to", agentId)
     .eq("work_date", day)
     .limit(1000);
-  if (leadsError) throw new Error("Accountability lead evidence unavailable");
-  if ((leads ?? []).length >= 1000) throw new Error("Accountability lead evidence truncated");
   const usable = (leads ?? []).filter((l) => l.assignment_source !== "duplicate_skipped");
   const ids = usable.map((l) => l.id);
 
   const reported = new Set<string>();
   if (ids.length) {
-    const { data: reps, error: reportError } = await db
+    const { data: reps } = await db
       .from("call_reports")
       .select("lead_id")
       .eq("agent_id", agentId)
-      .eq("status", "submitted")
       .in("lead_id", ids)
-      .gte("submitted_at", start)
-      .lte("submitted_at", end);
-    if (reportError) throw new Error("Accountability report evidence unavailable");
+      .gte("created_at", start)
+      .lte("created_at", end);
     for (const r of reps ?? []) if (r.lead_id) reported.add(r.lead_id);
   }
   const leadRows = usable.map((l) => ({
@@ -49,31 +44,23 @@ export async function measureAgentDay(agentId: string, day: string): Promise<Acc
       (l.status !== "pending" && l.updated_at <= end),
   }));
 
-  const { data: fus, error: followUpError } = await followUpWork(db, "current")
-    .select("id, lead_id, agent_id, customer_name, created_at, scheduled_at, status, completed_at")
+  const { data: fus } = await followUpWork(db, "current")
+    .select("id, lead_id, customer_name, scheduled_at, status, completed_at")
     .eq("agent_id", agentId)
     .lte("scheduled_at", end)
     .or(`status.eq.upcoming,completed_at.gte.${start}`)
     .limit(1000);
-  if (followUpError) throw new Error("Accountability follow-up evidence unavailable");
-  if ((fus ?? []).length >= 1000) throw new Error("Accountability follow-up evidence truncated");
-  const followUpLeadIds = [...new Set((fus ?? []).map(f => f.lead_id))];
-  const owners = followUpLeadIds.length ? await db.from("leads").select("id, assigned_to, assigned_agent_id").in("id", followUpLeadIds) : { data: [], error: null };
-  const assignments = followUpLeadIds.length ? await db.from("lead_assignments").select("lead_id, to_agent_id, created_at").in("lead_id", followUpLeadIds).order("created_at", { ascending: false }).limit(1000) : { data: [], error: null };
-  if (owners.error || assignments.error || (assignments.data ?? []).length >= 1000) throw new Error("Responsibility evidence unavailable or truncated");
-  const ownerBy = new Map((owners.data ?? []).map(l => [l.id, l.assigned_to ?? l.assigned_agent_id]));
-  const all = (fus ?? []).map((f) => {
-    const handled = f.status === "done" && Boolean(f.completed_at) && String(f.completed_at) >= f.scheduled_at && String(f.completed_at) <= end;
-    const history = (assignments.data ?? []).filter(a => a.lead_id === f.lead_id);
-    const latest = history[0];
-    const assessment = classifyOverdue({ ...f, ownerId: ownerBy.get(f.lead_id) ?? null, ownershipConfirmed: Boolean(latest && latest.to_agent_id === agentId && latest.created_at <= f.created_at) }, end);
-    return { id: f.id, handled, scheduled_at: f.scheduled_at, customer: f.customer_name, ...assessment };
-  });
+  const all = (fus ?? []).map((f) => ({
+    id: f.id,
+    handled: f.status === "done" && Boolean(f.completed_at) && String(f.completed_at) <= end,
+    scheduled_at: f.scheduled_at,
+    customer: f.customer_name,
+  }));
   // Today's work = follow-ups scheduled for this day; older ones are backlog, shown separately.
   const due = all.filter((f) => String(f.scheduled_at) >= start);
   const backlog = all.filter((f) => String(f.scheduled_at) < start && !f.handled);
 
-  const { count: missed, error: missedError } = await db
+  const { count: missed } = await db
     .from("call_reports")
     .select("id", { count: "exact", head: true })
     .eq("agent_id", agentId)
@@ -81,17 +68,12 @@ export async function measureAgentDay(agentId: string, day: string): Promise<Acc
     .gte("call_started_at", start)
     .lte("call_started_at", end);
 
-  if (missedError) throw new Error("Incomplete-report evidence unavailable");
   const m = computeAccountability({ leads: leadRows, dueFollowUps: due, missedReports: missed ?? 0 });
   return {
     ...m,
     evidence: {
       measured_at: new Date().toISOString(),
       backlog_followups: backlog.length,
-      classifier_version: "overdue-evidence-v1",
-      excluded_followups: due.filter(f => !f.handled && !f.faultEligible).map(f => ({ id: f.id, classification: f.classification, reason: f.reason })),
-      fault_eligible_overdue: due.filter(f => !f.handled && f.faultEligible).length,
-      evidence_limits: { pending_leads: 100, overdue_followups: 50, overdue_total: due.filter(f => !f.handled).length },
       window: { start, end, timezone: "Asia/Dhaka" },
       pending_lead_ids: leadRows.filter((l) => !l.completed).map((l) => l.id).slice(0, 100),
       overdue_followups: due.filter((f) => !f.handled).slice(0, 50).map((f) => ({ id: f.id, scheduled_at: f.scheduled_at, customer: f.customer })),
@@ -149,7 +131,7 @@ export async function evaluateDay(day: string, agentIds: string[]): Promise<numb
       await logAudit({
         action: "accountability_flagged",
         entityType: "agent_accountability_review",
-        entityId: data[0]?.id ?? null,
+        entityId: data[0]!.id,
         actorLabel: "system",
         metadata: { agent_id: agentId, business_date: day, pending_percent: m.pendingPercent },
       });

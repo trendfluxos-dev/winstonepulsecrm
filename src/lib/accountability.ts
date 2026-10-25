@@ -1,4 +1,3 @@
-import type { OverdueClass } from "@/lib/overdue-evidence";
 /**
  * Daily Agent Accountability — pure rule, shared by server and tests.
  * Workload = eligible leads assigned for the business day + follow-ups due by
@@ -21,7 +20,7 @@ export const STATUS_LABEL: Record<AccountabilityStatus, string> = {
 
 export type AccountabilityInput = {
   leads: { id: string; completed: boolean }[];
-  dueFollowUps: { id: string; handled: boolean; classification?: OverdueClass }[];
+  dueFollowUps: { id: string; handled: boolean }[];
   missedReports: number;
 };
 
@@ -40,9 +39,8 @@ export type AccountabilityMetrics = {
 export function computeAccountability(input: AccountabilityInput): AccountabilityMetrics {
   const assigned = input.leads.length;
   const completedLeads = input.leads.filter((l) => l.completed).length;
-  const eligibleFollowUps = input.dueFollowUps.filter(f => f.handled || !f.classification || f.classification === "validated_overdue");
-  const dueCount = eligibleFollowUps.length;
-  const overdue = eligibleFollowUps.filter((f) => !f.handled).length;
+  const dueCount = input.dueFollowUps.length;
+  const overdue = input.dueFollowUps.filter((f) => !f.handled).length;
   const eligible = assigned + dueCount;
   const completed = completedLeads + (dueCount - overdue);
   const pending = eligible - completed;

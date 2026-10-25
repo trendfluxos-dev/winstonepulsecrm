@@ -74,7 +74,6 @@ class CallStateReceiver : BroadcastReceiver() {
                 val wasOnCall = lastState == TelephonyManager.EXTRA_STATE_OFFHOOK
                 lastState = state
                 val endedLeadId = LiveCallLauncher.activeLeadId
-                val physicalCallUid = LiveCallLauncher.activeCallUid ?: DialerCallTracker.callUid ?: IncomingCallTracker.callUid
                 val rec = recorder(app)
                 val twoSided = rec.twoSided
                 val recorderSource = rec.recorderSource
@@ -98,8 +97,6 @@ class CallStateReceiver : BroadcastReceiver() {
                         twoSided = twoSided,
                         incoming = !outgoing,
                         recorderSource = recorderSource,
-                        callUid = physicalCallUid,
-                        callStartedAt = if (offHookAt > 0) java.time.Instant.ofEpochMilli(offHookAt).toString() else null,
                     )
                 } else if (captured != null) {
                     captured.first.delete()
@@ -116,7 +113,6 @@ class CallStateReceiver : BroadcastReceiver() {
                     com.winstone.connect.data.sync.PhoneRecordingPickupWorker.schedule(
                         context = app,
                         callStartMs = offHookAt,
-                        callUid = physicalCallUid,
                         callEndMs = System.currentTimeMillis(),
                         phoneNumber = number,
                         leadId = if (outgoing) endedLeadId else null,
@@ -124,7 +120,7 @@ class CallStateReceiver : BroadcastReceiver() {
                     )
                 }
 
-                val duration = if (wasOnCall && offHookAt > 0) ((System.currentTimeMillis() - offHookAt) / 1000L).toInt().coerceIn(0, 86400) else 0
+                val duration = captured?.second ?: 0
                 val ended =
                     if (outgoing) CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
                     else CallLifecycle.incomingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
@@ -160,7 +156,6 @@ class CallStateReceiver : BroadcastReceiver() {
                         // Connected means Android saw the call go off-hook, not
                         // that we managed to record it.
                         connected = wasOnCall,
-                        callUid = physicalCallUid,
                     )
                 }
                 // Any number, any direction, app open or not: the mandatory

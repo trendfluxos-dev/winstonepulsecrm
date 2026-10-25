@@ -1,4 +1,3 @@
-import { audioChecksum } from "@/lib/call-reconciliation";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { recordingRecovery, assertRecordingRetry, analysisOutcomeOk } from "./recording-recovery";
@@ -153,7 +152,7 @@ export const recordingPipeline = createServerFn({ method: "POST" })
           : r.recording_status === "not_available"
             ? "failed"
             : "pending";
-      const supabaseState: StageState = recovery.hasAudio && r.storage_path
+      const supabaseState: StageState = r.storage_path
         ? "success"
         : r.recording_status === "not_available"
           ? "skipped"
@@ -396,7 +395,7 @@ export const recoverRecordingAudio = createServerFn({ method: "POST" })
     const path = `recovered/${row.id}/${crypto.randomUUID()}.${extension}`;
     const { error: uploadError } = await supabaseAdmin.storage.from(AUDIO_BUCKET).upload(path, bytes, { contentType: extension === "mp3" ? "audio/mpeg" : `audio/${extension}`, upsert: false });
     if (uploadError) throw new Error(uploadError.message);
-    const { data: saved, error: saveError } = await supabaseAdmin.from("call_recordings").update({ storage_path: path, audio_url: path, storage_bucket: AUDIO_BUCKET, file_size_bytes: bytes.length, file_name: path.split("/").pop() ?? null, recording_status: "available", checksum: await audioChecksum(bytes), upload_status: "uploaded", sync_status: "uploaded", analysis_status: "pending", analysis_error: null }).eq("id", row.id).eq("updated_at", row.updated_at).is("storage_path", null).is("audio_url", null).select("id").maybeSingle();
+    const { data: saved, error: saveError } = await supabaseAdmin.from("call_recordings").update({ storage_path: path, audio_url: path, storage_bucket: AUDIO_BUCKET, file_size_bytes: bytes.length, file_name: path.split("/").pop() ?? null, recording_status: "stored", upload_status: "uploaded", sync_status: "uploaded", analysis_status: "pending", analysis_error: null }).eq("id", row.id).eq("updated_at", row.updated_at).is("storage_path", null).is("audio_url", null).select("id").maybeSingle();
     if (saveError || !saved) {
       await supabaseAdmin.storage.from(AUDIO_BUCKET).remove([path]);
       throw new Error(saveError?.message ?? "রেকর্ডিং পরিবর্তিত হয়েছে; আবার রিফ্রেশ করুন।");

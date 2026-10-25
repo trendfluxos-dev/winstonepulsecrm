@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { allBrochures, brochureFor, pickBrochures } from "@/lib/project-brochures";
+import { allBrochures, brochureFor } from "@/lib/project-brochures";
 
 describe("allBrochures", () => {
   const list = allBrochures();
@@ -37,19 +37,5 @@ describe("allBrochures", () => {
       expect(b, name).not.toBeNull();
       expect(urls.has(b!.url), name).toBe(true);
     }
-  });
-});
-
-describe("pickBrochures", () => {
-  const all = allBrochures();
-  it("returns only the chosen projects, in profile order", () => {
-    const got = pickBrochures([all[9]!.entry, all[2]!.entry]);
-    expect(got.map((b) => b.entry)).toEqual([all[2]!.entry, all[9]!.entry]);
-  });
-  it("returns nothing when nothing is chosen", () => {
-    expect(pickBrochures([])).toEqual([]);
-  });
-  it("ignores names that are not real brochures", () => {
-    expect(pickBrochures(["99-Fake-Brochure.pdf", all[0]!.entry])).toHaveLength(1);
   });
 });

@@ -1,4 +1,3 @@
-import { accountLock, ACCESS_RECOVERY } from "@/lib/access-recovery";
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
@@ -181,8 +180,9 @@ export const Route = createFileRoute("/api/public/agent/login")({
             403,
           );
         }
-        const lock = accountLock(profile);
-        if (lock) return json({ error: ACCESS_RECOVERY[lock].title.bn, code: lock, recovery: ACCESS_RECOVERY[lock].recovery.bn }, 403);
+        if (profile.approval_status !== "approved" || !profile.is_active) {
+          return json({ error: "অ্যাকাউন্ট এখনও অনুমোদনের অপেক্ষায় আছে" }, 403);
+        }
 
         // The phone posts every call/WhatsApp log with an employee id, so make
         // sure an approved desk always has one.
@@ -202,12 +202,10 @@ export const Route = createFileRoute("/api/public/agent/login")({
         const preCheck = await bindAgentSim({ profileId: profile.id, sim: simCandidate });
         if (preCheck.status === "conflict") {
           return json(
-            { error: ACCESS_RECOVERY.sim_conflict.title.bn, code: "sim_conflict", recovery: ACCESS_RECOVERY.sim_conflict.recovery.bn },
+            { error: `এই সিম নম্বরটি ${preCheck.ownerName}-এর অ্যাকাউন্টে যুক্ত আছে` },
             409,
           );
         }
-
-        if (preCheck.status === "invalid") return json({ error: ACCESS_RECOVERY.sim_invalid.title.bn, code: "sim_invalid", recovery: ACCESS_RECOVERY.sim_invalid.recovery.bn }, 422);
 
         // Every phone gets its own token, bound to this profile. The APK stores
         // the token; the server only ever keeps its SHA-256 hash.

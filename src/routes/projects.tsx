@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { useAdminToken } from "@/lib/local-session";
 import { getProjectReport } from "@/lib/project-reports.functions";
 import { listInventory } from "@/lib/inventory.functions";
-import { InventorySheetPanel } from "@/components/crm/InventorySheetPanel";
 
 export const Route = createFileRoute("/projects")({
   head: () => ({
@@ -97,7 +96,6 @@ function ProjectsPage() {
           </div>
         </header>
         <ProjectCatalogPanel />
-        <InventorySheetPanel showListings />
         <HqImport />
         <ProjectSalesReport />
 

@@ -50,11 +50,7 @@ object WinstoneAgentApi {
             .build()
         client.newCall(req).execute().use { res ->
             val body = runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
-            if (!res.isSuccessful) {
-                val reason = body.optString("error", "সাইন ইন করা যায়নি (HTTP ${res.code})")
-                val recovery = body.optString("recovery")
-                error(if (recovery.isNotBlank()) "$reason — $recovery" else reason)
-            }
+            if (!res.isSuccessful) error(body.optString("error", "সাইন ইন করা যায়নি (HTTP ${res.code})"))
             val agent = body.optJSONObject("agent") ?: error("সাইন ইন করা যায়নি")
             val token = body.optString("device_token")
             if (token.isBlank()) error("ডিভাইস অনুমোদন পাওয়া যায়নি")

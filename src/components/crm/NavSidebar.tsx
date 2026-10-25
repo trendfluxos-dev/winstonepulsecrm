@@ -62,9 +62,6 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   "/news": Newspaper,
   "/site-visits": MapPin,
   "/reports": BarChart3,
-  "/facebook-ads": BarChart3,
-  "/integrations": Network,
-  "/meta-control-center": ShieldCheck,
   "/system": Server,
   "/ingest": DatabaseZap,
   "/migration": Boxes,
@@ -77,19 +74,18 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   "/customers": Users,
   "/support-admin": Headset,
   "/help": HelpCircle,
-  "/walkthrough": BookOpen,
 };
 
 const GROUPS: { title: { bn: string; en: string }; routes: string[] }[] = [
   { title: { bn: "প্রধান", en: "Main" }, routes: ["/", "/desk", "/coach"] },
   { title: { bn: "লিড ও বিক্রয়", en: "Leads & sales" }, routes: ["/leadhub", "/live-leads", "/booking-review", "/sales-intel", "/news", "/site-visits", "/projects", "/inventory", "/unit-board", "/qualify", "/reports"] },
-  { title: { bn: "ম্যানেজমেন্ট", en: "Management" }, routes: ["/hq", "/contributions", "/audit-log", "/staff-portal", "/facebook-ads"] },
+  { title: { bn: "ম্যানেজমেন্ট", en: "Management" }, routes: ["/hq", "/contributions", "/audit-log", "/staff-portal"] },
   { title: { bn: "সাপোর্ট", en: "Support" }, routes: ["/inbox", "/tickets", "/customers", "/support-admin"] },
   {
     title: { bn: "আইটি ও নিরাপত্তা", en: "IT & security" },
-    routes: ["/integrations", "/meta-control-center", "/system", "/runtime-errors", "/security", "/ingest", "/migration", "/migration-export"],
+    routes: ["/system", "/runtime-errors", "/security", "/ingest", "/migration", "/migration-export"],
   },
-  { title: { bn: "সহায়তা", en: "Help" }, routes: ["/walkthrough", "/docs", "/docs-admin", "/help"] },
+  { title: { bn: "সহায়তা", en: "Help" }, routes: ["/docs", "/docs-admin", "/help"] },
 ];
 
 const FOCUS = "outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";

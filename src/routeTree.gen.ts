@@ -24,22 +24,17 @@ import { Route as DiagnosticsRouteImport } from './routes/diagnostics'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as DocsAdminRouteImport } from './routes/docs-admin'
-import { Route as FacebookAdsRouteImport } from './routes/facebook-ads'
 import { Route as HandoverRouteImport } from './routes/handover'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as HqRouteImport } from './routes/hq'
 import { Route as ImportRouteImport } from './routes/import'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as IngestRouteImport } from './routes/ingest'
-import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as LeadhubRouteImport } from './routes/leadhub'
 import { Route as LiveLeadsRouteImport } from './routes/live-leads'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as McpRouteImport } from './routes/mcp'
-import { Route as MessengerRouteImport } from './routes/messenger'
-import { Route as MessengerSetupRouteImport } from './routes/messenger-setup'
-import { Route as MetaControlCenterRouteImport } from './routes/meta-control-center'
 import { Route as MigrationRouteImport } from './routes/migration'
 import { Route as MigrationExportRouteImport } from './routes/migration-export'
 import { Route as NewsRouteImport } from './routes/news'
@@ -65,7 +60,6 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TicketsRouteImport } from './routes/tickets'
 import { Route as UnitBoardRouteImport } from './routes/unit-board'
 import { Route as VoiceTranscriptionRouteImport } from './routes/voice-transcription'
-import { Route as WalkthroughRouteImport } from './routes/walkthrough'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as DocsSlugRouteImport } from './routes/docs_.$slug'
 import { Route as HelpSlugRouteImport } from './routes/help_.$slug'
@@ -114,11 +108,6 @@ import { Route as ApiPublicIngestOutcomeRouteImport } from './routes/api/public/
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
 import { Route as ApiPublicIngestReprocessRouteImport } from './routes/api/public/ingest/reprocess'
 import { Route as ApiPublicIntegrationsStatusRouteImport } from './routes/api/public/integrations/status'
-import { Route as ApiPublicJobsInventorySheetRouteImport } from './routes/api/public/jobs/inventory-sheet'
-import { Route as ApiPublicJobsLeadReportSheetRouteImport } from './routes/api/public/jobs/lead-report-sheet'
-import { Route as ApiPublicJobsMessengerRetentionRouteImport } from './routes/api/public/jobs/messenger-retention'
-import { Route as ApiPublicMetaMessengerRouteImport } from './routes/api/public/meta/messenger'
-import { Route as ApiPublicN8nLeadsRouteImport } from './routes/api/public/n8n/leads'
 import { Route as ApiPublicOsEventsRouteImport } from './routes/api/public/os/events'
 import { Route as ApiPublicPaddleWebhookRouteImport } from './routes/api/public/paddle/webhook'
 import { Route as ApiPublicReportsSummaryRouteImport } from './routes/api/public/reports/summary'
@@ -203,11 +192,6 @@ const DocsAdminRoute = DocsAdminRouteImport.update({
   path: '/docs-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FacebookAdsRoute = FacebookAdsRouteImport.update({
-  id: '/facebook-ads',
-  path: '/facebook-ads',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const HandoverRoute = HandoverRouteImport.update({
   id: '/handover',
   path: '/handover',
@@ -238,11 +222,6 @@ const IngestRoute = IngestRouteImport.update({
   path: '/ingest',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IntegrationsRoute = IntegrationsRouteImport.update({
-  id: '/integrations',
-  path: '/integrations',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const InventoryRoute = InventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
@@ -266,21 +245,6 @@ const ManualRoute = ManualRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MessengerRoute = MessengerRouteImport.update({
-  id: '/messenger',
-  path: '/messenger',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MessengerSetupRoute = MessengerSetupRouteImport.update({
-  id: '/messenger-setup',
-  path: '/messenger-setup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MetaControlCenterRoute = MetaControlCenterRouteImport.update({
-  id: '/meta-control-center',
-  path: '/meta-control-center',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MigrationRoute = MigrationRouteImport.update({
@@ -406,11 +370,6 @@ const UnitBoardRoute = UnitBoardRouteImport.update({
 const VoiceTranscriptionRoute = VoiceTranscriptionRouteImport.update({
   id: '/voice-transcription',
   path: '/voice-transcription',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WalkthroughRoute = WalkthroughRouteImport.update({
-  id: '/walkthrough',
-  path: '/walkthrough',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
@@ -672,34 +631,6 @@ const ApiPublicIntegrationsStatusRoute =
     path: '/api/public/integrations/status',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicJobsInventorySheetRoute =
-  ApiPublicJobsInventorySheetRouteImport.update({
-    id: '/api/public/jobs/inventory-sheet',
-    path: '/api/public/jobs/inventory-sheet',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicJobsLeadReportSheetRoute =
-  ApiPublicJobsLeadReportSheetRouteImport.update({
-    id: '/api/public/jobs/lead-report-sheet',
-    path: '/api/public/jobs/lead-report-sheet',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicJobsMessengerRetentionRoute =
-  ApiPublicJobsMessengerRetentionRouteImport.update({
-    id: '/api/public/jobs/messenger-retention',
-    path: '/api/public/jobs/messenger-retention',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicMetaMessengerRoute = ApiPublicMetaMessengerRouteImport.update({
-  id: '/api/public/meta/messenger',
-  path: '/api/public/meta/messenger',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicN8nLeadsRoute = ApiPublicN8nLeadsRouteImport.update({
-  id: '/api/public/n8n/leads',
-  path: '/api/public/n8n/leads',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicOsEventsRoute = ApiPublicOsEventsRouteImport.update({
   id: '/api/public/os/events',
   path: '/api/public/os/events',
@@ -760,22 +691,17 @@ export interface FileRoutesByFullPath {
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
   '/docs-admin': typeof DocsAdminRoute
-  '/facebook-ads': typeof FacebookAdsRoute
   '/handover': typeof HandoverRoute
   '/help': typeof HelpRoute
   '/hq': typeof HqRoute
   '/import': typeof ImportRoute
   '/inbox': typeof InboxRoute
   '/ingest': typeof IngestRoute
-  '/integrations': typeof IntegrationsRoute
   '/inventory': typeof InventoryRoute
   '/leadhub': typeof LeadhubRoute
   '/live-leads': typeof LiveLeadsRoute
   '/manual': typeof ManualRoute
   '/mcp': typeof McpRoute
-  '/messenger': typeof MessengerRoute
-  '/messenger-setup': typeof MessengerSetupRoute
-  '/meta-control-center': typeof MetaControlCenterRoute
   '/migration': typeof MigrationRoute
   '/migration-export': typeof MigrationExportRoute
   '/news': typeof NewsRoute
@@ -801,7 +727,6 @@ export interface FileRoutesByFullPath {
   '/tickets': typeof TicketsRoute
   '/unit-board': typeof UnitBoardRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
-  '/walkthrough': typeof WalkthroughRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/help/$slug': typeof HelpSlugRoute
@@ -850,11 +775,6 @@ export interface FileRoutesByFullPath {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
-  '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
-  '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
-  '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
-  '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
-  '/api/public/n8n/leads': typeof ApiPublicN8nLeadsRoute
   '/api/public/os/events': typeof ApiPublicOsEventsRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
@@ -880,22 +800,17 @@ export interface FileRoutesByTo {
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
   '/docs-admin': typeof DocsAdminRoute
-  '/facebook-ads': typeof FacebookAdsRoute
   '/handover': typeof HandoverRoute
   '/help': typeof HelpRoute
   '/hq': typeof HqRoute
   '/import': typeof ImportRoute
   '/inbox': typeof InboxRoute
   '/ingest': typeof IngestRoute
-  '/integrations': typeof IntegrationsRoute
   '/inventory': typeof InventoryRoute
   '/leadhub': typeof LeadhubRoute
   '/live-leads': typeof LiveLeadsRoute
   '/manual': typeof ManualRoute
   '/mcp': typeof McpRoute
-  '/messenger': typeof MessengerRoute
-  '/messenger-setup': typeof MessengerSetupRoute
-  '/meta-control-center': typeof MetaControlCenterRoute
   '/migration': typeof MigrationRoute
   '/migration-export': typeof MigrationExportRoute
   '/news': typeof NewsRoute
@@ -921,7 +836,6 @@ export interface FileRoutesByTo {
   '/tickets': typeof TicketsRoute
   '/unit-board': typeof UnitBoardRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
-  '/walkthrough': typeof WalkthroughRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs/$slug': typeof DocsSlugRoute
   '/help/$slug': typeof HelpSlugRoute
@@ -970,11 +884,6 @@ export interface FileRoutesByTo {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
-  '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
-  '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
-  '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
-  '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
-  '/api/public/n8n/leads': typeof ApiPublicN8nLeadsRoute
   '/api/public/os/events': typeof ApiPublicOsEventsRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
@@ -1001,22 +910,17 @@ export interface FileRoutesById {
   '/dispatch': typeof DispatchRoute
   '/docs': typeof DocsRoute
   '/docs-admin': typeof DocsAdminRoute
-  '/facebook-ads': typeof FacebookAdsRoute
   '/handover': typeof HandoverRoute
   '/help': typeof HelpRoute
   '/hq': typeof HqRoute
   '/import': typeof ImportRoute
   '/inbox': typeof InboxRoute
   '/ingest': typeof IngestRoute
-  '/integrations': typeof IntegrationsRoute
   '/inventory': typeof InventoryRoute
   '/leadhub': typeof LeadhubRoute
   '/live-leads': typeof LiveLeadsRoute
   '/manual': typeof ManualRoute
   '/mcp': typeof McpRoute
-  '/messenger': typeof MessengerRoute
-  '/messenger-setup': typeof MessengerSetupRoute
-  '/meta-control-center': typeof MetaControlCenterRoute
   '/migration': typeof MigrationRoute
   '/migration-export': typeof MigrationExportRoute
   '/news': typeof NewsRoute
@@ -1042,7 +946,6 @@ export interface FileRoutesById {
   '/tickets': typeof TicketsRoute
   '/unit-board': typeof UnitBoardRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
-  '/walkthrough': typeof WalkthroughRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/docs_/$slug': typeof DocsSlugRoute
   '/help_/$slug': typeof HelpSlugRoute
@@ -1091,11 +994,6 @@ export interface FileRoutesById {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
-  '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
-  '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
-  '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
-  '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
-  '/api/public/n8n/leads': typeof ApiPublicN8nLeadsRoute
   '/api/public/os/events': typeof ApiPublicOsEventsRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
@@ -1123,22 +1021,17 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/docs'
     | '/docs-admin'
-    | '/facebook-ads'
     | '/handover'
     | '/help'
     | '/hq'
     | '/import'
     | '/inbox'
     | '/ingest'
-    | '/integrations'
     | '/inventory'
     | '/leadhub'
     | '/live-leads'
     | '/manual'
     | '/mcp'
-    | '/messenger'
-    | '/messenger-setup'
-    | '/meta-control-center'
     | '/migration'
     | '/migration-export'
     | '/news'
@@ -1164,7 +1057,6 @@ export interface FileRouteTypes {
     | '/tickets'
     | '/unit-board'
     | '/voice-transcription'
-    | '/walkthrough'
     | '/.well-known/oauth-protected-resource'
     | '/docs/$slug'
     | '/help/$slug'
@@ -1213,11 +1105,6 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
-    | '/api/public/jobs/inventory-sheet'
-    | '/api/public/jobs/lead-report-sheet'
-    | '/api/public/jobs/messenger-retention'
-    | '/api/public/meta/messenger'
-    | '/api/public/n8n/leads'
     | '/api/public/os/events'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
@@ -1243,22 +1130,17 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/docs'
     | '/docs-admin'
-    | '/facebook-ads'
     | '/handover'
     | '/help'
     | '/hq'
     | '/import'
     | '/inbox'
     | '/ingest'
-    | '/integrations'
     | '/inventory'
     | '/leadhub'
     | '/live-leads'
     | '/manual'
     | '/mcp'
-    | '/messenger'
-    | '/messenger-setup'
-    | '/meta-control-center'
     | '/migration'
     | '/migration-export'
     | '/news'
@@ -1284,7 +1166,6 @@ export interface FileRouteTypes {
     | '/tickets'
     | '/unit-board'
     | '/voice-transcription'
-    | '/walkthrough'
     | '/.well-known/oauth-protected-resource'
     | '/docs/$slug'
     | '/help/$slug'
@@ -1333,11 +1214,6 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
-    | '/api/public/jobs/inventory-sheet'
-    | '/api/public/jobs/lead-report-sheet'
-    | '/api/public/jobs/messenger-retention'
-    | '/api/public/meta/messenger'
-    | '/api/public/n8n/leads'
     | '/api/public/os/events'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
@@ -1363,22 +1239,17 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/docs'
     | '/docs-admin'
-    | '/facebook-ads'
     | '/handover'
     | '/help'
     | '/hq'
     | '/import'
     | '/inbox'
     | '/ingest'
-    | '/integrations'
     | '/inventory'
     | '/leadhub'
     | '/live-leads'
     | '/manual'
     | '/mcp'
-    | '/messenger'
-    | '/messenger-setup'
-    | '/meta-control-center'
     | '/migration'
     | '/migration-export'
     | '/news'
@@ -1404,7 +1275,6 @@ export interface FileRouteTypes {
     | '/tickets'
     | '/unit-board'
     | '/voice-transcription'
-    | '/walkthrough'
     | '/.well-known/oauth-protected-resource'
     | '/docs_/$slug'
     | '/help_/$slug'
@@ -1453,11 +1323,6 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
-    | '/api/public/jobs/inventory-sheet'
-    | '/api/public/jobs/lead-report-sheet'
-    | '/api/public/jobs/messenger-retention'
-    | '/api/public/meta/messenger'
-    | '/api/public/n8n/leads'
     | '/api/public/os/events'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
@@ -1484,22 +1349,17 @@ export interface RootRouteChildren {
   DispatchRoute: typeof DispatchRoute
   DocsRoute: typeof DocsRoute
   DocsAdminRoute: typeof DocsAdminRoute
-  FacebookAdsRoute: typeof FacebookAdsRoute
   HandoverRoute: typeof HandoverRoute
   HelpRoute: typeof HelpRoute
   HqRoute: typeof HqRoute
   ImportRoute: typeof ImportRoute
   InboxRoute: typeof InboxRoute
   IngestRoute: typeof IngestRoute
-  IntegrationsRoute: typeof IntegrationsRoute
   InventoryRoute: typeof InventoryRoute
   LeadhubRoute: typeof LeadhubRoute
   LiveLeadsRoute: typeof LiveLeadsRoute
   ManualRoute: typeof ManualRoute
   McpRoute: typeof McpRoute
-  MessengerRoute: typeof MessengerRoute
-  MessengerSetupRoute: typeof MessengerSetupRoute
-  MetaControlCenterRoute: typeof MetaControlCenterRoute
   MigrationRoute: typeof MigrationRoute
   MigrationExportRoute: typeof MigrationExportRoute
   NewsRoute: typeof NewsRoute
@@ -1525,7 +1385,6 @@ export interface RootRouteChildren {
   TicketsRoute: typeof TicketsRoute
   UnitBoardRoute: typeof UnitBoardRoute
   VoiceTranscriptionRoute: typeof VoiceTranscriptionRoute
-  WalkthroughRoute: typeof WalkthroughRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DocsSlugRoute: typeof DocsSlugRoute
   HelpSlugRoute: typeof HelpSlugRoute
@@ -1574,11 +1433,6 @@ export interface RootRouteChildren {
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
   ApiPublicIngestReprocessRoute: typeof ApiPublicIngestReprocessRoute
   ApiPublicIntegrationsStatusRoute: typeof ApiPublicIntegrationsStatusRoute
-  ApiPublicJobsInventorySheetRoute: typeof ApiPublicJobsInventorySheetRoute
-  ApiPublicJobsLeadReportSheetRoute: typeof ApiPublicJobsLeadReportSheetRoute
-  ApiPublicJobsMessengerRetentionRoute: typeof ApiPublicJobsMessengerRetentionRoute
-  ApiPublicMetaMessengerRoute: typeof ApiPublicMetaMessengerRoute
-  ApiPublicN8nLeadsRoute: typeof ApiPublicN8nLeadsRoute
   ApiPublicOsEventsRoute: typeof ApiPublicOsEventsRoute
   ApiPublicPaddleWebhookRoute: typeof ApiPublicPaddleWebhookRoute
   ApiPublicReportsSummaryRoute: typeof ApiPublicReportsSummaryRoute
@@ -1696,13 +1550,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/facebook-ads': {
-      id: '/facebook-ads'
-      path: '/facebook-ads'
-      fullPath: '/facebook-ads'
-      preLoaderRoute: typeof FacebookAdsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/handover': {
       id: '/handover'
       path: '/handover'
@@ -1745,13 +1592,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IngestRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/integrations': {
-      id: '/integrations'
-      path: '/integrations'
-      fullPath: '/integrations'
-      preLoaderRoute: typeof IntegrationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/inventory': {
       id: '/inventory'
       path: '/inventory'
@@ -1785,27 +1625,6 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/messenger': {
-      id: '/messenger'
-      path: '/messenger'
-      fullPath: '/messenger'
-      preLoaderRoute: typeof MessengerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/messenger-setup': {
-      id: '/messenger-setup'
-      path: '/messenger-setup'
-      fullPath: '/messenger-setup'
-      preLoaderRoute: typeof MessengerSetupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/meta-control-center': {
-      id: '/meta-control-center'
-      path: '/meta-control-center'
-      fullPath: '/meta-control-center'
-      preLoaderRoute: typeof MetaControlCenterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/migration': {
@@ -1981,13 +1800,6 @@ declare module '@tanstack/react-router' {
       path: '/voice-transcription'
       fullPath: '/voice-transcription'
       preLoaderRoute: typeof VoiceTranscriptionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/walkthrough': {
-      id: '/walkthrough'
-      path: '/walkthrough'
-      fullPath: '/walkthrough'
-      preLoaderRoute: typeof WalkthroughRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.well-known/oauth-protected-resource': {
@@ -2326,41 +2138,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIntegrationsStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/jobs/inventory-sheet': {
-      id: '/api/public/jobs/inventory-sheet'
-      path: '/api/public/jobs/inventory-sheet'
-      fullPath: '/api/public/jobs/inventory-sheet'
-      preLoaderRoute: typeof ApiPublicJobsInventorySheetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/jobs/lead-report-sheet': {
-      id: '/api/public/jobs/lead-report-sheet'
-      path: '/api/public/jobs/lead-report-sheet'
-      fullPath: '/api/public/jobs/lead-report-sheet'
-      preLoaderRoute: typeof ApiPublicJobsLeadReportSheetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/jobs/messenger-retention': {
-      id: '/api/public/jobs/messenger-retention'
-      path: '/api/public/jobs/messenger-retention'
-      fullPath: '/api/public/jobs/messenger-retention'
-      preLoaderRoute: typeof ApiPublicJobsMessengerRetentionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/meta/messenger': {
-      id: '/api/public/meta/messenger'
-      path: '/api/public/meta/messenger'
-      fullPath: '/api/public/meta/messenger'
-      preLoaderRoute: typeof ApiPublicMetaMessengerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/n8n/leads': {
-      id: '/api/public/n8n/leads'
-      path: '/api/public/n8n/leads'
-      fullPath: '/api/public/n8n/leads'
-      preLoaderRoute: typeof ApiPublicN8nLeadsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/os/events': {
       id: '/api/public/os/events'
       path: '/api/public/os/events'
@@ -2436,22 +2213,17 @@ const rootRouteChildren: RootRouteChildren = {
   DispatchRoute: DispatchRoute,
   DocsRoute: DocsRoute,
   DocsAdminRoute: DocsAdminRoute,
-  FacebookAdsRoute: FacebookAdsRoute,
   HandoverRoute: HandoverRoute,
   HelpRoute: HelpRoute,
   HqRoute: HqRoute,
   ImportRoute: ImportRoute,
   InboxRoute: InboxRoute,
   IngestRoute: IngestRoute,
-  IntegrationsRoute: IntegrationsRoute,
   InventoryRoute: InventoryRoute,
   LeadhubRoute: LeadhubRoute,
   LiveLeadsRoute: LiveLeadsRoute,
   ManualRoute: ManualRoute,
   McpRoute: McpRoute,
-  MessengerRoute: MessengerRoute,
-  MessengerSetupRoute: MessengerSetupRoute,
-  MetaControlCenterRoute: MetaControlCenterRoute,
   MigrationRoute: MigrationRoute,
   MigrationExportRoute: MigrationExportRoute,
   NewsRoute: NewsRoute,
@@ -2477,7 +2249,6 @@ const rootRouteChildren: RootRouteChildren = {
   TicketsRoute: TicketsRoute,
   UnitBoardRoute: UnitBoardRoute,
   VoiceTranscriptionRoute: VoiceTranscriptionRoute,
-  WalkthroughRoute: WalkthroughRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DocsSlugRoute: DocsSlugRoute,
@@ -2527,11 +2298,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
   ApiPublicIngestReprocessRoute: ApiPublicIngestReprocessRoute,
   ApiPublicIntegrationsStatusRoute: ApiPublicIntegrationsStatusRoute,
-  ApiPublicJobsInventorySheetRoute: ApiPublicJobsInventorySheetRoute,
-  ApiPublicJobsLeadReportSheetRoute: ApiPublicJobsLeadReportSheetRoute,
-  ApiPublicJobsMessengerRetentionRoute: ApiPublicJobsMessengerRetentionRoute,
-  ApiPublicMetaMessengerRoute: ApiPublicMetaMessengerRoute,
-  ApiPublicN8nLeadsRoute: ApiPublicN8nLeadsRoute,
   ApiPublicOsEventsRoute: ApiPublicOsEventsRoute,
   ApiPublicPaddleWebhookRoute: ApiPublicPaddleWebhookRoute,
   ApiPublicReportsSummaryRoute: ApiPublicReportsSummaryRoute,

@@ -5,16 +5,15 @@
   "auth": {
     "type": "oauth",
     "issuer": "https://siepfegeubbqwhodyxcg.supabase.co/auth/v1",
-    "require_oauth_client_claim": true,
     "accepted_audiences": [
       "authenticated"
     ]
   },
   "mcp": {
     "server": {
-      "name": "winstone-pulse-the-premium-real-estate-crm",
+      "name": "winstone-public-property-catalog",
       "version": "0.1.0",
-      "title": "Winstone Pulse: The Premium Real Estate CRM"
+      "title": "Winstone Public Property Catalog"
     },
     "tools": [
       {

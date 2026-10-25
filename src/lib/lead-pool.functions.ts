@@ -192,16 +192,15 @@ export const leadPoolStatus = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     await deckReader(data.adminToken);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { dhakaToday, usablePoolCount, activeAgents, dailyPlan, assignedTodayByAgent } = await import(
+    const { dhakaToday, usablePoolCount, activeAgents, dailyPlan } = await import(
       "@/lib/lead-pool.server"
     );
     const today = dhakaToday();
 
-    const [poolCount, agents, plan, held, { data: previewCandidates }, { data: assigned }, { data: audits }] = await Promise.all([
+    const [poolCount, agents, plan, { data: previewCandidates }, { data: assigned }, { data: audits }] = await Promise.all([
       usablePoolCount(),
       activeAgents(),
       dailyPlan(),
-      assignedTodayByAgent(today),
       supabaseAdmin
         .from("leads")
         .select("id, name, phone_number, serial_no, reference_by, created_at")
@@ -240,7 +239,7 @@ export const leadPoolStatus = createServerFn({ method: "GET" })
         name: agent.name,
         total: mine.length,
         pending: mine.filter((row) => row.status === "pending").length,
-        today: held.get(agent.id) ?? 0,
+        today: mine.filter((row) => row.work_date === today).length,
       };
     });
 
