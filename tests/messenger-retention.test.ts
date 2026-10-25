@@ -35,6 +35,8 @@ describe("messenger retention policy", () => {
     const route = readFileSync("src/routes/api/public/jobs/messenger-retention.ts", "utf8");
     expect(route).toContain("authenticateCronRequest");
     expect(route).toContain('q.not("sent_mid", "is", null)');
-    expect(route).not.toMatch(/body|psid/i.test(route) && /select.*body/i.test(route) ? /./ : /never/);
+    // Cleanup returns counts only — it never reads message content back.
+    expect(route).not.toContain(".select(");
+    expect(route).not.toContain("body_ciphertext");
   });
 });
