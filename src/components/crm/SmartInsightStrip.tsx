@@ -10,12 +10,15 @@ import { useMemo } from "react";
 
 import { CONNECTED_THRESHOLD_SECONDS, useSnapshot } from "@/lib/crm-data";
 import { leadOwner } from "@/lib/lead-owner";
+import { useT } from "@/lib/i18n";
+
+type Bilingual = { bn: string; en: string };
 
 type Insight = {
   tone: "good" | "watch" | "urgent";
   icon: React.ReactNode;
-  title: string;
-  detail: string;
+  title: Bilingual;
+  detail: Bilingual;
 };
 
 const TONE: Record<Insight["tone"], string> = {
@@ -30,10 +33,11 @@ function sameDay(iso: string, ref: Date) {
 
 /**
  * Reads the same live snapshot the boards already use and turns it into a few
- * plain-Bengali lines: what changed since yesterday, what is overdue, and what
- * to do next. Every number comes from real rows — nothing is invented.
+ * short, plain sentences: what changed since yesterday, what is overdue, and
+ * what to do next. Every number comes from real rows — nothing is invented.
  */
 export function SmartInsightStrip({ scope }: { scope: "desk" | "floor" }) {
+  const t = useT();
   const { leads, calls, isPending } = useSnapshot();
 
   const insights = useMemo<Insight[]>(() => {
@@ -62,17 +66,26 @@ export function SmartInsightStrip({ scope }: { scope: "desk" | "floor" }) {
         ? {
             tone: "good",
             icon: <TrendingUp className="size-4" />,
-            title: `আজ ${todayConnected}টি কলে কথা হয়েছে`,
+            title: {
+              bn: `আজ ${todayConnected} জনের সাথে কথা হয়েছে`,
+              en: `${todayConnected} calls answered today`,
+            },
             detail:
               delta === 0
-                ? "গতকালের সমান গতি — ছন্দ ধরে রাখুন।"
-                : `গতকালের চেয়ে ${delta}টি বেশি। ভালো এগোচ্ছে।`,
+                ? { bn: "গতকালের সমান গতি — ধারাবাহিক থাকুন।", en: "Same pace as yesterday — keep it going." }
+                : { bn: `গতকালের চেয়ে ${delta}টি বেশি। ভালো চলছে।`, en: `${delta} more than yesterday. Going well.` },
           }
         : {
             tone: "watch",
             icon: <TrendingDown className="size-4" />,
-            title: `আজ ${todayConnected}টি কলে কথা হয়েছে`,
-            detail: `গতকালের চেয়ে ${Math.abs(delta)}টি কম — এখনই কয়েকটি কল সেরে নিন।`,
+            title: {
+              bn: `আজ ${todayConnected} জনের সাথে কথা হয়েছে`,
+              en: `${todayConnected} calls answered today`,
+            },
+            detail: {
+              bn: `গতকালের চেয়ে ${Math.abs(delta)}টি কম — আর কয়েকটি কল দিয়ে ফেলুন।`,
+              en: `${Math.abs(delta)} less than yesterday — make a few calls now.`,
+            },
           },
     );
 
@@ -80,8 +93,14 @@ export function SmartInsightStrip({ scope }: { scope: "desk" | "floor" }) {
       rows.push({
         tone: "urgent",
         icon: <Flame className="size-4" />,
-        title: `${hot}টি হট লিড খোলা আছে`,
-        detail: "সবচেয়ে আগে এগুলোতেই কল করুন — এখানেই ডিল হওয়ার সম্ভাবনা বেশি।",
+        title: {
+          bn: `${hot}টি গুরুত্বপূর্ণ (হট) লিড বাকি`,
+          en: `${hot} hot leads waiting`,
+        },
+        detail: {
+          bn: "সবার আগে এগুলোতে কল দিন — এখানেই ডিল হওয়ার সম্ভাবনা সবচেয়ে বেশি।",
+          en: "Call these first — deals are most likely here.",
+        },
       });
     }
 
@@ -89,8 +108,14 @@ export function SmartInsightStrip({ scope }: { scope: "desk" | "floor" }) {
       rows.push({
         tone: followUpsDue > 5 ? "urgent" : "watch",
         icon: <CalendarClock className="size-4" />,
-        title: `${followUpsDue}টি ফলো-আপ সময় পেরিয়ে গেছে`,
-        detail: "একদিনের বেশি পুরোনো ফলো-আপ ঠান্ডা হয়ে যায়।",
+        title: {
+          bn: `${followUpsDue}টি ফলো-আপ সময় পেরিয়ে গেছে`,
+          en: `${followUpsDue} follow-ups overdue`,
+        },
+        detail: {
+          bn: "একদিনের বেশি পুরোনো ফলো-আপ ঠান্ডা হয়ে যায় — আজই ফিরিয়ে আনুন।",
+          en: "Follow-ups older than a day go cold — catch up today.",
+        },
       });
     }
 
@@ -98,11 +123,14 @@ export function SmartInsightStrip({ scope }: { scope: "desk" | "floor" }) {
       rows.push({
         tone: "watch",
         icon: <AlertTriangle className="size-4" />,
-        title: `${untouched}টি লিডে এখনো একটিও কল হয়নি`,
+        title: {
+          bn: `${untouched}টি লিডে এখনো একটিও কল হয়নি`,
+          en: `${untouched} leads not called yet`,
+        },
         detail:
           scope === "floor"
-            ? "কোঅর্ডিনেটর ডেস্ক থেকে ভাগ দেখে নিন।"
-            : "আজকের তালিকার শুরু থেকেই ধরুন।",
+            ? { bn: "ভাগ ঠিক আছে কি না দেখে নিন — কাজ শুরুর আগে।", en: "Check the sharing before work starts." }
+            : { bn: "আজকের তালিকার শুরু থেকেই কল শুরু করুন।", en: "Start calling from the top of today's list." },
       });
     }
 
@@ -110,8 +138,8 @@ export function SmartInsightStrip({ scope }: { scope: "desk" | "floor" }) {
       rows.push({
         tone: "good",
         icon: <CheckCircle2 className="size-4" />,
-        title: "সব লিডের কাজ শেষ",
-        detail: "নতুন তালিকা আসা পর্যন্ত পরিষ্কার — চমৎকার।",
+        title: { bn: "সব লিডের কাজ শেষ", en: "All leads are done" },
+        detail: { bn: "নতুন তালিকা আসা পর্যন্ত পরিষ্কার — চমৎকার কাজ!", en: "Clear until the next list arrives — great work!" },
       });
     }
 
@@ -129,17 +157,17 @@ export function SmartInsightStrip({ scope }: { scope: "desk" | "floor" }) {
   }
 
   return (
-    <section aria-label="স্মার্ট পরামর্শ" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section aria-label={t({ bn: "স্মার্ট পরামর্শ", en: "Smart tips" })} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {insights.map((row) => (
         <article
-          key={row.title}
+          key={row.title.en}
           className={`rounded-xl border p-3 shadow-sm transition-colors ${TONE[row.tone]}`}
         >
           <p className="flex items-center gap-2 text-sm font-semibold">
             <span className="shrink-0">{row.icon}</span>
-            <span className="min-w-0">{row.title}</span>
+            <span className="min-w-0">{t(row.title)}</span>
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">{row.detail}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t(row.detail)}</p>
         </article>
       ))}
     </section>

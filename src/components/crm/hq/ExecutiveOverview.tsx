@@ -8,6 +8,8 @@ import {
   Users,
 } from "lucide-react";
 import { useMemo } from "react";
+import { useT } from "@/lib/i18n";
+
 import {
   CartesianGrid,
   Cell,
@@ -82,6 +84,7 @@ export function ExecutiveOverview({
   events: LeadEvent[];
   onSelectAgent?: (agentId: string) => void;
 }) {
+  const t = useT();
   const kpi = useMemo(() => {
     const today = dhakaDay(new Date());
     const connected = calls.filter((c) => c.duration_seconds > CONNECTED_THRESHOLD_SECONDS);
@@ -106,20 +109,23 @@ export function ExecutiveOverview({
   }, [calls, leads]);
 
   const funnel = useMemo(() => {
-    const steps = [
-      { label: "নতুন লিড", value: leads.length },
+    const steps: { label: { bn: string; en: string }; value: number }[] = [
+      { label: { bn: "নতুন লিড", en: "New leads" }, value: leads.length },
       {
-        label: "যোগাযোগ হয়েছে",
+        label: { bn: "যোগাযোগ হয়েছে", en: "Contacted" },
         value: leads.filter((l) => l.status !== "pending").length,
       },
       {
-        label: "কোয়ালিফাইড",
+        label: { bn: "সম্ভাব্য (হট+ওয়ার্ম)", en: "Qualified" },
         value: leads.filter((l) => l.temperature === "hot" || l.temperature === "warm").length,
       },
-      { label: "ফলো-আপ", value: leads.filter((l) => l.status === "follow_up").length },
-      { label: "আলোচনা চলছে", value: leads.filter((l) => l.temperature === "hot").length },
+      { label: { bn: "ফলো-আপ", en: "Follow-up" }, value: leads.filter((l) => l.status === "follow_up").length },
       {
-        label: "বুকিং",
+        label: { bn: "আলোচনা চলছে", en: "In negotiation" },
+        value: leads.filter((l) => l.temperature === "hot").length,
+      },
+      {
+        label: { bn: "বুকিং", en: "Booked" },
         value: leads.filter((l) => l.status === "closed" && l.outcome_category === "deal_won")
           .length,
       },
@@ -186,60 +192,60 @@ export function ExecutiveOverview({
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
         <KpiCard
           icon={<Users className="size-4" />}
-          label="মোট লিড"
+          label={t({ bn: "মোট লিড", en: "Total leads" })}
           value={String(kpi.total)}
-          hint="সব সময়ের"
+          hint={t({ bn: "সব সময় মিলিয়ে", en: "All time" })}
         />
         <KpiCard
           icon={<PhoneCall className="size-4" />}
-          label="যোগাযোগ হয়েছে"
+          label={t({ bn: "যোগাযোগ হয়েছে", en: "Contacted" })}
           value={String(kpi.contacted)}
-          hint={`${kpi.contactRate}% লিডে কথা`}
+          hint={`${kpi.contactRate}% ${t({ bn: "লিডে কথা হয়েছে", en: "of leads spoken to" })}`}
         />
         <KpiCard
           icon={<Flame className="size-4" />}
-          label="কোয়ালিফাইড (হট+ওয়ার্ম)"
+          label={t({ bn: "সম্ভাব্য (হট+ওয়ার্ম)", en: "Qualified (hot+warm)" })}
           value={String(kpi.qualified)}
-          hint={`${kpi.qualifiedRate}% কোয়ালিফাইড`}
+          hint={`${kpi.qualifiedRate}% ${t({ bn: "সম্ভাব্য", en: "qualified" })}`}
         />
         <KpiCard
           icon={<CalendarCheck className="size-4" />}
-          label="ফলো-আপ বাকি"
+          label={t({ bn: "ফলো-আপ বাকি", en: "Follow-ups left" })}
           value={String(kpi.followUp)}
-          hint="সময় নির্ধারিত"
+          hint={t({ bn: "সময় ঠিক করা আছে", en: "Scheduled" })}
         />
         <KpiCard
           icon={<Handshake className="size-4" />}
-          label="ডিল জেতা"
+          label={t({ bn: "বুকিং হয়েছে", en: "Deals won" })}
           value={String(kpi.won)}
-          hint={`${kpi.wonRate}% রূপান্তর`}
+          hint={`${kpi.wonRate}% ${t({ bn: "সফল", en: "converted" })}`}
         />
         <KpiCard
           icon={<Activity className="size-4" />}
-          label="আজকের কল"
+          label={t({ bn: "আজকের কল", en: "Calls today" })}
           value={String(kpi.todayCalls)}
-          hint="সব এজেন্ট মিলিয়ে"
+          hint={t({ bn: "সব এজেন্ট মিলিয়ে", en: "All agents combined" })}
         />
       </div>
 
       <div className="grid gap-3 xl:grid-cols-3">
         <div className="card-elevated p-4">
           <div className="flex items-end justify-between gap-2">
-            <h3 className="text-sm font-semibold">সেলস পাইপলাইন</h3>
-            <span className="text-[11px] text-muted-foreground">মোট লিড: {kpi.total}</span>
+            <h3 className="text-sm font-semibold">{t({ bn: "কাজের ধাপ", en: "Sales pipeline" })}</h3>
+            <span className="text-[11px] text-muted-foreground">{t({ bn: "মোট লিড", en: "Total leads" })}: {kpi.total}</span>
           </div>
           <ul className="mt-3 space-y-1.5">
             {funnel.map((step, i) => {
               const width = 100 - i * 13;
               return (
-                <li key={step.label} className="flex items-center gap-3">
+                <li key={step.label.en} className="flex items-center gap-3">
                   <span
                     className="grid h-8 shrink-0 place-items-center rounded-sm bg-primary/80 text-[11px] font-semibold text-primary-foreground"
                     style={{ width: `${width}%`, opacity: 1 - i * 0.12 }}
                   >
                     {step.value}
                   </span>
-                  <span className="shrink-0 text-[11px] text-muted-foreground">{step.label}</span>
+                  <span className="shrink-0 text-[11px] text-muted-foreground">{t(step.label)}</span>
                 </li>
               );
             })}
@@ -247,7 +253,7 @@ export function ExecutiveOverview({
         </div>
 
         <div className="card-elevated p-4">
-          <h3 className="text-sm font-semibold">লিড সোর্স</h3>
+          <h3 className="text-sm font-semibold">{t({ bn: "লিড কোথা থেকে আসছে", en: "Where leads come from" })}</h3>
           <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
             <div className="relative h-40 w-40 shrink-0">
               <ResponsiveContainer width="100%" height="100%">
@@ -279,7 +285,7 @@ export function ExecutiveOverview({
               <div className="pointer-events-none absolute inset-0 grid place-items-center">
                 <div className="text-center">
                   <p className="tabular text-lg font-bold leading-none">{kpi.total}</p>
-                  <p className="text-[10px] text-muted-foreground">লিড</p>
+                  <p className="text-[10px] text-muted-foreground">{t({ bn: "লিড", en: "leads" })}</p>
                 </div>
               </div>
             </div>
@@ -296,14 +302,14 @@ export function ExecutiveOverview({
                 </li>
               ))}
               {sources.length === 0 && (
-                <li className="text-[11px] text-muted-foreground">কোনো লিড নেই।</li>
+                <li className="text-[11px] text-muted-foreground">{t({ bn: "এখনো কোনো লিড নেই।", en: "No leads yet." })}</li>
               )}
             </ul>
           </div>
         </div>
 
         <div className="card-elevated p-4">
-          <h3 className="text-sm font-semibold">টিম পারফরম্যান্স</h3>
+          <h3 className="text-sm font-semibold">{t({ bn: "এজেন্টদের ফলাফল", en: "Agent performance" })}</h3>
           <ol className="mt-3 space-y-2.5">
             {team.map((row, i) => {
               const pct = Math.round((row.connected / teamMax) * 100);
@@ -320,7 +326,7 @@ export function ExecutiveOverview({
                         {row.profile.name}
                       </span>
                       <span className="block text-[10px] text-muted-foreground">
-                        {row.dials} কল · {row.connected} কথা · {row.closedWon} বুকিং
+                        {t({ bn: `${row.dials} কল · ${row.connected} কথা · ${row.closedWon} বুকিং`, en: `${row.dials} calls · ${row.connected} talked · ${row.closedWon} bookings` })}
                       </span>
                       <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-muted">
                         <span
@@ -335,7 +341,7 @@ export function ExecutiveOverview({
               );
             })}
             {team.length === 0 && (
-              <li className="text-[11px] text-muted-foreground">এখনো কোনো এজেন্ট নেই।</li>
+              <li className="text-[11px] text-muted-foreground">{t({ bn: "এখনো কোনো এজেন্ট নেই।", en: "No agents yet." })}</li>
             )}
           </ol>
         </div>
@@ -343,7 +349,7 @@ export function ExecutiveOverview({
 
       <div className="grid gap-3 xl:grid-cols-3">
         <div className="card-elevated p-4 xl:col-span-1">
-          <h3 className="text-sm font-semibold">কল অ্যাক্টিভিটি ট্রেন্ড</h3>
+          <h3 className="text-sm font-semibold">{t({ bn: "কল কমছে বাড়ছে", en: "Call trend" })}</h3>
           <div className="mt-2 h-40">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trend}>
@@ -378,7 +384,7 @@ export function ExecutiveOverview({
                 <Line
                   type="monotone"
                   dataKey="calls"
-                  name="কল"
+                  name={t({ bn: "কল", en: "Calls" })}
                   stroke="var(--chart-1)"
                   strokeWidth={2}
                   dot={{ r: 2.5, fill: "var(--chart-1)" }}
@@ -389,16 +395,16 @@ export function ExecutiveOverview({
         </div>
 
         <div className="card-elevated p-4">
-          <h3 className="text-sm font-semibold">রূপান্তরের হার</h3>
+          <h3 className="text-sm font-semibold">{t({ bn: "কতটুকু সফল হচ্ছে", en: "Success rates" })}</h3>
           <div className="mt-3 grid grid-cols-3 gap-2">
-            <Gauge label="কথা হওয়ার হার" value={kpi.contactRate} color="var(--chart-1)" />
-            <Gauge label="কোয়ালিফাইড হার" value={kpi.qualifiedRate} color="var(--chart-2)" />
-            <Gauge label="বুকিং হার" value={kpi.wonRate} color="var(--chart-3)" />
+            <Gauge label={t({ bn: "কথা হওয়ার হার", en: "Talk rate" })} value={kpi.contactRate} color="var(--chart-1)" />
+            <Gauge label={t({ bn: "সম্ভাব্য হার", en: "Qualified rate" })} value={kpi.qualifiedRate} color="var(--chart-2)" />
+            <Gauge label={t({ bn: "বুকিং হার", en: "Booking rate" })} value={kpi.wonRate} color="var(--chart-3)" />
           </div>
         </div>
 
         <div className="card-elevated p-4">
-          <h3 className="text-sm font-semibold">সাম্প্রতিক কাজ</h3>
+          <h3 className="text-sm font-semibold">{t({ bn: "সাম্প্রতিক কাজ", en: "Recent activity" })}</h3>
           <ul className="mt-3 space-y-2">
             {recent.map((row) => (
               <li key={row.id} className="flex items-center gap-2 text-[11px]">
@@ -408,7 +414,7 @@ export function ExecutiveOverview({
               </li>
             ))}
             {recent.length === 0 && (
-              <li className="text-[11px] text-muted-foreground">কোনো কাজের রেকর্ড নেই।</li>
+              <li className="text-[11px] text-muted-foreground">{t({ bn: "এখনো কোনো কাজের রেকর্ড নেই।", en: "No activity records yet." })}</li>
             )}
           </ul>
         </div>

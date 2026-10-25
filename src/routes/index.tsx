@@ -100,7 +100,7 @@ function EntryHall() {
             </span>
           </span>
           <span className="inline-flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
-            <span aria-hidden className="size-1.5 rounded-full bg-live" /> Server online
+            <span aria-hidden className="size-1.5 rounded-full bg-live" /> {t({ bn: "সার্ভার চালু আছে", en: "Server online" })}
           </span>
         </div>
       </div>
@@ -117,14 +117,14 @@ function EntryHall() {
               The Premium Real Estate CRM.
             </p>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Leads, calls, follow-ups and team performance. One connected workspace for your sales floor.
+              {t({ bn: "লিড, কল, ফলো-আপ আর টিমের ফলাফল — আপনার সেলস টিমের সব কাজ এক জায়গায়।", en: "Leads, calls, follow-ups and team performance. One connected workspace for your sales floor." })}
             </p>
             <Button asChild variant="outline" className="mt-5"><Link to="/walkthrough"><BookOpen />{t({ bn: "CRM walkthrough দেখুন", en: "Explore the CRM walkthrough" })}</Link></Button>
             <div className="mt-8 grid overflow-hidden rounded-xl border border-border bg-card sm:mt-10 sm:grid-cols-3">
               {[
-                { icon: Headphones, label: "Manage your team", sub: "Agents, roles & performance" },
-                { icon: BarChart3, label: "Track your pipeline", sub: "Leads, follow-ups & bookings" },
-                { icon: Smartphone, label: "Review call activity", sub: "Call reports & customer history" },
+                { icon: Headphones, label: t({ bn: "টিম সামলান", en: "Manage your team" }), sub: t({ bn: "এজেন্ট, ভূমিকা ও ফলাফল", en: "Agents, roles & performance" }) },
+                { icon: BarChart3, label: t({ bn: "কাজের ধাপ দেখুন", en: "Track your pipeline" }), sub: t({ bn: "লিড, ফলো-আপ ও বুকিং", en: "Leads, follow-ups & bookings" }) },
+                { icon: Smartphone, label: t({ bn: "কলের কাজ দেখুন", en: "Review call activity" }), sub: t({ bn: "কল রিপোর্ট ও কাস্টমারের ইতিহাস", en: "Call reports & customer history" }) },
               ].map(({ icon: Icon, label, sub }) => (
                 <span key={label} className="flex items-center gap-3 border-border p-4 text-left text-sm font-semibold text-foreground [&:not(:first-child)]:border-t sm:p-5 sm:[&:not(:first-child)]:border-l sm:[&:not(:first-child)]:border-t-0">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full text-gold ring-1 ring-gold/40">
@@ -142,11 +142,11 @@ function EntryHall() {
         </header>
 
         <h2 className="mt-10 text-center text-xl font-bold tracking-tight sm:text-3xl">
-          Choose Your Workspace
+          {t({ bn: "আপনার কর্মঘর বেছে নিন", en: "Choose Your Workspace" })}
           <span aria-hidden className="mx-auto mt-2 block h-0.5 w-12 bg-gold" />
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
-          Select the mode you are using — the Winstone Pulse Gateway opens the same CRM on every device.
+          {t({ bn: "যে ডিভাইসে কাজ করেন সেটা বেছে নিন — প্রতিটি ডিভাইসে একই CRM খোলে।", en: "Select the mode you are using — the Winstone Pulse Gateway opens the same CRM on every device." })}
         </p>
 
         <div className="mt-5 grid grid-cols-2 gap-2 sm:mt-8 sm:gap-4 lg:grid-cols-4">
@@ -154,38 +154,38 @@ function EntryHall() {
             icon={<Smartphone />}
             illustration={<SmartphoneIllustration />}
             title="Android"
-            subtitle="Mobile-first CRM"
+            subtitle={t({ bn: "মোবাইলে কাজের জন্য", en: "Mobile-first CRM" })}
             onClick={() => chooseMode("android")}
           />
           <ModeCard
             icon={<Globe />}
             illustration={<WebIllustration />}
             title="Web / iOS"
-            subtitle="Responsive CRM"
+            subtitle={t({ bn: "যেকোনো ব্রাউজারে", en: "Responsive CRM" })}
             onClick={() => chooseMode("web")}
           />
           <ModeCard
             icon={<Monitor />}
             illustration={<DesktopIllustration />}
             title="Desktop"
-            subtitle="Full CRM Workspace"
+            subtitle={t({ bn: "পুরো ডেস্কটপ ভিউ", en: "Full CRM Workspace" })}
             onClick={() => chooseMode("desktop")}
           />
           <ModeCard
             icon={<ShieldCheck />}
             illustration={<span className="grid h-16 w-full shrink-0 place-items-center rounded-md bg-secondary text-gold sm:h-24 sm:w-24 lg:w-28"><ShieldCheck className="size-10" /></span>}
             title="IT Console"
-            subtitle="Secure administration"
+            subtitle={t({ bn: "নিরাপদ প্রশাসন", en: "Secure administration" })}
             onClick={() => openPin("/system")}
           />
         </div>
 
         <p className="mt-5 text-center text-[10px] font-medium uppercase sm:mt-8 sm:text-xs tracking-[0.2em] text-muted-foreground">
-          One CRM. One data layer. Every device.
+          {t({ bn: "এক CRM · এক ডেটা · প্রতিটি ডিভাইস", en: "One CRM. One data layer. Every device." })}
         </p>
 
         <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
-          <p className="text-sm font-semibold">Your role &amp; workspace</p>
+          <p className="text-sm font-semibold">{t({ bn: "আপনার ভূমিকা ও কর্মঘর", en: "Your role & workspace" })}</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {ROLES.map(({ key, label, icon: Icon }) => (
               <button
@@ -200,10 +200,10 @@ function EntryHall() {
             ))}
           </div>
           <Button size="lg" className="btn-enter mt-4 w-full rounded-md text-base font-bold" onClick={startRole}>
-            Get started <ChevronRight className="size-5" />
+            {t({ bn: "শুরু করুন", en: "Get started" })} <ChevronRight className="size-5" />
           </Button>
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            Optional — pick a device above so we remember your preferred view.
+            {t({ bn: "ঐচ্ছিক — উপরে ডিভাইস বেছে নিলে আপনার পছন্দ মনে রাখা হবে।", en: "Optional — pick a device above so we remember your preferred view." })}
           </p>
         </div>
 
@@ -213,25 +213,25 @@ function EntryHall() {
           id="workspace-signin"
           className="font-hand mt-12 scroll-mt-6 text-center text-3xl font-semibold tracking-normal sm:text-4xl"
         >
-          Sign in to your workspace
+          {t({ bn: "আপনার কর্মঘরে প্রবেশ করুন", en: "Sign in to your workspace" })}
           <span aria-hidden className="mx-auto mt-2 block h-0.5 w-12 bg-gold" />
         </h2>
         <div className="mt-5 grid gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4">
           <EntryCard
             icon={<Headphones className="size-6" />}
-            title="Sales Agent"
-            description="Your own assigned lead queue, call log, WhatsApp threads, follow-ups and AI coaching."
+            title={t({ bn: "সেলস এজেন্ট", en: "Sales Agent" })}
+            description={t({ bn: "আপনার নিজের লিড, কল, ফলো-আপ আর এআই কোচিং — সব এক জায়গায়।", en: "Your own leads, calls, follow-ups and AI coaching — all in one place." })}
             primary={
               <Button asChild className="btn-enter flex-1">
                 <Link to="/auth" search={{ role: "agent", mode: "signin" }}>
-                  Sign in
+                  {t({ bn: "প্রবেশ করুন", en: "Sign in" })}
                 </Link>
               </Button>
             }
             secondary={
               <Button asChild variant="secondary" className="flex-1">
                 <Link to="/auth" search={{ role: "agent", mode: "signup" }}>
-                  Create account
+                  {t({ bn: "নতুন অ্যাকাউন্ট", en: "Create account" })}
                 </Link>
               </Button>
             }
@@ -239,65 +239,65 @@ function EntryHall() {
 
           <EntryCard
             icon={<Database className="size-6" />}
-            title="LeadHub Nexus"
-            description="Canonical lead database and lead operations — imports, data quality and deduplication, quotas and lead assignment."
+            title={t({ bn: "লিডহাব নেক্সাস", en: "LeadHub Nexus" })}
+            description={t({ bn: "নতুন লিড যোগ ও এজেন্টদের মাঝে ভাগ করার মূল ঘর।", en: "The main home for adding new leads and sharing them with agents." })}
             primary={
               <Button className="btn-enter flex-1" onClick={() => openPin("/leadhub")}>
-                <Lock className="size-4" /> Unlock PIN
+                <Lock className="size-4" /> {t({ bn: "পিন দিয়ে খুলুন", en: "Unlock PIN" })}
               </Button>
             }
           />
 
           <EntryCard
             icon={<BarChart3 className="size-6" />}
-            title="Executive Headquarters (HQ)"
-            description="Central management dashboard for live team performance, agent performance updates, leaderboards, call/report metrics, and business analytics."
+            title={t({ bn: "এক্সিকিউটিভ এইচকিউ", en: "Executive Headquarters (HQ)" })}
+            description={t({ bn: "পুরো টিমের ফলাফল, রিপোর্ট আর ব্যবসার সংখ্যা — সব এক নজরে।", en: "Team performance, reports and business numbers — all at a glance." })}
             primary={
               <Button className="btn-enter flex-1" onClick={() => openPin("/hq")}>
-                <Lock className="size-4" /> Unlock PIN
+                <Lock className="size-4" /> {t({ bn: "পিন দিয়ে খুলুন", en: "Unlock PIN" })}
               </Button>
             }
           />
 
           <EntryCard
             icon={<Server className="size-6" />}
-            title="IT Console"
-            description="Technical administration — system configuration, integrations, data health, device and account provisioning, and account approvals."
+            title={t({ bn: "আইটি কনসোল", en: "IT Console" })}
+            description={t({ bn: "অ্যাকাউন্ট, সেটিংস আর সংযোগ — টেকনিক্যাল কাজ এখানে হয়।", en: "Accounts, settings and connections — the technical home." })}
             primary={
               <Button className="btn-enter flex-1" onClick={() => openPin("/system")}>
-                <Lock className="size-4" /> Unlock PIN
+                <Lock className="size-4" /> {t({ bn: "পিন দিয়ে খুলুন", en: "Unlock PIN" })}
               </Button>
             }
           />
         </div>
 
         <section className="mt-10 rounded-xl border border-border bg-card p-5 sm:p-6">
-          <h2 className="text-lg font-bold tracking-tight">Are you a Winstone sales agent?</h2>
+          <h2 className="text-lg font-bold tracking-tight">{t({ bn: "আপনি কি Winstone-এর সেলস এজেন্ট?", en: "Are you a Winstone sales agent?" })}</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Your account and company device must be provisioned by the IT Console before you can start working.
+            {t({ bn: "কাজ শুরুর আগে IT Console থেকে আপনার অ্যাকাউন্ট ও কোম্পানির ডিভাইস তৈরি করে দেওয়া হয়।", en: "The IT Console sets up your account and company device before you can start working." })}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Already have an account? Sign in using your assigned credentials on the authorized device.
+            {t({ bn: "অ্যাকাউন্ট থাকলে অনুমোদিত ডিভাইসে নিজের তথ্য দিয়ে প্রবেশ করুন।", en: "Already have an account? Sign in with your assigned credentials on the authorized device." })}
           </p>
           <p className="mt-4 border-t border-border pt-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-gold">
-            New agent accounts are created and managed by the IT Console.
+            {t({ bn: "নতুন এজেন্ট অ্যাকাউন্ট IT Console-ই তৈরি করে।", en: "New agent accounts are created and managed by the IT Console." })}
           </p>
         </section>
 
         {scope !== "none" && (
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            Already signed in —{" "}
+            {t({ bn: "আগেই প্রবেশ করেছেন — ", en: "Already signed in — " })}
             <Link to="/desk" className="font-semibold text-gold hover:underline">
-              go to my desk
+              {t({ bn: "আমার ডেস্কে যান", en: "go to my desk" })}
             </Link>
           </p>
         )}
 
         <footer className="mt-auto pt-14 text-center text-xs text-muted-foreground">
           <p className="inline-flex items-center gap-1.5">
-            <LifeBuoy className="size-3.5" /> Need help?{" "}
+            <LifeBuoy className="size-3.5" /> {t({ bn: "সাহায্য দরকার?", en: "Need help?" })}{" "}
             <Link to="/support" className="font-semibold text-gold hover:underline">
-              Contact IT Console
+              {t({ bn: "IT Console-এর সাথে যোগাযোগ করুন", en: "Contact IT Console" })}
             </Link>
           </p>
           <p className="mt-3">© 2026 TrendFlux Digital. All Rights Reserved.</p>
@@ -374,6 +374,7 @@ function ModeCard({
   subtitle: string;
   onClick: () => void;
 }) {
+  const t = useT();
   return (
     <button
       type="button"
@@ -391,7 +392,7 @@ function ModeCard({
         {illustration}
       </span>
       <span className="mt-auto flex items-center justify-between rounded-md border border-border bg-secondary px-2 py-2 text-[11px] font-semibold sm:px-3 sm:text-sm">
-        <span className="truncate">Select workspace</span>
+        <span className="truncate">{t({ bn: "এই কর্মঘর খুলুন", en: "Select workspace" })}</span>
         <ArrowUpRight className="size-4 shrink-0" />
       </span>
     </button>
