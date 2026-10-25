@@ -91,7 +91,7 @@ export function AiTeamSummary() {
       {model.data && (
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-green-600" aria-hidden />
+            <span className="size-2 rounded-full bg-success" aria-hidden />
             {t({ bn: "সক্রিয় মডেল:", en: "Active model:" })}{" "}
             <span className="font-medium text-foreground">
               {model.data.model === "meta"
@@ -152,7 +152,7 @@ export function AiTeamSummary() {
                 className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground"
               >
                 <span
-                  className={`size-2 shrink-0 rounded-full ${entry.ok ? "bg-green-600" : "bg-destructive"}`}
+                  className={`size-2 shrink-0 rounded-full ${entry.ok ? "bg-success" : "bg-destructive"}`}
                   aria-hidden
                 />
                 <span className="font-medium text-foreground">{dhaka(entry.at)}</span>
@@ -176,7 +176,7 @@ export function AiTeamSummary() {
         (model.data.lastErrorStatus === 402 ||
           model.data.lastErrorStatus === 403 ||
           !model.data.lastSuccessAt) && (
-          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-foreground">
+          <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs text-foreground">
             <p className="font-medium">
               {t({ bn: "Meta বিলিং সতর্কতা", en: "Meta billing notice" })}
             </p>
