@@ -33,7 +33,25 @@ export const Route = createFileRoute("/api/public/meta/messenger")({
     },
     POST: async ({ request }) => {
       const { inspectSignedWebhook } = await import("@/lib/messenger-webhook.server");
-      return inspectSignedWebhook(request, process.env["META_APP_SECRET"]);
+      // Ingestion needs both the env switch AND a latest audit-log "enable"
+      // decision (which itself requires all verification tracks verified).
+      // Fail closed: any lookup error keeps ingestion off.
+      const { messengerIngestionEnabled } = await import("@/lib/messenger-ingest.server");
+      let enabled = messengerIngestionEnabled();
+      if (enabled) {
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data } = await supabaseAdmin
+            .from("messenger_sync_decisions" as never)
+            .select("action")
+            .order("created_at", { ascending: false })
+            .limit(1);
+          enabled = Array.isArray(data) && (data[0] as { action?: string } | undefined)?.action === "enable";
+        } catch {
+          enabled = false;
+        }
+      }
+      return inspectSignedWebhook(request, process.env["META_APP_SECRET"], { enabled });
     },
   } },
 });

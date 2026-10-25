@@ -33,10 +33,10 @@ export const Route = createFileRoute("/api/public/jobs/messenger-retention")({
           return count ?? 0;
         };
 
-        deleted.messages = await sweep("messenger_messages", "created_at", MESSENGER_RETENTION_DAYS.messages);
-        deleted.threadEvents = await sweep("messenger_thread_events", "created_at", MESSENGER_RETENTION_DAYS.threadEvents);
-        deleted.receipts = await sweep("messenger_webhook_receipts", "received_at", MESSENGER_RETENTION_DAYS.receipts);
-        deleted.sentOutbox = await sweep("messenger_outbox", "created_at", MESSENGER_RETENTION_DAYS.sentOutbox, (q) =>
+        deleted["messages"] = await sweep("messenger_messages", "created_at", MESSENGER_RETENTION_DAYS.messages);
+        deleted["threadEvents"] = await sweep("messenger_thread_events", "created_at", MESSENGER_RETENTION_DAYS.threadEvents);
+        deleted["receipts"] = await sweep("messenger_webhook_receipts", "received_at", MESSENGER_RETENTION_DAYS.receipts);
+        deleted["sentOutbox"] = await sweep("messenger_outbox", "created_at", MESSENGER_RETENTION_DAYS.sentOutbox, (q) =>
           q.not("sent_mid", "is", null),
         );
 
