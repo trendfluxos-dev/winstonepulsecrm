@@ -1,14 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { DatabaseBackup, Download, History, Loader2, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
+import { DatabaseBackup, Download, History, Loader2, RotateCcw, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { AiTeamSummary } from "@/components/crm/AiTeamSummary";
 import { AppShell } from "@/components/crm/AppShell";
-import { CredentialIncidentTracker } from "@/components/crm/CredentialIncidentTracker";
-import { MetaVerificationReport } from "@/components/crm/MetaVerificationReport";
 import { PageHeader } from "@/components/crm/PageHeader";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { Button } from "@/components/ui/button";
@@ -47,7 +45,7 @@ const short = (v: unknown) => { const s = v == null ? "—" : typeof v === "stri
 const csv = (v: unknown) => { const s = String(v ?? ""); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 
 function Page() {
-  const [tab, setTab] = useState<"log" | "backups" | "ai" | "meta">("log");
+  const [tab, setTab] = useState<"log" | "backups" | "ai">("log");
   return (
     <AppShell>
       <RoleGate surface="hq" allow={["authority"]} icon={<History className="size-7" />}
@@ -58,14 +56,8 @@ function Page() {
             <Button variant={tab === "log" ? "default" : "outline"} size="sm" onClick={() => setTab("log")}><History className="size-4" /> Audit log</Button>
             <Button variant={tab === "backups" ? "default" : "outline"} size="sm" onClick={() => setTab("backups")}><DatabaseBackup className="size-4" /> Backups</Button>
             <Button variant={tab === "ai" ? "default" : "outline"} size="sm" onClick={() => setTab("ai")}><Sparkles className="size-4" /> AI</Button>
-            <Button variant={tab === "meta" ? "default" : "outline"} size="sm" onClick={() => setTab("meta")}><ShieldCheck className="size-4" /> Meta</Button>
           </div>
-          {tab === "log" ? <AuditLog /> : tab === "backups" ? <Backups /> : tab === "ai" ? <AiTeamSummary /> : (
-            <div className="space-y-4">
-              <MetaVerificationReport />
-              <CredentialIncidentTracker />
-            </div>
-          )}
+          {tab === "log" ? <AuditLog /> : tab === "backups" ? <Backups /> : <AiTeamSummary />}
         </div>
       </RoleGate>
     </AppShell>

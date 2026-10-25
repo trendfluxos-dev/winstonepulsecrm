@@ -1,4 +1,3 @@
-import { audioStored } from "@/lib/call-reconciliation";
 /** Browser-safe recovery rules shared by diagnostics and operational retries. */
 export type RecoveryRecording = {
   storage_path: string | null;
@@ -13,7 +12,7 @@ export type RecoveryRecording = {
 };
 
 export function recordingRecovery(row: RecoveryRecording, driveStatus?: string | null) {
-  const hasAudio = audioStored(row);
+  const hasAudio = Boolean(row.storage_path || row.audio_url);
   const terminal = row.analysis_status === "not_available";
   const active = row.analysis_status === "processing" && !analysisLeaseExpired(row.updated_at);
   const missingUpload = !hasAudio;

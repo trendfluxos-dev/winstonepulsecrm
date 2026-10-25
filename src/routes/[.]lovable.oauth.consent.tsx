@@ -142,9 +142,8 @@ function Consent() {
     <Shell>
       <h1 className="text-lg font-semibold">Connect {clientName} to Winstone Pulse</h1>
       <p className="text-sm text-muted-foreground">
-        {clientName} will be able to call this app's enabled tools while you are signed in. This
-        does not bypass the CRM's permissions or backend policies — only approved email addresses
-        can use staff tools.
+        {clientName} will be able to read leads, call and WhatsApp history and floor activity, and
+        add new leads — acting as you. Only approved email addresses can actually use these tools.
       </p>
       {error && (
         <p role="alert" className="text-sm text-destructive">

@@ -68,7 +68,7 @@ export async function resolveLeadId(input: {
     const result = await intakeLead({
       name: input.fallbackName?.trim() || `Unknown ${phone}`,
       phoneNumber: input.phoneNumber,
-      ownerId: input.source === "call" ? null : input.agentId ?? null,
+      ownerId: input.agentId ?? null,
       source: input.source,
     });
     return { leadId: result.leadId, created: !result.duplicate };

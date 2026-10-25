@@ -7,12 +7,11 @@ blank page. Local dev only; telemetry posts are stubbed so nothing is recorded.
 Run: bun run test:recovery   (exit 0 = pass)
 """
 import asyncio
-import os
 import sys
 from playwright.async_api import async_playwright
 
 BASE = "http://localhost:8080"
-FAIL_MSG = os.environ.get("MODULE_RECOVERY_TEST_ERROR", "TypeError: Failed to fetch dynamically imported module: /src/x.tsx")
+FAIL_MSG = "TypeError: Failed to fetch dynamically imported module: /src/x.tsx"
 
 
 async def main():

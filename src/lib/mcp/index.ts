@@ -7,17 +7,14 @@ import listPublicPropertyFacts from "./tools/list-public-property-facts";
 const projectRef = import.meta.env["VITE_SUPABASE_PROJECT_ID"] ?? "project-ref-unset";
 
 export default defineMcp({
-  name: "winstone-pulse-the-premium-real-estate-crm",
-  title: "Winstone Pulse: The Premium Real Estate CRM",
+  name: "winstone-public-property-catalog",
+  title: "Winstone Public Property Catalog",
   version: "0.1.0",
   instructions:
     "Read-only verified public project and property facts. This server never exposes leads, customer contacts, calls, recordings, reports, staff data, or payment data.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
-    // OAuth tokens carry a client_id claim; copied password-login session
-    // JWTs do not and must be rejected.
-    requireOAuthClientClaim: true,
   }),
   tools: [listPublicPropertyFacts],
 });

@@ -19,14 +19,7 @@ vi.mock("@tanstack/react-start", () => ({ createServerFn: () => {
 } }));
 vi.mock("@/lib/access.server", () => ({ resolveCaller: async () => state.caller }));
 vi.mock("@/integrations/supabase/auth-middleware", () => ({ requireSupabaseAuth: {} }));
-vi.mock("@/lib/ai-model.server", () => ({
-  getAiModelChoice: async () => { state.configReads++; return "gemini"; },
-  getAiModelStatus: async () => {
-    state.configReads++;
-    return { model: "gemini", configured: true, metaConfigured: false, lastSuccessAt: null, lastErrorAt: null, lastErrorStatus: null };
-  },
-}));
-
+vi.mock("@/lib/ai-model.server", () => ({ getAiModelChoice: async () => { state.configReads++; return "gemini"; } }));
 vi.mock("@/lib/service-bill-review.server", () => ({ currentServiceBill: async () => { state.configReads++; return { bill_id: "bill-a", amount: 35.29 }; } }));
 vi.mock("@/lib/support.server", () => ({ escalateConversation: async () => { state.escalations++; return { ref: "TKT-1" }; } }));
 vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: { from: (table: string) => {

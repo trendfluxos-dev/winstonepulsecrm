@@ -62,13 +62,13 @@ export const getAiModel = createServerFn({ method: "GET" })
     const c = await resolveCaller(data.adminToken ?? null);
     if (c.scope === "none") throw new Error("Sign in required");
     const m = await import("@/lib/ai-model.server");
-    return m.getAiModelStatus();
+    return { model: await m.getAiModelChoice() };
   });
 
 export const setAiModel = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) =>
     z
-      .object({ adminToken: z.string().min(1), model: z.enum(["openai", "gemini", "meta", "vertex"]) })
+      .object({ adminToken: z.string().min(1), model: z.enum(["openai", "gemini"]) })
       .parse(i),
   )
   .handler(async ({ data }) => {

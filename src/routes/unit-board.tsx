@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/crm/AppShell";
 import { LangToggle } from "@/components/crm/LangToggle";
 import { UnitBackupPanel } from "@/components/crm/UnitBackupPanel";
-import { InventorySheetPanel } from "@/components/crm/InventorySheetPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DHAKA_LOCATIONS, formatArea, formatTaka, isValidBdPhone, kathaToSqft, normalizeBdPhone, toBnDigits } from "@/lib/bd-format";
@@ -105,7 +104,6 @@ function UnitBoardPage() {
         ))}
 
         {q.data?.canBackup ? <UnitBackupPanel adminToken={adminToken} canRestore={q.data.canEdit} /> : null}
-        <InventorySheetPanel showListings />
         {q.data?.canEdit ? <UnitEditor key={selected?.id ?? "new"} unit={selected} projects={q.data.projects} adminToken={adminToken} onDone={() => setSelected(null)} /> : null}
       </div>
       <PaymentAndSlip unit={selected} />

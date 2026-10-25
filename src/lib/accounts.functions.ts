@@ -181,7 +181,6 @@ export const getMyAccount = createServerFn({ method: "POST" })
       readOnly: caller.readOnly,
       deck: deckAccess(caller),
       approval: caller.approval,
-      active: caller.profile?.is_active ?? null,
       signedIn: caller.userId !== null,
       profile: caller.profile
         ? {

@@ -13,7 +13,6 @@ import { z } from "zod";
 const Body = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("open"),
-    call_uid: z.string().trim().min(6).max(120).nullable().optional(),
     lead_id: z.string().uuid(),
     recording_id: z.string().uuid().nullable().optional(),
     phone_number: z.string().max(24).nullable().optional(),
@@ -148,20 +147,11 @@ export const Route = createFileRoute("/api/public/agent/report")({
             return json({ error: "এই লিড আপনার তালিকায় নেই" }, 403);
           }
 
-          let recordingId = body.recording_id ?? null;
-          if (body.call_uid) {
-            const match = await supabaseAdmin.from("call_recordings").select("id, agent_id, lead_id")
-              .eq("external_call_id", body.call_uid).maybeSingle();
-            if (match.error) return json({ error: "Call reconciliation unavailable" }, 503);
-            if (!match.data) return json({ error: "Call lifecycle sync pending; retry report sync", code: "call_sync_pending" }, 409);
-            if (match.data.agent_id !== caller.profile.id || match.data.lead_id !== body.lead_id || (recordingId && recordingId !== match.data.id)) return json({ error: "Call identity conflict" }, 403);
-            recordingId = match.data.id;
-          }
-          if (recordingId) {
+          if (body.recording_id) {
             const { data: rec } = await supabaseAdmin
               .from("call_recordings")
               .select("agent_id, lead_id")
-              .eq("id", recordingId)
+              .eq("id", body.recording_id)
               .maybeSingle();
             if (!rec || rec.agent_id !== caller.profile.id || (rec.lead_id && rec.lead_id !== body.lead_id)) {
               return json({ error: "এই রেকর্ডিং আপনার কলের নয়" }, 403);
@@ -171,7 +161,7 @@ export const Route = createFileRoute("/api/public/agent/report")({
           const report = await openCallReport({
             leadId: body.lead_id,
             agentId: caller.profile.id,
-            recordingId,
+            recordingId: body.recording_id ?? null,
             deviceId: caller.device.id,
             phoneNumber: body.phone_number ?? null,
             callStartedAt: body.call_started_at ?? null,
