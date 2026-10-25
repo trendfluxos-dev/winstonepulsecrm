@@ -43,13 +43,18 @@ function BreakdownCard({
   rows: { key: string; label: string; value: number }[];
   emptyHint: string;
 }) {
+  const t = useT();
   const total = rows.reduce((sum, r) => sum + r.value, 0);
   return (
     <div className="card-elevated flex flex-col p-3 sm:p-4">
       <h2 className="text-sm font-semibold">{title}</h2>
       <p className="text-xs text-muted-foreground">{subtitle}</p>
       {total === 0 ? (
-        <EmptyBlock title={title} hint={emptyHint} compact />
+        <EmptyBlock
+          title={t({ bn: "এই সময়ে কোনো তথ্য নেই", en: "No data for this period" })}
+          hint={emptyHint}
+          compact
+        />
       ) : (
         <ul className="mt-3 space-y-2.5">
           {rows.map((r) => {
