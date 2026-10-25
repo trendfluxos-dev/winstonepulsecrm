@@ -24,9 +24,10 @@ export const Route = createFileRoute("/api/public/n8n/leads")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        if (process.env["N8N_PIPELINE_ENABLED"] !== "true") return refuse(503, "PIPELINE_DISABLED");
+        // 403 (not 503): a deliberate fail-closed refusal must not surface as a preview crash overlay.
+        if (process.env["N8N_PIPELINE_ENABLED"] !== "true") return refuse(403, "PIPELINE_DISABLED");
         const secret = process.env["N8N_WEBHOOK_SECRET"];
-        if (!secret) return refuse(503, "WEBHOOK_NOT_CONFIGURED");
+        if (!secret) return refuse(403, "WEBHOOK_NOT_CONFIGURED");
 
         if (!limiter(requestSourceKey(request))) return refuse(429, "RATE_LIMITED");
 
