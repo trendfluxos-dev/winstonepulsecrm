@@ -82,6 +82,21 @@ Replace only through the managed secure update form or Project Settings → Secr
 
 The storage check never claims App/Page permissions or delivery, enables Messenger, or accepts user assertions as provider proof. No live old-token test or persistent audit storage was added.
 
+### Durable receipt and reviewed lead intake (written, switched off)
+
+The ingestion code now exists end to end in the order Meta requires:
+
+1. `src/lib/messenger-webhook.server.ts` reads the raw body within the 262144-byte bound and verifies `X-Hub-Signature-256` against those exact bytes before anything else.
+2. `src/lib/messenger-ingest.server.ts` parses the payload strictly, then claims one atomic receipt per event (`msg:`/`dlv:`/`rd:`/`pbk:` identity plus a SHA-256 of the key-sorted event). An exact replay returns the stored result; a changed payload under the same identity is rejected with 409. Echoes are never stored as customer messages.
+3. `src/lib/messenger-store.server.ts` is the only writer: thread upsert by `(page_id, psid)`, message insert with a unique `mid`, append-only thread events. A missing table is reported as unreadable storage, which keeps the webhook refusing with 503 rather than acknowledging a message it did not keep.
+4. `src/lib/messenger-review.server.ts` turns one genuinely stored inbound message into a lead only after staff confirm the name, a real Bangladesh phone number and customer consent. The lead goes through the canonical intake path with `ownerId: null` and source `messenger`, so it lands in the LeadHub unassigned queue; the message is linked to the lead exactly once and the history stays append-only.
+
+The pipeline is gated by the server-only `MESSENGER_INGESTION_ENABLED` flag, which is not set. Until the reviewed migration in `docs/proposals/messenger-inbox-migration.UNAPPLIED.sql` is applied **and** Meta App/Page approvals are verified, the live webhook keeps answering 503 and `/inbox` keeps the reviewed-lead action disabled. Nothing in this section claims a message was stored or a lead was created.
+
+### Owner-side verification tools
+
+The Meta Graph API Explorer (https://developers.facebook.com/tools/explorer/) runs in the owner's own browser session. It can show app review status, Page roles and subscriptions, but its access token must never be pasted into chat, an upload or a CRM field — a token in chat is a leaked token. The in-app full-IT-PIN Meta test on `/inbox` remains the only CRM-side check, and it reports allowlisted statuses only.
+
 ### Manual safe Meta connection test
 
 `/inbox` includes a full-IT-PIN-only manual test. It reads configured Page identity and Page/app subscriptions with GET requests, server-only Authorization headers, 10-second request deadlines, bounded response bodies and no redirects. No credentials, raw provider responses, IDs or token-derived data are returned or logged; failures are allowlisted codes. The test does not fetch customer conversations, subscribe an app, write data, activate handlers or send messages. Page identity/association and both `messages` subscription levels can be checked, but App Review/Live mode/Advanced Access and `pages_messaging` approval remain **unverified** without authoritative evidence. A subscription is not a successful signed delivery. Results and Dhaka check time remain only in the current UI session; no durable history is claimed.
