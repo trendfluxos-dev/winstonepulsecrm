@@ -464,3 +464,9 @@
 - [ ] User: Meta Dashboard → Webhooks → Page → callback https://crm.winstonebd.com/api/public/meta/messenger + same verify token → Verify and Save → subscribe `messages` (needs publish for live URL).
 - [ ] Then: 4 evidence tracks in /inbox Meta tab → IT enable decision → real-message test.
 - [x] Google Sheets linked to project; Daily Lead Report sync built (lead-report-sheet.server/.functions.ts, IT Console panel on /system, day-tab mirror, formula-safe cells, metrics + audit). Verified live: tab 2026-10-25 with 500 assigned leads written and read back.
+
+## 2026-10-25 — Daily lead hand-out filled to 50 (fixed hidden blocker)
+- [x] Root cause of the silent hand-out failure (no distribution since 2026-10-23): `filter_eligible_lead_ids` re-extracted every lead's phones via a full-table `all_phones` scan per call; the per-row assignment trigger calls it too, so one 100-lead assignment batch exceeded the 8s statement timeout and the 09:10 Dhaka cron returned 500 with no run row.
+- [x] Migration 0130 (applied to the live DB): phone matching now uses the indexed `lead_phone_keys` table (same eligibility rules), plus additive backfill of missing keys for 309 legacy leads. No lead data changed or deleted.
+- [x] Re-ran the canonical auto hand-out (`/api/public/hooks/lead-distribution`, cron secret used in-DB only): run row 2026-10-25 completed, moved 75 (Mehedi Ashraf +50, Soniya Yeasmin +12, Sabbir Ahmmed +13), remaining pool 1,835, shortage false, duplicates 0.
+- [x] Final state: all 8 active agents hold ≥ 50 leads for today (Abu Haidar 65, seven others 50). Cap/trigger and assignment ledger untouched.
