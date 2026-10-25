@@ -14,6 +14,31 @@ function formatMinutes(minutes: number): string {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
+/** One-line plain-language summary shown beside each agent row. */
+function agentSummary(
+  r: ReportResult["rows"][number],
+  t: ReturnType<typeof useT>,
+): string {
+  if (r.dials === 0) {
+    return r.assigned > 0
+      ? t({ bn: "লিড পেয়েছেন, এখনো কোনো কল দেননি — কল শুরু করুন।", en: "Leads assigned but no calls yet — start calling." })
+      : t({ bn: "এই সময়ে কোনো কল দেননি।", en: "No calls in this period." });
+  }
+  const facts = t({
+    bn: `${r.dials}টি কল, ${r.connected}টিতে কথা, ${r.dealsWon}টি বুকিং।`,
+    en: `${r.dials} call${r.dials === 1 ? "" : "s"}, ${r.connected} answered, ${r.dealsWon} booking${r.dealsWon === 1 ? "" : "s"}.`,
+  });
+  let tip = t({ bn: "ভালো চলছে — এভাবেই চালিয়ে যান।", en: "On track — keep going." });
+  if (r.connectRate < 40) {
+    tip = t({ bn: "কথা হওয়ার হার কম — কলের সময় বা ভঙ্গি বদলে দেখুন।", en: "Low answer rate — try a different call time or approach." });
+  } else if (r.assigned > 0 && r.dealsWon === 0) {
+    tip = t({ bn: "কথা হচ্ছে, বুকিং হয়নি — ফলো-আপ ধরে রাখুন।", en: "Calls connect, no bookings yet — keep following up." });
+  } else if (r.avgCallSeconds < 30) {
+    tip = t({ bn: "কলগুলো ছোট — গ্রাহকের সাথে আরেকটু বেশি কথা বলুন।", en: "Calls are short — talk a bit longer with customers." });
+  }
+  return `${facts} ${tip}`;
+}
+
 /** Per-agent activity, connection and conversion scorecard table with CSV export. */
 export function AgentPerformanceTable({
   report,
@@ -99,6 +124,7 @@ export function AgentPerformanceTable({
           {report.rows.map((r) => (
             <li key={r.agentId} className="rounded-lg border border-border p-3">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2"><div className="min-w-0"><p className="truncate font-semibold">{r.agent}</p><p className="text-xs text-muted-foreground">{r.employeeId}</p></div><p className="tabular text-lg font-bold">{r.conversionRate.toFixed(1)}%</p></div>
+              <p className="mt-1.5 rounded-md bg-muted/60 px-2 py-1.5 text-xs leading-snug">{agentSummary(r, t)}</p>
               <dl className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
                 <Metric label={t({ bn: "কল দেওয়া", en: "Calls made" })} value={r.dials} />
                 <Metric label={t({ bn: "কথা হয়েছে", en: "Answered" })} value={r.connected} />
@@ -111,10 +137,11 @@ export function AgentPerformanceTable({
           ))}
         </ul>
         <div className="table-scroll mt-3 hidden md:block">
-          <table className="w-full min-w-[860px] text-sm">
+          <table className="w-full min-w-[1120px] text-sm">
             <thead>
               <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
                 <th className="py-2 pr-3 font-semibold">{t({ bn: "এজেন্ট", en: "Agent" })}</th>
+                <th className="py-2 pr-3 font-semibold">{t({ bn: "সহজ সারাংশ", en: "Quick summary" })}</th>
                 <Th>{t({ bn: "কল দেওয়া", en: "Calls made" })}</Th>
                 <Th>{t({ bn: "কথা হয়েছে", en: "Answered" })}</Th>
                 <Th>{t({ bn: "কথার হার", en: "Answer rate" })}</Th>
@@ -136,6 +163,7 @@ export function AgentPerformanceTable({
                       <span className="font-medium">{r.agent}</span>
                       <span className="ml-2 text-xs text-muted-foreground">{r.employeeId}</span>
                     </td>
+                    <td className="py-2 pr-3 text-xs leading-snug text-muted-foreground">{agentSummary(r, t)}</td>
                     <Td>{r.dials}</Td>
                     <Td>{r.connected}</Td>
                     <Td>{r.connectRate.toFixed(1)}%</Td>
