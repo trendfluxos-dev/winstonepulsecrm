@@ -156,10 +156,10 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
     : `${range.from} → ${range.to}`;
 
   return (
-    <section className="space-y-4" aria-label={t({ bn: "চার্ট ড্যাশবোর্ড", en: "Charts dashboard" })}>
+    <section className="space-y-4" aria-label={t({ bn: "ছবিতে হিসাব", en: "Charts" })}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">{t({ bn: "চার্ট ড্যাশবোর্ড", en: "Charts dashboard" })}</h2>
+          <h2 className="text-lg font-semibold">{t({ bn: "ছবিতে হিসাব", en: "Charts" })}</h2>
           <p className="text-sm text-muted-foreground">
             {scope === "hq" ? t({ bn: "পুরো টিমের আসল লিড ও কল", en: "Live leads and calls for the whole team" }) : t({ bn: "শুধু আপনার আসল লিড ও কল", en: "Only your live leads and calls" })} · {rangeLabel}
           </p>
