@@ -51,12 +51,16 @@ export const logWhatsappHandoff = createServerFn({ method: "POST" })
 const SendInput = z.object({
   adminToken: z.string().nullable().optional(),
   leadId: z.string().uuid(),
-  body: z.string().trim().min(1).max(4000),
+  /** Only a pre-approved template id — free-form text is never accepted. */
+  template: z.string().trim().min(1).max(80),
+  variables: z.array(z.string().trim().min(1).max(200)).max(10).default([]),
 });
 
 /**
  * Sends a WhatsApp message through the official Meta Cloud API and logs it in
- * the lead thread. Refuses honestly when the API is not configured.
+ * the lead thread. Only templates from the approved allow-list may be sent —
+ * arbitrary caller-provided text is rejected. Refuses honestly when the API
+ * is not configured.
  */
 export const sendWhatsappMessage = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => SendInput.parse(input))
