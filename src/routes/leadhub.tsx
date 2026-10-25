@@ -24,11 +24,11 @@ import { InstructionCopilot } from "@/components/crm/InstructionCopilot";
 import { useCoordinatorAllocation } from "@/components/crm/deck/AssignLeadsWorkspace";
 
 const SECTIONS = [
-  { key: "overview", label: { bn: "ওভারভিউ", en: "Overview" }, icon: ShieldCheck },
-  { key: "import", label: { bn: "লিড ইমপোর্ট", en: "Import Leads" }, icon: FileUp },
-  { key: "database", label: { bn: "মূল লিড ডেটাবেস", en: "Canonical Lead Database" }, icon: Database },
-  { key: "assign", label: { bn: "এজেন্ট ও সংখ্যা অনুযায়ী বণ্টন", en: "Assign by Agent + Quantity" }, icon: Send },
-  { key: "history", label: { bn: "বণ্টনের ইতিহাস / মান যাচাই", en: "Distribution History / Quality" }, icon: History },
+  { key: "overview", label: { bn: "সারকথো", en: "Summary" }, icon: ShieldCheck },
+  { key: "import", label: { bn: "লিড যোগ করো", en: "Add leads" }, icon: FileUp },
+  { key: "database", label: { bn: "সব লিডের তালিকা", en: "All leads" }, icon: Database },
+  { key: "assign", label: { bn: "এজেন্টে ভাগ করো", en: "Share out to agents" }, icon: Send },
+  { key: "history", label: { bn: "কে কী পেরেছো", en: "Who got what" }, icon: History },
 ] as const;
 type Section = (typeof SECTIONS)[number]["key"];
 
