@@ -19,7 +19,9 @@ describe("daily new allocation", () => {
     expect(result.agents[0]?.remaining).toBe(0);
   });
   it("does not warn or demand assignments on Friday", () => {
-    expect(summarizeDailyAllocation("2026-10-23", agents, [])).toMatchObject({ distributionOpen: false, showZeroAlert: false, remaining: 0 });
+    const result = summarizeDailyAllocation("2026-10-23", agents, []);
+    expect(result).toMatchObject({ distributionOpen: false, showZeroAlert: false, remaining: 0 });
+    expect(result.agents.map(a => [a.remaining, a.zeroAlert])).toEqual([[0, false], [0, false]]);
   });
   it("does not produce a zero-distribution alarm without active agents", () => {
     expect(summarizeDailyAllocation(day, [], [])).toMatchObject({ total: 0, showZeroAlert: false });
