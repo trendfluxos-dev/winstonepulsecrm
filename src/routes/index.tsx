@@ -374,6 +374,7 @@ function ModeCard({
   subtitle: string;
   onClick: () => void;
 }) {
+  const t = useT();
   return (
     <button
       type="button"
@@ -391,7 +392,7 @@ function ModeCard({
         {illustration}
       </span>
       <span className="mt-auto flex items-center justify-between rounded-md border border-border bg-secondary px-2 py-2 text-[11px] font-semibold sm:px-3 sm:text-sm">
-        <span className="truncate">Select workspace</span>
+        <span className="truncate">{t({ bn: "এই কর্মঘর খুলুন", en: "Select workspace" })}</span>
         <ArrowUpRight className="size-4 shrink-0" />
       </span>
     </button>
