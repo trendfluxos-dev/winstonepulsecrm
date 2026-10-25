@@ -1,5 +1,5 @@
 import { readFileSync, readdirSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 
 import { messengerIngestionEnabled } from "@/lib/messenger-ingest.server";
 import { notConnectedMessengerService } from "@/lib/messenger.server";
@@ -40,6 +40,8 @@ describe("Messenger role scoping", () => {
 });
 
 describe("Facebook not connected", () => {
+  beforeEach(() => vi.stubEnv("META_WEBHOOK_VERIFY_TOKEN", ""));
+  afterEach(() => vi.unstubAllEnvs());
   it("service stubs refuse everything", async () => {
     expect(await notConnectedMessengerService.connection()).toEqual({ connected: false, reason: "FACEBOOK_NOT_CONNECTED" });
     expect((await notConnectedMessengerService.sendReply({ threadId: "x", text: "hi", requestId: "r" })).ok).toBe(false);
