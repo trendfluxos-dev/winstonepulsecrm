@@ -40,7 +40,11 @@ describe("Messenger role scoping", () => {
 });
 
 describe("Facebook not connected", () => {
-  beforeEach(() => vi.stubEnv("META_WEBHOOK_VERIFY_TOKEN", ""));
+  beforeEach(() => {
+    vi.stubEnv("META_WEBHOOK_VERIFY_TOKEN", "");
+    vi.stubEnv("META_APP_SECRET", "");
+    vi.stubEnv("MESSENGER_INGESTION_ENABLED", "false");
+  });
   afterEach(() => vi.unstubAllEnvs());
   it("service stubs refuse everything", async () => {
     expect(await notConnectedMessengerService.connection()).toEqual({ connected: false, reason: "FACEBOOK_NOT_CONNECTED" });

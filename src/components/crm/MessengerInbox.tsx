@@ -105,7 +105,7 @@ export function MessengerInbox() {
             </li>
           ))}
         </ul>
-        {active ? <div className={`${mobileThreadOpen ? "min-w-0" : "hidden min-w-0 md:block"}`}><div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_240px]"><ThreadPane thread={active} canReply={view.canReply && active.assignedTo === "me"} canAssign={view.canAssign} onBack={() => setSelected(null)} /><MessengerLeadDetails key={active.id} connected={status.data?.connected === true} thread={active} /></div></div> : null}
+        {active ? <div className={`${mobileThreadOpen ? "min-w-0" : "hidden min-w-0 md:block"}`}><div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_240px]"><ThreadPane thread={active} canReply={view.canReply && active.assignedTo === "me"} canAssign={view.canAssign} onBack={() => setSelected(null)} /><MessengerLeadDetails key={active.id} connected={Boolean(status.data?.connected)} thread={active} /></div></div> : null}
       </div>
     </div>
   );
