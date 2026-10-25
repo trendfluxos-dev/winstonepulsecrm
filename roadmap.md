@@ -1,5 +1,9 @@
 # Roadmap
 
+## Explicit daily target / received / remaining
+- [x] Show labelled target, received and remaining for every active agent on HQ/LeadHub and self-only Desk; compact mobile rows and desktop table, same server values.
+- [x] Signed-in HQ shows all 8 agents with explicit target/received/remaining; refreshed desktop table and mobile cards verified, no horizontal overflow or page errors. 17 targeted tests pass, semantic colors pass, harness build OK. No data or deployment changes.
+
 ## Align allocation logic and deploy
 - [x] Use one fail-closed unique-assignment receipt reader for distribution capacity, LeadHub allocation and daily summary; server computes Friday/zero-row conditions, UI renders them.
 - [x] 44 targeted and 1111 full-suite tests pass; harness build OK; signed-in HQ refresh verified. Published: live /manual HTTP 200 passes v1.6.0/$35.29/50 markers, and live HQ loads the new DailyAllocationSummary asset HTTP 200 with server-provided zeroAlert. Live signed-in summary not separately exercised; preview read-back verified 75 new assignments, 5 zero agents.
