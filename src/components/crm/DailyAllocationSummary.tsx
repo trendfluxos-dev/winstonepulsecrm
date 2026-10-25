@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { getDailyAllocation } from "@/lib/daily-allocation.functions";
 import { useAdminToken, useDeckToken } from "@/lib/local-session";
 import { useMyAccount } from "@/lib/session";
@@ -33,32 +34,35 @@ export function DailyAllocationSummary({ surface }: { surface: "hq" | "leadhub" 
         <p>{surface === "self" ? t({ bn: "আজ আপনি কোনো নতুন লিড পাননি। LeadHub-এর বণ্টন যাচাই প্রয়োজন।", en: "You have received no new leads today. LeadHub distribution needs checking." }) : t({ bn: `${d.zeroCount} জন সক্রিয় এজেন্ট আজ নতুন লিড পাননি। LeadHub-এর বণ্টন যাচাই প্রয়োজন।`, en: `${d.zeroCount} active agents have received no new leads today. Check LeadHub distribution.` })}</p></div>}
       {d.agents.length === 0 ? <p className="text-sm text-muted-foreground">{t({ bn: "কোনো সক্রিয় অনুমোদিত এজেন্ট নেই।", en: "No active approved agents." })}</p> : <>
         <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-          {[{ label: t({ bn: "নতুন লিড বণ্টিত", en: "New leads assigned" }), value: d.total }, { label: t({ bn: "সক্রিয় এজেন্ট", en: "Active agents" }), value: d.agents.length }, { label: t({ bn: "৫০ পূর্ণ করেছেন", en: "Received all 50" }), value: d.completeCount }, { label: t({ bn: "বণ্টন বাকি", en: "Still to assign" }), value: d.remaining }].map(item => <div key={item.label}><dt className="text-xs text-muted-foreground">{item.label}</dt><dd className="tabular-nums text-lg font-semibold">{item.value}</dd></div>)}
+          {[{ label: t({ bn: "নতুন লিড বণ্টিত", en: "New leads assigned" }), value: d.total }, { label: t({ bn: "সক্রিয় এজেন্ট", en: "Active agents" }), value: d.agents.length }, { label: t({ bn: "লক্ষ্য পূর্ণ করেছেন", en: "Target reached" }), value: d.completeCount }, { label: t({ bn: "লক্ষ্যে বাকি", en: "Remaining to target" }), value: d.remaining }].map(item => <div key={item.label}><dt className="text-xs text-muted-foreground">{item.label}</dt><dd className="tabular-nums text-lg font-semibold">{item.value}</dd></div>)}
         </dl>
         <ul className="grid gap-3 md:hidden" aria-label={t({ bn: "এজেন্টভিত্তিক বণ্টন সারাংশ", en: "Per-agent distribution summary" })}>
           {d.agents.map(agent => <li key={agent.id} className="rounded-md border border-border p-3">
             <p className="break-words text-sm font-semibold">{agent.name}</p>
             <dl className="mt-3 grid grid-cols-3 gap-2 text-sm">
-              <div><dt className="text-xs text-muted-foreground">{t({ bn: "দৈনিক লক্ষ্য", en: "Daily target" })}</dt><dd className="tabular-nums font-semibold">{d.quota}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">{t({ bn: "দৈনিক লক্ষ্য", en: "Daily target" })}</dt><dd className="tabular-nums font-semibold">{agent.target}</dd></div>
               <div><dt className="text-xs text-muted-foreground">{t({ bn: "লিড পেয়েছেন", en: "Received" })}</dt><dd className={agent.zeroAlert ? "tabular-nums font-semibold text-warning" : "tabular-nums font-semibold"}>{agent.received}</dd></div>
               <div><dt className="text-xs text-muted-foreground">{t({ bn: "বাকি", en: "Remaining" })}</dt><dd className="tabular-nums font-semibold">{d.distributionOpen ? agent.remaining : t({ bn: "বণ্টন বন্ধ", en: "Paused" })}</dd></div>
             </dl>
+            <div className="mt-3 space-y-1"><p className="text-xs tabular-nums">{t({ bn: "লক্ষ্য পূরণ", en: "Target completion" })}: {agent.progress}%</p><Progress value={agent.progress} aria-label={`${agent.name} ${t({ bn: "লক্ষ্য পূরণ", en: "target completion" })}`} /></div>
           </li>)}
         </ul>
         <div className="hidden md:block">
           <table className="w-full table-fixed text-sm">
             <caption className="sr-only">{t({ bn: "এজেন্টভিত্তিক দৈনিক লক্ষ্য, প্রাপ্ত লিড ও বাকি লিড", en: "Daily target, received leads and remaining leads per agent" })}</caption>
             <thead className="border-b border-border text-xs text-muted-foreground"><tr>
-              <th className="w-2/5 py-2 text-left font-medium">{t({ bn: "এজেন্ট", en: "Agent" })}</th>
+              <th className="w-1/3 py-2 text-left font-medium">{t({ bn: "এজেন্ট", en: "Agent" })}</th>
               <th className="py-2 text-right font-medium">{t({ bn: "দৈনিক লক্ষ্য", en: "Daily target" })}</th>
               <th className="py-2 text-right font-medium">{t({ bn: "লিড পেয়েছেন", en: "Received" })}</th>
               <th className="py-2 text-right font-medium">{t({ bn: "বাকি", en: "Remaining" })}</th>
+              <th className="w-1/5 py-2 pl-3 text-right font-medium">{t({ bn: "লক্ষ্য পূরণ", en: "Completion" })}</th>
             </tr></thead>
             <tbody>{d.agents.map(agent => <tr key={agent.id} className="border-b border-border">
               <th scope="row" className="break-words py-3 pr-3 text-left font-medium">{agent.name}</th>
-              <td className="py-3 text-right tabular-nums">{d.quota}</td>
+              <td className="py-3 text-right tabular-nums">{agent.target}</td>
               <td className={agent.zeroAlert ? "py-3 text-right tabular-nums font-semibold text-warning" : "py-3 text-right tabular-nums font-semibold"}>{agent.received}</td>
               <td className="py-3 text-right tabular-nums">{d.distributionOpen ? agent.remaining : t({ bn: "বণ্টন বন্ধ", en: "Paused" })}</td>
+              <td className="space-y-1 py-3 pl-3 text-right tabular-nums"><span>{agent.progress}%</span><Progress value={agent.progress} aria-label={`${agent.name} ${t({ bn: "লক্ষ্য পূরণ", en: "target completion" })}`} /></td>
             </tr>)}</tbody>
           </table>
         </div>
