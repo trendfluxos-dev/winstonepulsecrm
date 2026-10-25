@@ -1,5 +1,10 @@
 # Roadmap
 
+## Messenger — lead details beside messages
+- [ ] Add scoped linked-lead details beside the selected conversation; demo/disconnected data never reads real leads; keep Meta enable and ownership gates.
+- [ ] Validate permissions and UI states with synthetic tests; live verification waits for authorized sync activation.
+
+
 ## Inventory & pricing sheet — listings and integrations roadmap
 - [ ] Owner chose to provide the existing inventory/pricing sheet link; link and tab name still pending. Accessible Zahid's Drive (2) lists only Daily Lead Report; no inventory sheet found.
 - [x] Add authenticated, read-only cached sheet sync beside /projects and /unit-board listings; preserve canonical CRM inventory/bookings, verified snapshot backups and safe failure state.
