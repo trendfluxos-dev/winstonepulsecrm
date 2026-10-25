@@ -60,6 +60,9 @@ export function ReportsBoard() {
         agents={agents}
         sources={sources}
         visible={showFilters}
+        matchedAgents={report.rows.length}
+        matchedLeads={report.totals.newLeads}
+        matchedCalls={report.totals.dials}
       />
 
       <ReportsKpiStrip report={report} />
