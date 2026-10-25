@@ -51,12 +51,16 @@ export const logWhatsappHandoff = createServerFn({ method: "POST" })
 const SendInput = z.object({
   adminToken: z.string().nullable().optional(),
   leadId: z.string().uuid(),
-  body: z.string().trim().min(1).max(4000),
+  /** Only a pre-approved template id — free-form text is never accepted. */
+  template: z.string().trim().min(1).max(80),
+  variables: z.array(z.string().trim().min(1).max(200)).max(10).default([]),
 });
 
 /**
  * Sends a WhatsApp message through the official Meta Cloud API and logs it in
- * the lead thread. Refuses honestly when the API is not configured.
+ * the lead thread. Only templates from the approved allow-list may be sent —
+ * arbitrary caller-provided text is rejected. Refuses honestly when the API
+ * is not configured.
  */
 export const sendWhatsappMessage = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => SendInput.parse(input))
@@ -67,6 +71,13 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
       throw new Error("অনুমোদিত অ্যাকাউন্ট দিয়ে সাইন ইন করুন");
     }
     requireWrite(caller);
+
+    const { findWhatsAppTemplate } = await import("@/lib/whatsapp-templates");
+    const template = findWhatsAppTemplate(data.template);
+    if (!template) throw new Error("শুধু অনুমোদিত টেমপ্লেট পাঠানো যায়");
+    if (data.variables.length !== template.variables.length) {
+      throw new Error("টেমপ্লেটের সব তথ্য পূরণ করুন");
+    }
 
     const { getWhatsAppProvider } = await import("@/lib/whatsapp-provider.server");
     const provider = getWhatsAppProvider();
@@ -111,7 +122,10 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
     const to = normalizeWhatsAppNumber(lead.phone_number);
     if (!to) throw new Error("নম্বরটি সঠিক নয়");
 
-    const result = await provider.sendMessage({ to, body: data.body, leadId: lead.id });
+    const variables = Object.fromEntries(
+      template.variables.map((label, i) => [label, data.variables[i]!]),
+    );
+    const result = await provider.sendTemplate({ to, template: template.name, variables });
     if (!result.ok) return { ok: false as const, status: "failed" as const, error: result.error };
 
     await supabaseAdmin.from("whatsapp_interactions").insert({
@@ -119,7 +133,7 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
       agent_id: caller.profile?.id ?? null,
       sender_type: "agent",
       message_type: "text",
-      message_content: data.body,
+      message_content: `[টেমপ্লেট: ${template.label}] ${data.variables.join(" · ")}`,
       provider: "meta-cloud-api",
       provider_message_id: result.providerMessageId || null,
       // Meta's webhook moves this to delivered / read / failed.
