@@ -3143,6 +3143,228 @@ export type Database = {
         }
         Relationships: []
       }
+      messenger_messages: {
+        Row: {
+          body: string | null
+          created_at: string
+          delivery_status: string | null
+          direction: string
+          error_code: string | null
+          id: string
+          lead_id: string | null
+          mid: string | null
+          sent_by: string | null
+          thread_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          delivery_status?: string | null
+          direction: string
+          error_code?: string | null
+          id?: string
+          lead_id?: string | null
+          mid?: string | null
+          sent_by?: string | null
+          thread_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          delivery_status?: string | null
+          direction?: string
+          error_code?: string | null
+          id?: string
+          lead_id?: string | null
+          mid?: string | null
+          sent_by?: string | null
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messenger_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "messenger_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messenger_outbox: {
+        Row: {
+          attempts: number
+          body: string
+          created_at: string
+          created_by: string | null
+          last_error: string | null
+          next_retry_at: string | null
+          request_id: string
+          sent_mid: string | null
+          thread_id: string
+        }
+        Insert: {
+          attempts?: number
+          body: string
+          created_at?: string
+          created_by?: string | null
+          last_error?: string | null
+          next_retry_at?: string | null
+          request_id: string
+          sent_mid?: string | null
+          thread_id: string
+        }
+        Update: {
+          attempts?: number
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          last_error?: string | null
+          next_retry_at?: string | null
+          request_id?: string
+          sent_mid?: string | null
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messenger_outbox_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "messenger_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messenger_thread_events: {
+        Row: {
+          action: string
+          actor: string | null
+          created_at: string
+          detail: Json
+          id: string
+          thread_id: string
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          thread_id: string
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messenger_thread_events_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "messenger_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messenger_threads: {
+        Row: {
+          assigned_agent_id: string | null
+          created_at: string
+          id: string
+          last_inbound_at: string | null
+          last_message_at: string | null
+          lead_id: string | null
+          page_id: string
+          psid: string
+          status: string
+          unread_count: number
+        }
+        Insert: {
+          assigned_agent_id?: string | null
+          created_at?: string
+          id?: string
+          last_inbound_at?: string | null
+          last_message_at?: string | null
+          lead_id?: string | null
+          page_id: string
+          psid: string
+          status?: string
+          unread_count?: number
+        }
+        Update: {
+          assigned_agent_id?: string | null
+          created_at?: string
+          id?: string
+          last_inbound_at?: string | null
+          last_message_at?: string | null
+          lead_id?: string | null
+          page_id?: string
+          psid?: string
+          status?: string
+          unread_count?: number
+        }
+        Relationships: []
+      }
+      messenger_webhook_receipts: {
+        Row: {
+          event_key: string
+          payload_sha256: string
+          processed_at: string | null
+          received_at: string
+        }
+        Insert: {
+          event_key: string
+          payload_sha256: string
+          processed_at?: string | null
+          received_at?: string
+        }
+        Update: {
+          event_key?: string
+          payload_sha256?: string
+          processed_at?: string | null
+          received_at?: string
+        }
+        Relationships: []
+      }
+      meta_page_connections: {
+        Row: {
+          connected_at: string
+          connected_by: string | null
+          id: string
+          last_validated_at: string | null
+          page_id: string
+          page_name: string | null
+          scopes: string[]
+          status: string
+          token_ciphertext: string | null
+        }
+        Insert: {
+          connected_at?: string
+          connected_by?: string | null
+          id?: string
+          last_validated_at?: string | null
+          page_id: string
+          page_name?: string | null
+          scopes?: string[]
+          status?: string
+          token_ciphertext?: string | null
+        }
+        Update: {
+          connected_at?: string
+          connected_by?: string | null
+          id?: string
+          last_validated_at?: string | null
+          page_id?: string
+          page_name?: string | null
+          scopes?: string[]
+          status?: string
+          token_ciphertext?: string | null
+        }
+        Relationships: []
+      }
       objection_answers: {
         Row: {
           answer: string

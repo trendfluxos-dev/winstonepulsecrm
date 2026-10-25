@@ -1,4 +1,3 @@
--- PROPOSAL ONLY — NOT APPLIED. Review before any migration. Lives outside drizzle/migrations on purpose.
 -- Server-only tables: RLS on, no client policies; access only through server functions.
 -- Column names below are exactly what src/lib/messenger-store.server.ts and
 -- src/lib/messenger-review.server.ts read and write, so applying this file is
@@ -118,9 +117,3 @@ CREATE TRIGGER messenger_thread_events_append_only
 CREATE TRIGGER messenger_webhook_receipts_append_only
   BEFORE UPDATE OR DELETE ON public.messenger_webhook_receipts
   FOR EACH ROW EXECUTE FUNCTION public.block_messenger_history_mutation();
-
--- Still required before this file is applied:
--- 1. Authoritative Meta evidence: App Review + required permission tier, Live mode,
---    Page consent for messaging, and messages subscriptions at App and Page level.
--- 2. Owner decision on keeping the outbox (sending) in this migration or a later one.
--- 3. The MESSENGER_INGESTION_ENABLED server flag is set only after both are done.
