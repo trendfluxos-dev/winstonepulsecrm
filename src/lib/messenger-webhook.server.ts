@@ -1,4 +1,5 @@
 import { matchesWebhookSignature } from "@/lib/messenger-protocol.server";
+import { validateMetaWebhookBytes } from "@/lib/meta-webhook-payload";
 
 export const MAX_WEBHOOK_BYTES = 262144;
 const refusal = (status: number, code: string) => Response.json({ ok: false, code }, { status, headers: { "Cache-Control": "no-store" } });
@@ -29,6 +30,7 @@ export async function inspectSignedWebhook(request: Request, appSecret: string |
   let offset = 0;
   for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
   if (!await matchesWebhookSignature(bytes, signature, appSecret)) return refusal(401, "INVALID_WEBHOOK_SIGNATURE");
+  if (!validateMetaWebhookBytes(bytes).valid) return refusal(400, "INVALID_WEBHOOK_PAYLOAD");
   // Never acknowledge 200: valid signatures do not prove Page consent or durable receipt.
   return refusal(503, "MESSENGER_INGESTION_NOT_READY");
 }

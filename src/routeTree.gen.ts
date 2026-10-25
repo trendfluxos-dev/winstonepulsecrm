@@ -39,6 +39,7 @@ import { Route as ManualRouteImport } from './routes/manual'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MessengerRouteImport } from './routes/messenger'
 import { Route as MessengerSetupRouteImport } from './routes/messenger-setup'
+import { Route as MetaControlCenterRouteImport } from './routes/meta-control-center'
 import { Route as MigrationRouteImport } from './routes/migration'
 import { Route as MigrationExportRouteImport } from './routes/migration-export'
 import { Route as NewsRouteImport } from './routes/news'
@@ -271,6 +272,11 @@ const MessengerRoute = MessengerRouteImport.update({
 const MessengerSetupRoute = MessengerSetupRouteImport.update({
   id: '/messenger-setup',
   path: '/messenger-setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MetaControlCenterRoute = MetaControlCenterRouteImport.update({
+  id: '/meta-control-center',
+  path: '/meta-control-center',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MigrationRoute = MigrationRouteImport.update({
@@ -742,6 +748,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/messenger': typeof MessengerRoute
   '/messenger-setup': typeof MessengerSetupRoute
+  '/meta-control-center': typeof MetaControlCenterRoute
   '/migration': typeof MigrationRoute
   '/migration-export': typeof MigrationExportRoute
   '/news': typeof NewsRoute
@@ -857,6 +864,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/messenger': typeof MessengerRoute
   '/messenger-setup': typeof MessengerSetupRoute
+  '/meta-control-center': typeof MetaControlCenterRoute
   '/migration': typeof MigrationRoute
   '/migration-export': typeof MigrationExportRoute
   '/news': typeof NewsRoute
@@ -973,6 +981,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/messenger': typeof MessengerRoute
   '/messenger-setup': typeof MessengerSetupRoute
+  '/meta-control-center': typeof MetaControlCenterRoute
   '/migration': typeof MigrationRoute
   '/migration-export': typeof MigrationExportRoute
   '/news': typeof NewsRoute
@@ -1090,6 +1099,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/messenger'
     | '/messenger-setup'
+    | '/meta-control-center'
     | '/migration'
     | '/migration-export'
     | '/news'
@@ -1205,6 +1215,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/messenger'
     | '/messenger-setup'
+    | '/meta-control-center'
     | '/migration'
     | '/migration-export'
     | '/news'
@@ -1320,6 +1331,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/messenger'
     | '/messenger-setup'
+    | '/meta-control-center'
     | '/migration'
     | '/migration-export'
     | '/news'
@@ -1436,6 +1448,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   MessengerRoute: typeof MessengerRoute
   MessengerSetupRoute: typeof MessengerSetupRoute
+  MetaControlCenterRoute: typeof MetaControlCenterRoute
   MigrationRoute: typeof MigrationRoute
   MigrationExportRoute: typeof MigrationExportRoute
   NewsRoute: typeof NewsRoute
@@ -1731,6 +1744,13 @@ declare module '@tanstack/react-router' {
       path: '/messenger-setup'
       fullPath: '/messenger-setup'
       preLoaderRoute: typeof MessengerSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meta-control-center': {
+      id: '/meta-control-center'
+      path: '/meta-control-center'
+      fullPath: '/meta-control-center'
+      preLoaderRoute: typeof MetaControlCenterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/migration': {
@@ -2348,6 +2368,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   MessengerRoute: MessengerRoute,
   MessengerSetupRoute: MessengerSetupRoute,
+  MetaControlCenterRoute: MetaControlCenterRoute,
   MigrationRoute: MigrationRoute,
   MigrationExportRoute: MigrationExportRoute,
   NewsRoute: NewsRoute,

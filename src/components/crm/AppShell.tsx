@@ -56,6 +56,7 @@ export const NAV = [
   { to: "/reports", label: "Reports", scopes: ["authority", "coordinator", "agent"] },
   { to: "/facebook-ads", label: "Facebook Ads Reports", scopes: ["authority"] },
   { to: "/integrations", label: "Integration Status", scopes: ["authority", "coordinator", "agent", "none"] },
+  { to: "/meta-control-center", label: "Meta Control Center", scopes: ["authority"] },
   { to: "/system", label: "IT Console", scopes: ["authority"] },
   { to: "/runtime-errors", label: "Runtime Errors", scopes: ["authority"] },
   { to: "/ingest", label: "Ingest Check", scopes: ["authority"] },
