@@ -1,6 +1,5 @@
 import { HubSyncStatusPanel } from "@/components/crm/HubAlerts";
 import { DistributionFailurePanel } from "@/components/crm/DistributionFailurePanel";
-import { AgentDailyTargetPanel } from "@/components/crm/AgentDailyTargetPanel";
 import { SystemManualCard } from "@/components/crm/SystemManualCard";
 import { DeploymentStatusPanel } from "@/components/crm/DeploymentStatusPanel";
 import { PAGE_SECTIONS, sectionSearch, useSection } from "@/lib/page-sections";
@@ -210,7 +209,6 @@ function SystemBoard() {
         <div className="space-y-6">
           <AccountabilityReviewPanel surface="it" />
           <StaffAccountsTable />
-          <AgentDailyTargetPanel />
           <AccountApprovals />
           <SystemCustomizer />
         </div>
