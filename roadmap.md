@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-25 — Google Calendar linked; site-visit calendar sync live-capable (03:15 UTC)
+- [x] Google Calendar connection (Zahid's Google Calendar 2) linked to the project; gateway read verified (calendar list OK, primary calendar Asia/Dhaka, events write scope configured).
+- [x] Site visit → team Calendar sync already existed (`addSiteVisitToTeamCalendar` in site-visits.functions.ts + button in SiteVisitsPanel): confirmed visits only, one event per visit, no customer phone sent, event id stored on the row. It was blocked only by the missing connection — now unblocked. Supersedes the older blocked Calendar entries below (shared team calendar path; per-agent own calendars still need a workspace Google OAuth client).
+- [ ] First real proof: add one confirmed site visit to the calendar from the CRM and confirm the event appears (user action, creates a real event).
+
 ## 2026-10-25 — HQ panel shows the latest AI failure alongside the last success (01:33 UTC)
 - [x] HQ status row now carries the last failed call too: Dhaka timestamp + HTTP status + short safe reason (`402 · billing/credits`, `429 · AI busy`, `500 · service unavailable`, `no usable answer`), or "No failed AI call yet" while nothing has failed. Active model and last success stay as before.
 - [x] Failures that never produced an HTTP status (network error, unreadable/missing answer) are now recorded as `AI_NO_RESPONSE_STATUS` (0) instead of being invisible, and non-finite statuses are normalised — the recorded failure time is always the latest attempt. Stored fields remain model name, ISO time and status number only.
