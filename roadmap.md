@@ -2,7 +2,7 @@
 
 ## Safari lazy-route recovery
 - [x] Identify reported expression in TanStack lazy module lookup; fresh signed-in HQ does not reproduce, existing recovery missed Safari's undefined module signature.
-- [ ] Share the narrow signature across root/global recovery and verify bounded reload/fallback with the exact reported error; no deployment requested.
+- [x] Root and global recovery now share one narrow classifier. Five unit tests pass; normal and exact Safari-signature browser recovery pass (one coalesced probe, reload, nonblank result, bounded fallback). Signed-in HQ boot/refresh has no page errors; harness build and colors OK. Original stale bundle state not reproducible; no deployment performed.
 
 ## Auto distribution failure alerts
 - [x] Persist authenticated cron failures as safe reason/stage in existing alerts, show bounded history with Dhaka timestamp in HQ/IT; no raw errors, schedule/auth/assignment changes.
