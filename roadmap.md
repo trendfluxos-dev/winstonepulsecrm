@@ -191,6 +191,6 @@
 ## 2026-10-24 — All 15 brochures as one ZIP
 - [x] Projects page header offers "All brochures (ZIP, 15)": fetches the 15 brochure PDFs, packs them (stored, not re-compressed) and saves one archive; verified in browser — 18 MB ZIP with exactly 15 valid PDFs, no page errors; tests/brochure-zip.test.ts (4) passes.
 
-- [ ] Verify all 15 brochure links download the correct PDF in browser (owner request 2026-10-24 18:27 UTC)
+- [x] Verified all 15 brochure links in browser (signed-in staff): each downloaded a valid PDF whose text contains its own project name — 15/15 correct, no console errors.
 
-- [ ] Executive HQ accountability presentation PDF (24 slides, Bengali, with CRM evidence, 13 Sep–24 Oct 2026) — owner request 2026-10-25 05:00 UTC
+- [x] Executive HQ accountability presentation PDF: 24 Bengali slides with DB-verified evidence (4,163 reports, 53 approved reviews, per-agent pending/overdue/recording counts), delivered to Files as winstone-hq-accountability-review-2026-10-25.pdf. QA: no blank/overflowing pages, key text verified per page.
