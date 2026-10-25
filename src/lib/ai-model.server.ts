@@ -12,9 +12,31 @@ import {
   requireAiKey,
   resolveAiProvider,
   aiCallFailureMessage,
+  withLastFailure,
   withLastSuccess,
   type AiModelChoice,
 } from "@/lib/ai-providers";
+
+/** Best-effort status recording for the HQ indicator; never breaks AI calls. */
+async function recordAiStatus(
+  merge: (data: unknown) => Record<string, unknown>,
+): Promise<void> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("app_config")
+      .select("data")
+      .eq("id", "ai")
+      .maybeSingle();
+    await supabaseAdmin.from("app_config").upsert({
+      id: "ai",
+      data: merge(data?.data),
+      updated_at: new Date().toISOString(),
+    });
+  } catch {
+    // Status recording is optional telemetry — ignore failures.
+  }
+}
 
 export type { AiModelChoice };
 
