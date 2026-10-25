@@ -14,7 +14,7 @@ import {
 } from "@/lib/n8n-pipeline";
 import { claimN8nReceipt, processN8nLead } from "@/lib/n8n-pipeline.server";
 
-const limiter = createRateLimiter({ windowMs: 60_000, max: N8N_RATE_LIMIT_PER_MINUTE });
+const limiter = createRateLimiter(N8N_RATE_LIMIT_PER_MINUTE, 60_000);
 
 function refuse(status: number, code: string) {
   return Response.json({ ok: false, code }, { status });
