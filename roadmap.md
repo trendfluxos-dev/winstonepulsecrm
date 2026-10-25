@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Inventory & pricing sheet — listings and integrations roadmap
-- [ ] Confirm the inventory/pricing source spreadsheet: accessible Drive lists only Daily Lead Report; no inventory sheet found.
-- [ ] Add authenticated, read-only cached sheet sync beside listings; preserve canonical CRM inventory and show actual sync state.
-- [ ] Add source/status/next steps to /integrations without exposing inventory records publicly; test validation and access boundaries.
+- [ ] Owner chose to provide the existing inventory/pricing sheet link; link and tab name still pending. Accessible Zahid's Drive (2) lists only Daily Lead Report; no inventory sheet found.
+- [x] Add authenticated, read-only cached sheet sync beside /projects and /unit-board listings; preserve canonical CRM inventory/bookings, verified snapshot backups and safe failure state.
+- [x] Add source/status/next steps and IT-only linking/refresh to /integrations without exposing inventory publicly. 21 targeted tests pass; global colors pass; harness build OK; public/private UI inspected, signed-in pending-source state verified, unauthenticated job POST 401.
+- [ ] First real-source sync and automatic hourly activation await the owner's sheet link/tab, real read-back through staff UI, publication and managed schedule registration; no schedule or production inventory changes made.
 
 ## Daily Lead Report — automatic post-shift sync
 - [x] Add a managed authenticated daily callback after the evening shift summary (17:35 Asia/Dhaka).
