@@ -26,7 +26,7 @@ function agentSummary(
   }
   const facts = t({
     bn: `${r.dials}টি কল, ${r.connected}টিতে কথা, ${r.dealsWon}টি বুকিং।`,
-    en: `${r.dials} calls, ${r.connected} answered, ${r.dealsWon} bookings.`,
+    en: `${r.dials} call${r.dials === 1 ? "" : "s"}, ${r.connected} answered, ${r.dealsWon} booking${r.dealsWon === 1 ? "" : "s"}.`,
   });
   let tip = t({ bn: "ভালো চলছে — এভাবেই চালিয়ে যান।", en: "On track — keep going." });
   if (r.connectRate < 40) {
