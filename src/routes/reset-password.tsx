@@ -27,12 +27,20 @@ function ResetPasswordPage() {
   const navigate = useNavigate();
   const clear = useServerFn(clearMustChangePassword);
   const [ready, setReady] = useState<boolean | null>(null);
+  // Recovery-link sessions are exempt from current-password; signed-in
+  // sessions (must_change_password redirect) must supply it.
+  const [isRecovery, setIsRecovery] = useState(false);
+  const [currentPw, setCurrentPw] = useState("");
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    const hashRecovery =
+      typeof window !== "undefined" && window.location.hash.includes("type=recovery");
+    if (hashRecovery) setIsRecovery(true);
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") setIsRecovery(true);
       if (event === "PASSWORD_RECOVERY" || session) setReady(true);
     });
     void supabase.auth.getSession().then(({ data }) => setReady(Boolean(data.session)));
@@ -40,13 +48,24 @@ function ResetPasswordPage() {
   }, []);
 
   const save = async (): Promise<void> => {
+    if (!isRecovery && currentPw.length === 0) {
+      toast.error("বর্তমান পাসওয়ার্ডটি দিন");
+      return;
+    }
     if (pw.length < 8) { toast.error("কমপক্ষে ৮ অক্ষরের পাসওয়ার্ড দিন"); return; }
     if (pw !== pw2) { toast.error("দুটি পাসওয়ার্ড মেলেনি"); return; }
     setBusy(true);
-    const { error } = await supabase.auth.updateUser({ password: pw });
+    const { error } = await supabase.auth.updateUser(
+      isRecovery ? { password: pw } : { password: pw, current_password: currentPw },
+    );
     if (error) {
       setBusy(false);
-      { toast.error(error.message); return; }
+      toast.error(
+        /current password/i.test(error.message)
+          ? "বর্তমান পাসওয়ার্ডটি সঠিক নয় — আবার চেষ্টা করুন"
+          : error.message,
+      );
+      return;
     }
     await clear();
     await supabase.auth.refreshSession();
