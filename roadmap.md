@@ -1,5 +1,9 @@
 # Roadmap
 
+## Safari lazy-route recovery
+- [x] Identify reported expression in TanStack lazy module lookup; fresh signed-in HQ does not reproduce, existing recovery missed Safari's undefined module signature.
+- [ ] Share the narrow signature across root/global recovery and verify bounded reload/fallback with the exact reported error; no deployment requested.
+
 ## Auto distribution failure alerts
 - [x] Persist authenticated cron failures as safe reason/stage in existing alerts, show bounded history with Dhaka timestamp in HQ/IT; no raw errors, schedule/auth/assignment changes.
 - [x] 14 focused failure tests pass (capture, safe persistence, authority, Friday/success/auth exclusions), plus 6 allocation regressions; harness build and colors OK. Signed-in HQ empty history/refresh verified with no page errors. Actual failure display not browser-exercised (synthetic response substitution did not apply); no real failure, alert rows, data or deployment forced.

@@ -19,7 +19,7 @@ import { TemporaryClosureNotice } from "@/components/crm/TemporaryClosureNotice"
 import { supabase } from "@/integrations/supabase/client";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { isModuleLoadError } from "../lib/module-load-error";
+import { isModuleLoadError, MODULE_LOAD_ERROR_PATTERN } from "../lib/module-load-error";
 
 function NotFoundComponent() {
   return (
