@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-25 — HQ panel shows the latest AI failure alongside the last success (01:33 UTC)
+- [x] HQ status row now carries the last failed call too: Dhaka timestamp + HTTP status + short safe reason (`402 · billing/credits`, `429 · AI busy`, `500 · service unavailable`, `no usable answer`), or "No failed AI call yet" while nothing has failed. Active model and last success stay as before.
+- [x] Failures that never produced an HTTP status (network error, unreadable/missing answer) are now recorded as `AI_NO_RESPONSE_STATUS` (0) instead of being invisible, and non-finite statuses are normalised — the recorded failure time is always the latest attempt. Stored fields remain model name, ISO time and status number only.
+- [x] Fixed the typecheck error the build reported in `recordAiStatus` (`Record<string, unknown>` → Supabase `Json`): the merge callback is typed as `AiStatusRecord`. 5 new tests (23 total, all passing). Docs: `docs/AI_PROVIDERS.md` status-indicator section. No secrets, live calls, migrations, data changes or deployment.
+
+
 ## 2026-10-25 — Meta billing hint + live smoke test (01:29 UTC)
 - [x] Authorized live smoke test of Muse Spark: endpoint reachable, key accepted far enough for a structured response, but Meta returned HTTP 402 (billing/credits inactive). No key/headers/body logged; no settings changed.
 - [x] HQ billing hint: `withLastFailure` records last failed call's HTTP status only (never bodies); `aiChatJson` records failures via shared `recordAiStatus` helper; HQ panel shows a bilingual Meta billing notice when the last call was 402/403 or no success yet. 2 new tests (18 total, all passing).
