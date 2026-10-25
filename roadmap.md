@@ -423,3 +423,7 @@
 - [x] Vertex AI provider: service-account saved, live token mint verified, full suite 1035 passed / 9 skipped, build OK.
 - [ ] META_APP_SECRET + META_WEBHOOK_VERIFY_TOKEN still absent from the secret store (user believes added; form declined) — webhook handshake/signature stay closed.
 - [ ] Four Meta verification tracks have no evidence — enable decision blocked until recorded in HQ Meta tab.
+
+## 2026-10-25 — AI Lead Pipeline plan (PLAN ONLY)
+- [ ] Design Winstone AI Lead Pipeline plan (CRM/LeadHub canonical + n8n), 8 areas, reuse-vs-missing inventory, phases, blockers. No changes.
+- [ ] Meta real-message test: BLOCKED — META_APP_SECRET + META_WEBHOOK_VERIFY_TOKEN absent from secret store; enable decision also blocked on 4 unverified tracks.
