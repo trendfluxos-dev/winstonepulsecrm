@@ -214,6 +214,7 @@ function ControlBoard() {
             {tab === "overview" && (
               <div className="space-y-8">
                 <HqSmartSummary
+                  loading={isPending}
                   profiles={profiles}
                   leads={leads}
                   calls={calls}
