@@ -109,7 +109,7 @@ function AuthPage() {
   return (
     <div className="theme-light grid min-h-dvh bg-background lg:grid-cols-2">
       <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-border bg-secondary p-12 lg:flex">
-        <div className="absolute inset-x-12 top-24 h-px bg-accent" aria-hidden />
+        <div className="absolute inset-x-12 top-24 h-px bg-border" aria-hidden />
         <span className="text-sm font-semibold tracking-[0.2em]">WINSTONE PULSE</span>
         <div>
           <h2 className="text-5xl font-semibold leading-tight tracking-tight">
@@ -137,7 +137,7 @@ function AuthPage() {
               ))}
             </div>
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-secondary">
-              <div className="h-full w-2/3 rounded-full bg-accent" />
+              <div className="h-full w-2/3 rounded-full bg-primary" />
             </div>
             <p className="mt-2 text-[11px] text-muted-foreground">Illustrative sample, not live data</p>
           </div>
