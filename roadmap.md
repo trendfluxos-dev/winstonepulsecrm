@@ -499,3 +499,9 @@
 - [x] Migration 0130 (applied to the live DB): phone matching now uses the indexed `lead_phone_keys` table (same eligibility rules), plus additive backfill of missing keys for 309 legacy leads. No lead data changed or deleted.
 - [x] Re-ran the canonical auto hand-out (`/api/public/hooks/lead-distribution`, cron secret used in-DB only): run row 2026-10-25 completed, moved 75 (Mehedi Ashraf +50, Soniya Yeasmin +12, Sabbir Ahmmed +13), remaining pool 1,835, shortage false, duplicates 0.
 - [x] Final state: all 8 active agents hold ≥ 50 leads for today (Abu Haidar 65, seven others 50). Cap/trigger and assignment ledger untouched.
+
+## 2026-10-25 — New workspace: Google connections re-linked
+- [x] Google Sheets connected fresh in the new workspace (gateway-backed, `GOOGLE_SHEETS_API_KEY`); read-only check opened both "WINSTONE PULSE — Daily Lead Report" and the call-report sheet (HTTP 200).
+- [x] Google Calendar connected fresh (gateway-backed, `GOOGLE_CALENDAR_API_KEY`, Asia/Dhaka primary calendar); calendar list read HTTP 200. Write path (site-visit event) not exercised — no event created.
+- [ ] Google Drive and Google Maps connections still unlinked in the new workspace (app code uses Drive for knowledge/recordings); re-link when the owner wants them.
+- [ ] Inventory/pricing sheet URL + tab name still pending from the owner (existing sheet only, never created).
