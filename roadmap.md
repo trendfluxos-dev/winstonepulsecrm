@@ -1,5 +1,9 @@
 # Roadmap
 
+## Auto distribution failure alerts
+- [x] Persist authenticated cron failures as safe reason/stage in existing alerts, show bounded history with Dhaka timestamp in HQ/IT; no raw errors, schedule/auth/assignment changes.
+- [ ] Test failure capture, safe reason mapping and authority-only reads; verify admin UI without forcing real distribution failures.
+
 ## Explicit daily target / received / remaining
 - [x] Show labelled target, received and remaining for every active agent on HQ/LeadHub and self-only Desk; compact mobile rows and desktop table, same server values.
 - [x] Signed-in HQ shows all 8 agents with explicit target/received/remaining; refreshed desktop table and mobile cards verified, no horizontal overflow or page errors. 17 targeted tests pass, semantic colors pass, harness build OK. No data or deployment changes.

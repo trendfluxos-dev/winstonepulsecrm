@@ -1,4 +1,5 @@
 import { HubSyncStatusPanel } from "@/components/crm/HubAlerts";
+import { DistributionFailurePanel } from "@/components/crm/DistributionFailurePanel";
 import { SystemManualCard } from "@/components/crm/SystemManualCard";
 import { DeploymentStatusPanel } from "@/components/crm/DeploymentStatusPanel";
 import { PAGE_SECTIONS, sectionSearch, useSection } from "@/lib/page-sections";
@@ -177,6 +178,7 @@ function SystemBoard() {
 
       {sec === "calls" && (
         <div className="space-y-6">
+          <DistributionFailurePanel />
           <CallOpsPanel showControls />
           <RecordingPipelinePanel />
           <SyncedCallsPanel />
