@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { LEAD_STATUSES, type LeadStatus, type Profile } from "@/lib/crm-data";
 import { defaultFilters, type ReportFilters } from "@/lib/crm-reports";
+import { useT } from "@/lib/i18n";
 import { RotateCcw, Search, X } from "lucide-react";
 
 const PRESETS = [
@@ -43,6 +44,7 @@ export function ReportsFilterBar({
   sources: string[];
   visible: boolean;
 }) {
+  const t = useT();
   const active: { key: string; label: string; clear: () => void }[] = [];
   if (filters.query.trim())
     active.push({
@@ -85,14 +87,20 @@ export function ReportsFilterBar({
     <section
       className={`card-elevated flex-col gap-3 p-3 sm:p-4 ${visible ? "flex" : "hidden lg:flex"}`}
     >
+      <p className="text-xs text-muted-foreground">
+        {t({
+          bn: "এখান থেকে রিপোর্ট ছোট করে দেখুন — কোনো তারিখ, এজেন্ট বা নাম বেছে নিলে নিচের সব হিসাব সেই অনুযায়ী বদলে যাবে। কিছু না বদলালে সবকিছুই দেখাবে।",
+          en: "Use these to narrow the report — pick a date, agent or name and every number below updates. Leave everything as-is to see all.",
+        })}
+      </p>
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={filters.query}
           onChange={(e) => patch({ query: e.target.value })}
-          placeholder="নাম, মোবাইল বা রেফারেন্স দিয়ে খুঁজুন…"
+          placeholder={t({ bn: "নাম, মোবাইল বা রেফারেন্স লিখে খুঁজুন…", en: "Type a name, phone or reference…" })}
           className="h-10 pl-9"
-          aria-label="লিড খুঁজুন"
+          aria-label={t({ bn: "লিড খুঁজুন", en: "Search leads" })}
         />
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:flex xl:flex-wrap xl:items-end">
