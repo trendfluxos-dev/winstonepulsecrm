@@ -36,6 +36,9 @@ export function ReportsFilterBar({
   agents,
   sources,
   visible,
+  matchedAgents,
+  matchedLeads,
+  matchedCalls,
 }: {
   filters: ReportFilters;
   patch: (next: Partial<ReportFilters>) => void;
@@ -43,6 +46,9 @@ export function ReportsFilterBar({
   agents: Profile[];
   sources: string[];
   visible: boolean;
+  matchedAgents: number;
+  matchedLeads: number;
+  matchedCalls: number;
 }) {
   const t = useT();
   const active: { key: string; label: string; clear: () => void }[] = [];
@@ -216,6 +222,32 @@ export function ReportsFilterBar({
           ))}
         </div>
       )}
+      <div className="rounded-lg bg-muted/60 px-3 py-2 text-xs leading-relaxed" aria-live="polite">
+        {matchedAgents > 0 || matchedLeads > 0 || matchedCalls > 0 ? (
+          <p>
+            <span className="font-semibold text-foreground">
+              {t({
+                bn: `${filters.from} থেকে ${filters.to} সময়ে এই শর্তে মিলেছে:`,
+                en: `From ${filters.from} to ${filters.to}, these filters match:`,
+              })}
+            </span>{" "}
+            {t({
+              bn: `${matchedAgents} জন এজেন্ট, ${matchedLeads}টি লিড, ${matchedCalls}টি কল। উপরের চিপগুলোতে চাপ দিলে সেই শর্ত সরে যাবে।`,
+              en: `${matchedAgents} agent${matchedAgents === 1 ? "" : "s"}, ${matchedLeads} lead${matchedLeads === 1 ? "" : "s"}, ${matchedCalls} call${matchedCalls === 1 ? "" : "s"}. Tap a chip above to remove that filter.`,
+            })}
+          </p>
+        ) : (
+          <p>
+            <span className="font-semibold text-foreground">
+              {t({ bn: "এই শর্তে কিছু পাওয়া যায়নি।", en: "Nothing matches these filters." })}
+            </span>{" "}
+            {t({
+              bn: "এভাবে বদলান — ১) তারিখ বাড়ান, যেমন 'শেষ ৯০ দিন' চাপুন; ২) উপরের খোঁজার ঘরটি খালি করুন; ৩) এজেন্ট, জায়গা, অবস্থা ও কথার ধরন 'সব' করুন। সব একসাথে বদলাতে 'আগের অবস্থায় ফিরুন' চাপুন।",
+              en: "Try this — 1) widen the dates, e.g. tap 'Last 90 days'; 2) clear the search box; 3) set agent, source, status and mood back to 'All'. Or press Reset to clear everything.",
+            })}
+          </p>
+        )}
+      </div>
     </section>
   );
 }
