@@ -18,9 +18,10 @@ import {
 } from "@/lib/ai-providers";
 
 describe("parseAiModelChoice", () => {
-  it("keeps the stored meta and gemini choices", () => {
+  it("keeps the stored meta, gemini and vertex choices", () => {
     expect(parseAiModelChoice("meta")).toBe("meta");
     expect(parseAiModelChoice("gemini")).toBe("gemini");
+    expect(parseAiModelChoice("vertex")).toBe("vertex");
     expect(parseAiModelChoice("openai")).toBe("openai");
   });
 
@@ -48,6 +49,13 @@ describe("resolveAiProvider", () => {
     const gemini = resolveAiProvider("gemini");
     expect(gemini.keyEnv).toBe("LOVABLE_API_KEY");
     expect(gemini.reasoningEffort).toBeUndefined();
+  });
+
+  it("routes vertex to the Vertex AI host with its service-account secret", () => {
+    const vertex = resolveAiProvider("vertex");
+    expect(vertex.endpoint).toContain("aiplatform.googleapis.com");
+    expect(vertex.model).toBe("google/gemini-2.5-flash");
+    expect(vertex.keyEnv).toBe("GOOGLE_VERTEX_SERVICE_ACCOUNT");
   });
 });
 
