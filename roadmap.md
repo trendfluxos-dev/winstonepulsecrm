@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-25 — Meta billing hint + live smoke test (01:29 UTC)
+- [x] Authorized live smoke test of Muse Spark: endpoint reachable, key accepted far enough for a structured response, but Meta returned HTTP 402 (billing/credits inactive). No key/headers/body logged; no settings changed.
+- [x] HQ billing hint: `withLastFailure` records last failed call's HTTP status only (never bodies); `aiChatJson` records failures via shared `recordAiStatus` helper; HQ panel shows a bilingual Meta billing notice when the last call was 402/403 or no success yet. 2 new tests (18 total, all passing).
+
 ## 2026-10-25 — HQ AI status indicator + Meta activated (01:22 UTC)
 - [x] Owner added `MODEL_API_KEY` via secure form; presence verified (never displayed). Active model set to `meta` in app_config (owner request, 01:19 UTC).
 - [x] HQ panel status indicator: active model + last successful AI call time (Dhaka), secret-free. `withLastSuccess` merges timestamp into app_config without dropping the model choice; recording is best-effort and never breaks AI calls. 3 new tests (16 total, all passing).
