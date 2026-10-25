@@ -15,17 +15,17 @@ import { useT } from "@/lib/i18n";
 import { RotateCcw, Search, X } from "lucide-react";
 
 const PRESETS = [
-  { label: "আজ", days: 1 },
-  { label: "৭ দিন", days: 7 },
-  { label: "৩০ দিন", days: 30 },
-  { label: "৯০ দিন", days: 90 },
+  { label: { bn: "আজ", en: "Today" }, days: 1 },
+  { label: { bn: "শেষ ৭ দিন", en: "Last 7 days" }, days: 7 },
+  { label: { bn: "শেষ ৩০ দিন", en: "Last 30 days" }, days: 30 },
+  { label: { bn: "শেষ ৯০ দিন", en: "Last 90 days" }, days: 90 },
 ] as const;
 
 const SENTIMENTS = [
-  { key: "positive", label: "পজিটিভ" },
-  { key: "neutral", label: "নিরপেক্ষ" },
-  { key: "negative", label: "নেগেটিভ" },
-  { key: "critical", label: "ক্রিটিক্যাল" },
+  { key: "positive", label: { bn: "ভালো কথা", en: "Positive" } },
+  { key: "neutral", label: { bn: "সাধারণ কথা", en: "Neutral" } },
+  { key: "negative", label: { bn: "খারাপ কথা", en: "Negative" } },
+  { key: "critical", label: { bn: "জরুরি সমস্যা", en: "Critical" } },
 ] as const;
 
 /** Date range, search, agent, source, stage and sentiment filters — inline on desktop, collapsible on mobile. */
