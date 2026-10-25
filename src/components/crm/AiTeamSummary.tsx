@@ -5,6 +5,8 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { getAiModel, getAiTeamSummary, setAiModel } from "@/lib/ai-features.functions";
+import { aiFailureLabel } from "@/lib/ai-providers";
+
 import { useLang, useT } from "@/lib/i18n";
 import { useAdminToken } from "@/lib/local-session";
 
@@ -38,7 +40,23 @@ export function AiTeamSummary() {
     onError: (e) => toast.error(e instanceof Error ? e.message : String(e)),
   });
 
+  const dhaka = (iso: string) =>
+    new Intl.DateTimeFormat(lang === "bn" ? "bn-BD" : "en-GB", {
+      timeZone: "Asia/Dhaka",
+      day: "numeric",
+      month: "short",
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(new Date(iso));
+
+  /** Safe failure text: HTTP status plus a short reason. Never provider detail. */
+  const failureText = (status: number) => {
+    const label = t(aiFailureLabel(status));
+    return status > 0 ? `${status} · ${label}` : label;
+  };
+
   return (
+
     <section className="card-elevated space-y-4 p-4" aria-label={t({ bn: "AI টিম সারাংশ", en: "AI team summary" })}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
@@ -92,7 +110,22 @@ export function AiTeamSummary() {
                 }).format(new Date(model.data.lastSuccessAt))
               : t({ bn: "এখনও কোনো সফল AI কল নেই", en: "No successful AI call yet" })}
           </span>
+          {model.data.lastErrorAt && (
+            <>
+              <span aria-hidden>·</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-destructive" aria-hidden />
+                {t({ bn: "শেষ ব্যর্থ কল:", en: "Last failed call:" })}{" "}
+                <span className="font-medium text-foreground">
+                  {dhaka(model.data.lastErrorAt)}
+                  {model.data.lastErrorStatus !== null &&
+                    ` · ${failureText(model.data.lastErrorStatus)}`}
+                </span>
+              </span>
+            </>
+          )}
         </p>
+
       )}
 
       {model.data?.model === "meta" &&
