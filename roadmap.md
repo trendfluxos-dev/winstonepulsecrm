@@ -509,4 +509,5 @@
 ## 2026-10-25 — Plain-language wording pass (staff screens)
 - [x] Simple Bengali/English names everywhere staff looks: navigation (i18n.ts NAV_LABELS), screen sections (page-sections.ts), LeadHub tabs, Executive HQ tabs/headings, desk tabs (DeskTabBar), chart heading, manual/handover card, profile buttons.
 - [x] Checked signed-in in the browser (Bengali): desk tabs, HQ tabs and cards, phone menu all read plainly; no page errors. 55 related tests pass, typecheck and build OK.
+- [x] Even simpler report-board wording: one-line filter helper, match-count line (date range + "এই শর্তে মিলেছোে: N জন এজোেন্ট, Mটোি লোিড, Kটোি কল" + chip hint), two-step empty-state guidance, and shortened "কীভোোোোোবোোোে পড়োোোোবোোোে?" guide bullets. Verified signed-in in Bengali (empty state, 90-day match line, guide); typecheck and build OK.
 - [ ] Not published yet (owner decides when to push live).
