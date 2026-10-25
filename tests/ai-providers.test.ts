@@ -95,17 +95,24 @@ describe("withLastSuccess — status indicator data", () => {
     expect(withLastSuccess({ model: "meta" }, "2026-10-25T01:00:00Z")).toEqual({
       model: "meta",
       last_success_at: "2026-10-25T01:00:00Z",
+      history: [{ at: "2026-10-25T01:00:00Z", ok: true }],
     });
   });
 
   it("works with empty or malformed existing config", () => {
-    expect(withLastSuccess(null, "t")).toEqual({ last_success_at: "t" });
-    expect(withLastSuccess({ model: 42 }, "t")).toEqual({ last_success_at: "t" });
+    expect(withLastSuccess(null, "t")).toEqual({
+      last_success_at: "t",
+      history: [{ at: "t", ok: true }],
+    });
+    expect(withLastSuccess({ model: 42 }, "t")).toEqual({
+      last_success_at: "t",
+      history: [{ at: "t", ok: true }],
+    });
   });
 
-  it("stores only the model name and timestamp — never key material", () => {
+  it("stores only the model name, timestamp and safe history — never key material", () => {
     const merged = withLastSuccess({ model: "meta", secret: "x", key: "y" }, "t");
-    expect(Object.keys(merged).sort()).toEqual(["last_success_at", "model"]);
+    expect(Object.keys(merged).sort()).toEqual(["history", "last_success_at", "model"]);
   });
 });
 
@@ -118,12 +125,14 @@ describe("withLastFailure — billing hint data", () => {
       last_success_at: "s",
       last_error_at: "2026-10-25T01:30:00Z",
       last_error_status: 402,
+      history: [{ at: "2026-10-25T01:30:00Z", ok: false, status: 402 }],
     });
   });
 
   it("stores only safe fields — never error bodies or key material", () => {
     const merged = withLastFailure({ model: "meta", body: "raw", key: "k" }, "t", 403);
     expect(Object.keys(merged).sort()).toEqual([
+      "history",
       "last_error_at",
       "last_error_status",
       "model",
@@ -193,7 +202,68 @@ describe("withLastFailure — status normalisation", () => {
       last_success_at: "s",
       last_error_at: "2026-10-25T01:30:00Z",
       last_error_status: AI_NO_RESPONSE_STATUS,
+      history: [{ at: "2026-10-25T01:30:00Z", ok: false, status: AI_NO_RESPONSE_STATUS }],
     });
+  });
+});
+
+describe("AI call history — safe rolling window", () => {
+  it("keeps newest first and caps the window at the limit", () => {
+    let data: unknown = { model: "meta" };
+    for (let i = 1; i <= 12; i++) {
+      data =
+        i % 2 === 0
+          ? withLastFailure(data, `t${i}`, 402)
+          : withLastSuccess(data, `t${i}`);
+    }
+    const history = readAiHistory(data);
+    expect(history).toHaveLength(AI_HISTORY_LIMIT);
+    expect(history[0]).toEqual({ at: "t12", ok: false, status: 402 });
+    expect(history[1]).toEqual({ at: "t11", ok: true });
+    expect(history.at(-1)?.at).toBe("t3");
+  });
+
+  it("a success keeps the earlier failure markers and appends to history", () => {
+    const failed = withLastFailure({ model: "meta" }, "f", 500);
+    const merged = withLastSuccess(failed, "s");
+    expect(merged.last_error_at).toBe("f");
+    expect(merged.last_error_status).toBe(500);
+    expect(merged.history).toEqual([
+      { at: "s", ok: true },
+      { at: "f", ok: false, status: 500 },
+    ]);
+  });
+
+  it("readAiHistory drops malformed entries and non-finite statuses", () => {
+    const history = readAiHistory({
+      history: [
+        { at: "a", ok: true },
+        { at: "b", ok: false, status: 402.7 },
+        { at: "c", ok: false, status: Number.NaN },
+        { ok: true },
+        { at: 5, ok: false },
+        "junk",
+        null,
+      ],
+    });
+    expect(history).toEqual([
+      { at: "a", ok: true },
+      { at: "b", ok: false, status: 402 },
+      { at: "c", ok: false },
+    ]);
+  });
+
+  it("history entries never carry prompts, answers or key material", () => {
+    const merged = withLastFailure(
+      { model: "meta", history: [{ at: "x", ok: true, prompt: "p", key: "k" }] },
+      "t",
+      403,
+    );
+    for (const entry of merged.history) {
+      expect(Object.keys(entry).sort()).toEqual(
+        entry.ok ? ["at", "ok"] : ["at", "ok", "status"],
+      );
+    }
   });
 });
 
