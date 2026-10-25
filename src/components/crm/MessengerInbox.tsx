@@ -8,6 +8,7 @@ import { useT } from "@/lib/i18n";
 import { useAdminToken } from "@/lib/local-session";
 import { getMessengerStatus } from "@/lib/messenger.functions";
 import { filterDemoThreads, NOT_CONNECTED, withinMessagingWindow, type DemoThread } from "@/lib/messenger-shared";
+import { MessengerLeadDetails } from "@/components/crm/MessengerLeadDetails";
 
 /**
  * Messenger inbox body shared by the /messenger page and the agent desk tab.
@@ -104,7 +105,7 @@ export function MessengerInbox() {
             </li>
           ))}
         </ul>
-        {active ? <div className={mobileThreadOpen ? "min-w-0" : "hidden min-w-0 md:block"}><ThreadPane thread={active} canReply={view.canReply && active.assignedTo === "me"} canAssign={view.canAssign} onBack={() => setSelected(null)} /></div> : null}
+        {active ? <div className={`${mobileThreadOpen ? "min-w-0" : "hidden min-w-0 md:block"}`}><div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_240px]"><ThreadPane thread={active} canReply={view.canReply && active.assignedTo === "me"} canAssign={view.canAssign} onBack={() => setSelected(null)} /><MessengerLeadDetails key={active.id} connected={status.data?.connected === true} thread={active} /></div></div> : null}
       </div>
     </div>
   );
