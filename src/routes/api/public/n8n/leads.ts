@@ -24,11 +24,11 @@ export const Route = createFileRoute("/api/public/n8n/leads")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        if (process.env.N8N_PIPELINE_ENABLED !== "true") return refuse(503, "PIPELINE_DISABLED");
-        const secret = process.env.N8N_WEBHOOK_SECRET;
+        if (process.env["N8N_PIPELINE_ENABLED"] !== "true") return refuse(503, "PIPELINE_DISABLED");
+        const secret = process.env["N8N_WEBHOOK_SECRET"];
         if (!secret) return refuse(503, "WEBHOOK_NOT_CONFIGURED");
 
-        if (!limiter.allow(requestSourceKey(request))) return refuse(429, "RATE_LIMITED");
+        if (!limiter(requestSourceKey(request))) return refuse(429, "RATE_LIMITED");
 
         const rawBody = await request.text();
         if (new TextEncoder().encode(rawBody).byteLength > N8N_MAX_BODY_BYTES) {
