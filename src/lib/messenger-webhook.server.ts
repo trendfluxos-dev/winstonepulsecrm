@@ -1,11 +1,22 @@
 import { matchesWebhookSignature } from "@/lib/messenger-protocol.server";
 import { validateMetaWebhookBytes } from "@/lib/meta-webhook-payload";
+import { ingestMessengerWebhook, MAX_WEBHOOK_BYTES, type MessengerStore } from "@/lib/messenger-ingest.server";
 
-export const MAX_WEBHOOK_BYTES = 262144;
-const refusal = (status: number, code: string) => Response.json({ ok: false, code }, { status, headers: { "Cache-Control": "no-store" } });
+export { MAX_WEBHOOK_BYTES };
 
-/** Validate signatures without accepting messages until durable ingestion is reviewed. */
-export async function inspectSignedWebhook(request: Request, appSecret: string | undefined) {
+const refusal = (status: number, code: string) =>
+  Response.json({ ok: false, code }, { status, headers: { "Cache-Control": "no-store" } });
+
+/**
+ * Validate the raw body, then hand it to the durable pipeline. The pipeline
+ * refuses until the reviewed storage migration is applied and Meta approvals
+ * are verified, so a valid signature still never becomes an accepted message.
+ */
+export async function inspectSignedWebhook(
+  request: Request,
+  appSecret: string | undefined,
+  options: { store?: MessengerStore; enabled?: boolean } = {},
+) {
   if (!appSecret) return refusal(503, "FACEBOOK_NOT_CONNECTED");
   const signature = request.headers.get("x-hub-signature-256");
   if (!signature || !/^sha256=[a-f0-9]{64}$/.test(signature)) return refusal(401, "INVALID_WEBHOOK_SIGNATURE");
@@ -24,13 +35,21 @@ export async function inspectSignedWebhook(request: Request, appSecret: string |
       }
       chunks.push(value);
     }
-  } catch { return refusal(400, "UNREADABLE_WEBHOOK_BODY"); }
-  finally { reader.releaseLock(); }
+  } catch {
+    return refusal(400, "UNREADABLE_WEBHOOK_BODY");
+  } finally {
+    reader.releaseLock();
+  }
   const bytes = new Uint8Array(size);
   let offset = 0;
-  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
   if (!await matchesWebhookSignature(bytes, signature, appSecret)) return refusal(401, "INVALID_WEBHOOK_SIGNATURE");
   if (!validateMetaWebhookBytes(bytes).valid) return refusal(400, "INVALID_WEBHOOK_PAYLOAD");
-  // Never acknowledge 200: valid signatures do not prove Page consent or durable receipt.
-  return refusal(503, "MESSENGER_INGESTION_NOT_READY");
+
+  const result = await ingestMessengerWebhook({ bytes, signature, appSecret, store: options.store, enabled: options.enabled });
+  if (result.ok) return Response.json({ ok: true, stored: result.stored, duplicates: result.duplicates }, { headers: { "Cache-Control": "no-store" } });
+  return refusal(result.status, result.code);
 }
