@@ -1,5 +1,13 @@
 # Roadmap
 
+## Per-agent allocation targets, progress and publication
+- [ ] Keep the hard cap at 50; append-only IT-managed targets within 1–50, shared server percentage/remaining, HQ/LeadHub/self display.
+- [ ] Publish and verify live release and active-agent scoped views; never fabricate assignment or work.
+
+## Bengali daily accountability presentation — Zahid Hasan Emon
+- [ ] Read day-by-day saved staff evidence from verified available history; distinguish unknown launch date, sync gaps, allocation failures and confirmed neglect.
+- [ ] Create detailed Bengali PDF presented by Zahid Hasan Emon, IT Department, Winstone Properties Limited; inspect every page, exclude customer/secret details.
+
 ## HQ screenshot — false no-call/untouched claims
 - [x] Diagnose recording-only counts, omitted submitted reports, browser-local day and unsupported inactivity claims.
 - [x] Reconciled command-center evidence, distinguished unknown phone sync, excluded saved attempts/last-call markers and removed unsupported projections. 12 tests, colors and harness build pass; signed-in HQ English/Bangla and desktop/428px inspected, no overflow/errors. Live read-back: 212 pending without evidence, zero recorded calls today; actual phone sync remains unverified. No data or deployment changes.
