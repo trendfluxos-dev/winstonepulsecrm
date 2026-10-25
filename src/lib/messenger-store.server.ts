@@ -52,13 +52,23 @@ export function supabaseMessengerStore(): MessengerStore {
       if (!thread) return { ok: false, reason: "storage_unavailable" };
       const threadId = (thread as { id: string }).id;
 
+      // Bodies are encrypted at rest; without the server key we refuse to
+      // store rather than fall back to plaintext.
+      let bodyCiphertext: string | null = null;
+      if (input.text !== null) {
+        const { encryptMessageBody } = await import("@/lib/messenger-crypto.server");
+        bodyCiphertext = await encryptMessageBody(input.text);
+        if (!bodyCiphertext) return { ok: false, reason: "storage_unavailable" };
+      }
+
       const { data: message, error: messageError } = await supabaseAdmin
         .from("messenger_messages" as never)
         .insert({
           thread_id: threadId,
           mid: input.mid,
           direction: "inbound",
-          body: input.text,
+          body: null,
+          body_ciphertext: bodyCiphertext,
           created_at: at,
         } as never)
         .select("id")
@@ -126,7 +136,7 @@ export function supabaseMessengerReviewStore(): ReviewStore {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data, error } = await supabaseAdmin
         .from("messenger_messages" as never)
-        .select("id, thread_id, direction, body, lead_id, messenger_threads ( page_id, psid )")
+        .select("id, thread_id, direction, body, body_ciphertext, lead_id, messenger_threads ( page_id, psid )")
         .eq("id", messageId)
         .maybeSingle();
       if (error) {
@@ -139,18 +149,26 @@ export function supabaseMessengerReviewStore(): ReviewStore {
         thread_id: string;
         direction: string;
         body: string | null;
+        body_ciphertext: string | null;
         lead_id: string | null;
         messenger_threads: { page_id: string; psid: string } | null;
       };
       const thread = row.messenger_threads;
       if (!thread) return null;
+      // Decrypt server-side; rows stored before encryption fall back to the
+      // legacy plaintext column. Undecryptable ciphertext is never shown raw.
+      let body = row.body;
+      if (row.body_ciphertext) {
+        const { decryptMessageBody } = await import("@/lib/messenger-crypto.server");
+        body = await decryptMessageBody(row.body_ciphertext);
+      }
       const message: StoredMessage = {
         id: row.id,
         threadId: row.thread_id,
         pageId: thread.page_id,
         psid: thread.psid,
         direction: row.direction === "outbound" ? "outbound" : "inbound",
-        body: row.body,
+        body,
         leadId: row.lead_id,
       };
       return message;

@@ -3146,6 +3146,7 @@ export type Database = {
       messenger_messages: {
         Row: {
           body: string | null
+          body_ciphertext: string | null
           created_at: string
           delivery_status: string | null
           direction: string
@@ -3158,6 +3159,7 @@ export type Database = {
         }
         Insert: {
           body?: string | null
+          body_ciphertext?: string | null
           created_at?: string
           delivery_status?: string | null
           direction: string
@@ -3170,6 +3172,7 @@ export type Database = {
         }
         Update: {
           body?: string | null
+          body_ciphertext?: string | null
           created_at?: string
           delivery_status?: string | null
           direction?: string
