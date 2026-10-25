@@ -106,6 +106,28 @@ describe("withLastSuccess — status indicator data", () => {
   });
 });
 
+describe("withLastFailure — billing hint data", () => {
+  it("records status and time while preserving model and success timestamp", () => {
+    expect(
+      withLastFailure({ model: "meta", last_success_at: "s" }, "2026-10-25T01:30:00Z", 402),
+    ).toEqual({
+      model: "meta",
+      last_success_at: "s",
+      last_error_at: "2026-10-25T01:30:00Z",
+      last_error_status: 402,
+    });
+  });
+
+  it("stores only safe fields — never error bodies or key material", () => {
+    const merged = withLastFailure({ model: "meta", body: "raw", key: "k" }, "t", 403);
+    expect(Object.keys(merged).sort()).toEqual([
+      "last_error_at",
+      "last_error_status",
+      "model",
+    ]);
+  });
+});
+
 describe("aiCallFailureMessage — secret-safe errors", () => {
   it("maps statuses to generic staff-facing messages", () => {
     expect(aiCallFailureMessage(402)).toContain("credits");
