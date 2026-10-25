@@ -1222,6 +1222,36 @@ export type Database = {
           },
         ]
       }
+      credential_incidents: {
+        Row: {
+          actor: string | null
+          actor_label: string | null
+          created_at: string
+          id: string
+          note: string
+          service: string
+          status: string
+        }
+        Insert: {
+          actor?: string | null
+          actor_label?: string | null
+          created_at?: string
+          id?: string
+          note: string
+          service: string
+          status: string
+        }
+        Update: {
+          actor?: string | null
+          actor_label?: string | null
+          created_at?: string
+          id?: string
+          note?: string
+          service?: string
+          status?: string
+        }
+        Relationships: []
+      }
       crm_activities: {
         Row: {
           actor_user_id: string
