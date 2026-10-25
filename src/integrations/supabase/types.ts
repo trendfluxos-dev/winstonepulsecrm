@@ -3237,6 +3237,39 @@ export type Database = {
           },
         ]
       }
+      messenger_sync_decisions: {
+        Row: {
+          action: string
+          actor: string | null
+          actor_label: string | null
+          created_at: string
+          id: string
+          missing_tracks: string[]
+          reason: string
+          verified_tracks: string[]
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          actor_label?: string | null
+          created_at?: string
+          id?: string
+          missing_tracks?: string[]
+          reason: string
+          verified_tracks?: string[]
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          actor_label?: string | null
+          created_at?: string
+          id?: string
+          missing_tracks?: string[]
+          reason?: string
+          verified_tracks?: string[]
+        }
+        Relationships: []
+      }
       messenger_thread_events: {
         Row: {
           action: string
