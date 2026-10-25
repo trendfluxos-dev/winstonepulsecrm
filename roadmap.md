@@ -505,3 +505,8 @@
 - [x] Google Calendar connected fresh (gateway-backed, `GOOGLE_CALENDAR_API_KEY`, Asia/Dhaka primary calendar); calendar list read HTTP 200. Write path (site-visit event) not exercised — no event created.
 - [ ] Google Drive and Google Maps connections still unlinked in the new workspace (app code uses Drive for knowledge/recordings); re-link when the owner wants them.
 - [ ] Inventory/pricing sheet URL + tab name still pending from the owner (existing sheet only, never created).
+
+## 2026-10-25 — Plain-language wording pass (staff screens)
+- [x] Simple Bengali/English names everywhere staff looks: navigation (i18n.ts NAV_LABELS), screen sections (page-sections.ts), LeadHub tabs, Executive HQ tabs/headings, desk tabs (DeskTabBar), chart heading, manual/handover card, profile buttons.
+- [x] Checked signed-in in the browser (Bengali): desk tabs, HQ tabs and cards, phone menu all read plainly; no page errors. 55 related tests pass, typecheck and build OK.
+- [ ] Not published yet (owner decides when to push live).
