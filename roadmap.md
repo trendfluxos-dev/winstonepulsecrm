@@ -1,8 +1,9 @@
 # Roadmap
 
 ## Messenger — lead details beside messages
-- [ ] Add scoped linked-lead details beside the selected conversation; demo/disconnected data never reads real leads; keep Meta enable and ownership gates.
-- [ ] Validate permissions and UI states with synthetic tests; live verification waits for authorized sync activation.
+- [x] Add read-only linked-lead sidebar beside the selected conversation (stacked below on smaller screens); saved inbound message IDs only, independent thread and current lead ownership checks. Demo/disconnected data never reads real leads; Meta activation unchanged.
+- [x] 42 targeted Messenger/inventory tests pass, semantic colors pass, harness build OK. Signed-in browser shows inactive sidebar with no runtime errors; job remains 401 without managed auth. Tests now isolate environment flags rather than depend on real Meta settings.
+- [ ] Live lead-detail proof awaits approved Meta activation and future stored-message inbox wiring; existing inbox still supplies demos and the service remains fail-closed. No real messages, leads, settings, secrets or deployment changed.
 
 
 ## Inventory & pricing sheet — listings and integrations roadmap
