@@ -1,4 +1,5 @@
 import { accountLock, ACCESS_RECOVERY } from "@/lib/access-recovery";
+import { DailyAllocationSummary } from "@/components/crm/DailyAllocationSummary";
 import { MyNeglectNotice } from "@/components/crm/LeadNeglectPanel";
 import { PhotoUpload } from "@/components/crm/PhotoUpload";
 import { StaffAvatar } from "@/components/crm/StaffAvatar";
@@ -369,6 +370,7 @@ function DeskPage() {
           {tab === "today" && (
             <>
           <OfficialNewsStrip />
+          <DailyAllocationSummary surface="self" />
 
           <details className="group card-elevated overflow-hidden">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold [&::-webkit-details-marker]:hidden">

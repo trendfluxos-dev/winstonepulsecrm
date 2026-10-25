@@ -5,6 +5,7 @@ import { Database, FileUp, History, KeyRound, Send, ShieldCheck } from "lucide-r
 import { useState } from "react";
 
 import { AppShell } from "@/components/crm/AppShell";
+import { DailyAllocationSummary } from "@/components/crm/DailyAllocationSummary";
 import { CsvImportDialog } from "@/components/crm/CsvImportDialog";
 import { LeadDatabasePanel } from "@/components/crm/LeadDatabasePanel";
 import { HeadLeadIntakePanel } from "@/components/crm/HeadLeadIntakePanel";
@@ -108,7 +109,7 @@ function LeadHubWorkspace() {
         ))}
       </nav>
 
-      {section === "overview" && <><DeckKpis /><LeadStorePanel agents={agentOptions} canAssign={false} defaultAssignment="unassigned" title={t({ bn: "অনির্ধারিত লিড — পর্যালোচনার অপেক্ষায়", en: "Unassigned leads — awaiting review" })} /><AllocationTable onAssign={(id) => { setAssignFor(id); setSection("assign"); }} /></>}
+      {section === "overview" && <><DailyAllocationSummary surface="leadhub" /><DeckKpis /><LeadStorePanel agents={agentOptions} canAssign={false} defaultAssignment="unassigned" title={t({ bn: "অনির্ধারিত লিড — পর্যালোচনার অপেক্ষায়", en: "Unassigned leads — awaiting review" })} /><AllocationTable onAssign={(id) => { setAssignFor(id); setSection("assign"); }} /></>}
       {section === "import" && <div className="space-y-4"><div className="flex justify-end"><CsvImportDialog /></div><HeadLeadIntakePanel /><ImportHistoryPanel /></div>}
       {section === "database" && <LeadStorePanel agents={agentOptions} canAssign={false} title={t({ bn: "মূল লিড ডেটাবেস", en: "Canonical Lead Database" })} />}
       {section === "assign" && <div className="space-y-4"><LeadDatabasePanel /><AssignLeadsWorkspace key={`${assignFor ?? "all"}-${draftKey}`} initialAgentId={assignFor} initialCount={assignCount} /></div>}
