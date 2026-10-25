@@ -1,5 +1,12 @@
 # Roadmap
 
+## 2026-10-25 — Messenger retention + webhook handshake activation (in progress)
+- [ ] Retention policy + automatic deletion for encrypted Messenger messages (owner request 00:46 UTC): retention window, scheduled cleanup, reviewed exception to the append-only trigger for expired rows only.
+- [x] Webhook GET subscription handshake wired (exact verify-token match → 200 challenge; mismatch → 403; unconfigured → 503); human navigation still 303s to /messenger.
+- [x] Ingestion switch `MESSENGER_INGESTION_ENABLED=true` set by owner order; POST still refuses without `META_APP_SECRET`, and Meta-side registration still needs the verify token + App/Page approvals.
+- [ ] Re-request `META_APP_SECRET` + `META_WEBHOOK_VERIFY_TOKEN` via secure form (first attempt cancelled by the new message).
+- [ ] Run updated messenger test suite; update AGENTS.md/docs to match the new handshake + retention reality.
+
 ## 2026-10-25 — Verification report, delivery diagnostics, message encryption
 - [x] Read-only verification report on `/inbox` (`src/lib/meta-verification-report.ts` + `MetaVerificationReport.tsx`): three separate evidence tracks — Messenger App Review approval, Page subscription, old-token revocation — each unverified with null checkedAt and its own blocker; no track borrows another's proof.
 - [x] Webhook delivery diagnostics on `/inbox` (`src/lib/messenger-delivery.ts` pure summarizer, `messenger-delivery.functions.ts` staff-only server fn, `MessengerDeliveryStatus.tsx`): receipt totals/pending, delivery/read/postback/echo counts, outbox pending retries and latest failure code. Counts and codes only, never message content; storage errors report not-ready, never empty.
