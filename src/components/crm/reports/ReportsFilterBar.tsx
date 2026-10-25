@@ -11,20 +11,21 @@ import {
 } from "@/components/ui/select";
 import { LEAD_STATUSES, type LeadStatus, type Profile } from "@/lib/crm-data";
 import { defaultFilters, type ReportFilters } from "@/lib/crm-reports";
+import { useT } from "@/lib/i18n";
 import { RotateCcw, Search, X } from "lucide-react";
 
 const PRESETS = [
-  { label: "আজ", days: 1 },
-  { label: "৭ দিন", days: 7 },
-  { label: "৩০ দিন", days: 30 },
-  { label: "৯০ দিন", days: 90 },
+  { label: { bn: "আজ", en: "Today" }, days: 1 },
+  { label: { bn: "শেষ ৭ দিন", en: "Last 7 days" }, days: 7 },
+  { label: { bn: "শেষ ৩০ দিন", en: "Last 30 days" }, days: 30 },
+  { label: { bn: "শেষ ৯০ দিন", en: "Last 90 days" }, days: 90 },
 ] as const;
 
 const SENTIMENTS = [
-  { key: "positive", label: "পজিটিভ" },
-  { key: "neutral", label: "নিরপেক্ষ" },
-  { key: "negative", label: "নেগেটিভ" },
-  { key: "critical", label: "ক্রিটিক্যাল" },
+  { key: "positive", label: { bn: "ভালো কথা", en: "Positive" } },
+  { key: "neutral", label: { bn: "সাধারণ কথা", en: "Neutral" } },
+  { key: "negative", label: { bn: "খারাপ কথা", en: "Negative" } },
+  { key: "critical", label: { bn: "জরুরি সমস্যা", en: "Critical" } },
 ] as const;
 
 /** Date range, search, agent, source, stage and sentiment filters — inline on desktop, collapsible on mobile. */
@@ -43,32 +44,33 @@ export function ReportsFilterBar({
   sources: string[];
   visible: boolean;
 }) {
+  const t = useT();
   const active: { key: string; label: string; clear: () => void }[] = [];
   if (filters.query.trim())
     active.push({
       key: "query",
-      label: `খোঁজ: ${filters.query.trim()}`,
+      label: `${t({ bn: "খোঁজ", en: "Search" })}: ${filters.query.trim()}`,
       clear: () => patch({ query: "" }),
     });
   if (filters.agentId !== "all") {
     const agent = agents.find((a) => a.id === filters.agentId);
     active.push({
       key: "agent",
-      label: `এজেন্ট: ${agent?.name ?? filters.agentId}`,
+      label: `${t({ bn: "এজেন্ট", en: "Agent" })}: ${agent?.name ?? filters.agentId}`,
       clear: () => patch({ agentId: "all" }),
     });
   }
   if (filters.source !== "all")
     active.push({
       key: "source",
-      label: `কোথা থেকে: ${filters.source}`,
+      label: `${t({ bn: "কোথা থেকে", en: "Source" })}: ${filters.source}`,
       clear: () => patch({ source: "all" }),
     });
   if (filters.status !== "all") {
     const st = LEAD_STATUSES.find((s) => s.key === filters.status);
     active.push({
       key: "status",
-      label: `স্ট্যাটাস: ${st?.label ?? filters.status}`,
+      label: `${t({ bn: "অবস্থা", en: "Status" })}: ${st?.label ?? filters.status}`,
       clear: () => patch({ status: "all" }),
     });
   }
@@ -76,7 +78,7 @@ export function ReportsFilterBar({
     const se = SENTIMENTS.find((s) => s.key === filters.sentiment);
     active.push({
       key: "sentiment",
-      label: `কথার ধরন: ${se?.label ?? filters.sentiment}`,
+      label: `${t({ bn: "কথার ধরন", en: "Mood" })}: ${se ? t(se.label) : filters.sentiment}`,
       clear: () => patch({ sentiment: "all" }),
     });
   }
@@ -85,18 +87,24 @@ export function ReportsFilterBar({
     <section
       className={`card-elevated flex-col gap-3 p-3 sm:p-4 ${visible ? "flex" : "hidden lg:flex"}`}
     >
+      <p className="text-xs text-muted-foreground">
+        {t({
+          bn: "এখান থেকে রিপোর্ট ছোট করে দেখুন — কোনো তারিখ, এজেন্ট বা নাম বেছে নিলে নিচের সব হিসাব সেই অনুযায়ী বদলে যাবে। কিছু না বদলালে সবকিছুই দেখাবে।",
+          en: "Use these to narrow the report — pick a date, agent or name and every number below updates. Leave everything as-is to see all.",
+        })}
+      </p>
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={filters.query}
           onChange={(e) => patch({ query: e.target.value })}
-          placeholder="নাম, মোবাইল বা রেফারেন্স দিয়ে খুঁজুন…"
+          placeholder={t({ bn: "নাম, মোবাইল বা রেফারেন্স লিখে খুঁজুন…", en: "Type a name, phone or reference…" })}
           className="h-10 pl-9"
-          aria-label="লিড খুঁজুন"
+          aria-label={t({ bn: "লিড খুঁজুন", en: "Search leads" })}
         />
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:flex xl:flex-wrap xl:items-end">
-        <Field label="শুরু">
+        <Field label={t({ bn: "শুরুর তারিখ", en: "From date" })}>
           <Input
             type="date"
             value={filters.from}
@@ -105,7 +113,7 @@ export function ReportsFilterBar({
             className="h-9 w-full xl:w-[150px]"
           />
         </Field>
-        <Field label="শেষ">
+        <Field label={t({ bn: "শেষ তারিখ", en: "To date" })}>
           <Input
             type="date"
             value={filters.to}
@@ -114,13 +122,13 @@ export function ReportsFilterBar({
             className="h-9 w-full xl:w-[150px]"
           />
         </Field>
-        <Field label="এজেন্ট">
+        <Field label={t({ bn: "কোন এজেন্ট", en: "Which agent" })}>
           <Select value={filters.agentId} onValueChange={(v) => patch({ agentId: v })}>
             <SelectTrigger className="h-9 w-full xl:w-[180px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">সব এজেন্ট</SelectItem>
+              <SelectItem value="all">{t({ bn: "সব এজেন্ট", en: "All agents" })}</SelectItem>
               {agents.map((a) => (
                 <SelectItem key={a.id} value={a.id}>
                   {a.name}
@@ -129,13 +137,13 @@ export function ReportsFilterBar({
             </SelectContent>
           </Select>
         </Field>
-        <Field label="লিড কোথা থেকে">
+        <Field label={t({ bn: "লিড এসেছে কোথা থেকে", en: "Lead source" })}>
           <Select value={filters.source} onValueChange={(v) => patch({ source: v })}>
             <SelectTrigger className="h-9 w-full xl:w-[165px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">সব সোর্স</SelectItem>
+              <SelectItem value="all">{t({ bn: "সব জায়গা থেকে", en: "All sources" })}</SelectItem>
               {sources.map((s) => (
                 <SelectItem key={s} value={s}>
                   {s}
@@ -144,7 +152,7 @@ export function ReportsFilterBar({
             </SelectContent>
           </Select>
         </Field>
-        <Field label="লিড স্ট্যাটাস">
+        <Field label={t({ bn: "লিডের অবস্থা", en: "Lead status" })}>
           <Select
             value={filters.status}
             onValueChange={(v) => patch({ status: v as LeadStatus | "all" })}
@@ -153,7 +161,7 @@ export function ReportsFilterBar({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">সব স্ট্যাটাস</SelectItem>
+              <SelectItem value="all">{t({ bn: "সব অবস্থা", en: "All statuses" })}</SelectItem>
               {LEAD_STATUSES.map((s) => (
                 <SelectItem key={s.key} value={s.key}>
                   {s.label}
@@ -162,16 +170,16 @@ export function ReportsFilterBar({
             </SelectContent>
           </Select>
         </Field>
-        <Field label="কথার ধরন">
+        <Field label={t({ bn: "কথার ধরন", en: "Call mood" })}>
           <Select value={filters.sentiment} onValueChange={(v) => patch({ sentiment: v })}>
             <SelectTrigger className="h-9 w-full xl:w-[150px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">সব ধরনের</SelectItem>
+              <SelectItem value="all">{t({ bn: "সব ধরনের", en: "All moods" })}</SelectItem>
               {SENTIMENTS.map((s) => (
                 <SelectItem key={s.key} value={s.key}>
-                  {s.label}
+                  {t(s.label)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -185,16 +193,16 @@ export function ReportsFilterBar({
               size="sm"
               onClick={() => patch(defaultFilters(p.days))}
             >
-              {p.label}
+              {t(p.label)}
             </Button>
           ))}
           <Button variant="ghost" size="sm" onClick={() => setFilters(defaultFilters(30))}>
-            <RotateCcw className="size-4" /> রিসেট
+            <RotateCcw className="size-4" /> {t({ bn: "আগের অবস্থায় ফিরুন", en: "Reset" })}
           </Button>
         </div>
       </div>
       {active.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5" aria-label="সক্রিয় ফিল্টার">
+        <div className="flex flex-wrap items-center gap-1.5" aria-label={t({ bn: "যেগুলো বেছে নেওয়া হয়েছে", en: "Active filters" })}>
           {active.map((chip) => (
             <button
               key={chip.key}

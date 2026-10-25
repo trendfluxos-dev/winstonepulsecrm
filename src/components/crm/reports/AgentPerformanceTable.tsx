@@ -35,6 +35,17 @@ export function AgentPerformanceTable({
           <p className="text-xs text-muted-foreground">
             {t({ bn: "কে কত কল দিয়েছে, কতটিতে কথা হয়েছে, কতটি বুকিং", en: "Activity, connection and conversion overview" })}
           </p>
+          <details className="mt-2 rounded-md bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
+            <summary className="cursor-pointer font-semibold text-foreground">
+              {t({ bn: "কীভাবে পড়বেন? (সহজ ব্যাখ্যা)", en: "How to read this (simple guide)" })}
+            </summary>
+            <ul className="mt-1.5 list-disc space-y-1 pl-4">
+              <li>{t({ bn: "কল দেওয়া = এজেন্ট যতবার ফোন করেছে।", en: "Calls made = how many times the agent phoned." })}</li>
+              <li>{t({ bn: "কথা হয়েছে = যত কলে কাস্টমার ধরেছে। পাশের % দেখায় ১০০ কলে কতটিতে কথা হয়েছে।", en: "Answered = calls the customer picked up. The % shows answered out of every 100 calls." })}</li>
+              <li>{t({ bn: "কথার সময় = সব কল মিলে মোট কতক্ষণ কথা হয়েছে।", en: "Talk time = total minutes spent talking." })}</li>
+              <li>{t({ bn: "বুকিংয়ের হার = পাওয়া লিডের মধ্যে কত শতাংশ বুকিং হয়েছে। বেশি হলে ভালো।", en: "Booking rate = how many of the assigned leads became bookings. Higher is better." })}</li>
+            </ul>
+          </details>
         </div>
         <Button
           variant="outline"
@@ -89,12 +100,12 @@ export function AgentPerformanceTable({
             <li key={r.agentId} className="rounded-lg border border-border p-3">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2"><div className="min-w-0"><p className="truncate font-semibold">{r.agent}</p><p className="text-xs text-muted-foreground">{r.employeeId}</p></div><p className="tabular text-lg font-bold">{r.conversionRate.toFixed(1)}%</p></div>
               <dl className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
-                <Metric label={t({ bn: "কল", en: "Calls" })} value={r.dials} />
-                <Metric label={t({ bn: "কথা", en: "Connected" })} value={r.connected} />
-                <Metric label={t({ bn: "কথা হার", en: "Connect %" })} value={`${r.connectRate.toFixed(1)}%`} />
-                <Metric label={t({ bn: "সময়", en: "Talk time" })} value={formatMinutes(r.talkMinutes)} />
-                <Metric label={t({ bn: "পাওয়া লিড", en: "Assigned" })} value={r.assigned} />
-                <Metric label={t({ bn: "বুকিং", en: "Won" })} value={r.dealsWon} />
+                <Metric label={t({ bn: "কল দেওয়া", en: "Calls made" })} value={r.dials} />
+                <Metric label={t({ bn: "কথা হয়েছে", en: "Answered" })} value={r.connected} />
+                <Metric label={t({ bn: "কথা হওয়ার হার", en: "Answer rate" })} value={`${r.connectRate.toFixed(1)}%`} />
+                <Metric label={t({ bn: "কথার সময়", en: "Talk time" })} value={formatMinutes(r.talkMinutes)} />
+                <Metric label={t({ bn: "পাওয়া লিড", en: "Leads given" })} value={r.assigned} />
+                <Metric label={t({ bn: "বুকিং", en: "Bookings" })} value={r.dealsWon} />
               </dl>
             </li>
           ))}
@@ -104,16 +115,16 @@ export function AgentPerformanceTable({
             <thead>
               <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
                 <th className="py-2 pr-3 font-semibold">{t({ bn: "এজেন্ট", en: "Agent" })}</th>
-                <Th>{t({ bn: "কল", en: "Dials" })}</Th>
-                <Th>{t({ bn: "কথা", en: "Connected" })}</Th>
-                <Th>{t({ bn: "কথা হার", en: "Connect %" })}</Th>
-                <Th>{t({ bn: "সময়", en: "Talk time" })}</Th>
-                <Th>{t({ bn: "গড় কল", en: "Avg call" })}</Th>
+                <Th>{t({ bn: "কল দেওয়া", en: "Calls made" })}</Th>
+                <Th>{t({ bn: "কথা হয়েছে", en: "Answered" })}</Th>
+                <Th>{t({ bn: "কথার হার", en: "Answer rate" })}</Th>
+                <Th>{t({ bn: "কথার সময়", en: "Talk time" })}</Th>
+                <Th>{t({ bn: "গড়ে একটি কল", en: "Avg call" })}</Th>
                 <Th>{t({ bn: "হোয়াটসঅ্যাপ", en: "WhatsApp" })}</Th>
-                <Th>{t({ bn: "লিড", en: "Assigned" })}</Th>
-                <Th>{t({ bn: "বুকিং", en: "Won" })}</Th>
-                <Th>{t({ bn: "সফল %", en: "Conv %" })}</Th>
-                <th className="py-2 font-semibold">{t({ bn: "ফলাফল", en: "Performance" })}</th>
+                <Th>{t({ bn: "পাওয়া লিড", en: "Leads given" })}</Th>
+                <Th>{t({ bn: "বুকিং", en: "Bookings" })}</Th>
+                <Th>{t({ bn: "বুকিংয়ের হার", en: "Booking rate" })}</Th>
+                <th className="py-2 font-semibold">{t({ bn: "কাজের ধারা", en: "Activity bar" })}</th>
               </tr>
             </thead>
             <tbody className="zebra">
