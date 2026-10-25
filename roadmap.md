@@ -1,5 +1,9 @@
 # Roadmap
 
+## Daily new-lead allocation alerts
+- [x] Add read-only Dhaka-day ledger summary for active eligible agents in HQ/LeadHub and self-only Desk notice; Friday stays neutral, no assignment or schedule changes.
+- [ ] Verify zero/partial/full/Friday/error and access boundaries with tests; inspect signed-in UI.
+
 ## Daily Lead Report — publish and activate at 17:35 Dhaka
 - [x] Publish the existing callback; live POST now returns 401 without managed authentication (not 404). Active managed 11:35 UTC / 17:35 Dhaka schedule preserved without duplication.
 - [x] 12 targeted schedule/sheet tests pass; live release checker confirms v1.6.0, $35.29 and 50-lead markers deployed.

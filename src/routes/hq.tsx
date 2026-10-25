@@ -1,4 +1,5 @@
 import { SystemManualCard } from "@/components/crm/SystemManualCard";
+import { DailyAllocationSummary } from "@/components/crm/DailyAllocationSummary";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ChevronDown, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -219,6 +220,7 @@ function ControlBoard() {
                   onSelectAgent={setOpenAgentId}
                 />
                 <WhatsappAgentSummary />
+                <DailyAllocationSummary surface="hq" />
                 <SalesChartsDashboard scope="hq" />
                 <SalesCommandCenter
                   profiles={profiles}
