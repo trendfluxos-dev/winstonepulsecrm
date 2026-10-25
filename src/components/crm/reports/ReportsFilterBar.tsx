@@ -95,8 +95,8 @@ export function ReportsFilterBar({
     >
       <p className="text-xs text-muted-foreground">
         {t({
-          bn: "এখান থেকে রিপোর্ট ছোট করে দেখুন — কোনো তারিখ, এজেন্ট বা নাম বেছে নিলে নিচের সব হিসাব সেই অনুযায়ী বদলে যাবে। কিছু না বদলালে সবকিছুই দেখাবে।",
-          en: "Use these to narrow the report — pick a date, agent or name and every number below updates. Leave everything as-is to see all.",
+          bn: "যেমন চান তেমন বাছুন — নিচের সব হিসাব সঙ্গে সঙ্গে বদলে যাবে।",
+          en: "Pick what you want — the numbers below update right away.",
         })}
       </p>
       <div className="relative">
@@ -227,12 +227,12 @@ export function ReportsFilterBar({
           <p>
             <span className="font-semibold text-foreground">
               {t({
-                bn: `${filters.from} থেকে ${filters.to} সময়ে এই শর্তে মিলেছে:`,
-                en: `From ${filters.from} to ${filters.to}, these filters match:`,
+                bn: `${filters.from} থেকে ${filters.to} — এই শর্তে মিলেছে:`,
+                en: `From ${filters.from} to ${filters.to} — matches:`,
               })}
             </span>{" "}
-            {t({
-              bn: `${matchedAgents} জন এজেন্ট, ${matchedLeads}টি লিড, ${matchedCalls}টি কল। উপরের চিপগুলোতে চাপ দিলে সেই শর্ত সরে যাবে।`,
+              bn: `${matchedAgents} জন এজেন্ট, ${matchedLeads}টি লিড, ${matchedCalls}টি কল। চিপে চাপ দিলে সেই শর্ত সরে যাবে।`,
+              en: `${matchedAgents} agent${matchedAgents === 1 ? "" : "s"}, ${matchedLeads} lead${matchedLeads === 1 ? "" : "s"}, ${matchedCalls} call${matchedCalls === 1 ? "" : "s"}. Tap a chip to remove that filter.`,
               en: `${matchedAgents} agent${matchedAgents === 1 ? "" : "s"}, ${matchedLeads} lead${matchedLeads === 1 ? "" : "s"}, ${matchedCalls} call${matchedCalls === 1 ? "" : "s"}. Tap a chip above to remove that filter.`,
             })}
           </p>
@@ -242,8 +242,8 @@ export function ReportsFilterBar({
               {t({ bn: "এই শর্তে কিছু পাওয়া যায়নি।", en: "Nothing matches these filters." })}
             </span>{" "}
             {t({
-              bn: "এভাবে বদলান — ১) তারিখ বাড়ান, যেমন 'শেষ ৯০ দিন' চাপুন; ২) উপরের খোঁজার ঘরটি খালি করুন; ৩) এজেন্ট, জায়গা, অবস্থা ও কথার ধরন 'সব' করুন। সব একসাথে বদলাতে 'আগের অবস্থায় ফিরুন' চাপুন।",
-              en: "Try this — 1) widen the dates, e.g. tap 'Last 90 days'; 2) clear the search box; 3) set agent, source, status and mood back to 'All'. Or press Reset to clear everything.",
+              bn: "তারিখ বাড়ান — 'শেষ ৯০ দিন' চাপুন। তারপরও কিছু না মিললে — 'আগের অবস্থায় ফিরুন' চাপুন।",
+              en: "Widen the dates — tap 'Last 90 days'. Still nothing? Press 'Reset' to clear everything.",
             })}
           </p>
         )}

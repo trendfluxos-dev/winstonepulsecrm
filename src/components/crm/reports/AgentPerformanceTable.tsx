@@ -64,9 +64,9 @@ export function AgentPerformanceTable({
             <summary className="cursor-pointer font-semibold text-foreground">
               {t({ bn: "কীভাবে পড়বেন? (সহজ ব্যাখ্যা)", en: "How to read this (simple guide)" })}
             </summary>
-            <ul className="mt-1.5 list-disc space-y-1 pl-4">
+              <li>{t({ bn: "কথা হয়েছে = কত কলে কাস্টমার কথা ধরেছে। % দেখায় ১০০ কলে কতটুকু কথা হয়েছে।", en: "Answered = calls the customer picked up. The % shows answered out of every 100 calls." })}</li>
               <li>{t({ bn: "কল দেওয়া = এজেন্ট যতবার ফোন করেছে।", en: "Calls made = how many times the agent phoned." })}</li>
-              <li>{t({ bn: "কথা হয়েছে = যত কলে কাস্টমার ধরেছে। পাশের % দেখায় ১০০ কলে কতটিতে কথা হয়েছে।", en: "Answered = calls the customer picked up. The % shows answered out of every 100 calls." })}</li>
+              <li>{t({ bn: "বুকিংয়ের হার = পাওয়া লিডের মধ্যে কতটুকু বুকিং হয়েছে। বেশি হলে ভালো।", en: "Booking rate = how many of the assigned leads became bookings. Higher is better." })}</li>
               <li>{t({ bn: "কথার সময় = সব কল মিলে মোট কতক্ষণ কথা হয়েছে।", en: "Talk time = total minutes spent talking." })}</li>
               <li>{t({ bn: "বুকিংয়ের হার = পাওয়া লিডের মধ্যে কত শতাংশ বুকিং হয়েছে। বেশি হলে ভালো।", en: "Booking rate = how many of the assigned leads became bookings. Higher is better." })}</li>
             </ul>
