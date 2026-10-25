@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  AI_HISTORY_LIMIT,
   AI_MODEL_IDS,
   AI_NO_RESPONSE_STATUS,
   META_MODEL_API_BASE_URL,
@@ -9,6 +10,7 @@ import {
 
   isProviderConfigured,
   parseAiModelChoice,
+  readAiHistory,
   requireAiKey,
   resolveAiProvider,
   withLastFailure,
