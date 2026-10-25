@@ -17,6 +17,7 @@ import {
   withLastFailure,
   withLastSuccess,
   readAiHistory,
+  VERTEX_DEFAULT_LOCATION,
   type AiCallHistoryEntry,
   type AiModelChoice,
 } from "@/lib/ai-providers";
@@ -74,6 +75,7 @@ export async function getAiModelChoice(): Promise<AiModelChoice> {
 export async function getAiModelStatus(): Promise<{
   model: AiModelChoice;
   metaConfigured: boolean;
+  vertexConfigured: boolean;
   lastSuccessAt: string | null;
   lastErrorAt: string | null;
   lastErrorStatus: number | null;
@@ -95,6 +97,7 @@ export async function getAiModelStatus(): Promise<{
   return {
     model: parseAiModelChoice(config?.model),
     metaConfigured: isProviderConfigured("meta", process.env),
+    vertexConfigured: isProviderConfigured("vertex", process.env),
     lastSuccessAt: typeof config?.last_success_at === "string" ? config.last_success_at : null,
     lastErrorAt: typeof config?.last_error_at === "string" ? config.last_error_at : null,
     lastErrorStatus: typeof config?.last_error_status === "number" ? config.last_error_status : null,
@@ -123,7 +126,20 @@ export async function setAiModelChoice(model: AiModelChoice): Promise<void> {
 export async function aiChatJson<T>(args: { system: string; user: string }): Promise<T> {
   const choice = await getAiModelChoice();
   const provider = resolveAiProvider(choice);
-  const key = requireAiKey(choice, process.env);
+
+  // Vertex auths with a short-lived OAuth token minted from the stored
+  // service-account JSON; every other provider uses its stored key directly.
+  let endpoint = provider.endpoint;
+  let key: string;
+  if (choice === "vertex") {
+    const { parseVertexServiceAccount, mintVertexAccessToken } = await import("@/lib/vertex-auth.server");
+    const account = parseVertexServiceAccount(process.env["GOOGLE_VERTEX_SERVICE_ACCOUNT"]);
+    key = await mintVertexAccessToken(account);
+    const location = process.env["GOOGLE_VERTEX_LOCATION"] || VERTEX_DEFAULT_LOCATION;
+    endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${account.projectId}/locations/${location}/endpoints/openapi/chat/completions`;
+  } else {
+    key = requireAiKey(choice, process.env);
+  }
 
   const body: Record<string, unknown> = {
     model: provider.model,
