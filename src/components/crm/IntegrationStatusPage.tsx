@@ -3,6 +3,7 @@ import { ArrowUpRight, CircleOff, Clock3, Cloud, FolderOpen, MessageCircle, Netw
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { integrationStatus, type IntegrationStatus } from "@/lib/integration-status";
+import { WorkspaceRoadmap } from "@/components/crm/WorkspaceRoadmap";
 
 const ICONS = { messenger: MessageCircle, whatsapp: MessageCircle, windsor: BarChart3, drive: FolderOpen, os: Cloud };
 
@@ -45,6 +46,7 @@ export function IntegrationStatusPage() {
         <div className="min-w-0 space-y-3"><h3 className="text-sm font-semibold">{t({ bn: "যাচাইয়ের প্রয়োজনীয় ধাপ", en: "Required verification steps" })}</h3><ol className="list-decimal space-y-3 pl-5 text-sm leading-relaxed marker:text-muted-foreground">{service.steps.map(step => <li key={step.en} className="pl-1">{t(step)}</li>)}</ol></div>
       </section>;
     })}</div>
+    <WorkspaceRoadmap />
     <p className="border-t border-border pt-4 text-xs text-muted-foreground">{t({ bn: "গোপন তথ্য, অনুমতি ও live ডেটা অপরিবর্তিত। এই পাতায় কোনো সংযোগ চালু, মেসেজ পাঠানো বা তথ্য সিঙ্ক হয় না। অন্য পাতার পরীক্ষা বর্তমান প্রবেশাধিকার মেনেই চলবে।", en: "Credentials, permissions and live data are unchanged. This page does not activate connections, send messages or sync data. Other pages retain their existing access checks." })}</p>
   </div>;
 }
