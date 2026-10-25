@@ -131,8 +131,37 @@ export function AiTeamSummary() {
             )}
           </span>
         </p>
+      )}
 
-
+      {model.data && model.data.history.length > 0 && (
+        <div className="rounded-lg border border-border bg-card p-3">
+          <p className="text-xs font-medium text-foreground">
+            {t({ bn: "সাম্প্রতিক AI কলের ইতিহাস", en: "Recent AI call history" })}
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {model.data.history.map((entry, i) => (
+              <li
+                key={`${entry.at}-${i}`}
+                className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground"
+              >
+                <span
+                  className={`size-2 shrink-0 rounded-full ${entry.ok ? "bg-green-600" : "bg-destructive"}`}
+                  aria-hidden
+                />
+                <span className="font-medium text-foreground">{dhaka(entry.at)}</span>
+                <span aria-hidden>·</span>
+                {entry.ok ? (
+                  <span>{t({ bn: "সফল", en: "Successful" })}</span>
+                ) : (
+                  <span>
+                    {t({ bn: "ব্যর্থ", en: "Failed" })}
+                    {typeof entry.status === "number" && ` · ${failureText(entry.status)}`}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {model.data?.model === "meta" &&
