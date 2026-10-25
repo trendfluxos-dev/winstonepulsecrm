@@ -44,7 +44,23 @@ Rules that must never change:
 - After adding the secret, publish the app before expecting the published
   site to use it (the preview reads it immediately).
 
+## Status indicator in the HQ panel
+
+The AI panel shows, for every provider: the active model, the time of the
+last **successful** call, and the time of the last **failed** call with its
+status and a short reason (e.g. `402 · billing/credits`, `429 · AI busy`,
+`500 · service unavailable`, `no usable answer` when the provider never
+answered). Times are Dhaka local; the row reads "No failed AI call yet" while
+no failure has been recorded.
+
+Only three safe fields are ever stored in the `ai` config row: the model name,
+an ISO timestamp, and an HTTP status number (a call that never produced one is
+stored as `0`). Provider error bodies, response text, tokens and keys are never
+written to the database or shown in the panel, and recording failures is
+best-effort — it can never break an AI call.
+
 ## Compatibility blocker: Responses API / encrypted reasoning
+
 
 The Meta quickstart describes the Responses API with
 `reasoning.encrypted_content` and high reasoning effort. **The current CRM
