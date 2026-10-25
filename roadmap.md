@@ -190,3 +190,5 @@
 
 ## 2026-10-24 — All 15 brochures as one ZIP
 - [x] Projects page header offers "All brochures (ZIP, 15)": fetches the 15 brochure PDFs, packs them (stored, not re-compressed) and saves one archive; verified in browser — 18 MB ZIP with exactly 15 valid PDFs, no page errors; tests/brochure-zip.test.ts (4) passes.
+
+- [ ] Verify all 15 brochure links download the correct PDF in browser (owner request 2026-10-24 18:27 UTC)
