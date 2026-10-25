@@ -1,4 +1,4 @@
--- PROPOSAL ONLY — NOT APPLIED. Review before any migration. Lives outside drizzle/migrations on purpose.
+-- APPLIED 2026-10-25 as drizzle/migrations/0123_messenger_durable_storage.sql (owner-authorized). Kept for review history.
 -- Server-only tables: RLS on, no client policies; access only through server functions.
 -- Column names below are exactly what src/lib/messenger-store.server.ts and
 -- src/lib/messenger-review.server.ts read and write, so applying this file is
