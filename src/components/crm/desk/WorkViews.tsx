@@ -392,7 +392,7 @@ export function OutlookView() {
   const max = Math.max(1, ...weeks.map((w) => w.n));
   return (
     <section className="space-y-4">
-      <SectionTitle title={t({ bn: "আউটলুক", en: "Outlook" })} sub={t({ bn: "সামনের কাজ — শুধু আসল সংখ্যা।", en: "What's ahead — real counts only." })} />
+      <SectionTitle title={t({ bn: "আজকের অবস্থা", en: "Today's status" })} sub={t({ bn: "সামনের কাজ — শুধু আসল সংখ্যা।", en: "What's ahead — real counts only." })} />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard loading={isPending} label={t({ bn: "সক্রিয় হট লিড", en: "Active hot leads" })} value={num(hot, lang)} icon={<Flame />} tone="destructive" />
         <StatCard loading={isPending} label={t({ bn: "৭ দিনে ফলো-আপ", en: "Follow-ups in 7 days" })} value={num(dueWeek, lang)} icon={<CalendarClock />} tone="chart4" />
