@@ -21,6 +21,7 @@ import { MaintenancePanel } from "@/components/crm/MaintenancePanel";
 import { OsSyncPanel } from "@/components/crm/OsSyncPanel";
 import { LoginFailuresPanel, MonthlySummaryPanel } from "@/components/crm/SecurityMonitorPanel";
 import { YearArchivePanel } from "@/components/crm/YearArchivePanel";
+import { LeadReportSheetPanel } from "@/components/crm/LeadReportSheetPanel";
 import { ReportSheetPanel } from "@/components/crm/ReportSheetPanel";
 import { SheetSyncHealthPanel } from "@/components/crm/SheetSyncHealthPanel";
 import { BackendHealthPanel } from "@/components/crm/BackendHealthPanel";
@@ -183,6 +184,7 @@ function SystemBoard() {
           <DriveBackupPanel />
           <DocSummaryPanel />
           <ReportSheetPanel />
+          <LeadReportSheetPanel />
           <ShiftSummaryPanel scope="it" />
         </div>
       )}
