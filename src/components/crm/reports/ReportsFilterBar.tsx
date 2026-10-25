@@ -104,7 +104,7 @@ export function ReportsFilterBar({
         />
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:flex xl:flex-wrap xl:items-end">
-        <Field label="শুরু">
+        <Field label={t({ bn: "শুরুর তারিখ", en: "From date" })}>
           <Input
             type="date"
             value={filters.from}
@@ -113,7 +113,7 @@ export function ReportsFilterBar({
             className="h-9 w-full xl:w-[150px]"
           />
         </Field>
-        <Field label="শেষ">
+        <Field label={t({ bn: "শেষ তারিখ", en: "To date" })}>
           <Input
             type="date"
             value={filters.to}
@@ -122,13 +122,13 @@ export function ReportsFilterBar({
             className="h-9 w-full xl:w-[150px]"
           />
         </Field>
-        <Field label="এজেন্ট">
+        <Field label={t({ bn: "কোন এজেন্ট", en: "Which agent" })}>
           <Select value={filters.agentId} onValueChange={(v) => patch({ agentId: v })}>
             <SelectTrigger className="h-9 w-full xl:w-[180px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">সব এজেন্ট</SelectItem>
+              <SelectItem value="all">{t({ bn: "সব এজেন্ট", en: "All agents" })}</SelectItem>
               {agents.map((a) => (
                 <SelectItem key={a.id} value={a.id}>
                   {a.name}
@@ -137,13 +137,13 @@ export function ReportsFilterBar({
             </SelectContent>
           </Select>
         </Field>
-        <Field label="লিড কোথা থেকে">
+        <Field label={t({ bn: "লিড এসেছে কোথা থেকে", en: "Lead source" })}>
           <Select value={filters.source} onValueChange={(v) => patch({ source: v })}>
             <SelectTrigger className="h-9 w-full xl:w-[165px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">সব সোর্স</SelectItem>
+              <SelectItem value="all">{t({ bn: "সব জায়গা থেকে", en: "All sources" })}</SelectItem>
               {sources.map((s) => (
                 <SelectItem key={s} value={s}>
                   {s}
@@ -152,7 +152,7 @@ export function ReportsFilterBar({
             </SelectContent>
           </Select>
         </Field>
-        <Field label="লিড স্ট্যাটাস">
+        <Field label={t({ bn: "লিডের অবস্থা", en: "Lead status" })}>
           <Select
             value={filters.status}
             onValueChange={(v) => patch({ status: v as LeadStatus | "all" })}
@@ -161,7 +161,7 @@ export function ReportsFilterBar({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">সব স্ট্যাটাস</SelectItem>
+              <SelectItem value="all">{t({ bn: "সব অবস্থা", en: "All statuses" })}</SelectItem>
               {LEAD_STATUSES.map((s) => (
                 <SelectItem key={s.key} value={s.key}>
                   {s.label}
@@ -170,13 +170,13 @@ export function ReportsFilterBar({
             </SelectContent>
           </Select>
         </Field>
-        <Field label="কথার ধরন">
+        <Field label={t({ bn: "কথার ধরন", en: "Call mood" })}>
           <Select value={filters.sentiment} onValueChange={(v) => patch({ sentiment: v })}>
             <SelectTrigger className="h-9 w-full xl:w-[150px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">সব ধরনের</SelectItem>
+              <SelectItem value="all">{t({ bn: "সব ধরনের", en: "All moods" })}</SelectItem>
               {SENTIMENTS.map((s) => (
                 <SelectItem key={s.key} value={s.key}>
                   {s.label}
@@ -197,12 +197,12 @@ export function ReportsFilterBar({
             </Button>
           ))}
           <Button variant="ghost" size="sm" onClick={() => setFilters(defaultFilters(30))}>
-            <RotateCcw className="size-4" /> রিসেট
+            <RotateCcw className="size-4" /> {t({ bn: "আগের অবস্থায় ফিরুন", en: "Reset" })}
           </Button>
         </div>
       </div>
       {active.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5" aria-label="সক্রিয় ফিল্টার">
+        <div className="flex flex-wrap items-center gap-1.5" aria-label={t({ bn: "যেগুলো বেছে নেওয়া হয়েছে", en: "Active filters" })}>
           {active.map((chip) => (
             <button
               key={chip.key}
