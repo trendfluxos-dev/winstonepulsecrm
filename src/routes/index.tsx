@@ -185,7 +185,7 @@ function EntryHall() {
         </p>
 
         <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
-          <p className="text-sm font-semibold">Your role &amp; workspace</p>
+          <p className="text-sm font-semibold">{t({ bn: "আপনার ভূমিকা ও কর্মঘর", en: "Your role & workspace" })}</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {ROLES.map(({ key, label, icon: Icon }) => (
               <button
