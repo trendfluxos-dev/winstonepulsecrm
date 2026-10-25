@@ -10,6 +10,19 @@ export async function readInventorySheetState(): Promise<InventorySheetState | n
 }
 async function store(state: InventorySheetState) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const previous = await readInventorySheetState();
+  if (previous && previous.syncedAt !== state.syncedAt) {
+    const backupKey = `${KEY}_history_${crypto.randomUUID()}`;
+    const { error: backupError } = await supabaseAdmin.from("system_settings").insert({ key: backupKey, value: previous as never });
+    if (backupError) throw new Error("SHEET_BACKUP_FAILED");
+    const { data: backup, error: readError } = await supabaseAdmin.from("system_settings").select("value").eq("key", backupKey).single();
+    if (readError || JSON.stringify(backup?.value) !== JSON.stringify(JSON.parse(JSON.stringify(previous)))) {
+      // jsonb key ordering differs; compare semantic values, not object-key order.
+      const saved = backup?.value as unknown as InventorySheetState | undefined;
+      if (readError || !saved || saved.sheetId !== previous.sheetId || saved.syncedAt !== previous.syncedAt || saved.rows.length !== previous.rows.length ||
+        saved.rows.some((row, i) => Object.keys(row).some((key) => row[key as keyof SheetListing] !== previous.rows[i]?.[key as keyof SheetListing]))) throw new Error("SHEET_BACKUP_VERIFY_FAILED");
+    }
+  }
   const { error } = await supabaseAdmin.from("system_settings").upsert({ key: KEY, value: state as never }, { onConflict: "key" });
   if (error) throw new Error("SHEET_STATE_SAVE_FAILED");
 }
@@ -24,7 +37,8 @@ async function fetchRows(sheetId: string, tab: string) {
   });
   if (!response.ok) {
     const body = await response.text();
-    console.error(`Inventory Sheets [${response.status}]: ${body}`);
+    // Provider status is retained; response text is not logged because sheet names may be private.
+    console.error(`Inventory Sheets [${response.status}]`, { responseReceived: body.length > 0 });
     throw new Error(`SHEETS_HTTP_${response.status}`);
   }
   const body = await response.json() as { values?: unknown };
