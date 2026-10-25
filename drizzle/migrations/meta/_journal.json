@@ -883,6 +883,13 @@
       "when": 1792889247420,
       "tag": "0125_messenger_retention_policy",
       "breakpoints": true
+    },
+    {
+      "idx": 126,
+      "version": "7",
+      "when": 1792889378136,
+      "tag": "0126_meta_verification_records",
+      "breakpoints": true
     }
   ]
 }
