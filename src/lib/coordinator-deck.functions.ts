@@ -114,7 +114,7 @@ const BatchInput = z.object({
 });
 
 /** Read-only proposal. No reservation, audit writes, rollover or automatic distribution. */
-async function buildAssignmentPreview(rows: Array<{ agentId: string; count: number }>) {
+async function buildAssignmentPreview(rows: Array<{ agentId: string; count: number }>, showBantScores = false) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const pool = await import("@/lib/lead-pool.server");
   const { eligibleLeadIds } = await import("@/lib/lead-eligibility.server");
