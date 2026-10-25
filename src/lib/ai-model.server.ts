@@ -66,11 +66,18 @@ export async function getAiModelStatus(): Promise<{
     .select("data")
     .eq("id", "ai")
     .maybeSingle();
-  const config = (data?.data ?? null) as { model?: string; last_success_at?: string } | null;
+  const config = (data?.data ?? null) as {
+    model?: string;
+    last_success_at?: string;
+    last_error_at?: string;
+    last_error_status?: number;
+  } | null;
   return {
     model: parseAiModelChoice(config?.model),
     metaConfigured: isProviderConfigured("meta", process.env),
     lastSuccessAt: typeof config?.last_success_at === "string" ? config.last_success_at : null,
+    lastErrorAt: typeof config?.last_error_at === "string" ? config.last_error_at : null,
+    lastErrorStatus: typeof config?.last_error_status === "number" ? config.last_error_status : null,
   };
 }
 
