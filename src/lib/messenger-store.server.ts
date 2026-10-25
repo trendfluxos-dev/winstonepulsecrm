@@ -90,10 +90,15 @@ export function supabaseMessengerStore(): MessengerStore {
 
     async recordStatus(input) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const threadId = await threadIdFor(supabaseAdmin, input.pageId, input.psid);
+      // Status events can arrive for threads we have never seen (messages sent
+      // before the webhook existed). The receipt already records the event;
+      // there is no thread to attach it to — skip gracefully, never crash.
+      if (!threadId) return { ok: true };
       const { error } = await supabaseAdmin
         .from("messenger_thread_events" as never)
         .insert({
-          thread_id: await threadIdFor(supabaseAdmin, input.pageId, input.psid),
+          thread_id: threadId,
           action: input.kind,
           detail: { event_key: input.eventKey, timestamp: input.timestamp } as never,
         } as never);

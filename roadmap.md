@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-25 — Messenger review pass + store defect fix (01:04 UTC)
+- [x] Full review of the Meta/Messenger pipeline: 16 files / 116 tests passed; live preview probes confirmed fail-closed — unsigned POST 503, fake-signed POST 503, wrong-verify-token handshake 503, human GET 303 → /messenger. No secrets, no Meta calls, no migrations, no gate changes.
+- [x] Fixed one real defect: `recordStatus` in `messenger-store.server.ts` crashed (23502 on NOT NULL thread_id) when a delivery/read/echo event arrived for a never-seen thread; it now skips gracefully (receipt still records the event). New `tests/messenger-store.test.ts` (3 tests: missing thread, existing thread, missing table). 4 files / 29 tests passed 01:05 UTC.
+
 ## 2026-10-25 — Sync enable/disable audit log (owner request 00:54 UTC)
 - [x] `messenger_sync_decisions` (0127, append-only, service_role-only, RLS on): every sync enable/disable decision records staff, Dhaka time, verification snapshot (verified/missing tracks) and reason.
 - [x] `src/lib/messenger-sync-decisions.ts` + `.functions.ts`: IT-only recording; an enable decision is refused server-side unless all four verification tracks' latest outcome is "verified" (VERIFICATION_INCOMPLETE with the missing tracks); disable always allowed; reasons validated so no token-like text is stored.
