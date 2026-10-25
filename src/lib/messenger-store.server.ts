@@ -114,3 +114,60 @@ async function unreadCount(db: { from: (t: never) => any }, threadId: string): P
     .eq("direction", "inbound");
   return count ?? 0;
 }
+
+/**
+ * Review store behind the staff confirmation step. Reads only the one message
+ * the staff member is looking at; a missing table is reported as unreadable
+ * rather than as "no such message", so the UI never claims a demo row is real.
+ */
+export function supabaseMessengerReviewStore(): ReviewStore {
+  return {
+    async loadMessage(messageId) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data, error } = await supabaseAdmin
+        .from("messenger_messages" as never)
+        .select("id, thread_id, direction, body, lead_id, messenger_threads ( page_id, psid )")
+        .eq("id", messageId)
+        .maybeSingle();
+      if (error) {
+        if (MISSING_STORAGE_CODES.has(error.code ?? "")) return "unavailable";
+        throw error;
+      }
+      if (!data) return null;
+      const row = data as unknown as {
+        id: string;
+        thread_id: string;
+        direction: string;
+        body: string | null;
+        lead_id: string | null;
+        messenger_threads: { page_id: string; psid: string } | null;
+      };
+      const thread = row.messenger_threads;
+      if (!thread) return null;
+      const message: StoredMessage = {
+        id: row.id,
+        threadId: row.thread_id,
+        pageId: thread.page_id,
+        psid: thread.psid,
+        direction: row.direction === "outbound" ? "outbound" : "inbound",
+        body: row.body,
+        leadId: row.lead_id,
+      };
+      return message;
+    },
+
+    async linkLead(messageId, leadId) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error } = await supabaseAdmin
+        .from("messenger_messages" as never)
+        .update({ lead_id: leadId } as never)
+        .eq("id", messageId)
+        .is("lead_id", null);
+      if (error) {
+        if (MISSING_STORAGE_CODES.has(error.code ?? "")) return { ok: false };
+        throw error;
+      }
+      return { ok: true };
+    },
+  };
+}
