@@ -4,6 +4,8 @@
 - [x] HQ status row now carries the last failed call too: Dhaka timestamp + HTTP status + short safe reason (`402 · billing/credits`, `429 · AI busy`, `500 · service unavailable`, `no usable answer`), or "No failed AI call yet" while nothing has failed. Active model and last success stay as before.
 - [x] Failures that never produced an HTTP status (network error, unreadable/missing answer) are now recorded as `AI_NO_RESPONSE_STATUS` (0) instead of being invisible, and non-finite statuses are normalised — the recorded failure time is always the latest attempt. Stored fields remain model name, ISO time and status number only.
 - [x] Fixed the typecheck error the build reported in `recordAiStatus` (`Record<string, unknown>` → Supabase `Json`): the merge callback is typed as `AiStatusRecord`. 5 new tests (23 total, all passing). Docs: `docs/AI_PROVIDERS.md` status-indicator section. No secrets, live calls, migrations, data changes or deployment.
+- [x] Two stale tests the full run exposed were repaired (both pre-existing, unrelated to this feature): the `targeted-security-boundaries` mock of `@/lib/ai-model.server` now defines `getAiModelStatus` (the HQ indicator export), and the desk tab-bar count matches the 14 current sections. Full isolated run: 137 files / 978 tests passing.
+
 
 
 ## 2026-10-25 — Meta billing hint + live smoke test (01:29 UTC)
