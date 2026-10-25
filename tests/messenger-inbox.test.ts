@@ -87,8 +87,15 @@ describe("Facebook not connected", () => {
     expect(page).toMatch(/Messenger Inbox — Winstone Pulse/);
     expect(page).toMatch(/<MessengerInbox \/>/);
   });
-  it("proposed migration is not in the applied migrations folder", () => {
-    expect(readdirSync("drizzle/migrations").some((f) => /messenger/i.test(f))).toBe(false);
+  it("durable storage migration is applied and the ingestion switch still gates the webhook", () => {
+    const applied = readdirSync("drizzle/migrations").filter((f) => /messenger/i.test(f));
+    expect(applied).toContain("0123_messenger_durable_storage.sql");
+    expect(applied).toContain("0124_messenger_message_encryption.sql");
+    // Storage existing must not by itself open the pipeline: the explicit
+    // server flag is still required before any real event is accepted.
+    expect(messengerIngestionEnabled({})).toBe(false);
+    expect(messengerIngestionEnabled({ MESSENGER_INGESTION_ENABLED: "yes" })).toBe(false);
+    expect(messengerIngestionEnabled({ MESSENGER_INGESTION_ENABLED: "true" })).toBe(true);
   });
   it("demo threads are clearly labelled samples", () => {
     expect(DEMO_THREADS.every((t) => t.id.startsWith("demo-") && t.customer.startsWith("নমুনা"))).toBe(true);
