@@ -16,6 +16,8 @@ import {
 
   withLastFailure,
   withLastSuccess,
+  readAiHistory,
+  type AiCallHistoryEntry,
   type AiModelChoice,
 } from "@/lib/ai-providers";
 
@@ -25,6 +27,7 @@ type AiStatusRecord = {
   last_success_at?: string;
   last_error_at?: string;
   last_error_status?: number;
+  history?: AiCallHistoryEntry[];
 };
 
 /** Best-effort status recording for the HQ indicator; never breaks AI calls. */
@@ -74,6 +77,8 @@ export async function getAiModelStatus(): Promise<{
   lastSuccessAt: string | null;
   lastErrorAt: string | null;
   lastErrorStatus: number | null;
+  /** Recent calls, newest first: time, success flag and failure status only. */
+  history: AiCallHistoryEntry[];
 }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
@@ -93,6 +98,7 @@ export async function getAiModelStatus(): Promise<{
     lastSuccessAt: typeof config?.last_success_at === "string" ? config.last_success_at : null,
     lastErrorAt: typeof config?.last_error_at === "string" ? config.last_error_at : null,
     lastErrorStatus: typeof config?.last_error_status === "number" ? config.last_error_status : null,
+    history: readAiHistory(config),
   };
 }
 
