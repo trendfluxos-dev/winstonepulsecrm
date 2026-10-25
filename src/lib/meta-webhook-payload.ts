@@ -32,3 +32,53 @@ export function validateMetaWebhookBytes(bytes: Uint8Array) {
     return validateMetaWebhookPayload(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)));
   } catch { return { valid: false as const }; }
 }
+
+/** One normalized event the durable pipeline may store. Page id comes from the envelope, never the sender. */
+export type MetaWebhookEvent = {
+  pageId: string;
+  senderId: string;
+  timestamp: number;
+  message?: { mid: string; text?: string; isEcho?: boolean };
+  delivery?: { watermark: number; mids?: string[] };
+  read?: { watermark: number };
+  postback?: { title?: string; payload?: string; mid?: string };
+};
+
+/** Structural parse only: it never proves Page consent, persistence or delivery. */
+export function parseMetaWebhookBytes(bytes: Uint8Array): { ok: true; events: MetaWebhookEvent[] } | { ok: false } {
+  let value: unknown;
+  try {
+    value = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+  } catch { return { ok: false }; }
+  const parsed = envelope.safeParse(value);
+  if (!parsed.success) return { ok: false };
+  const events: MetaWebhookEvent[] = [];
+  for (const entry of parsed.data.entry) {
+    for (const item of entry.messaging) {
+      events.push({
+        pageId: entry.id,
+        senderId: item.sender.id,
+        timestamp: item.timestamp,
+        message: item.message
+          ? {
+              mid: item.message.mid,
+              ...(item.message.text !== undefined ? { text: item.message.text } : {}),
+              ...(item.message.is_echo !== undefined ? { isEcho: item.message.is_echo } : {}),
+            }
+          : undefined,
+        delivery: item.delivery
+          ? { watermark: item.delivery.watermark, ...(item.delivery.mids !== undefined ? { mids: item.delivery.mids } : {}) }
+          : undefined,
+        read: item.read ? { watermark: item.read.watermark } : undefined,
+        postback: item.postback
+          ? {
+              ...(item.postback.title !== undefined ? { title: item.postback.title } : {}),
+              ...(item.postback.payload !== undefined ? { payload: item.postback.payload } : {}),
+              ...(item.postback.mid !== undefined ? { mid: item.postback.mid } : {}),
+            }
+          : undefined,
+      });
+    }
+  }
+  return { ok: true, events };
+}
