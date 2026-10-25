@@ -59,6 +59,8 @@ export async function getAiModelStatus(): Promise<{
   model: AiModelChoice;
   metaConfigured: boolean;
   lastSuccessAt: string | null;
+  lastErrorAt: string | null;
+  lastErrorStatus: number | null;
 }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
@@ -123,6 +125,7 @@ export async function aiChatJson<T>(args: { system: string; user: string }): Pro
     // Status only — provider error bodies can echo request data and must
     // never reach logs or staff screens.
     console.error("ai provider error", choice, res.status);
+    await recordAiStatus((data) => withLastFailure(data, new Date().toISOString(), res.status));
     throw new Error(aiCallFailureMessage(res.status));
   }
   const payload = (await res.json()) as {
