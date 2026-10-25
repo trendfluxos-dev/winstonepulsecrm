@@ -20,9 +20,16 @@ import {
 } from "@/lib/ai-providers";
 
 /** Best-effort status recording for the HQ indicator; never breaks AI calls. */
-async function recordAiStatus(
-  merge: (data: unknown) => Record<string, unknown>,
-): Promise<void> {
+/** Stored shape of the ai config row: model choice plus safe call markers. */
+type AiStatusRecord = {
+  model?: string;
+  last_success_at?: string;
+  last_error_at?: string;
+  last_error_status?: number;
+};
+
+async function recordAiStatus(merge: (data: unknown) => AiStatusRecord): Promise<void> {
+
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data } = await supabaseAdmin
@@ -32,7 +39,10 @@ async function recordAiStatus(
       .maybeSingle();
     await supabaseAdmin.from("app_config").upsert({
       id: "ai",
-      data: merge(data?.data),
+      // AiStatusRecord only holds model names, ISO times and a status number,
+      // so the value is always safe JSON — the cast is for the generated type.
+      data: merge(data?.data) as never,
+
       updated_at: new Date().toISOString(),
     });
   } catch {
