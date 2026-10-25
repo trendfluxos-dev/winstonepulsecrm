@@ -1,3 +1,4 @@
+import { useT } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -64,6 +65,7 @@ export function SalesCommandCenter({
   onDrill: (spec: DrillSpec) => void;
   onSelectAgent: (id: string) => void;
 }) {
+  const t = useT();
   const adminToken = useAdminToken();
   const fetchFeed = useServerFn(getCommandCenterFeed);
   const feed = useQuery({
@@ -144,6 +146,7 @@ export function SalesCommandCenter({
 
   return (
     <div className="space-y-5">
+      <p className="text-xs text-muted-foreground">{t({ bn: "রিপোর্ট ও ফলো-আপ সর্বশেষ পড়া", en: "Reports and follow-ups read as of" })}: {feed.data?.freshness?.generatedAt ? new Date(feed.data.freshness.generatedAt).toLocaleString("en-GB", { timeZone: "Asia/Dhaka" }) : "—"} · Asia/Dhaka · {t({ bn: "কলের তথ্য ও অডিও আপলোড আলাদা; অডিও রেফারেন্স ফাইল যাচাই নয়।", en: "Call evidence and audio uploads are separate; audio references are not verified files." })}</p>
       {/* Global filters */}
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-muted/30 p-2.5">
         <div className="flex rounded-lg border border-border bg-background p-0.5" role="group" aria-label="সময়সীমা">

@@ -7,6 +7,10 @@ import { AppShell } from "@/components/crm/AppShell";
 import { ConversationWorkspace } from "@/components/support/ConversationWorkspace";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MessengerInbox } from "@/components/crm/MessengerInbox";
+import { MessengerConnectionStatus } from "@/components/crm/MessengerConnectionStatus";
+import { useT } from "@/lib/i18n";
 import { useAdminToken } from "@/lib/local-session";
 import { listSupportInbox } from "@/lib/support-staff.functions";
 import {
@@ -23,16 +27,16 @@ import {
 export const Route = createFileRoute("/inbox")({
   head: () => ({
     meta: [
-      { title: "Support Inbox — Winstone Support Desk" },
+      { title: "Support & Messenger Inbox — Winstone Pulse" },
       {
         name: "description",
         content:
-          "Work the live support queue: AI-handled conversations, escalations, SLA countdowns, replies and ticket routing in one workspace.",
+          "Separate Support Desk and Messenger queues in Winstone Pulse; Messenger remains a disconnected demo until verified setup.",
       },
-      { property: "og:title", content: "Support Inbox — Winstone Support Desk" },
+      { property: "og:title", content: "Support & Messenger Inbox — Winstone Pulse" },
       {
         property: "og:description",
-        content: "One queue for AI and human support conversations with SLA tracking.",
+        content: "Separate support and Messenger workspaces with existing access controls and honest connection status.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -52,6 +56,16 @@ export const Route = createFileRoute("/inbox")({
 });
 
 function InboxPage() {
+  const t = useT();
+  const [queue, setQueue] = useState("support");
+  return <AppShell><MessengerConnectionStatus /><Tabs value={queue} onValueChange={setQueue}>
+    <TabsList className="mb-4"><TabsTrigger value="support">Support Desk</TabsTrigger><TabsTrigger value="messenger">{t({ bn: "Messenger", en: "Messenger" })}</TabsTrigger></TabsList>
+    <TabsContent value="support">{queue === "support" && <SupportInbox />}</TabsContent>
+    <TabsContent value="messenger">{queue === "messenger" && <MessengerInbox />}</TabsContent>
+  </Tabs></AppShell>;
+}
+
+function SupportInbox() {
   const adminToken = useAdminToken();
   const [status, setStatus] = useState<"all" | ConversationStatus>("open");
   const [mine, setMine] = useState(false);
@@ -71,7 +85,7 @@ function InboxPage() {
   const activeId = selected ?? conversations[0]?.id ?? null;
 
   return (
-    <AppShell>
+    <>
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="flex items-center gap-2 text-lg font-bold tracking-tight">
@@ -189,6 +203,6 @@ function InboxPage() {
           )}
         </section>
       </div>
-    </AppShell>
+    </>
   );
 }

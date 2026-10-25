@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { CallAudioPlayer } from "@/components/crm/CallAudioPlayer";
 import { PreCallBriefCard } from "@/components/crm/PreCallBriefCard";
 import { LeadNotesPanel } from "@/components/crm/LeadNotesPanel";
+import { LeadSourceDetails } from "@/components/crm/LeadSourceDetails";
 import { LeadFollowUpHistory } from "@/components/crm/LeadFollowUpHistory";
 import { LeadProjectFacts, VisitRequestsPanel } from "@/components/crm/KnowledgeHubCards";
 import { LeadProjectSales } from "@/components/crm/ProjectCatalog";
@@ -158,6 +159,7 @@ export function LeadDossier({
 
               <section id="lead-overview" className="scroll-mt-14 space-y-1 rounded-xl border bg-card p-4 text-sm">
                 <h3 className="text-sm font-semibold">পরিচিতি / Details</h3>
+                <LeadSourceDetails source={lead.source} />
                 {lead.address ? <p><span className="text-muted-foreground">ঠিকানা: </span>{lead.address}</p> : null}
                 <p className="tabular text-xs text-muted-foreground">যোগ হয়েছে: {fullDateTime(lead.created_at)}</p>
                 {lead.notes ? (

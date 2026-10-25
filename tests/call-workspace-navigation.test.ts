@@ -7,7 +7,7 @@ import { DeskTabBar } from "@/components/crm/desk/DeskTabBar";
 describe("desk navigation and honest SIM workspace", () => {
   it("keeps all desk sections reachable without horizontal scrolling", () => {
     const html = renderToStaticMarkup(React.createElement(DeskTabBar, { tab: "calls", onChange: () => {} }));
-    expect(html.match(/<button/g)).toHaveLength(13); // 12 sections (incl. Pipeline, Tasks, Activities, Outlook) + toggle
+    expect(html.match(/<button/g)).toHaveLength(14); // 14 sections (incl. Pipeline, Tasks, Activities, Outlook, Messenger)
     expect(html).toContain("grid-cols-2");
     expect(html).toContain('aria-current="page"');
     expect(html).not.toContain("overflow-x-auto");

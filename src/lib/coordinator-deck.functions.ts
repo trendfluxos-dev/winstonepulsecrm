@@ -1,3 +1,4 @@
+import { selectAssignmentCandidates, assertPreviewUnchanged } from "@/lib/assignment-preview";
 import { MAX_DAILY_LEADS_PER_AGENT } from "@/lib/lead-quota";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -100,6 +101,9 @@ export const coordinatorAllocation = createServerFn({ method: "POST" })
 const BatchInput = z.object({
   adminToken: z.string().nullable().optional(),
   requestId: z.string().uuid(),
+  reviewedLeadIds: z.array(z.string().uuid()).max(2000).optional(),
+  /** When true, annotate preview leads with their latest AI BANT total (display signal only; selection order and all gates are unchanged). */
+  showBantScores: z.boolean().optional(),
   rows: z
     .array(z.object({ agentId: z.string().uuid(), count: z.number().int().min(1).max(MAX_DAILY_LEADS_PER_AGENT) }))
     .min(1)
@@ -108,6 +112,49 @@ const BatchInput = z.object({
   const ids = value.rows.map((row) => row.agentId);
   if (new Set(ids).size !== ids.length) ctx.addIssue({ code: "custom", message: "একই এজেন্ট একাধিকবার দেওয়া যাবে না", path: ["rows"] });
 });
+
+/** Read-only proposal. No reservation, audit writes, rollover or automatic distribution. */
+async function buildAssignmentPreview(rows: Array<{ agentId: string; count: number }>, showBantScores = false) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const pool = await import("@/lib/lead-pool.server");
+  const { eligibleLeadIds } = await import("@/lib/lead-eligibility.server");
+  const agents = new Map((await pool.activeAgents()).map(a => [a.id, a]));
+  const today = pool.dhakaToday(); const held = await pool.assignedTodayByAgent(today); const plan = await pool.dailyPlan();
+  const taken = await pool.assignedPhoneKeys();
+  const candidates: import("@/lib/assignment-preview").PreviewLead[] = [];
+  for (let offset = 0; offset < 20000; offset += 1000) {
+    const page = await supabaseAdmin.from("leads").select("id, name, phone_number, created_at")
+      .is("assigned_to", null).is("assigned_agent_id", null).eq("status", "pending")
+      .or("assignment_source.is.null,assignment_source.neq.duplicate_skipped")
+      .order("created_at").order("id").range(offset, offset + 999);
+    if (page.error) throw new Error(page.error.message);
+    candidates.push(...(page.data ?? [])); if ((page.data ?? []).length < 1000) break;
+  }
+  const eligible = new Set(await eligibleLeadIds(candidates.map(l => l.id)));
+  const { extractBangladeshPhones } = await import("@/lib/lead-phone");
+  const proposals = rows.map(row => {
+    const agent = agents.get(row.agentId);
+    const capacity = agent ? Math.max(0, plan.perAgent - (held.get(row.agentId) ?? 0)) : 0;
+    const leads = selectAssignmentCandidates(candidates, eligible, taken, Math.min(row.count, capacity));
+    leads.forEach(l => { eligible.delete(l.id); extractBangladeshPhones(l.phone_number ?? "").forEach(k => taken.add(k)); });
+    return { agentId: row.agentId, name: agent?.name ?? null, requested: row.count, capacity, leads };
+  });
+  if (showBantScores) {
+    const { latestBantTotals } = await import("@/lib/lead-bant.server");
+    const totals = await latestBantTotals(candidates.map(l => l.id));
+    for (const proposal of proposals) {
+      proposal.leads = proposal.leads.map(l => ({ ...l, bantTotal: totals.get(l.id) ?? null }));
+    }
+  }
+  return { today, generatedAt: new Date().toISOString(), scanned: candidates.length, truncated: candidates.length >= 20000, proposals };
+}
+export const previewLeadCounts = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => BatchInput.parse(input))
+  .handler(async ({ data }) => {
+    await fullDeck(data.adminToken);
+    const { assertDistributionDay } = await import("@/lib/business-day"); assertDistributionDay();
+    return buildAssignmentPreview(data.rows, data.showBantScores ?? false);
+  });
 
 /**
  * Assigns up to the requested number of oldest eligible unassigned leads to each
@@ -126,11 +173,12 @@ export const assignLeadCounts = createServerFn({ method: "POST" })
     const { logAudit } = await import("@/lib/audit.server");
 
     // Same requestId already ran (double click / retry) → return that result.
-    const { data: prior } = await supabaseAdmin
+    const { data: prior, error: priorError } = await supabaseAdmin
       .from("audit_logs")
       .select("metadata")
       .eq("action", "lead_assigned")
       .contains("metadata", { requestId: data.requestId });
+    if (priorError) throw new Error("Assignment replay history unavailable");
     if (prior && prior.length) {
       const results = prior.map((p) => {
         const m = (p.metadata ?? {}) as { agentId?: string; count?: number; requested?: number };
@@ -139,6 +187,9 @@ export const assignLeadCounts = createServerFn({ method: "POST" })
       return { replay: true, results, available: await pool.usablePoolCount() };
     }
 
+    if (!data.reviewedLeadIds) throw new Error("Review a lead preview before assignment");
+    const preview = await buildAssignmentPreview(data.rows);
+    assertPreviewUnchanged(data.reviewedLeadIds, preview.proposals.flatMap(p => p.leads.map(l => l.id)));
     const agents = new Map((await pool.activeAgents()).map((a) => [a.id, a]));
     const today = pool.dhakaToday();
     const held = await pool.assignedTodayByAgent(today);
@@ -154,44 +205,20 @@ export const assignLeadCounts = createServerFn({ method: "POST" })
       const capacity = Math.max(0, plan.perAgent - (held.get(agent.id) ?? 0));
       const targetCount = Math.min(row.count, capacity);
       let moved: string[] = [];
-      for (let attempt = 0; attempt < 4 && moved.length < targetCount; attempt++) {
-        const need = targetCount - moved.length;
-        const { data: candidates, error } = await supabaseAdmin
-          .from("leads")
-          .select("id, phone_number")
-          .is("assigned_to", null)
-          .is("assigned_agent_id", null)
-          .eq("status", "pending")
-          .or("assignment_source.is.null,assignment_source.neq.duplicate_skipped")
-          .order("created_at", { ascending: true })
-          .limit(Math.min(1000, need * 3 + 20));
-        if (error) throw new Error(error.message);
-        const { extractBangladeshPhones } = await import("@/lib/lead-phone");
-        const valid = (candidates ?? []).filter((l) => extractBangladeshPhones(l.phone_number ?? "").length > 0);
-        if (!valid.length) break;
-        const eligible = new Set(await eligibleLeadIds(valid.map((l) => l.id)));
-        const ids = valid.filter((l) => eligible.has(l.id)).slice(0, need).map((l) => l.id);
-        if (!ids.length) break;
-        const { data: updated, error: updateError } = await supabaseAdmin
-          .from("leads")
-          .update({
-            assigned_to: agent.id,
-            assigned_agent_id: agent.id,
-            assignment_source: "leadhub",
-            work_date: today,
-          })
-          .in("id", ids)
-          .is("assigned_to", null)
-          .is("assigned_agent_id", null)
-          .select("id");
+      const proposal = preview.proposals.find(p => p.agentId === row.agentId);
+      const ids = (proposal?.leads ?? []).slice(0, targetCount).map(l => l.id);
+      if (ids.length) {
+        const { data: updated, error: updateError } = await supabaseAdmin.from("leads")
+          .update({ assigned_to: agent.id, assigned_agent_id: agent.id, assignment_source: "leadhub", work_date: today })
+          .in("id", ids).is("assigned_to", null).is("assigned_agent_id", null).select("id");
         if (updateError) throw new Error(updateError.message);
-        moved = moved.concat((updated ?? []).map((r) => r.id));
-        if ((updated ?? []).length === 0 && valid.length < need) break;
+        moved = (updated ?? []).map(r => r.id);
       }
       if (moved.length) {
-        await supabaseAdmin.from("lead_assignments").insert(
+        const historyWrite = await supabaseAdmin.from("lead_assignments").insert(
           moved.map((id) => ({ lead_id: id, from_agent_id: null, to_agent_id: agent.id, source: "leadhub_count" })),
         );
+        if (historyWrite.error) throw new Error("Assignment saved but history write failed; IT review required before retry");
       }
       await logAudit({
         action: "lead_assigned",
@@ -201,6 +228,8 @@ export const assignLeadCounts = createServerFn({ method: "POST" })
         actorLabel: caller.label,
         metadata: {
           requestId: data.requestId,
+          previewGeneratedAt: preview.generatedAt,
+          reviewedLeadIds: ids,
           agentId: agent.id,
           requested: row.count,
           count: moved.length,
