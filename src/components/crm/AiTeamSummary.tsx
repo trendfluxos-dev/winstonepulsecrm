@@ -9,8 +9,10 @@ import { useLang, useT } from "@/lib/i18n";
 import { useAdminToken } from "@/lib/local-session";
 
 /**
- * HQ panel: picks the AI model (OpenAI or Gemini) for every CRM AI feature,
- * and generates today's team summary. Authority (master PIN) only.
+ * HQ panel: picks the AI model for every CRM AI feature, and generates
+ * today's team summary. Authority (master PIN) only. OpenAI/Gemini run
+ * through the built-in gateway with zero setup; Meta (Muse Spark) stays
+ * disabled and marked "setup required" until the server key is configured.
  */
 export function AiTeamSummary() {
   const t = useT();
@@ -54,10 +56,23 @@ export function AiTeamSummary() {
           >
             <option value="openai">OpenAI (GPT-6 Astra)</option>
             <option value="gemini">Gemini (3.8 Flash)</option>
-            <option value="meta">Meta (Muse Spark 1.3)</option>
+            <option value="meta" disabled={!model.data?.metaConfigured}>
+              {model.data?.metaConfigured
+                ? "Meta (Muse Spark 1.3)"
+                : t({ bn: "Meta (Muse Spark 1.3) — সেটআপ প্রয়োজন", en: "Meta (Muse Spark 1.3) — setup required" })}
+            </option>
           </select>
         </label>
       </div>
+
+      {model.data?.model === "meta" && !model.data.metaConfigured && (
+        <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+          {t({
+            bn: "Meta মডেল নির্বাচিত, কিন্তু সার্ভারে এর কনফিগারেশন নেই — AI কাজ করবে না। OpenAI বা Gemini বেছে নিন।",
+            en: "Meta is selected but not configured on the server — AI features will fail. Switch to OpenAI or Gemini.",
+          })}
+        </p>
+      )}
 
       <Button size="sm" variant="outline" disabled={run.isPending} onClick={() => run.mutate()}>
         {run.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
