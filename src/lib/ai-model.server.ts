@@ -7,6 +7,7 @@
  * there is no silent fallback to another provider.
  */
 import {
+  isProviderConfigured,
   parseAiModelChoice,
   requireAiKey,
   resolveAiProvider,
