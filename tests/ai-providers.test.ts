@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   AI_MODEL_IDS,
+  AI_NO_RESPONSE_STATUS,
   META_MODEL_API_BASE_URL,
   aiCallFailureMessage,
+  aiFailureLabel,
+
   isProviderConfigured,
   parseAiModelChoice,
   requireAiKey,
@@ -143,3 +146,54 @@ describe("aiCallFailureMessage — secret-safe errors", () => {
     }
   });
 });
+
+describe("aiFailureLabel — safe failure reason for staff UI", () => {
+  it("gives every recorded status a short reason", () => {
+    expect(aiFailureLabel(AI_NO_RESPONSE_STATUS).en).toContain("no usable answer");
+    expect(aiFailureLabel(401).en).toContain("access not accepted");
+    expect(aiFailureLabel(402).en).toContain("billing");
+    expect(aiFailureLabel(403).en).toContain("billing");
+    expect(aiFailureLabel(429).en).toContain("busy");
+    expect(aiFailureLabel(500).en).toContain("unavailable");
+    expect(aiFailureLabel(400).en).toContain("refused");
+  });
+
+  it("carries no key material in either language", () => {
+    for (const status of [0, 400, 401, 402, 403, 429, 500]) {
+      const { bn, en } = aiFailureLabel(status);
+      expect(`${bn} ${en}`).not.toMatch(/key|token|bearer|authorization/i);
+    }
+  });
+
+  it("always answers in both languages so the panel can switch safely", () => {
+    for (const status of [0, 400, 402, 429, 500]) {
+      const { bn, en } = aiFailureLabel(status);
+      expect(bn.length).toBeGreaterThan(0);
+      expect(en.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("withLastFailure — status normalisation", () => {
+  it("normalises non-HTTP statuses to the no-response marker", () => {
+    expect(withLastFailure({ model: "meta" }, "t", NaN).last_error_status).toBe(
+      AI_NO_RESPONSE_STATUS,
+    );
+    expect(withLastFailure({ model: "meta" }, "t", Infinity).last_error_status).toBe(
+      AI_NO_RESPONSE_STATUS,
+    );
+    expect(withLastFailure({ model: "meta" }, "t", 402.7).last_error_status).toBe(402);
+  });
+
+  it("keeps the success timestamp when a later failure is recorded", () => {
+    expect(
+      withLastFailure({ model: "openai", last_success_at: "s" }, "2026-10-25T01:30:00Z", AI_NO_RESPONSE_STATUS),
+    ).toEqual({
+      model: "openai",
+      last_success_at: "s",
+      last_error_at: "2026-10-25T01:30:00Z",
+      last_error_status: AI_NO_RESPONSE_STATUS,
+    });
+  });
+});
+

@@ -12,15 +12,25 @@ import {
   requireAiKey,
   resolveAiProvider,
   aiCallFailureMessage,
+  AI_NO_RESPONSE_STATUS,
+
   withLastFailure,
   withLastSuccess,
   type AiModelChoice,
 } from "@/lib/ai-providers";
 
+/** Stored shape of the ai config row: model choice plus safe call markers. */
+type AiStatusRecord = {
+  model?: string;
+  last_success_at?: string;
+  last_error_at?: string;
+  last_error_status?: number;
+};
+
 /** Best-effort status recording for the HQ indicator; never breaks AI calls. */
-async function recordAiStatus(
-  merge: (data: unknown) => Record<string, unknown>,
-): Promise<void> {
+async function recordAiStatus(merge: (data: unknown) => AiStatusRecord): Promise<void> {
+
+
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data } = await supabaseAdmin
@@ -30,7 +40,10 @@ async function recordAiStatus(
       .maybeSingle();
     await supabaseAdmin.from("app_config").upsert({
       id: "ai",
-      data: merge(data?.data),
+      // AiStatusRecord only holds model names, ISO times and a status number,
+      // so the value is always safe JSON — the cast is for the generated type.
+      data: merge(data?.data) as never,
+
       updated_at: new Date().toISOString(),
     });
   } catch {
@@ -116,11 +129,22 @@ export async function aiChatJson<T>(args: { system: string; user: string }): Pro
   };
   if (provider.reasoningEffort) body["reasoning_effort"] = provider.reasoningEffort;
 
-  const res = await fetch(provider.endpoint, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let res: Response;
+  try {
+    res = await fetch(provider.endpoint, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    // No HTTP response at all (network/timeout). Record the no-response
+    // marker so the panel's failure timestamp stays accurate; the underlying
+    // error can echo request data and is never stored or shown.
+    await recordAiStatus((data) =>
+      withLastFailure(data, new Date().toISOString(), AI_NO_RESPONSE_STATUS),
+    );
+    throw new Error(aiCallFailureMessage(AI_NO_RESPONSE_STATUS));
+  }
   if (!res.ok) {
     // Status only — provider error bodies can echo request data and must
     // never reach logs or staff screens.
@@ -128,15 +152,22 @@ export async function aiChatJson<T>(args: { system: string; user: string }): Pro
     await recordAiStatus((data) => withLastFailure(data, new Date().toISOString(), res.status));
     throw new Error(aiCallFailureMessage(res.status));
   }
-  const payload = (await res.json()) as {
-    choices?: { message?: { content?: string | null } }[];
-  };
-  const text = payload.choices?.[0]?.message?.content ?? "";
+
+  // The answer is parsed inside one guard: an unreadable or missing body is a
+  // failed call too, so the recorded failure timestamp stays accurate.
   try {
+    const payload = (await res.json()) as {
+      choices?: { message?: { content?: string | null } }[];
+    };
+    const text = payload.choices?.[0]?.message?.content ?? "";
     const parsed = JSON.parse(text) as T;
     await recordAiStatus((data) => withLastSuccess(data, new Date().toISOString()));
     return parsed;
   } catch {
+    await recordAiStatus((data) =>
+      withLastFailure(data, new Date().toISOString(), AI_NO_RESPONSE_STATUS),
+    );
     throw new Error("The AI returned an unreadable answer — please retry");
   }
+
 }
