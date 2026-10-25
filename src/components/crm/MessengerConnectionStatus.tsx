@@ -7,6 +7,7 @@ import { MESSENGER_RETENTION_NOTE } from "@/lib/messenger-retention";
 import { MetaConnectionTest } from "@/components/crm/MetaConnectionTest";
 import { MetaVerificationReport } from "@/components/crm/MetaVerificationReport";
 import { MessengerDeliveryStatus } from "@/components/crm/MessengerDeliveryStatus";
+import { MessengerSyncAudit } from "@/components/crm/MessengerSyncAudit";
 
 /** Public preparation summary only, never a live Meta or secret check. */
 export function MessengerConnectionStatus() {
@@ -23,6 +24,7 @@ export function MessengerConnectionStatus() {
     <p className="text-xs text-muted-foreground">{t(verification.reason)}</p>
     <MetaVerificationReport />
     <MessengerDeliveryStatus />
+    <MessengerSyncAudit />
     <p className="text-xs text-muted-foreground">{t(MESSENGER_RETENTION_NOTE)}</p>
     <MetaConnectionTest />
     <p className="text-xs text-muted-foreground">{t({ bn: "Signed webhook: সার্ভারে স্বাক্ষর পরীক্ষার ব্যবস্থা আছে; বাস্তব যাচাইয়ের প্রমাণ নেই। গোপন তথ্য সেভ হওয়া মেসেজ সিঙ্কের প্রমাণ নয়।", en: "Signed webhook: server signature validation is implemented; no live verification evidence exists. Saved secrets do not prove message sync." })}</p>
