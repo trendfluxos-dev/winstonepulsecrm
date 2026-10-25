@@ -399,3 +399,10 @@
 - [x] All 15 per-project brochure links verified signed-in in browser: each downloads a PDF whose title matches its project card.
 - [x] Pick-and-choose brochure ZIP: "Choose projects" list; browser-verified 3-project ZIP on phone width, 7 tests pass.
 - [x] All 15 brochures stamped with info@ + support@winstonebd.com and Bengali+English site-visit CTA (scripts/brochures/stamp_contact.py); no existing text covered; all 15 links re-verified.
+
+## 2026-10-25 — Credential incidents, HQ Meta tab, guarded reply path
+- [x] Credential-incident tracker: `credential_incidents` table (migration 0128, server-only, append-only via trigger), pure rules in `src/lib/credential-incidents.ts` (credential-like notes rejected), IT-gated functions, `CredentialIncidentTracker` UI.
+- [x] HQ panel (audit-log) new "Meta" tab: MetaVerificationReport checklist + CredentialIncidentTracker.
+- [x] Guarded Messenger reply/outbox: `messenger-reply-gate.ts` (6 blockers, bilingual) + `messenger-reply.server.ts` (gate → outbox → Meta Send API, token never logged, status-only failures); `sendMessengerReply` now requires `staffConfirmed` and refuses with blocker list until all gates clear.
+- [x] Fail-closed 503→403 so the preview no longer blanks on webhook refusals; AI call history (last 10, safe fields) + retry button in HQ AI tab.
+- [ ] Still blocked externally: META_APP_SECRET + META_WEBHOOK_VERIFY_TOKEN secrets, four verification tracks, audited enable decision. Reply path sends nothing until all clear.
