@@ -59,13 +59,34 @@ describe("Facebook not connected", () => {
     expect(res.headers.get("Location")).toBe("/messenger");
     expect(res.headers.get("Cache-Control")).toBe("no-store");
   });
-  it("browser-like verification requests still fail closed", async () => {
+  it("browser-like verification requests still fail closed without a configured verify token", async () => {
     const h = (Webhook.options as any).server.handlers;
     for (const query of ["hub.mode=subscribe&hub.challenge=123&hub.verify_token=synthetic", "hub.challenge=123", "hub.mode="]) {
       const res: Response = await h.GET({ request: new Request(`http://x/api/public/meta/messenger?${query}`, { headers: { accept: "text/html" } }) });
       expect(res.status).toBe(503);
       expect((await res.json()).code).toBe("FACEBOOK_NOT_CONNECTED");
       expect(res.headers.get("Location")).toBeNull();
+    }
+  });
+  it("subscription handshake answers only an exact verify-token match", async () => {
+    const h = (Webhook.options as any).server.handlers;
+    const previous = process.env.META_WEBHOOK_VERIFY_TOKEN;
+    process.env.META_WEBHOOK_VERIFY_TOKEN = "synthetic-verify-token";
+    try {
+      const ok: Response = await h.GET({ request: new Request("http://x/api/public/meta/messenger?hub.mode=subscribe&hub.verify_token=synthetic-verify-token&hub.challenge=123456") });
+      expect(ok.status).toBe(200);
+      expect(await ok.text()).toBe("123456");
+      expect(ok.headers.get("Cache-Control")).toBe("no-store");
+
+      const wrong: Response = await h.GET({ request: new Request("http://x/api/public/meta/messenger?hub.mode=subscribe&hub.verify_token=wrong&hub.challenge=123456") });
+      expect(wrong.status).toBe(403);
+      expect((await wrong.json()).code).toBe("INVALID_VERIFY_TOKEN");
+
+      const badChallenge: Response = await h.GET({ request: new Request("http://x/api/public/meta/messenger?hub.mode=subscribe&hub.verify_token=synthetic-verify-token&hub.challenge=<script>") });
+      expect(badChallenge.status).toBe(403);
+    } finally {
+      if (previous === undefined) delete process.env.META_WEBHOOK_VERIFY_TOKEN;
+      else process.env.META_WEBHOOK_VERIFY_TOKEN = previous;
     }
   });
   it("messenger code reads no secrets, no database and makes no Meta calls", () => {
