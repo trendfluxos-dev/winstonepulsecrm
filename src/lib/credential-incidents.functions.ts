@@ -69,11 +69,16 @@ export const recordCredentialIncident = createServerFn({ method: "POST" })
     }).parse(input),
   )
   .handler(async ({ data }) => {
-    const { resolveCaller } = await import("@/lib/access.server");
+    const { resolveCaller, requireAuthority, requireWrite } = await import("@/lib/access.server");
     const caller = await resolveCaller(data.adminToken ?? null);
-    const { messengerView } = await import("@/lib/messenger-shared");
-    const view = messengerView(caller);
-    if (!view.canOpen || view.readOnly) return { ok: false as const, code: "FORBIDDEN" as const };
+    // Incident records are IT-only audit rows: an ordinary agent session must
+    // not be able to write them.
+    try {
+      requireAuthority(caller);
+      requireWrite(caller);
+    } catch {
+      return { ok: false as const, code: "FORBIDDEN" as const };
+    }
 
     const note = validateIncidentNote(data.note);
     if (!note.ok) return { ok: false as const, code: note.code };

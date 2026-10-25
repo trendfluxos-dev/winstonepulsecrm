@@ -116,7 +116,9 @@ export const getFloorLock = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { resolveCaller } = await import("@/lib/access.server");
     const caller = await resolveCaller(data.adminToken ?? null);
-    const state = await releaseDueGrants(await readState());
+    // Anonymous reads must never move leads: only a signed-in caller may
+    // trigger the scheduled-grant handover.
+    const state = caller.scope === "none" ? await readState() : await releaseDueGrants(await readState());
 
     const beforeOpen = state.enabled && Date.now() < new Date(state.openAt).getTime();
     const employeeId = caller.profile?.employee_id ?? null;

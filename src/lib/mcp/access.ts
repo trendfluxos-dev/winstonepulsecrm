@@ -9,10 +9,20 @@ import { parseConfig } from "@/lib/crm-config";
  */
 export async function requireAllowedUser(ctx: ToolContext): Promise<string> {
   if (!ctx.isAuthenticated()) throw new Error("Sign in first — this endpoint requires an account.");
-  const email = ctx.getUserEmail()?.trim().toLowerCase();
-  if (!email) throw new Error("Your account has no verified email address, so access is denied.");
+  const userId = ctx.getUserId();
+  if (!userId) throw new Error("Your account could not be verified, so access is denied.");
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  // The token's email claim alone is not proof of mailbox ownership (an
+  // unconfirmed address change would satisfy it). Read the auth record and
+  // require a confirmed email before consulting the allow-list.
+  const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
+  const email = userData?.user?.email?.trim().toLowerCase();
+  const confirmed = Boolean(userData?.user?.email_confirmed_at);
+  if (userError || !email || !confirmed) {
+    throw new Error("Your account has no verified email address, so access is denied.");
+  }
+
   const { data, error } = await supabaseAdmin
     .from("app_config")
     .select("data")
