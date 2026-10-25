@@ -16,17 +16,36 @@ export const getMessengerStatus = createServerFn({ method: "POST" })
     return { view: messengerView(caller), connected: connection.connected, notice: NOT_CONNECTED };
   });
 
-/** Reply placeholder: the role is re-checked, then it always refuses — nothing is sent or stored. */
+/**
+ * Guarded reply: the role is re-checked, then the reply gate must clear every
+ * blocker (secrets stored, all four Meta tracks verified, audited sync enable,
+ * explicit staff confirmation) before anything is queued or sent. Until then
+ * it refuses with a safe blocker list — nothing is sent or stored.
+ */
 export const sendMessengerReply = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    Base.extend({ threadId: z.string().min(1).max(100), text: z.string().min(1).max(2000), requestId: z.string().uuid() }).parse(input),
+    Base.extend({
+      threadId: z.string().min(1).max(100),
+      text: z.string().min(1).max(2000),
+      requestId: z.string().uuid(),
+      staffConfirmed: z.boolean(),
+    }).parse(input),
   )
   .handler(async ({ data }) => {
     const { resolveCaller } = await import("@/lib/access.server");
     const caller = await resolveCaller(data.adminToken ?? null);
     if (!messengerView(caller).canReply) return { ok: false as const, reason: "FORBIDDEN" as const };
-    const { getMessengerService } = await import("@/lib/messenger.server");
-    return getMessengerService().sendReply(data);
+    const { guardedSendReply, supabaseReplyStore } = await import("@/lib/messenger-reply.server");
+    return guardedSendReply(
+      {
+        threadId: data.threadId,
+        text: data.text,
+        requestId: data.requestId,
+        staffConfirmed: data.staffConfirmed,
+        actorProfileId: caller.profile?.id ?? null,
+      },
+      { env: process.env, store: supabaseReplyStore() },
+    );
   });
 
 /**
