@@ -1,5 +1,13 @@
 # Roadmap
 
+## Current checks — report schedule, Messenger samples, Meta and today's allocation
+- [x] Daily report schedule read back active at 17:35 Dhaka after the 17:30 summary; do not duplicate/change it. Published callback POST returned 404, so live execution is not ready.
+- [x] Add off-by-default local-only sample details: complete demo-1, optional-field gaps demo-2 and unlinked empty demo-3/4. 31 tests pass, colors pass, browser verified complete/missing/empty with zero page errors; harness build OK. No CRM records or demo-to-live lookup.
+- [x] Read-only today check (2026-10-25 Dhaka): all 8 active approved agents have 0 ledger assignments today and no matching assignment audit rows; all have older currently assigned leads (50–505 each). No assignment performed.
+- [ ] Published callback and first scheduled report execution await publication; no publish requested unambiguously by “when published”. Nothing will execute after this turn except the existing configured job.
+- [ ] Inventory activation blocked by owner-provided sheet URL/tab (still absent); no Daily Lead Report substitution.
+- [ ] Meta messages subscription cannot be verified without provider authorization; stored App Review/Live mode/Page consent/messages subscription evidence and sync-enable decision are empty. Keep sync off; no invented evidence or Meta activation.
+
 ## Messenger — lead details beside messages
 - [x] Add read-only linked-lead sidebar beside the selected conversation (stacked below on smaller screens); saved inbound message IDs only, independent thread and current lead ownership checks. Demo/disconnected data never reads real leads; Meta activation unchanged.
 - [x] 42 targeted Messenger/inventory tests pass, semantic colors pass, harness build OK. Signed-in browser shows inactive sidebar with no runtime errors; job remains 401 without managed auth. Tests now isolate environment flags rather than depend on real Meta settings.
