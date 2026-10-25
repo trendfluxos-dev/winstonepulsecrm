@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { messengerIngestionEnabled } from "@/lib/messenger-ingest.server";
 import { notConnectedMessengerService } from "@/lib/messenger.server";
 import { DEMO_THREADS, messengerView, unassignedThreads, visibleThreads, withinMessagingWindow } from "@/lib/messenger-shared";
 import { Route as Webhook } from "@/routes/api/public/meta/messenger";
