@@ -5,7 +5,7 @@
 - [x] Daily Lead Report schedule moved to 17:30 Dhaka (11:30 UTC); /system shows next scheduled sync time.
 - [x] Project photos finding: rule requires active staff; finding already ignored. Separate active service-bill finding left for owner decision.
 - [x] Bengali neglect presentation PDF (29 slides, day-by-day per agent since launch) in Files.
-- [ ] Publish and live check; active agents' own Desk view needs their sign-in (not available to me).
+- [x] Published; live checker DEPLOYED and live HQ serves the new target/progress code. [ ] Active agents' own Desk view needs their sign-in (not available to me).
 
 ## HQ screenshot — false no-call/untouched claims
 - [x] Diagnose recording-only counts, omitted submitted reports, browser-local day and unsupported inactivity claims.
