@@ -65,6 +65,36 @@ export function AiTeamSummary() {
         </label>
       </div>
 
+      {model.data && (
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-green-600" aria-hidden />
+            {t({ bn: "সক্রিয় মডেল:", en: "Active model:" })}{" "}
+            <span className="font-medium text-foreground">
+              {model.data.model === "meta"
+                ? "Meta (Muse Spark 1.3)"
+                : model.data.model === "gemini"
+                  ? "Gemini (3.8 Flash)"
+                  : "OpenAI (GPT-6 Astra)"}
+            </span>
+          </span>
+          <span aria-hidden>·</span>
+          <span>
+            {model.data.lastSuccessAt
+              ? t({ bn: "শেষ সফল কল:", en: "Last successful call:" }) +
+                " " +
+                new Intl.DateTimeFormat(lang === "bn" ? "bn-BD" : "en-GB", {
+                  timeZone: "Asia/Dhaka",
+                  day: "numeric",
+                  month: "short",
+                  hour: "numeric",
+                  minute: "2-digit",
+                }).format(new Date(model.data.lastSuccessAt))
+              : t({ bn: "এখনও কোনো সফল AI কল নেই", en: "No successful AI call yet" })}
+          </span>
+        </p>
+      )}
+
       {model.data?.model === "meta" && !model.data.metaConfigured && (
         <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
           {t({

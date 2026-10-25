@@ -12,6 +12,7 @@ import {
   requireAiKey,
   resolveAiProvider,
   aiCallFailureMessage,
+  withLastSuccess,
   type AiModelChoice,
 } from "@/lib/ai-providers";
 
@@ -35,9 +36,20 @@ export async function getAiModelChoice(): Promise<AiModelChoice> {
 export async function getAiModelStatus(): Promise<{
   model: AiModelChoice;
   metaConfigured: boolean;
+  lastSuccessAt: string | null;
 }> {
-  const model = await getAiModelChoice();
-  return { model, metaConfigured: isProviderConfigured("meta", process.env) };
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("app_config")
+    .select("data")
+    .eq("id", "ai")
+    .maybeSingle();
+  const config = (data?.data ?? null) as { model?: string; last_success_at?: string } | null;
+  return {
+    model: parseAiModelChoice(config?.model),
+    metaConfigured: isProviderConfigured("meta", process.env),
+    lastSuccessAt: typeof config?.last_success_at === "string" ? config.last_success_at : null,
+  };
 }
 
 export async function setAiModelChoice(model: AiModelChoice): Promise<void> {
@@ -89,7 +101,25 @@ export async function aiChatJson<T>(args: { system: string; user: string }): Pro
   };
   const text = payload.choices?.[0]?.message?.content ?? "";
   try {
-    return JSON.parse(text) as T;
+    const parsed = JSON.parse(text) as T;
+    // Record the last successful call for the HQ status indicator. This is
+    // best-effort: a recording failure must never break the AI call itself.
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data } = await supabaseAdmin
+        .from("app_config")
+        .select("data")
+        .eq("id", "ai")
+        .maybeSingle();
+      await supabaseAdmin.from("app_config").upsert({
+        id: "ai",
+        data: withLastSuccess(data?.data, new Date().toISOString()),
+        updated_at: new Date().toISOString(),
+      });
+    } catch {
+      // Status recording is optional telemetry — ignore failures.
+    }
+    return parsed;
   } catch {
     throw new Error("The AI returned an unreadable answer — please retry");
   }

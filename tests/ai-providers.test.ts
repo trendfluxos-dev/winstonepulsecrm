@@ -8,6 +8,7 @@ import {
   parseAiModelChoice,
   requireAiKey,
   resolveAiProvider,
+  withLastSuccess,
 } from "@/lib/ai-providers";
 
 describe("parseAiModelChoice", () => {
@@ -82,6 +83,25 @@ describe("isProviderConfigured — presence-only, secret-safe", () => {
   it("never crosses providers — a meta key does not configure the gateway", () => {
     expect(isProviderConfigured("openai", { MODEL_API_KEY: "k" })).toBe(false);
     expect(isProviderConfigured("meta", { LOVABLE_API_KEY: "k" })).toBe(false);
+  });
+});
+
+describe("withLastSuccess — status indicator data", () => {
+  it("preserves the stored model choice while adding the timestamp", () => {
+    expect(withLastSuccess({ model: "meta" }, "2026-10-25T01:00:00Z")).toEqual({
+      model: "meta",
+      last_success_at: "2026-10-25T01:00:00Z",
+    });
+  });
+
+  it("works with empty or malformed existing config", () => {
+    expect(withLastSuccess(null, "t")).toEqual({ last_success_at: "t" });
+    expect(withLastSuccess({ model: 42 }, "t")).toEqual({ last_success_at: "t" });
+  });
+
+  it("stores only the model name and timestamp — never key material", () => {
+    const merged = withLastSuccess({ model: "meta", secret: "x", key: "y" }, "t");
+    expect(Object.keys(merged).sort()).toEqual(["last_success_at", "model"]);
   });
 });
 
