@@ -110,21 +110,28 @@ export function AiTeamSummary() {
                 }).format(new Date(model.data.lastSuccessAt))
               : t({ bn: "এখনও কোনো সফল AI কল নেই", en: "No successful AI call yet" })}
           </span>
-          {model.data.lastErrorAt && (
-            <>
-              <span aria-hidden>·</span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-destructive" aria-hidden />
+          <span aria-hidden>·</span>
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              className={`size-2 rounded-full ${model.data.lastErrorAt ? "bg-destructive" : "bg-muted-foreground/40"}`}
+              aria-hidden
+            />
+            {model.data.lastErrorAt ? (
+              <>
+
                 {t({ bn: "শেষ ব্যর্থ কল:", en: "Last failed call:" })}{" "}
                 <span className="font-medium text-foreground">
                   {dhaka(model.data.lastErrorAt)}
                   {model.data.lastErrorStatus !== null &&
                     ` · ${failureText(model.data.lastErrorStatus)}`}
                 </span>
-              </span>
-            </>
-          )}
+              </>
+            ) : (
+              t({ bn: "এখনও কোনো বর্যর্থ AI কল নেই", en: "No failed AI call yet" })
+            )}
+          </span>
         </p>
+
 
       )}
 
