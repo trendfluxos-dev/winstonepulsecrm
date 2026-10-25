@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Daily Lead Report — automatic post-shift sync
-- [ ] Add a managed authenticated daily callback after the evening shift summary (17:35 Asia/Dhaka).
-- [ ] Verify synthetic authentication, payload validation and sync results; preserve the existing report and manual sync path.
-- [ ] Register and read back the schedule; live execution awaits publication of the new callback and its first scheduled run.
+- [x] Add a managed authenticated daily callback after the evening shift summary (17:35 Asia/Dhaka).
+- [x] Verify synthetic authentication, payload validation and sync results: 12 tests pass; preview unauthenticated POST returns 401; harness build OK. Automatic updates verify a retained backup, match lead IDs, preserve HQ notes/payments and never clear older rows; manual sync remains unchanged.
+- [x] Register and read back managed schedule `winstone-lead-report-after-shift`, daily 11:35 UTC, active; do not modify the existing unmanaged `winstone-daily-sheet-sync` job.
+- [ ] Live execution awaits publication of the new callback (not requested in this turn) and its first scheduled run; no real lead export was performed during verification. Schedule timing may spread up to about 30 seconds.
 
 ## 2026-10-25 — Google Calendar linked; site-visit calendar sync live-capable (03:15 UTC)
 - [x] Google Calendar connection (Zahid's Google Calendar 2) linked to the project; gateway read verified (calendar list OK, primary calendar Asia/Dhaka, events write scope configured).
