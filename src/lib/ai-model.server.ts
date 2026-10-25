@@ -12,9 +12,31 @@ import {
   requireAiKey,
   resolveAiProvider,
   aiCallFailureMessage,
+  withLastFailure,
   withLastSuccess,
   type AiModelChoice,
 } from "@/lib/ai-providers";
+
+/** Best-effort status recording for the HQ indicator; never breaks AI calls. */
+async function recordAiStatus(
+  merge: (data: unknown) => Record<string, unknown>,
+): Promise<void> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("app_config")
+      .select("data")
+      .eq("id", "ai")
+      .maybeSingle();
+    await supabaseAdmin.from("app_config").upsert({
+      id: "ai",
+      data: merge(data?.data),
+      updated_at: new Date().toISOString(),
+    });
+  } catch {
+    // Status recording is optional telemetry — ignore failures.
+  }
+}
 
 export type { AiModelChoice };
 
@@ -37,6 +59,8 @@ export async function getAiModelStatus(): Promise<{
   model: AiModelChoice;
   metaConfigured: boolean;
   lastSuccessAt: string | null;
+  lastErrorAt: string | null;
+  lastErrorStatus: number | null;
 }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
@@ -44,11 +68,18 @@ export async function getAiModelStatus(): Promise<{
     .select("data")
     .eq("id", "ai")
     .maybeSingle();
-  const config = (data?.data ?? null) as { model?: string; last_success_at?: string } | null;
+  const config = (data?.data ?? null) as {
+    model?: string;
+    last_success_at?: string;
+    last_error_at?: string;
+    last_error_status?: number;
+  } | null;
   return {
     model: parseAiModelChoice(config?.model),
     metaConfigured: isProviderConfigured("meta", process.env),
     lastSuccessAt: typeof config?.last_success_at === "string" ? config.last_success_at : null,
+    lastErrorAt: typeof config?.last_error_at === "string" ? config.last_error_at : null,
+    lastErrorStatus: typeof config?.last_error_status === "number" ? config.last_error_status : null,
   };
 }
 
@@ -94,6 +125,7 @@ export async function aiChatJson<T>(args: { system: string; user: string }): Pro
     // Status only — provider error bodies can echo request data and must
     // never reach logs or staff screens.
     console.error("ai provider error", choice, res.status);
+    await recordAiStatus((data) => withLastFailure(data, new Date().toISOString(), res.status));
     throw new Error(aiCallFailureMessage(res.status));
   }
   const payload = (await res.json()) as {
@@ -102,23 +134,7 @@ export async function aiChatJson<T>(args: { system: string; user: string }): Pro
   const text = payload.choices?.[0]?.message?.content ?? "";
   try {
     const parsed = JSON.parse(text) as T;
-    // Record the last successful call for the HQ status indicator. This is
-    // best-effort: a recording failure must never break the AI call itself.
-    try {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data } = await supabaseAdmin
-        .from("app_config")
-        .select("data")
-        .eq("id", "ai")
-        .maybeSingle();
-      await supabaseAdmin.from("app_config").upsert({
-        id: "ai",
-        data: withLastSuccess(data?.data, new Date().toISOString()),
-        updated_at: new Date().toISOString(),
-      });
-    } catch {
-      // Status recording is optional telemetry — ignore failures.
-    }
+    await recordAiStatus((data) => withLastSuccess(data, new Date().toISOString()));
     return parsed;
   } catch {
     throw new Error("The AI returned an unreadable answer — please retry");

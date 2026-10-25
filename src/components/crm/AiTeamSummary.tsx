@@ -95,6 +95,29 @@ export function AiTeamSummary() {
         </p>
       )}
 
+      {model.data?.model === "meta" &&
+        model.data.metaConfigured &&
+        (model.data.lastErrorStatus === 402 ||
+          model.data.lastErrorStatus === 403 ||
+          !model.data.lastSuccessAt) && (
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-foreground">
+            <p className="font-medium">
+              {t({ bn: "Meta বিলিং সতর্কতা", en: "Meta billing notice" })}
+            </p>
+            <p className="mt-1 text-muted-foreground">
+              {model.data.lastErrorStatus === 402 || model.data.lastErrorStatus === 403
+                ? t({
+                    bn: "সর্বশেষ কলে Meta বিলিং/ক্রেডিট না থাকায় উত্তর দেয়নি (402)। Meta developer অ্যাকাউন্টে বিলিং বা ক্রেডিট যোগ করুন, তারপর আবার চেষ্টা করুন।",
+                    en: "The last call was refused for missing Meta billing/credits (402). Add billing or credits in your Meta developer account, then retry.",
+                  })
+                : t({
+                    bn: "Meta এখনও একটি সফল কল সম্পন্ন করেনি। উত্তর না আসলে Meta developer অ্যাকাউন্টে বিলিং/ক্রেডিট সক্রিয় আছে কিনা দেখুন।",
+                    en: "Meta has not completed a successful call yet. If calls fail, check that billing/credits are active in your Meta developer account.",
+                  })}
+            </p>
+          </div>
+        )}
+
       {model.data?.model === "meta" && !model.data.metaConfigured && (
         <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
           {t({

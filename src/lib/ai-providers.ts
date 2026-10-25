@@ -99,6 +99,25 @@ export function withLastSuccess(
   };
 }
 
+/**
+ * Merge a last-failed-call marker (HTTP status only) into the stored ai
+ * config, preserving the model choice and any success timestamp. The status
+ * number is safe to show staff; provider error bodies are never stored.
+ */
+export function withLastFailure(
+  data: unknown,
+  at: string,
+  status: number,
+): { model?: string; last_success_at?: string; last_error_at: string; last_error_status: number } {
+  const existing = (data ?? {}) as { model?: unknown; last_success_at?: unknown };
+  return {
+    ...(typeof existing.model === "string" && existing.model ? { model: existing.model } : {}),
+    ...(typeof existing.last_success_at === "string" ? { last_success_at: existing.last_success_at } : {}),
+    last_error_at: at,
+    last_error_status: status,
+  };
+}
+
 /** Error text shown to staff must never carry provider responses or keys. */
 export function aiCallFailureMessage(status: number): string {
   if (status === 402 || status === 403) return "AI credits are exhausted — please try again later";

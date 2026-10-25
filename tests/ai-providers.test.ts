@@ -8,6 +8,7 @@ import {
   parseAiModelChoice,
   requireAiKey,
   resolveAiProvider,
+  withLastFailure,
   withLastSuccess,
 } from "@/lib/ai-providers";
 
@@ -102,6 +103,28 @@ describe("withLastSuccess — status indicator data", () => {
   it("stores only the model name and timestamp — never key material", () => {
     const merged = withLastSuccess({ model: "meta", secret: "x", key: "y" }, "t");
     expect(Object.keys(merged).sort()).toEqual(["last_success_at", "model"]);
+  });
+});
+
+describe("withLastFailure — billing hint data", () => {
+  it("records status and time while preserving model and success timestamp", () => {
+    expect(
+      withLastFailure({ model: "meta", last_success_at: "s" }, "2026-10-25T01:30:00Z", 402),
+    ).toEqual({
+      model: "meta",
+      last_success_at: "s",
+      last_error_at: "2026-10-25T01:30:00Z",
+      last_error_status: 402,
+    });
+  });
+
+  it("stores only safe fields — never error bodies or key material", () => {
+    const merged = withLastFailure({ model: "meta", body: "raw", key: "k" }, "t", 403);
+    expect(Object.keys(merged).sort()).toEqual([
+      "last_error_at",
+      "last_error_status",
+      "model",
+    ]);
   });
 });
 
