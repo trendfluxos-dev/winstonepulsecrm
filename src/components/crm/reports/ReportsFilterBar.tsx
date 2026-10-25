@@ -49,28 +49,28 @@ export function ReportsFilterBar({
   if (filters.query.trim())
     active.push({
       key: "query",
-      label: `খোঁজ: ${filters.query.trim()}`,
+      label: `${t({ bn: "খোঁজ", en: "Search" })}: ${filters.query.trim()}`,
       clear: () => patch({ query: "" }),
     });
   if (filters.agentId !== "all") {
     const agent = agents.find((a) => a.id === filters.agentId);
     active.push({
       key: "agent",
-      label: `এজেন্ট: ${agent?.name ?? filters.agentId}`,
+      label: `${t({ bn: "এজেন্ট", en: "Agent" })}: ${agent?.name ?? filters.agentId}`,
       clear: () => patch({ agentId: "all" }),
     });
   }
   if (filters.source !== "all")
     active.push({
       key: "source",
-      label: `কোথা থেকে: ${filters.source}`,
+      label: `${t({ bn: "কোথা থেকে", en: "Source" })}: ${filters.source}`,
       clear: () => patch({ source: "all" }),
     });
   if (filters.status !== "all") {
     const st = LEAD_STATUSES.find((s) => s.key === filters.status);
     active.push({
       key: "status",
-      label: `স্ট্যাটাস: ${st?.label ?? filters.status}`,
+      label: `${t({ bn: "অবস্থা", en: "Status" })}: ${st?.label ?? filters.status}`,
       clear: () => patch({ status: "all" }),
     });
   }
@@ -78,7 +78,7 @@ export function ReportsFilterBar({
     const se = SENTIMENTS.find((s) => s.key === filters.sentiment);
     active.push({
       key: "sentiment",
-      label: `কথার ধরন: ${se?.label ?? filters.sentiment}`,
+      label: `${t({ bn: "কথার ধরন", en: "Mood" })}: ${se?.label ?? filters.sentiment}`,
       clear: () => patch({ sentiment: "all" }),
     });
   }
