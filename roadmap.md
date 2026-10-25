@@ -1,5 +1,11 @@
 # Roadmap
 
+## Daily Lead Report — automatic post-shift sync
+- [x] Add a managed authenticated daily callback after the evening shift summary (17:35 Asia/Dhaka).
+- [x] Verify synthetic authentication, payload validation and sync results: 12 tests pass; preview unauthenticated POST returns 401; harness build OK. Automatic updates verify a retained backup, match lead IDs, preserve HQ notes/payments and never clear older rows; manual sync remains unchanged.
+- [x] Register and read back managed schedule `winstone-lead-report-after-shift`, daily 11:35 UTC, active; do not modify the existing unmanaged `winstone-daily-sheet-sync` job.
+- [ ] Live execution awaits publication of the new callback (not requested in this turn) and its first scheduled run; no real lead export was performed during verification. Schedule timing may spread up to about 30 seconds.
+
 ## 2026-10-25 — Google Calendar linked; site-visit calendar sync live-capable (03:15 UTC)
 - [x] Google Calendar connection (Zahid's Google Calendar 2) linked to the project; gateway read verified (calendar list OK, primary calendar Asia/Dhaka, events write scope configured).
 - [x] Site visit → team Calendar sync already existed (`addSiteVisitToTeamCalendar` in site-visits.functions.ts + button in SiteVisitsPanel): confirmed visits only, one event per visit, no customer phone sent, event id stored on the row. It was blocked only by the missing connection — now unblocked. Supersedes the older blocked Calendar entries below (shared team calendar path; per-agent own calendars still need a workspace Google OAuth client).

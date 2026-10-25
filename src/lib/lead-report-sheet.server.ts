@@ -169,6 +169,10 @@ export async function fetchLeadReportRows(): Promise<LeadReportRow[]> {
     supabaseAdmin.from("bookings").select("lead_id, status").in("lead_id", leadIds),
   ]);
 
+  for (const result of [profilesRes, visitsRes, bookingsRes]) {
+    if (result.error) throw new Error("Lead report related data unavailable");
+  }
+
   const agentName = new Map((profilesRes.data ?? []).map((p) => [p.id, p.name ?? ""]));
   const visits = new Map<string, { total: number; done: number }>();
   for (const v of visitsRes.data ?? []) {
@@ -233,12 +237,38 @@ export function leadReportSheetUrl() {
  * Rewrite the Dhaka-day tab so it mirrors the CRM exactly. Clears up to
  * MAX_ROWS + 1 lines so removed leads never linger as stale rows.
  */
-export async function syncLeadReportToSheet(): Promise<LeadReportSyncResult> {
+export async function syncLeadReportToSheet(options?: { preserveExisting?: boolean }): Promise<LeadReportSyncResult> {
   const tab = dhakaDateLabel(new Date());
   const syncedAt = new Date().toISOString();
   const rows = await fetchLeadReportRows();
 
   await ensureDayTab(tab);
+  if (options?.preserveExisting) {
+    // Before the automated replacement, retain and verify every existing cell.
+    const previous = (await gatewayFetch(`/spreadsheets/${SHEET_ID}/values/${tab}!A:N`)) as { values?: string[][] };
+    const existing = previous.values ?? [];
+    if (existing.length > 1) {
+      const backupTab = `${tab}-backup-${crypto.randomUUID().slice(0, 8)}`;
+      await gatewayFetch(`/spreadsheets/${SHEET_ID}:batchUpdate`, {
+        method: "POST", body: JSON.stringify({ requests: [{ addSheet: { properties: { title: backupTab } } }] }),
+      });
+      await gatewayFetch(`/spreadsheets/${SHEET_ID}/values/${backupTab}!A1:N${existing.length}?valueInputOption=RAW`, {
+        method: "PUT", body: JSON.stringify({ values: existing }),
+      });
+      const backup = (await gatewayFetch(`/spreadsheets/${SHEET_ID}/values/${backupTab}!A:N`)) as { values?: string[][] };
+      if (JSON.stringify(backup.values ?? []) !== JSON.stringify(existing)) {
+        throw new Error("Lead report backup verification failed");
+      }
+    }
+    const updates = planScheduledLeadReportRows(existing.slice(1), rows, syncedAt);
+    if (updates.length > 0) {
+      await gatewayFetch(`/spreadsheets/${SHEET_ID}/values:batchUpdate`, {
+        method: "POST", body: JSON.stringify({ valueInputOption: "RAW", data: updates.map((update) => ({
+          range: `${tab}!A${update.rowNumber}:N${update.rowNumber}`, values: [update.values],
+        })) }),
+      });
+    }
+  } else {
   const values = rows.map((row) => toLeadReportLine(row, syncedAt));
   const blank = Array.from({ length: LEAD_REPORT_HEADER.length }, () => "");
   const padded = [...values];
@@ -248,6 +278,7 @@ export async function syncLeadReportToSheet(): Promise<LeadReportSyncResult> {
     `/spreadsheets/${SHEET_ID}/values/${tab}!A2:N${MAX_ROWS + 1}?valueInputOption=USER_ENTERED`,
     { method: "PUT", body: JSON.stringify({ values: padded }) },
   );
+  }
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   await supabaseAdmin.from("app_config").upsert({
@@ -256,6 +287,27 @@ export async function syncLeadReportToSheet(): Promise<LeadReportSyncResult> {
   });
 
   return { tab, rows: rows.length, syncedAt, sheetUrl: leadReportSheetUrl() };
+}
+
+/** Update known lead rows, append new ones, never clear old leads or HQ cells. */
+export function planScheduledLeadReportRows(existing: string[][], rows: LeadReportRow[], syncedAt: string) {
+  const positions = new Map<string, number>();
+  existing.forEach((line, index) => {
+    const id = line[13];
+    if (!id) return;
+    if (positions.has(id)) throw new Error("Duplicate lead IDs in existing report");
+    positions.set(id, index);
+  });
+  let nextRow = existing.length + 2;
+  return rows.map((row) => {
+    const index = positions.get(row.leadId);
+    const values = toLeadReportLine(row, syncedAt);
+    if (index !== undefined) {
+      values[11] = existing[index]?.[11] ?? "";
+      values[12] = existing[index]?.[12] ?? "";
+    }
+    return { rowNumber: index === undefined ? nextRow++ : index + 2, values };
+  });
 }
 
 export async function readLeadReportSyncState() {
