@@ -153,7 +153,7 @@ export async function aiChatJson<T>(args: { system: string; user: string }): Pro
 
   let res: Response;
   try {
-    res = await fetch(provider.endpoint, {
+    res = await fetch(endpoint, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify(body),
