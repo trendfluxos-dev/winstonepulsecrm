@@ -253,37 +253,79 @@ export function WhatsappInbox() {
               </div>
 
               <div className="border-t border-border p-3">
-                <div className="flex items-end gap-2">
-                  <Textarea
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    rows={2}
-                    className="resize-none"
-                    placeholder={
-                      integrationStatus === "configured"
-                        ? "মেসেজ লিখে পাঠান"
-                        : "যে মেসেজটি পাঠিয়েছেন তা এখানে লিখে রাখুন"
-                    }
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        if (draft.trim() && !mutation.isPending) mutation.mutate(draft.trim());
-                      }
-                    }}
-                  />
-                  <Button
-                    size="icon"
-                    disabled={!draft.trim() || mutation.isPending}
-                    onClick={() => mutation.mutate(draft.trim())}
-                    aria-label="মেসেজ সংরক্ষণ"
-                  >
-                    {mutation.isPending ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Send className="size-4" />
-                    )}
-                  </Button>
-                </div>
+                {integrationStatus === "configured" ? (
+                  <div className="space-y-2">
+                    <select
+                      value={templateId}
+                      onChange={(e) => {
+                        setTemplateId(e.target.value);
+                        setTemplateVars([]);
+                      }}
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                      aria-label="অনুমোদিত টেমপ্লেট"
+                    >
+                      {WHATSAPP_TEMPLATES.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.label}
+                        </option>
+                      ))}
+                    </select>
+                    {activeTemplate?.variables.map((label, i) => (
+                      <Input
+                        key={label}
+                        value={templateVars[i] ?? ""}
+                        onChange={(e) =>
+                          setTemplateVars((prev) => {
+                            const next = [...prev];
+                            next[i] = e.target.value;
+                            return next;
+                          })
+                        }
+                        placeholder={label}
+                      />
+                    ))}
+                    <Button
+                      className="w-full"
+                      disabled={!templateReady || mutation.isPending}
+                      onClick={() => mutation.mutate("")}
+                    >
+                      {mutation.isPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Send className="size-4" />
+                      )}
+                      টেমপ্লেট পাঠান
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-end gap-2">
+                    <Textarea
+                      value={draft}
+                      onChange={(e) => setDraft(e.target.value)}
+                      rows={2}
+                      className="resize-none"
+                      placeholder="যে মেসেজটি পাঠিয়েছেন তা এখানে লিখে রাখুন"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          if (draft.trim() && !mutation.isPending) mutation.mutate(draft.trim());
+                        }
+                      }}
+                    />
+                    <Button
+                      size="icon"
+                      disabled={!draft.trim() || mutation.isPending}
+                      onClick={() => mutation.mutate(draft.trim())}
+                      aria-label="মেসেজ সংরক্ষণ"
+                    >
+                      {mutation.isPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Send className="size-4" />
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           )}
