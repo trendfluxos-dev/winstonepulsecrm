@@ -23,7 +23,7 @@ export function AiTeamSummary() {
 
   const model = useQuery({ queryKey: ["ai-model"], queryFn: () => modelGet() });
   const switchModel = useMutation({
-    mutationFn: (next: "openai" | "gemini") => modelSet({ data: { adminToken: adminToken ?? "", model: next } }),
+    mutationFn: (next: "openai" | "gemini" | "meta") => modelSet({ data: { adminToken: adminToken ?? "", model: next } }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["ai-model"] });
       toast.success(t({ bn: "AI মডেল বদলানো হয়েছে", en: "AI model updated" }));
@@ -50,10 +50,11 @@ export function AiTeamSummary() {
             className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground"
             value={model.data?.model ?? "openai"}
             disabled={switchModel.isPending}
-            onChange={(e) => switchModel.mutate(e.target.value as "openai" | "gemini")}
+            onChange={(e) => switchModel.mutate(e.target.value as "openai" | "gemini" | "meta")}
           >
             <option value="openai">OpenAI (GPT-6 Astra)</option>
             <option value="gemini">Gemini (3.8 Flash)</option>
+            <option value="meta">Meta (Muse Spark 1.3)</option>
           </select>
         </label>
       </div>
