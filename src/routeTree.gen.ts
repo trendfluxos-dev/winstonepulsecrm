@@ -114,6 +114,7 @@ import { Route as ApiPublicIngestOutcomeRouteImport } from './routes/api/public/
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
 import { Route as ApiPublicIngestReprocessRouteImport } from './routes/api/public/ingest/reprocess'
 import { Route as ApiPublicIntegrationsStatusRouteImport } from './routes/api/public/integrations/status'
+import { Route as ApiPublicJobsInventorySheetRouteImport } from './routes/api/public/jobs/inventory-sheet'
 import { Route as ApiPublicJobsLeadReportSheetRouteImport } from './routes/api/public/jobs/lead-report-sheet'
 import { Route as ApiPublicJobsMessengerRetentionRouteImport } from './routes/api/public/jobs/messenger-retention'
 import { Route as ApiPublicMetaMessengerRouteImport } from './routes/api/public/meta/messenger'
@@ -671,6 +672,12 @@ const ApiPublicIntegrationsStatusRoute =
     path: '/api/public/integrations/status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsInventorySheetRoute =
+  ApiPublicJobsInventorySheetRouteImport.update({
+    id: '/api/public/jobs/inventory-sheet',
+    path: '/api/public/jobs/inventory-sheet',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsLeadReportSheetRoute =
   ApiPublicJobsLeadReportSheetRouteImport.update({
     id: '/api/public/jobs/lead-report-sheet',
@@ -843,6 +850,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
   '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
   '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
   '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
@@ -962,6 +970,7 @@ export interface FileRoutesByTo {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
   '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
   '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
   '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
@@ -1082,6 +1091,7 @@ export interface FileRoutesById {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
   '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
   '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
   '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
@@ -1203,6 +1213,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/inventory-sheet'
     | '/api/public/jobs/lead-report-sheet'
     | '/api/public/jobs/messenger-retention'
     | '/api/public/meta/messenger'
@@ -1322,6 +1333,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/inventory-sheet'
     | '/api/public/jobs/lead-report-sheet'
     | '/api/public/jobs/messenger-retention'
     | '/api/public/meta/messenger'
@@ -1441,6 +1453,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/inventory-sheet'
     | '/api/public/jobs/lead-report-sheet'
     | '/api/public/jobs/messenger-retention'
     | '/api/public/meta/messenger'
@@ -1561,6 +1574,7 @@ export interface RootRouteChildren {
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
   ApiPublicIngestReprocessRoute: typeof ApiPublicIngestReprocessRoute
   ApiPublicIntegrationsStatusRoute: typeof ApiPublicIntegrationsStatusRoute
+  ApiPublicJobsInventorySheetRoute: typeof ApiPublicJobsInventorySheetRoute
   ApiPublicJobsLeadReportSheetRoute: typeof ApiPublicJobsLeadReportSheetRoute
   ApiPublicJobsMessengerRetentionRoute: typeof ApiPublicJobsMessengerRetentionRoute
   ApiPublicMetaMessengerRoute: typeof ApiPublicMetaMessengerRoute
@@ -2312,6 +2326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIntegrationsStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/inventory-sheet': {
+      id: '/api/public/jobs/inventory-sheet'
+      path: '/api/public/jobs/inventory-sheet'
+      fullPath: '/api/public/jobs/inventory-sheet'
+      preLoaderRoute: typeof ApiPublicJobsInventorySheetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/lead-report-sheet': {
       id: '/api/public/jobs/lead-report-sheet'
       path: '/api/public/jobs/lead-report-sheet'
@@ -2506,6 +2527,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
   ApiPublicIngestReprocessRoute: ApiPublicIngestReprocessRoute,
   ApiPublicIntegrationsStatusRoute: ApiPublicIntegrationsStatusRoute,
+  ApiPublicJobsInventorySheetRoute: ApiPublicJobsInventorySheetRoute,
   ApiPublicJobsLeadReportSheetRoute: ApiPublicJobsLeadReportSheetRoute,
   ApiPublicJobsMessengerRetentionRoute: ApiPublicJobsMessengerRetentionRoute,
   ApiPublicMetaMessengerRoute: ApiPublicMetaMessengerRoute,
