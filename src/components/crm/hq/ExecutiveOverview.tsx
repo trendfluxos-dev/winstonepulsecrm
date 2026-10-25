@@ -192,60 +192,60 @@ export function ExecutiveOverview({
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
         <KpiCard
           icon={<Users className="size-4" />}
-          label="মোট লিড"
+          label={t({ bn: "মোট লিড", en: "Total leads" })}
           value={String(kpi.total)}
-          hint="সব সময়ের"
+          hint={t({ bn: "সব সময় মিলিয়ে", en: "All time" })}
         />
         <KpiCard
           icon={<PhoneCall className="size-4" />}
-          label="যোগাযোগ হয়েছে"
+          label={t({ bn: "যোগাযোগ হয়েছে", en: "Contacted" })}
           value={String(kpi.contacted)}
-          hint={`${kpi.contactRate}% লিডে কথা`}
+          hint={`${kpi.contactRate}% ${t({ bn: "লিডে কথা হয়েছে", en: "of leads spoken to" })}`}
         />
         <KpiCard
           icon={<Flame className="size-4" />}
-          label="কোয়ালিফাইড (হট+ওয়ার্ম)"
+          label={t({ bn: "সম্ভাব্য (হট+ওয়ার্ম)", en: "Qualified (hot+warm)" })}
           value={String(kpi.qualified)}
-          hint={`${kpi.qualifiedRate}% কোয়ালিফাইড`}
+          hint={`${kpi.qualifiedRate}% ${t({ bn: "সম্ভাব্য", en: "qualified" })}`}
         />
         <KpiCard
           icon={<CalendarCheck className="size-4" />}
-          label="ফলো-আপ বাকি"
+          label={t({ bn: "ফলো-আপ বাকি", en: "Follow-ups left" })}
           value={String(kpi.followUp)}
-          hint="সময় নির্ধারিত"
+          hint={t({ bn: "সময় ঠিক করা আছে", en: "Scheduled" })}
         />
         <KpiCard
           icon={<Handshake className="size-4" />}
-          label="ডিল জেতা"
+          label={t({ bn: "বুকিং হয়েছে", en: "Deals won" })}
           value={String(kpi.won)}
-          hint={`${kpi.wonRate}% রূপান্তর`}
+          hint={`${kpi.wonRate}% ${t({ bn: "সফল", en: "converted" })}`}
         />
         <KpiCard
           icon={<Activity className="size-4" />}
-          label="আজকের কল"
+          label={t({ bn: "আজকের কল", en: "Calls today" })}
           value={String(kpi.todayCalls)}
-          hint="সব এজেন্ট মিলিয়ে"
+          hint={t({ bn: "সব এজেন্ট মিলিয়ে", en: "All agents combined" })}
         />
       </div>
 
       <div className="grid gap-3 xl:grid-cols-3">
         <div className="card-elevated p-4">
           <div className="flex items-end justify-between gap-2">
-            <h3 className="text-sm font-semibold">সেলস পাইপলাইন</h3>
-            <span className="text-[11px] text-muted-foreground">মোট লিড: {kpi.total}</span>
+            <h3 className="text-sm font-semibold">{t({ bn: "কাজের ধাপ", en: "Sales pipeline" })}</h3>
+            <span className="text-[11px] text-muted-foreground">{t({ bn: "মোট লিড", en: "Total leads" })}: {kpi.total}</span>
           </div>
           <ul className="mt-3 space-y-1.5">
             {funnel.map((step, i) => {
               const width = 100 - i * 13;
               return (
-                <li key={step.label} className="flex items-center gap-3">
+                <li key={step.label.en} className="flex items-center gap-3">
                   <span
                     className="grid h-8 shrink-0 place-items-center rounded-sm bg-primary/80 text-[11px] font-semibold text-primary-foreground"
                     style={{ width: `${width}%`, opacity: 1 - i * 0.12 }}
                   >
                     {step.value}
                   </span>
-                  <span className="shrink-0 text-[11px] text-muted-foreground">{step.label}</span>
+                  <span className="shrink-0 text-[11px] text-muted-foreground">{t(step.label)}</span>
                 </li>
               );
             })}
