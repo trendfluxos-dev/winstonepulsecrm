@@ -61,7 +61,7 @@ export function ReportsFilterBar({
   if (filters.source !== "all")
     active.push({
       key: "source",
-      label: `সোর্স: ${filters.source}`,
+      label: `কোথা থেকে: ${filters.source}`,
       clear: () => patch({ source: "all" }),
     });
   if (filters.status !== "all") {
@@ -76,7 +76,7 @@ export function ReportsFilterBar({
     const se = SENTIMENTS.find((s) => s.key === filters.sentiment);
     active.push({
       key: "sentiment",
-      label: `সেন্টিমেন্ট: ${se?.label ?? filters.sentiment}`,
+      label: `কথার ধরন: ${se?.label ?? filters.sentiment}`,
       clear: () => patch({ sentiment: "all" }),
     });
   }
@@ -129,7 +129,7 @@ export function ReportsFilterBar({
             </SelectContent>
           </Select>
         </Field>
-        <Field label="লিড সোর্স">
+        <Field label="লিড কোথা থেকে">
           <Select value={filters.source} onValueChange={(v) => patch({ source: v })}>
             <SelectTrigger className="h-9 w-full xl:w-[165px]">
               <SelectValue />
@@ -162,7 +162,7 @@ export function ReportsFilterBar({
             </SelectContent>
           </Select>
         </Field>
-        <Field label="সেন্টিমেন্ট">
+        <Field label="কথার ধরন">
           <Select value={filters.sentiment} onValueChange={(v) => patch({ sentiment: v })}>
             <SelectTrigger className="h-9 w-full xl:w-[150px]">
               <SelectValue />
