@@ -1,5 +1,13 @@
 # Roadmap
 
+## Safari lazy-route recovery
+- [x] Identify reported expression in TanStack lazy module lookup; fresh signed-in HQ does not reproduce, existing recovery missed Safari's undefined module signature.
+- [x] Root and global recovery now share one narrow classifier. Five unit tests pass; normal and exact Safari-signature browser recovery pass (one coalesced probe, reload, nonblank result, bounded fallback). Signed-in HQ boot/refresh has no page errors; harness build and colors OK. Original stale bundle state not reproducible; no deployment performed.
+
+## Auto distribution failure alerts
+- [x] Persist authenticated cron failures as safe reason/stage in existing alerts, show bounded history with Dhaka timestamp in HQ/IT; no raw errors, schedule/auth/assignment changes.
+- [x] 14 focused failure tests pass (capture, safe persistence, authority, Friday/success/auth exclusions), plus 6 allocation regressions; harness build and colors OK. Signed-in HQ empty history/refresh verified with no page errors. Actual failure display not browser-exercised (synthetic response substitution did not apply); no real failure, alert rows, data or deployment forced.
+
 ## Explicit daily target / received / remaining
 - [x] Show labelled target, received and remaining for every active agent on HQ/LeadHub and self-only Desk; compact mobile rows and desktop table, same server values.
 - [x] Signed-in HQ shows all 8 agents with explicit target/received/remaining; refreshed desktop table and mobile cards verified, no horizontal overflow or page errors. 17 targeted tests pass, semantic colors pass, harness build OK. No data or deployment changes.

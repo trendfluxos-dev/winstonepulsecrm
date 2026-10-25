@@ -1,5 +1,6 @@
 import { SystemManualCard } from "@/components/crm/SystemManualCard";
 import { DailyAllocationSummary } from "@/components/crm/DailyAllocationSummary";
+import { DistributionFailurePanel } from "@/components/crm/DistributionFailurePanel";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ChevronDown, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -221,6 +222,7 @@ function ControlBoard() {
                 />
                 <WhatsappAgentSummary />
                 <DailyAllocationSummary surface="hq" />
+                <DistributionFailurePanel />
                 <SalesChartsDashboard scope="hq" />
                 <SalesCommandCenter
                   profiles={profiles}
