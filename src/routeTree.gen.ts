@@ -116,6 +116,7 @@ import { Route as ApiPublicIngestReprocessRouteImport } from './routes/api/publi
 import { Route as ApiPublicIntegrationsStatusRouteImport } from './routes/api/public/integrations/status'
 import { Route as ApiPublicJobsMessengerRetentionRouteImport } from './routes/api/public/jobs/messenger-retention'
 import { Route as ApiPublicMetaMessengerRouteImport } from './routes/api/public/meta/messenger'
+import { Route as ApiPublicN8nLeadsRouteImport } from './routes/api/public/n8n/leads'
 import { Route as ApiPublicOsEventsRouteImport } from './routes/api/public/os/events'
 import { Route as ApiPublicPaddleWebhookRouteImport } from './routes/api/public/paddle/webhook'
 import { Route as ApiPublicReportsSummaryRouteImport } from './routes/api/public/reports/summary'
@@ -680,6 +681,11 @@ const ApiPublicMetaMessengerRoute = ApiPublicMetaMessengerRouteImport.update({
   path: '/api/public/meta/messenger',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicN8nLeadsRoute = ApiPublicN8nLeadsRouteImport.update({
+  id: '/api/public/n8n/leads',
+  path: '/api/public/n8n/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicOsEventsRoute = ApiPublicOsEventsRouteImport.update({
   id: '/api/public/os/events',
   path: '/api/public/os/events',
@@ -832,6 +838,7 @@ export interface FileRoutesByFullPath {
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
   '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
   '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
+  '/api/public/n8n/leads': typeof ApiPublicN8nLeadsRoute
   '/api/public/os/events': typeof ApiPublicOsEventsRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
@@ -949,6 +956,7 @@ export interface FileRoutesByTo {
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
   '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
   '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
+  '/api/public/n8n/leads': typeof ApiPublicN8nLeadsRoute
   '/api/public/os/events': typeof ApiPublicOsEventsRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
@@ -1067,6 +1075,7 @@ export interface FileRoutesById {
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
   '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
   '/api/public/meta/messenger': typeof ApiPublicMetaMessengerRoute
+  '/api/public/n8n/leads': typeof ApiPublicN8nLeadsRoute
   '/api/public/os/events': typeof ApiPublicOsEventsRoute
   '/api/public/paddle/webhook': typeof ApiPublicPaddleWebhookRoute
   '/api/public/reports/summary': typeof ApiPublicReportsSummaryRoute
@@ -1186,6 +1195,7 @@ export interface FileRouteTypes {
     | '/api/public/integrations/status'
     | '/api/public/jobs/messenger-retention'
     | '/api/public/meta/messenger'
+    | '/api/public/n8n/leads'
     | '/api/public/os/events'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
@@ -1303,6 +1313,7 @@ export interface FileRouteTypes {
     | '/api/public/integrations/status'
     | '/api/public/jobs/messenger-retention'
     | '/api/public/meta/messenger'
+    | '/api/public/n8n/leads'
     | '/api/public/os/events'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
@@ -1420,6 +1431,7 @@ export interface FileRouteTypes {
     | '/api/public/integrations/status'
     | '/api/public/jobs/messenger-retention'
     | '/api/public/meta/messenger'
+    | '/api/public/n8n/leads'
     | '/api/public/os/events'
     | '/api/public/paddle/webhook'
     | '/api/public/reports/summary'
@@ -1538,6 +1550,7 @@ export interface RootRouteChildren {
   ApiPublicIntegrationsStatusRoute: typeof ApiPublicIntegrationsStatusRoute
   ApiPublicJobsMessengerRetentionRoute: typeof ApiPublicJobsMessengerRetentionRoute
   ApiPublicMetaMessengerRoute: typeof ApiPublicMetaMessengerRoute
+  ApiPublicN8nLeadsRoute: typeof ApiPublicN8nLeadsRoute
   ApiPublicOsEventsRoute: typeof ApiPublicOsEventsRoute
   ApiPublicPaddleWebhookRoute: typeof ApiPublicPaddleWebhookRoute
   ApiPublicReportsSummaryRoute: typeof ApiPublicReportsSummaryRoute
@@ -2299,6 +2312,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMetaMessengerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/n8n/leads': {
+      id: '/api/public/n8n/leads'
+      path: '/api/public/n8n/leads'
+      fullPath: '/api/public/n8n/leads'
+      preLoaderRoute: typeof ApiPublicN8nLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/os/events': {
       id: '/api/public/os/events'
       path: '/api/public/os/events'
@@ -2467,6 +2487,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIntegrationsStatusRoute: ApiPublicIntegrationsStatusRoute,
   ApiPublicJobsMessengerRetentionRoute: ApiPublicJobsMessengerRetentionRoute,
   ApiPublicMetaMessengerRoute: ApiPublicMetaMessengerRoute,
+  ApiPublicN8nLeadsRoute: ApiPublicN8nLeadsRoute,
   ApiPublicOsEventsRoute: ApiPublicOsEventsRoute,
   ApiPublicPaddleWebhookRoute: ApiPublicPaddleWebhookRoute,
   ApiPublicReportsSummaryRoute: ApiPublicReportsSummaryRoute,

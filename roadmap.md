@@ -425,5 +425,7 @@
 - [ ] Four Meta verification tracks have no evidence — enable decision blocked until recorded in HQ Meta tab.
 
 ## 2026-10-25 — AI Lead Pipeline plan (PLAN ONLY)
-- [ ] Design Winstone AI Lead Pipeline plan (CRM/LeadHub canonical + n8n), 8 areas, reuse-vs-missing inventory, phases, blockers. No changes.
+- [x] Design Winstone AI Lead Pipeline plan (CRM/LeadHub canonical + n8n), 8 areas, reuse-vs-missing inventory, phases, blockers. No changes.
 - [ ] Meta real-message test: BLOCKED — META_APP_SECRET + META_WEBHOOK_VERIFY_TOKEN absent from secret store; enable decision also blocked on 4 unverified tracks.
+- [x] Implemented plan phases 1-5,7-8: migration 0129 (lead_consent_events, n8n_event_receipts, lead_bant_scores — append-only, server-only), lead-bant.ts/.server.ts, n8n-pipeline.ts/.server.ts, /api/public/n8n/leads (fail-closed), Nexus preview showBantScores signal, 17 new tests pass, build OK.
+- [ ] Enable pipeline: needs N8N_WEBHOOK_SECRET (shared with n8n) + N8N_PIPELINE_ENABLED=true after owner approves consent policy; GHL not built (needs explicit approval).

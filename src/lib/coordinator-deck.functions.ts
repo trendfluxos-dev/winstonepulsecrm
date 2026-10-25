@@ -102,6 +102,8 @@ const BatchInput = z.object({
   adminToken: z.string().nullable().optional(),
   requestId: z.string().uuid(),
   reviewedLeadIds: z.array(z.string().uuid()).max(2000).optional(),
+  /** When true, annotate preview leads with their latest AI BANT total (display signal only; selection order and all gates are unchanged). */
+  showBantScores: z.boolean().optional(),
   rows: z
     .array(z.object({ agentId: z.string().uuid(), count: z.number().int().min(1).max(MAX_DAILY_LEADS_PER_AGENT) }))
     .min(1)
@@ -112,7 +114,7 @@ const BatchInput = z.object({
 });
 
 /** Read-only proposal. No reservation, audit writes, rollover or automatic distribution. */
-async function buildAssignmentPreview(rows: Array<{ agentId: string; count: number }>) {
+async function buildAssignmentPreview(rows: Array<{ agentId: string; count: number }>, showBantScores = false) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const pool = await import("@/lib/lead-pool.server");
   const { eligibleLeadIds } = await import("@/lib/lead-eligibility.server");
@@ -137,6 +139,13 @@ async function buildAssignmentPreview(rows: Array<{ agentId: string; count: numb
     leads.forEach(l => { eligible.delete(l.id); extractBangladeshPhones(l.phone_number ?? "").forEach(k => taken.add(k)); });
     return { agentId: row.agentId, name: agent?.name ?? null, requested: row.count, capacity, leads };
   });
+  if (showBantScores) {
+    const { latestBantTotals } = await import("@/lib/lead-bant.server");
+    const totals = await latestBantTotals(candidates.map(l => l.id));
+    for (const proposal of proposals) {
+      proposal.leads = proposal.leads.map(l => ({ ...l, bantTotal: totals.get(l.id) ?? null }));
+    }
+  }
   return { today, generatedAt: new Date().toISOString(), scanned: candidates.length, truncated: candidates.length >= 20000, proposals };
 }
 export const previewLeadCounts = createServerFn({ method: "POST" })
@@ -144,7 +153,7 @@ export const previewLeadCounts = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await fullDeck(data.adminToken);
     const { assertDistributionDay } = await import("@/lib/business-day"); assertDistributionDay();
-    return buildAssignmentPreview(data.rows);
+    return buildAssignmentPreview(data.rows, data.showBantScores ?? false);
   });
 
 /**
