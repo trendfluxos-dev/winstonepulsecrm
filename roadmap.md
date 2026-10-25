@@ -415,3 +415,11 @@
 - [ ] Verify META_APP_SECRET + META_WEBHOOK_VERIFY_TOKEN now live (probe handshake/signature behavior).
 - [ ] Replace empty GOOGLE_VERTEX_SERVICE_ACCOUNT with uploaded service-account key file (daring-pier-450522).
 - [ ] Messenger sync enable decision: requires all four verification tracks verified first — record evidence, then IT enable decision.
+
+## 2026-10-25 — Audience channel research
+- [ ] Find communities/forums/directories where Winstone's audience (Bangladesh property buyers/investors) spends time; draft a post or listing for each (marketing research subagent, report in Files).
+
+## 2026-10-25 — /goal wrap-up status
+- [x] Vertex AI provider: service-account saved, live token mint verified, full suite 1035 passed / 9 skipped, build OK.
+- [ ] META_APP_SECRET + META_WEBHOOK_VERIFY_TOKEN still absent from the secret store (user believes added; form declined) — webhook handshake/signature stay closed.
+- [ ] Four Meta verification tracks have no evidence — enable decision blocked until recorded in HQ Meta tab.
