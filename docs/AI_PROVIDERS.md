@@ -70,3 +70,10 @@ Until an adapter exists, those settings are unsupported and deliberately not
 sent — the Meta path uses the OpenAI-compatible chat-completions shape only
 (`model`, `messages`, `response_format`). Adding encrypted reasoning requires
 a reviewed adapter change, not a config flag.
+
+## Google Vertex AI (optional, fourth provider)
+
+- Choice `vertex` → model `google/gemini-2.5-flash` through Vertex AI's OpenAI-compatible chat endpoint (`{location}-aiplatform.googleapis.com`), default location `us-central1` (override with `GOOGLE_VERTEX_LOCATION`).
+- Auth: service-account JSON in server-only secret `GOOGLE_VERTEX_SERVICE_ACCOUNT`; `src/lib/vertex-auth.server.ts` mints a short-lived OAuth token (RS256 JWT exchange) with a per-process cache. The JSON, private key and tokens are never logged or returned; all failures are generic messages.
+- Fail-closed: without a valid service-account JSON the HQ picker shows "setup required" and every call is refused — no cross-provider fallback.
+- Reference: uploaded Vertex AI Agent Platform API docs (aiplatform.googleapis.com).
