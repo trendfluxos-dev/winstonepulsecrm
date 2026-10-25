@@ -28,7 +28,7 @@ export function MetaVerificationReport() {
     queryFn: () => listMetaVerification({ data: { adminToken } }),
     refetchInterval: 30000,
   });
-  const latest = new Map(Object.entries(records.data && records.data.ok ? records.data.latest : {})) as Map<string, MetaVerificationRecord>;
+  const latest = new Map(Object.entries(records.data && records.data.ok ? (records.data.latest ?? {}) : {})) as Map<string, MetaVerificationRecord>;
 
   const [track, setTrack] = useState<string>(META_VERIFICATION_TRACKS[0].id);
   const [outcome, setOutcome] = useState<"verified" | "failed">("verified");
