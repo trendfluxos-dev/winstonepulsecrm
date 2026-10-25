@@ -37,7 +37,7 @@
 - Fonts use public/fonts WOFF2 + CSS @font-face, never Google CSS — why: avoid render-blocking requests.
 - Private AI/bill reads authenticate; support inbox lists only the agent's own assigned conversations (other support reads follow own/unassigned work) and agent escalation requires ownership; project writes reject read-only HQ; scored time needs phone sync — why: requests cannot bypass access or fabricate evidence.
 
-- HQ summaries share one filtered command-center result; count current follow-up work and saved booking signals — why: independent status/recording guesses contradict totals.
+- HQ summaries share command-center report/recording counts and Dhaka days; pending excludes saved attempts; absent evidence never proves inactivity — why: no false blame from audio gaps.
 - Winstone AI copilot is read-only and IT Console (full PIN) only; it never assigns leads — why: LeadHub Nexus is the one assignment path with quota/Friday/audit rules.
 - Release counts as deployed only when scripts/check-live-release.ts (or IT Console Deployment status) sees /manual version, $35.29 and 50-lead markers live — why: publish requests are not proof.
 - The operations manual's only source is docs/CRM_OPERATIONS_MANUAL.md (parsed by src/lib/manual-source.ts for /manual); rebuild the PDF with `npm run manual:pdf`, and `manual:check` (prebuild + CI) fails on hash/version drift — why: page and PDF can never disagree.

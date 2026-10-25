@@ -2,7 +2,7 @@
 
 ## HQ screenshot — false no-call/untouched claims
 - [x] Diagnose recording-only counts, omitted submitted reports, browser-local day and unsupported inactivity claims.
-- [ ] Reconcile with command-center evidence, distinguish unknown phone sync, respect saved attempt markers, translate and verify phone/desktop view; no data or deployment changes.
+- [x] Reconciled command-center evidence, distinguished unknown phone sync, excluded saved attempts/last-call markers and removed unsupported projections. 12 tests, colors and harness build pass; signed-in HQ English/Bangla and desktop/428px inspected, no overflow/errors. Live read-back: 212 pending without evidence, zero recorded calls today; actual phone sync remains unverified. No data or deployment changes.
 
 ## Safari lazy-route recovery
 - [x] Identify reported expression in TanStack lazy module lookup; fresh signed-in HQ does not reproduce, existing recovery missed Safari's undefined module signature.
