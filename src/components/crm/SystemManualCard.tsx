@@ -2,11 +2,13 @@ import { Link } from "@tanstack/react-router";
 import { BookOpenCheck, Download } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 import { AUDIT_PDF_PATH, DOC_VERSION, HANDOVER_PDF_PATH } from "@/lib/handover-docs";
 import { MANUAL_PDF_META, MANUAL_PDF_PATH, MANUAL_UPDATED, MANUAL_VERSION } from "@/lib/system-manual";
 
 /** Reference card for the one canonical manual; shown in HQ and IT Console. */
 export function SystemManualCard() {
+  const t = useT();
   return (
     <div className="space-y-3">
     <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -15,24 +17,24 @@ export function SystemManualCard() {
           <BookOpenCheck className="size-5" />
         </span>
         <div>
-          <h2 className="font-semibold">System Manual / Client Handover</h2>
-          <p className="text-xs text-muted-foreground">Manual version {MANUAL_VERSION} · Last updated {MANUAL_UPDATED}</p>
+          <h2 className="font-semibold">{t({ bn: "সিস্টেম নথি ও দায় বদল", en: "System Manual / Client Handover" })}</h2>
+          <p className="text-xs text-muted-foreground">{t({ bn: "নথির সংস্করণ", en: "Manual version" })} {MANUAL_VERSION} · {t({ bn: "শেষ হালনাগাদ", en: "Last updated" })} {MANUAL_UPDATED}</p>
         </div>
       </div>
       <div className="flex gap-2">
-        <Button asChild variant="outline" size="sm"><Link to="/manual">পড়ুন</Link></Button>
+        <Button asChild variant="outline" size="sm"><Link to="/manual">{t({ bn: "পড়ুন", en: "Read" })}</Link></Button>
         <Button asChild size="sm"><a href={MANUAL_PDF_PATH} download title={`SHA-256 ${MANUAL_PDF_META.sourceSha256.slice(0, 12)}`}><Download className="size-4" /> PDF (v{MANUAL_PDF_META.version})</a></Button>
       </div>
     </section>
     <section className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h2 className="font-semibold">Client Handover &amp; Audit Report</h2>
-        <p className="text-xs text-muted-foreground">Document version {DOC_VERSION}</p>
+        <h2 className="font-semibold">{t({ bn: "দায় বদল ও তদারকি প্রতয়েদন", en: "Client Handover & Audit Report" })}</h2>
+        <p className="text-xs text-muted-foreground">{t({ bn: "নথির সংস্করণ", en: "Document version" })} {DOC_VERSION}</p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button asChild variant="outline" size="sm"><Link to="/handover">Handover</Link></Button>
+        <Button asChild variant="outline" size="sm"><Link to="/handover">{t({ bn: "দায় বদল", en: "Handover" })}</Link></Button>
         <Button asChild size="sm"><a href={HANDOVER_PDF_PATH} download><Download className="size-4" /> PDF</a></Button>
-        <Button asChild variant="outline" size="sm"><Link to="/audit-report">Audit</Link></Button>
+        <Button asChild variant="outline" size="sm"><Link to="/audit-report">{t({ bn: "তদারকি", en: "Audit" })}</Link></Button>
         <Button asChild size="sm"><a href={AUDIT_PDF_PATH} download><Download className="size-4" /> PDF</a></Button>
       </div>
     </section>
