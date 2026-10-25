@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { DatabaseBackup, Download, History, Loader2, RotateCcw, Sparkles } from "lucide-react";
+import { DatabaseBackup, Download, History, Loader2, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
