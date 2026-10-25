@@ -3,6 +3,7 @@ import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { integrationPreparation } from "@/lib/integration-readiness";
+import { MESSENGER_RETENTION_NOTE } from "@/lib/messenger-retention";
 import { MetaConnectionTest } from "@/components/crm/MetaConnectionTest";
 import { MetaVerificationReport } from "@/components/crm/MetaVerificationReport";
 import { MessengerDeliveryStatus } from "@/components/crm/MessengerDeliveryStatus";
