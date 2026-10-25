@@ -272,32 +272,32 @@ function EntryHall() {
         </div>
 
         <section className="mt-10 rounded-xl border border-border bg-card p-5 sm:p-6">
-          <h2 className="text-lg font-bold tracking-tight">Are you a Winstone sales agent?</h2>
+          <h2 className="text-lg font-bold tracking-tight">{t({ bn: "আপনি কি Winstone-এর সেলস এজেন্ট?", en: "Are you a Winstone sales agent?" })}</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Your account and company device must be provisioned by the IT Console before you can start working.
+            {t({ bn: "কাজ শুরুর আগে IT Console থেকে আপনার অ্যাকাউন্ট ও কোম্পানির ডিভাইস তৈরি করে দেওয়া হয়।", en: "The IT Console sets up your account and company device before you can start working." })}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Already have an account? Sign in using your assigned credentials on the authorized device.
+            {t({ bn: "অ্যাকাউন্ট থাকলে অনুমোদিত ডিভাইসে নিজের তথ্য দিয়ে প্রবেশ করুন।", en: "Already have an account? Sign in with your assigned credentials on the authorized device." })}
           </p>
           <p className="mt-4 border-t border-border pt-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-gold">
-            New agent accounts are created and managed by the IT Console.
+            {t({ bn: "নতুন এজেন্ট অ্যাকাউন্ট IT Console-ই তৈরি করে।", en: "New agent accounts are created and managed by the IT Console." })}
           </p>
         </section>
 
         {scope !== "none" && (
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            Already signed in —{" "}
+            {t({ bn: "আগেই প্রবেশ করেছেন — ", en: "Already signed in — " })}
             <Link to="/desk" className="font-semibold text-gold hover:underline">
-              go to my desk
+              {t({ bn: "আমার ডেস্কে যান", en: "go to my desk" })}
             </Link>
           </p>
         )}
 
         <footer className="mt-auto pt-14 text-center text-xs text-muted-foreground">
           <p className="inline-flex items-center gap-1.5">
-            <LifeBuoy className="size-3.5" /> Need help?{" "}
+            <LifeBuoy className="size-3.5" /> {t({ bn: "সাহায্য দরকার?", en: "Need help?" })}{" "}
             <Link to="/support" className="font-semibold text-gold hover:underline">
-              Contact IT Console
+              {t({ bn: "IT Console-এর সাথে যোগাযোগ করুন", en: "Contact IT Console" })}
             </Link>
           </p>
           <p className="mt-3">© 2026 TrendFlux Digital. All Rights Reserved.</p>
