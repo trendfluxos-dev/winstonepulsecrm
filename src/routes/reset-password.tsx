@@ -89,6 +89,14 @@ function ResetPasswordPage() {
             <p className="text-sm text-muted-foreground">
               ডেস্ক ব্যবহারের আগে নিজের নতুন পাসওয়ার্ড দিন। এটি কেউ দেখতে পাবে না।
             </p>
+            {!isRecovery && (
+              <Input
+                type="password"
+                placeholder="বর্তমান পাসওয়ার্ড"
+                value={currentPw}
+                onChange={(e) => setCurrentPw(e.target.value)}
+              />
+            )}
             <Input type="password" placeholder="নতুন পাসওয়ার্ড" value={pw} onChange={(e) => setPw(e.target.value)} />
             <Input type="password" placeholder="আবার লিখুন" value={pw2} onChange={(e) => setPw2(e.target.value)} />
             <Button className="w-full" disabled={busy || !ready} onClick={() => void save()}>
