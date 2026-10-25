@@ -72,6 +72,13 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
     }
     requireWrite(caller);
 
+    const { findWhatsAppTemplate } = await import("@/lib/whatsapp-templates");
+    const template = findWhatsAppTemplate(data.template);
+    if (!template) throw new Error("শুধু অনুমোদিত টেমপ্লেট পাঠানো যায়");
+    if (data.variables.length !== template.variables.length) {
+      throw new Error("টেমপ্লেটের সব তথ্য পূরণ করুন");
+    }
+
     const { getWhatsAppProvider } = await import("@/lib/whatsapp-provider.server");
     const provider = getWhatsAppProvider();
     if (provider.status !== "configured") {
@@ -115,7 +122,10 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
     const to = normalizeWhatsAppNumber(lead.phone_number);
     if (!to) throw new Error("নম্বরটি সঠিক নয়");
 
-    const result = await provider.sendMessage({ to, body: data.body, leadId: lead.id });
+    const variables = Object.fromEntries(
+      template.variables.map((label, i) => [label, data.variables[i]!]),
+    );
+    const result = await provider.sendTemplate({ to, template: template.name, variables });
     if (!result.ok) return { ok: false as const, status: "failed" as const, error: result.error };
 
     await supabaseAdmin.from("whatsapp_interactions").insert({
@@ -123,7 +133,7 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
       agent_id: caller.profile?.id ?? null,
       sender_type: "agent",
       message_type: "text",
-      message_content: data.body,
+      message_content: `[টেমপ্লেট: ${template.label}] ${data.variables.join(" · ")}`,
       provider: "meta-cloud-api",
       provider_message_id: result.providerMessageId || null,
       // Meta's webhook moves this to delivered / read / failed.
