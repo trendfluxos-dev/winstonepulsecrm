@@ -2251,6 +2251,51 @@ export type Database = {
           },
         ]
       }
+      lead_bant_scores: {
+        Row: {
+          authority: number | null
+          budget: number | null
+          confidence: string | null
+          created_at: string
+          created_by: string | null
+          evidence: Json
+          id: string
+          lead_id: string
+          model: string
+          need: number | null
+          timeline: number | null
+          total: number
+        }
+        Insert: {
+          authority?: number | null
+          budget?: number | null
+          confidence?: string | null
+          created_at?: string
+          created_by?: string | null
+          evidence?: Json
+          id?: string
+          lead_id: string
+          model: string
+          need?: number | null
+          timeline?: number | null
+          total: number
+        }
+        Update: {
+          authority?: number | null
+          budget?: number | null
+          confidence?: string | null
+          created_at?: string
+          created_by?: string | null
+          evidence?: Json
+          id?: string
+          lead_id?: string
+          model?: string
+          need?: number | null
+          timeline?: number | null
+          total?: number
+        }
+        Relationships: []
+      }
       lead_classifications: {
         Row: {
           agent_id: string | null
@@ -2308,6 +2353,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lead_consent_events: {
+        Row: {
+          action: string
+          actor: string | null
+          actor_label: string | null
+          consent_text: string | null
+          created_at: string
+          id: string
+          lead_id: string | null
+          phone: string
+          purpose: string
+          source: string | null
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          actor_label?: string | null
+          consent_text?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          phone: string
+          purpose: string
+          source?: string | null
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          actor_label?: string | null
+          consent_text?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          phone?: string
+          purpose?: string
+          source?: string | null
+        }
+        Relationships: []
       }
       lead_daily_assignment_ledger: {
         Row: {
@@ -3458,6 +3542,30 @@ export type Database = {
           note?: string
           outcome?: string
           track?: string
+        }
+        Relationships: []
+      }
+      n8n_event_receipts: {
+        Row: {
+          created_at: string
+          event_key: string
+          id: string
+          payload_sha256: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          event_key: string
+          id?: string
+          payload_sha256: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          event_key?: string
+          id?: string
+          payload_sha256?: string
+          status?: string
         }
         Relationships: []
       }
