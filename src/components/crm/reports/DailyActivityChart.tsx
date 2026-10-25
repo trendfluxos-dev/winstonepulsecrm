@@ -13,6 +13,7 @@ import {
 } from "recharts";
 
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 import type { ReportResult } from "@/lib/crm-reports";
 
 import { EmptyBlock } from "./EmptyBlock";
@@ -38,6 +39,7 @@ export function DailyActivityChart({
   hasActivity: boolean;
   onReset: () => void;
 }) {
+  const t = useT();
   const labelInterval = Math.max(0, Math.ceil(report.daily.length / 8) - 1);
 
   return (
@@ -45,12 +47,12 @@ export function DailyActivityChart({
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
         <div className="min-w-0">
           <h2 className="flex items-center gap-1.5 text-sm font-semibold">
-            <TrendingUp className="size-4 shrink-0 text-primary" /> Daily activity
+            <TrendingUp className="size-4 shrink-0 text-primary" /> {t({ bn: "দৈনিক কাজের ছবি", en: "Daily activity" })}
           </h2>
           <p className="text-xs text-muted-foreground">
             {trend === "activity"
-              ? "Dials vs connected conversations"
-              : "New leads, WhatsApp touches and talk minutes"}
+              ? t({ bn: "কত কল দেওয়া হয়েছে, কতটিতে কথা হয়েছে", en: "Calls made vs conversations answered" })
+              : t({ bn: "নতুন লিড, হোয়াটসঅ্যাপ আর কথার সময়", en: "New leads, WhatsApp touches and talk minutes" })}
           </p>
         </div>
         <div className="flex shrink-0 gap-1">
@@ -59,22 +61,22 @@ export function DailyActivityChart({
             variant={trend === "activity" ? "secondary" : "ghost"}
             onClick={() => onTrendChange("activity")}
           >
-            Calls
+            {t({ bn: "কল", en: "Calls" })}
           </Button>
           <Button
             size="sm"
             variant={trend === "pipeline" ? "secondary" : "ghost"}
             onClick={() => onTrendChange("pipeline")}
           >
-            Pipeline
+            {t({ bn: "পাইপলাইন", en: "Pipeline" })}
           </Button>
         </div>
       </div>
 
       {!hasActivity ? (
         <EmptyBlock
-          title="No activity recorded for this period"
-          hint="Adjust the date or filters to view available data."
+          title={t({ bn: "এই সময়ে কোনো কাজ নেই", en: "No activity recorded for this period" })}
+          hint={t({ bn: "তারিখ বা ফিল্টার বদলে দেখুন।", en: "Adjust the date or filters to view available data." })}
           onReset={onReset}
         />
       ) : (
@@ -111,7 +113,7 @@ export function DailyActivityChart({
                 <Area
                   type="monotone"
                   dataKey="dials"
-                  name="Dials"
+                  name={t({ bn: "কল দেওয়া হয়েছে", en: "Calls made" })}
                   stroke="var(--chart-1)"
                   fill="url(#rp-dials)"
                   strokeWidth={2}
@@ -119,7 +121,7 @@ export function DailyActivityChart({
                 <Area
                   type="monotone"
                   dataKey="connected"
-                  name="Connected"
+                  name={t({ bn: "কথা হয়েছে", en: "Connected" })}
                   stroke="var(--chart-3)"
                   fill="url(#rp-conn)"
                   strokeWidth={2}
@@ -146,7 +148,7 @@ export function DailyActivityChart({
                 <Line
                   type="monotone"
                   dataKey="newLeads"
-                  name="New leads"
+                  name={t({ bn: "নতুন লিড", en: "New leads" })}
                   stroke="var(--chart-1)"
                   strokeWidth={2}
                   dot={false}
@@ -154,7 +156,7 @@ export function DailyActivityChart({
                 <Line
                   type="monotone"
                   dataKey="whatsapp"
-                  name="WhatsApp"
+                  name={t({ bn: "হোয়াটসঅ্যাপ", en: "WhatsApp" })}
                   stroke="var(--chart-4)"
                   strokeWidth={2}
                   dot={false}
@@ -162,7 +164,7 @@ export function DailyActivityChart({
                 <Line
                   type="monotone"
                   dataKey="talkMinutes"
-                  name="Talk min"
+                  name={t({ bn: "কথার মিনিট", en: "Talk min" })}
                   stroke="var(--chart-3)"
                   strokeWidth={2}
                   dot={false}
