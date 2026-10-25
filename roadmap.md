@@ -1,14 +1,14 @@
 # Roadmap
 
-## 2026-10-25 — Safe Meta verification checklist on /inbox (in progress)
-- [ ] Owner request 00:49 UTC: recordable evidence checklist for App Review, Live mode, Page messaging consent and messages subscription — append-only records, no access token storage (token-like notes rejected).
+## 2026-10-25 — Safe Meta verification checklist on /inbox
+- [x] Owner request 00:49 UTC done: `meta_verification_records` (0126, append-only, service_role-only) + `src/lib/meta-verification.ts` (4 fixed tracks: app_review, live_mode, page_consent, messages_subscription) + `meta-verification.functions.ts` (IT-only record, staff read) + checklist UI in `MetaVerificationReport.tsx` with real Dhaka timestamps. `validateEvidenceNote` rejects any note that changes under credential redaction — no access token can be stored as evidence.
 
-## 2026-10-25 — Messenger retention + webhook handshake activation (in progress)
-- [ ] Retention policy + automatic deletion for encrypted Messenger messages (owner request 00:46 UTC): retention window, scheduled cleanup, reviewed exception to the append-only trigger for expired rows only.
+## 2026-10-25 — Messenger retention + webhook handshake activation
+- [x] Retention (owner request 00:46 UTC): `MESSENGER_RETENTION_DAYS` bodies 90d, thread events/receipts 180d, sent outbox 90d; `0125_messenger_retention_policy.sql` lets the trigger allow deletes only past the window (updates still blocked); cron route `/api/public/jobs/messenger-retention` (authenticateCronRequest, counts only, never pending retries) + managed schedule `messenger-retention-cleanup` daily 21:30 UTC (03:30 Dhaka). UI note on /inbox.
 - [x] Webhook GET subscription handshake wired (exact verify-token match → 200 challenge; mismatch → 403; unconfigured → 503); human navigation still 303s to /messenger.
 - [x] Ingestion switch `MESSENGER_INGESTION_ENABLED=true` set by owner order; POST still refuses without `META_APP_SECRET`, and Meta-side registration still needs the verify token + App/Page approvals.
-- [ ] Re-request `META_APP_SECRET` + `META_WEBHOOK_VERIFY_TOKEN` via secure form (first attempt cancelled by the new message).
-- [ ] Run updated messenger test suite; update AGENTS.md/docs to match the new handshake + retention reality.
+- [ ] `META_APP_SECRET` + `META_WEBHOOK_VERIFY_TOKEN` secure form rejected by owner 00:51 UTC — not configured; owner can save them later via Project Settings → Secrets. Until then POST refuses 503 and the handshake answers 503.
+- [x] 11 files / 89 tests passed 00:51:15 UTC (retention, verification checklist, crypto, delivery, inbox, webhook, ingest, review, routes, boundaries).
 
 ## 2026-10-25 — Verification report, delivery diagnostics, message encryption
 - [x] Read-only verification report on `/inbox` (`src/lib/meta-verification-report.ts` + `MetaVerificationReport.tsx`): three separate evidence tracks — Messenger App Review approval, Page subscription, old-token revocation — each unverified with null checkedAt and its own blocker; no track borrows another's proof.
