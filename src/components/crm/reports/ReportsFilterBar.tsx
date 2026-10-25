@@ -231,9 +231,9 @@ export function ReportsFilterBar({
                 en: `From ${filters.from} to ${filters.to} — matches:`,
               })}
             </span>{" "}
-              bn: `${matchedAgents} জন এজেন্ট, ${matchedLeads}টি লিড, ${matchedCalls}টি কল। চিপে চাপ দিলে সেই শর্ত সরে যাবে।`,
+            {t({
+              bn: `${matchedAgents} জন এজেন্ট, ${matchedLeads}টি লিড, ${matchedCalls}টি কল। চিপে চাপ দিলে সেই শর্ত সরে যোোোোো।`,
               en: `${matchedAgents} agent${matchedAgents === 1 ? "" : "s"}, ${matchedLeads} lead${matchedLeads === 1 ? "" : "s"}, ${matchedCalls} call${matchedCalls === 1 ? "" : "s"}. Tap a chip to remove that filter.`,
-              en: `${matchedAgents} agent${matchedAgents === 1 ? "" : "s"}, ${matchedLeads} lead${matchedLeads === 1 ? "" : "s"}, ${matchedCalls} call${matchedCalls === 1 ? "" : "s"}. Tap a chip above to remove that filter.`,
             })}
           </p>
         ) : (
