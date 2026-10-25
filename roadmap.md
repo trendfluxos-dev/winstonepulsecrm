@@ -1,5 +1,10 @@
 # Roadmap
 
+## Current checks — report schedule, Messenger samples, Meta and today's allocation
+- [ ] Read back daily report schedule and verify published callback without bypassing cron auth.
+- [ ] Add local-only sample lead detail and empty states; no CRM records or demo-to-live lookup.
+- [ ] Check today's allocation totals read-only; Meta activation and inventory connection require their missing authorization/source evidence.
+
 ## Messenger — lead details beside messages
 - [x] Add read-only linked-lead sidebar beside the selected conversation (stacked below on smaller screens); saved inbound message IDs only, independent thread and current lead ownership checks. Demo/disconnected data never reads real leads; Meta activation unchanged.
 - [x] 42 targeted Messenger/inventory tests pass, semantic colors pass, harness build OK. Signed-in browser shows inactive sidebar with no runtime errors; job remains 401 without managed auth. Tests now isolate environment flags rather than depend on real Meta settings.
