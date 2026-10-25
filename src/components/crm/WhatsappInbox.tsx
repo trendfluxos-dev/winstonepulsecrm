@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { logMyWhatsappMessage } from "@/lib/agent-desk.functions";
 import { getWhatsappIntegrationStatus, sendWhatsappMessage } from "@/lib/whatsapp.functions";
+import { WHATSAPP_TEMPLATES, findWhatsAppTemplate } from "@/lib/whatsapp-templates";
 import type { Lead, WhatsappMessage } from "@/lib/crm-data";
 import { useSnapshot } from "@/lib/crm-data";
 import { clockTime, dayLabel, relativeTime } from "@/lib/crm-format";
@@ -44,7 +45,11 @@ export function WhatsappInbox() {
   const [search, setSearch] = useState("");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+  const [templateId, setTemplateId] = useState<string>(WHATSAPP_TEMPLATES[0]?.id ?? "");
+  const [templateVars, setTemplateVars] = useState<string[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
+
+  const activeTemplate = findWhatsAppTemplate(templateId) ?? null;
 
   const threads = useMemo<Thread[]>(() => {
     const byLead = new Map<string, WhatsappMessage[]>();
@@ -88,7 +93,15 @@ export function WhatsappInbox() {
   const mutation = useMutation({
     mutationFn: async (text: string) => {
       if (integrationStatus === "configured") {
-        const result = await sendApi({ data: { adminToken, leadId: active!.lead.id, body: text } });
+        if (!activeTemplate) throw new Error("একটি অনুমোদিত টেমপ্লেট বেছে নিন");
+        const result = await sendApi({
+          data: {
+            adminToken,
+            leadId: active!.lead.id,
+            template: activeTemplate.id,
+            variables: activeTemplate.variables.map((_, i) => (templateVars[i] ?? "").trim()),
+          },
+        });
         if (!result.ok) throw new Error(result.error);
         return result;
       }
@@ -98,11 +111,16 @@ export function WhatsappInbox() {
     },
     onSuccess: () => {
       setDraft("");
+      setTemplateVars([]);
       if (integrationStatus === "configured") toast.success("WhatsApp মেসেজ পাঠানো হয়েছে");
       void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
+
+  const templateReady =
+    activeTemplate !== null &&
+    activeTemplate.variables.every((_, i) => (templateVars[i] ?? "").trim().length > 0);
 
   return (
     <section className="space-y-3">
