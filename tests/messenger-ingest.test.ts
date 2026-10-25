@@ -64,7 +64,7 @@ it("refuses while durable storage is absent instead of acknowledging", async () 
   const body = bodyOf({ message: { mid: "MID_NO_TABLES", text: "সংরক্ষণ নাই" } });
   const { store, seen } = fakeStore([{ kind: "storage_unavailable" }]);
   const result = await ingestMessengerWebhook({ bytes: body, signature: await signed(body), appSecret: secret, store, enabled: true });
-  expect(result).toEqual({ ok: false, status: 503, code: "MESSENGER_INGESTION_NOT_READY" });
+  expect(result).toEqual({ ok: false, status: 403, code: "MESSENGER_INGESTION_NOT_READY" });
   expect(seen).toHaveLength(0);
 });
 
@@ -72,7 +72,7 @@ it("stays switched off when the server flag is absent", async () => {
   const body = bodyOf({ message: { mid: "MID_DISABLED", text: "বন্ধ" } });
   const { store, seen } = fakeStore([{ kind: "fresh" }]);
   const result = await ingestMessengerWebhook({ bytes: body, signature: await signed(body), appSecret: secret, store, enabled: false });
-  expect(result).toEqual({ ok: false, status: 503, code: "MESSENGER_INGESTION_NOT_READY" });
+  expect(result).toEqual({ ok: false, status: 403, code: "MESSENGER_INGESTION_NOT_READY" });
   expect(seen).toHaveLength(0);
 });
 

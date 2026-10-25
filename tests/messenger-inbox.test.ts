@@ -44,11 +44,11 @@ describe("Facebook not connected", () => {
     expect(await notConnectedMessengerService.connection()).toEqual({ connected: false, reason: "FACEBOOK_NOT_CONNECTED" });
     expect((await notConnectedMessengerService.sendReply({ threadId: "x", text: "hi", requestId: "r" })).ok).toBe(false);
   });
-  it("webhook placeholder returns 503 for GET and POST", async () => {
+  it("webhook placeholder returns 403 for GET and POST", async () => {
     const h = (Webhook.options as any).server.handlers;
     for (const m of ["GET", "POST"]) {
       const res: Response = await h[m]({ request: new Request("http://x/api/public/meta/messenger", { method: m }) });
-      expect(res.status).toBe(503);
+      expect(res.status).toBe(403);
       expect((await res.json()).code).toBe("FACEBOOK_NOT_CONNECTED");
     }
   });
@@ -63,7 +63,7 @@ describe("Facebook not connected", () => {
     const h = (Webhook.options as any).server.handlers;
     for (const query of ["hub.mode=subscribe&hub.challenge=123&hub.verify_token=synthetic", "hub.challenge=123", "hub.mode="]) {
       const res: Response = await h.GET({ request: new Request(`http://x/api/public/meta/messenger?${query}`, { headers: { accept: "text/html" } }) });
-      expect(res.status).toBe(503);
+      expect(res.status).toBe(403);
       expect((await res.json()).code).toBe("FACEBOOK_NOT_CONNECTED");
       expect(res.headers.get("Location")).toBeNull();
     }

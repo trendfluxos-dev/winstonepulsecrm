@@ -65,8 +65,8 @@ describe("offline Messenger webhook protocol", () => {
     const fetch = vi.spyOn(globalThis, "fetch").mockImplementation(() => { throw new Error("Network prohibited"); });
     try {
       const service = getMessengerService();
-      expect(await service.verifyWebhook(challenge)).toEqual({ ok: false, status: 503 });
-      expect(await service.ingestWebhook(body, await sign(body))).toEqual({ ok: false, status: 503 });
+      expect(await service.verifyWebhook(challenge)).toEqual({ ok: false, status: 403 });
+      expect(await service.ingestWebhook(body, await sign(body))).toEqual({ ok: false, status: 403 });
       for (let i = 0; i < 2; i++) {
         expect(await service.sendReply({ threadId: "demo-1", text: "synthetic", requestId: "same-request" })).toEqual({ ok: false, reason: "FACEBOOK_NOT_CONNECTED" });
       }

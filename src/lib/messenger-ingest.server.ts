@@ -82,7 +82,7 @@ export async function ingestMessengerWebhook(input: {
   store?: MessengerStore | undefined;
   enabled?: boolean | undefined;
 }): Promise<MessengerIngestOutcome> {
-  if (!input.appSecret) return refusal(503, "FACEBOOK_NOT_CONNECTED");
+  if (!input.appSecret) return refusal(403, "FACEBOOK_NOT_CONNECTED");
   const signature = input.signature;
   if (!signature || !/^sha256=[a-f0-9]{64}$/.test(signature)) return refusal(401, "INVALID_WEBHOOK_SIGNATURE");
   if (!await matchesWebhookSignature(input.bytes, signature, input.appSecret)) return refusal(401, "INVALID_WEBHOOK_SIGNATURE");
@@ -91,7 +91,7 @@ export async function ingestMessengerWebhook(input: {
   if (!parsed.ok) return refusal(400, "INVALID_WEBHOOK_PAYLOAD");
 
   // Durable storage and Meta approvals are unverified: refuse before any write.
-  if (!(input.enabled ?? messengerIngestionEnabled())) return refusal(503, "MESSENGER_INGESTION_NOT_READY");
+  if (!(input.enabled ?? messengerIngestionEnabled())) return refusal(403, "MESSENGER_INGESTION_NOT_READY");
 
   const store = input.store ?? (await import("@/lib/messenger-store.server")).supabaseMessengerStore();
   let stored = 0;
@@ -101,7 +101,7 @@ export async function ingestMessengerWebhook(input: {
     const eventKey = messengerEventKey(event);
     const payloadHash = await messengerPayloadHash(event);
     const claim = await store.claimReceipt(eventKey, payloadHash);
-    if (claim.kind === "storage_unavailable") return refusal(503, "MESSENGER_INGESTION_NOT_READY");
+    if (claim.kind === "storage_unavailable") return refusal(403, "MESSENGER_INGESTION_NOT_READY");
     if (claim.kind === "conflict") return refusal(409, "MESSENGER_EVENT_CONFLICT");
     if (claim.kind === "duplicate") {
       duplicates += 1;
@@ -117,7 +117,7 @@ export async function ingestMessengerWebhook(input: {
         timestamp: event.timestamp,
       });
       if (!saved.ok) {
-        if (saved.reason === "storage_unavailable") return refusal(503, "MESSENGER_INGESTION_NOT_READY");
+        if (saved.reason === "storage_unavailable") return refusal(403, "MESSENGER_INGESTION_NOT_READY");
         duplicates += 1;
         continue;
       }
@@ -133,7 +133,7 @@ export async function ingestMessengerWebhook(input: {
       eventKey,
       timestamp: event.timestamp,
     });
-    if (!status.ok) return refusal(503, "MESSENGER_INGESTION_NOT_READY");
+    if (!status.ok) return refusal(403, "MESSENGER_INGESTION_NOT_READY");
   }
 
   return { ok: true, stored, duplicates };
