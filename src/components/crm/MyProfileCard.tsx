@@ -31,21 +31,31 @@ export function MyProfileCard() {
   const [phone, setPhone] = useState(profile?.phone ?? "");
   const [hue, setHue] = useState(profile?.avatar_hue ?? 200);
   const [pwOpen, setPwOpen] = useState(false);
+  const [pw0, setPw0] = useState("");
   const [pw1, setPw1] = useState("");
   const [pw2, setPw2] = useState("");
 
   const changePassword = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.auth.updateUser({ password: pw1 });
+      const { error } = await supabase.auth.updateUser({
+        password: pw1,
+        current_password: pw0,
+      });
       if (error) throw new Error(error.message);
     },
     onSuccess: () => {
       toast.success("পাসওয়ার্ড পরিবর্তন হয়েছে");
+      setPw0("");
       setPw1("");
       setPw2("");
       setPwOpen(false);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) =>
+      toast.error(
+        /current password/i.test(error.message)
+          ? "বর্তমান পাসওয়ার্ডটি সঠিক নয় — আবার চেষ্টা করুন"
+          : error.message,
+      ),
   });
 
   const mutation = useMutation({
@@ -170,6 +180,17 @@ export function MyProfileCard() {
 
       {pwOpen && (
         <div className="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-2">
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="my-pw0">বর্তমান পাসওয়ার্ড</Label>
+            <Input
+              id="my-pw0"
+              type="password"
+              autoComplete="current-password"
+              value={pw0}
+              onChange={(e) => setPw0(e.target.value)}
+              placeholder="যে পাসওয়ার্ড দিয়ে এখন লগইন করেছেন"
+            />
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="my-pw1">নতুন পাসওয়ার্ড</Label>
             <Input
@@ -193,7 +214,7 @@ export function MyProfileCard() {
           </div>
           <div className="sm:col-span-2">
             <Button
-              disabled={pw1.length < 6 || pw1 !== pw2 || changePassword.isPending}
+              disabled={pw0.length === 0 || pw1.length < 6 || pw1 !== pw2 || changePassword.isPending}
               onClick={() => changePassword.mutate()}
             >
               {changePassword.isPending ? (
