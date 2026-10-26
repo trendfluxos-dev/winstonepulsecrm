@@ -31,21 +31,31 @@ export function MyProfileCard() {
   const [phone, setPhone] = useState(profile?.phone ?? "");
   const [hue, setHue] = useState(profile?.avatar_hue ?? 200);
   const [pwOpen, setPwOpen] = useState(false);
+  const [pw0, setPw0] = useState("");
   const [pw1, setPw1] = useState("");
   const [pw2, setPw2] = useState("");
 
   const changePassword = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.auth.updateUser({ password: pw1 });
+      const { error } = await supabase.auth.updateUser({
+        password: pw1,
+        current_password: pw0,
+      });
       if (error) throw new Error(error.message);
     },
     onSuccess: () => {
       toast.success("পাসওয়ার্ড পরিবর্তন হয়েছে");
+      setPw0("");
       setPw1("");
       setPw2("");
       setPwOpen(false);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) =>
+      toast.error(
+        /current password/i.test(error.message)
+          ? "বর্তমান পাসওয়ার্ডটি সঠিক নয় — আবার চেষ্টা করুন"
+          : error.message,
+      ),
   });
 
   const mutation = useMutation({
