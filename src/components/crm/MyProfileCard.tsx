@@ -180,6 +180,17 @@ export function MyProfileCard() {
 
       {pwOpen && (
         <div className="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-2">
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="my-pw0">বর্তমান পাসওয়ার্ড</Label>
+            <Input
+              id="my-pw0"
+              type="password"
+              autoComplete="current-password"
+              value={pw0}
+              onChange={(e) => setPw0(e.target.value)}
+              placeholder="যে পাসওয়ার্ড দিয়ে এখন লগইন করেছেন"
+            />
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="my-pw1">নতুন পাসওয়ার্ড</Label>
             <Input
@@ -203,7 +214,7 @@ export function MyProfileCard() {
           </div>
           <div className="sm:col-span-2">
             <Button
-              disabled={pw1.length < 6 || pw1 !== pw2 || changePassword.isPending}
+              disabled={pw0.length === 0 || pw1.length < 6 || pw1 !== pw2 || changePassword.isPending}
               onClick={() => changePassword.mutate()}
             >
               {changePassword.isPending ? (
