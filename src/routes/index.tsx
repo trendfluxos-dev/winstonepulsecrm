@@ -211,6 +211,8 @@ function EntryHall() {
           </p>
         </div>
 
+        {signinOpen && (
+        <>
         <div aria-hidden className="mt-12 border-t border-border" />
 
         <h2
