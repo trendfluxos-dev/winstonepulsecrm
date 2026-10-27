@@ -27,6 +27,8 @@ object SyncStatus {
         val lastError: String? = null,
         val lastAudioUploadedAtMillis: Long = 0L,
         val lastReportSyncedAtMillis: Long = 0L,
+        /** Recordings uploading right now (in memory only, never persisted). */
+        val uploading: Int = 0,
     )
 
     private val _state = MutableStateFlow(Snapshot())
@@ -80,10 +82,16 @@ object SyncStatus {
     }
 
     @Synchronized
+    fun uploadStarted() { _state.value = _state.value.copy(uploading = _state.value.uploading + 1) }
+
+    @Synchronized
+    fun uploadEnded() { _state.value = _state.value.copy(uploading = (_state.value.uploading - 1).coerceAtLeast(0)) }
+
+    @Synchronized
     fun clearErrors(context: Context) = update(context) { it.copy(failed = 0, lastError = null) }
 
     private fun update(context: Context, transform: (Snapshot) -> Snapshot) {
-        val next = transform(_state.value)
+        val next = transform(_state.value).copy(uploading = _state.value.uploading)
         _state.value = next
         prefs(context).edit()
             .putInt(K_PENDING, next.pending)
