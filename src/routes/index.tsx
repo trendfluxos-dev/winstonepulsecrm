@@ -188,7 +188,7 @@ function EntryHall() {
 
         <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
           <Button asChild size="lg" className="btn-enter w-full rounded-md text-base font-bold">
-            <Link to="/signin">
+            <Link to="/signin" resetScroll={false}>
               {t({ bn: "শুরু করুন", en: "Get started" })} <ChevronRight className="size-5" />
             </Link>
           </Button>
