@@ -48,6 +48,10 @@ import {
 } from "@/lib/crm-data";
 import { formatTalkTime, relativeTime, shortDate } from "@/lib/crm-format";
 import { useMyAccount } from "@/lib/session";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getDeskWork } from "@/lib/desk-work.functions";
+import { deskFollowUpCounts, deskLeadCounts, deskReportCounts, isHotActive } from "@/lib/desk-counts";
 import { cn } from "@/lib/utils";
 import { isParked } from "@/lib/no-answer-cadence";
 
@@ -174,6 +178,9 @@ export function DeskCommandCenter({
 }) {
   const { account } = useMyAccount();
   const { leads, profiles, calls, messages, events, isPending } = useSnapshot();
+  const me = account?.profile?.id ?? "";
+  const readDeskWork = useServerFn(getDeskWork);
+  const deskWork = useQuery({ queryKey: ["desk-work", me], queryFn: () => readDeskWork(), enabled: Boolean(me), refetchInterval: 60_000 });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   // ?lead=<id> (from Pipeline / Tasks / search) selects that lead if it is in the caller's own snapshot.
   const leadParam = useRouterState({ select: (st) => (st.location.search as Record<string, unknown>)["lead"] });
@@ -203,30 +210,31 @@ export function DeskCommandCenter({
     const connected = todayCalls.filter(
       (c) => c.duration_seconds > CONNECTED_THRESHOLD_SECONDS,
     ).length;
-    const followUps = leads.filter((l) => l.status === "follow_up");
-    const overdue = followUps.filter((l) => l.retry_after && Date.parse(l.retry_after) < now);
-    const dueToday = followUps.filter(
-      (l) => l.retry_after && dhakaDay(new Date(l.retry_after)) === today,
-    );
-    const done = leads.filter((l) => l.work_state === "completed").length;
+    const lc = deskLeadCounts(leads, me, { from: today, to: today });
+    const fu = deskFollowUpCounts(deskWork.data?.followUps ?? [], new Date(now));
+    const rc = deskReportCounts(deskWork.data?.reports ?? [], today);
     return {
-      total: leads.length,
-      pending: leads.filter((l) => l.status === "pending").length,
-      done,
-      donePct: leads.length ? Math.round((done / leads.length) * 100) : 0,
+      total: lc.active,
+      allTime: lc.allTimeOwned,
+      pending: lc.activePending,
+      done: lc.rangeCompleted,
+      todayAssigned: lc.rangeAssigned,
+      donePct: lc.rangeAssigned ? Math.round((lc.rangeCompleted / lc.rangeAssigned) * 100) : 0,
       calls: todayCalls.length,
       connected,
       connectRate: todayCalls.length ? Math.round((connected / todayCalls.length) * 100) : 0,
+      reports: rc.submitted,
+      reportedConnected: rc.reportedConnected,
       talk: todayCalls.reduce((s, c) => s + c.duration_seconds, 0),
       whatsapp: onToday(messages).length,
-      followUp: followUps.length,
-      overdue: overdue.length,
-      dueToday: dueToday.length,
-      hot: leads.filter((l) => l.temperature === "hot" && l.status !== "closed").length,
+      followUp: fu.open,
+      overdue: fu.overdue,
+      dueToday: fu.dueToday,
+      hot: lc.hot,
       newToday: onToday(leads).length,
       uncalled: leads.filter((l) => l.call_attempts === 0 && !l.last_call_at).length,
     };
-  }, [calls, leads, messages]);
+  }, [calls, leads, messages, me, deskWork.data]);
 
   const rows = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -236,7 +244,7 @@ export function DeskCommandCenter({
         if (filter === "parked") return isParked(l);
         if (filter === "pending") return l.status === "pending" && !isParked(l);
         if (filter === "follow_up") return l.status === "follow_up";
-        if (filter === "hot") return l.temperature === "hot" && l.status !== "closed";
+        if (filter === "hot") return isHotActive(l, me);
         if (filter === "done") return l.status === "contacted" || l.status === "closed";
         return true;
       })
@@ -530,9 +538,9 @@ export function DeskCommandCenter({
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <StatCard
           icon={<Users />}
-          label={t({ bn: "আমার লিড", en: "My leads" })}
+          label={t({ bn: "আমার সক্রিয় লিড", en: "My active assigned leads" })}
           value={bn(stats.total, lang)}
-          sub={t({ bn: `${bn(stats.pending, lang)}টি কল বাকি`, en: `${bn(stats.pending, lang)} pending` })}
+          sub={t({ bn: `${bn(stats.pending, lang)}টি কল বাকি · বর্তমান · মোট মালিকানা ${bn(stats.allTime, lang)}`, en: `${bn(stats.pending, lang)} pending · current · ${bn(stats.allTime, lang)} owned all-time` })}
           loading={isPending}
         />
         <StatCard
@@ -540,8 +548,8 @@ export function DeskCommandCenter({
           label={t({ bn: "আজকের কল", en: "Today's calls" })}
           value={bn(stats.calls, lang)}
           sub={t({
-            bn: `${bn(stats.connected, lang)}টিতে কথা · ${bn(stats.connectRate, lang)}%`,
-            en: `${bn(stats.connected, lang)} connected · ${bn(stats.connectRate, lang)}%`,
+            bn: `${bn(stats.connected, lang)}টিতে কথা · ${bn(stats.connectRate, lang)}% · ${bn(stats.reports, lang)}টি রিপোর্ট জমা (${bn(stats.reportedConnected, lang)}টিতে কথা হয়েছে বলে জানানো)`,
+            en: `${bn(stats.connected, lang)} connected · ${bn(stats.connectRate, lang)}% · ${bn(stats.reports, lang)} reports submitted (${bn(stats.reportedConnected, lang)} agent-reported connected)`,
           })}
           tone="live"
           loading={isPending}
@@ -574,9 +582,9 @@ export function DeskCommandCenter({
         />
         <StatCard
           icon={<CheckCircle2 />}
-          label={t({ bn: "শেষ হয়েছে", en: "Completed" })}
-          value={`${bn(stats.done, lang)} / ${bn(stats.total, lang)}`}
-          sub={t({ bn: `${bn(stats.donePct, lang)}% কাজ শেষ · আমার সব অ্যাসাইন লিডের মধ্যে`, en: `${bn(stats.donePct, lang)}% complete · of all my assigned leads` })}
+          label={t({ bn: "আজ শেষ হয়েছে", en: "Completed today" })}
+          value={`${bn(stats.done, lang)} / ${bn(stats.todayAssigned, lang)}`}
+          sub={t({ bn: `${bn(stats.donePct, lang)}% · আজকের (ঢাকা) কাজের তারিখের আমার লিড · বর্তমান অবস্থা`, en: `${bn(stats.donePct, lang)}% · my leads with today's (Dhaka) work date · current state` })}
           tone="live"
           loading={isPending}
         />
