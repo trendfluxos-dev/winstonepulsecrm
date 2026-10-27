@@ -1,8 +1,8 @@
 # Roadmap
 
 ## 2026-10-27 — Sign-in daily performance
-- [ ] Show public daily agent performance at 5:30 PM Dhaka, highlight Top 3 and list remaining agents below; owner approved public names/results, no customer details.
-- [ ] Preserve the supplied reference's handwritten heading and clean supporting text in the performance section; keep existing scoring/finalization unchanged.
+- [x] Public sign-in daily performance reuses the existing 5:30 PM server reveal and scores; three leading results highlighted, remaining agents below, no customer details. Real signed-out read-back: 3 highlighted / 6 remaining, no overflow or page errors; 17 existing ranking/reveal tests pass, harness build OK. Not deployed.
+- [x] Reference handwritten heading and clean supporting text preserved. Existing scoring unchanged; existing code has no persisted 6:00 finalization, so no final/locked claim added.
 
 ## 2026-10-27 — Database performance and Run usage
 - [x] Measured requested credits for Oct 14–27 (partial current day): Run 0.959740401, including database 0.1677 for 1 recorded small instance-hour, Gateway 0.78988, network 0.000660401 and realtime 0.0015; Build separate 78.13016. No realized savings claim.
