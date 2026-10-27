@@ -54,6 +54,42 @@ export const Route = createFileRoute("/")({
       { property: "og:site_name", content: "Winstone Pulse" },
     ],
     links: [{ rel: "canonical", href: "https://crm.winstonebd.com/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://crm.winstonebd.com/#org",
+              name: "Winstone Properties Ltd.",
+              url: "https://winstonebd.com",
+              email: "info@winstonebd.com",
+              telephone: "+8801805049666",
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://crm.winstonebd.com/#website",
+              name: "Winstone Pulse",
+              url: "https://crm.winstonebd.com/",
+              inLanguage: ["en", "bn"],
+              publisher: { "@id": "https://crm.winstonebd.com/#org" },
+            },
+            {
+              "@type": "SoftwareApplication",
+              name: "Winstone Pulse",
+              description: "The Premium Real Estate CRM — leads, calls, follow-ups and team performance in one workspace.",
+              applicationCategory: "BusinessApplication",
+              operatingSystem: "Web, Android",
+              url: "https://crm.winstonebd.com/",
+              image: "https://crm.winstonebd.com/social/winstone-pulse.jpg",
+              publisher: { "@id": "https://crm.winstonebd.com/#org" },
+            },
+          ],
+        }),
+      },
+    ],
   }),
   component: EntryHall,
 });
