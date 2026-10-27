@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getDeskReports } from "@/lib/desk-work.functions";
-import { callKpis, leadKpis, rangeError, reportKpis, whatsappKpi } from "@/lib/kpi-contract";
+import { leadKpis, rangeError, reportKpis, whatsappKpi } from "@/lib/kpi-contract";
 import {
   Area,
   AreaChart,
@@ -154,7 +154,6 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
   const me = reportsQ.data?.agentId ?? null;
   const lk = me ? leadKpis(leads, me) : null;
   const rk = reportsQ.data ? reportKpis(reportsQ.data.reports, range) : null;
-  const ck = callKpis(calls, range);
   const wa = whatsappKpi(messages, range);
   const tiles = scope === "agent" ? [
     { label: t({ bn: "আমার মালিকানার লিড (এখন)", en: "Owned leads (now)" }), value: rangeErr ? "—" : lk ? lk.owned : na, icon: Users, tone: "primary" as const },
@@ -163,7 +162,6 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
     { label: t({ bn: "বন্ধ লিড (স্ট্যাটাস, এখন)", en: "Closed leads (status, now)" }), value: rangeErr ? "—" : lk ? lk.closed : na, icon: CheckCircle2, tone: "muted" as const },
     { label: t({ bn: "জমা দেওয়া রিপোর্ট", en: "Submitted reports" }), value: rangeErr ? "—" : rk ? rk.submitted : na, icon: CheckCircle2, tone: "accent" as const },
     { label: t({ bn: "কথা হয়েছে (রিপোর্ট অনুযায়ী)", en: "Connected (per reports)" }), value: rangeErr ? "—" : rk ? `${rk.reportedConnected} (${rk.rate}%)` : na, icon: PhoneCall, tone: "live" as const },
-    { label: t({ bn: "ফোনে সিঙ্ক হওয়া কল (>১০ সে. কথা)", en: "Phone-synced calls (>10s talk)" }), value: rangeErr ? "—" : `${ck.attempts} (${ck.connected})`, icon: Phone, tone: "chart4" as const },
     { label: t({ bn: "হোয়াটসঅ্যাপ", en: "WhatsApp" }), value: rangeErr ? "—" : wa ?? na, icon: MessageCircle, tone: "chart4" as const },
   ] : [
     { label: scope === "hq" ? t({ bn: "মোট লিড", en: "Total leads" }) : t({ bn: "আমার লিড", en: "My leads" }), value: k.leads, icon: Users, tone: "primary" as const },
@@ -253,8 +251,8 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
       {scope === "agent" && (
         <p className="text-xs text-muted-foreground">
           {t({
-            bn: "রিপোর্ট = আপনার জমা দেওয়া কল রিপোর্ট (জমার তারিখ ধরে)। ফোন থেকে সিঙ্ক হওয়া কল = শুধু অ্যান্ড্রয়েড অ্যাপ যে কল পাঠাতে পেরেছে; এটি কম হলে সিঙ্কের সমস্যা, আপনার কাজ কম নয়। \"এখন\" লেখা ঘর বর্তমান অবস্থা দেখায়, তারিখ ফিল্টার মানে না। কথা হওয়া কল = ১০ সেকেন্ডের বেশি কথা। সিঙ্ক হওয়া মেসেজ না থাকলে হোয়াটসঅ্যাপ 'পাওয়া যায়নি'।",
-            en: "Reports = call reports you submitted (by submit date). Phone-synced calls = only calls the Android app managed to send; a low number means a sync gap, not less work. \"Now\" tiles show current state and ignore the date filter. Connected call = more than 10 seconds of talk. WhatsApp shows Unavailable until synced messages exist.",
+            bn: "রিপোর্ট = আপনার জমা দেওয়া কল রিপোর্ট (জমার তারিখ ধরে)। \"এখন\" লেখা ঘর বর্তমান অবস্থা দেখায়, তারিখ ফিল্টার মানে না। কথা হয়েছে = রিপোর্টে এজেন্ট যা চিহ্নিত করেছেন। সিঙ্ক হওয়া মেসেজ না থাকলে হোয়াটসঅ্যাপ 'পাওয়া যায়নি'।",
+            en: "Reports = call reports you submitted (by submit date). \"Now\" tiles show current state and ignore the date filter. Connected = the agent marked the call connected in the report. WhatsApp shows Unavailable until synced messages exist.",
           })}
         </p>
       )}

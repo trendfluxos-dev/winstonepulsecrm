@@ -178,12 +178,13 @@ export function DeskCommandCenter({
 }) {
   const { account } = useMyAccount();
   const { leads, profiles, calls, messages, events, isPending } = useSnapshot();
-  const me = account?.profile?.id ?? "";
   const readDeskWork = useServerFn(getDeskWork);
   const readAllocation = useServerFn(getDailyAllocation);
+  // Identity comes from the same server session check that scopes reports/follow-ups, not the browser account.
+  const deskWork = useQuery({ queryKey: ["desk-work", account?.profile?.id ?? "session"], queryFn: () => readDeskWork(), refetchInterval: 60_000 });
+  const me = deskWork.data?.agentId ?? "";
   const allocation = useQuery({ queryKey: ["daily-new-allocation", "self", null, me], queryFn: () => readAllocation({ data: { surface: "self", adminToken: null } }), enabled: Boolean(me) });
   const ledgerToday = allocation.data?.agents.find((a) => a.id === me)?.received;
-  const deskWork = useQuery({ queryKey: ["desk-work", me], queryFn: () => readDeskWork(), enabled: Boolean(me), refetchInterval: 60_000 });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   // ?lead=<id> (from Pipeline / Tasks / search) selects that lead if it is in the caller's own snapshot.
   const leadParam = useRouterState({ select: (st) => (st.location.search as Record<string, unknown>)["lead"] });
@@ -554,11 +555,11 @@ export function DeskCommandCenter({
           />
           <StatCard
             icon={<PhoneOutgoing />}
-            label={t({ bn: "কল ও রিপোর্ট · আলাদা কাউন্ট", en: "Calls + Reports · counted separately" })}
-            value={deskWork.isError ? t({ bn: "পাওয়া যায়নি", en: "Unavailable" }) : `${bn(stats.calls, lang)} + ${bn(stats.reports, lang)}`}
+            label={t({ bn: "জমা দেওয়া কল রিপোর্ট", en: "Submitted call reports" })}
+            value={deskWork.isError ? t({ bn: "পাওয়া যায়নি", en: "Unavailable" }) : bn(stats.reports, lang)}
             sub={t({
-              bn: `আজ (ঢাকা) · ${bn(stats.calls, lang)}টি কল চেষ্টা (${bn(stats.connected, lang)}টি ফোনে ১০ সেকেন্ডের বেশি) · ${bn(stats.reports, lang)}টি রিপোর্ট জমা (${bn(stats.reportedConnected, lang)}টিতে কথা হয়েছে বলে জানানো)`,
-              en: `Today (Dhaka) · ${bn(stats.calls, lang)} call attempts (${bn(stats.connected, lang)} over 10s on phone) · ${bn(stats.reports, lang)} reports submitted (${bn(stats.reportedConnected, lang)} agent-reported connected)`,
+              bn: `আজ জমা দেওয়া কল রিপোর্ট (ঢাকা সময়) · ${bn(stats.reportedConnected, lang)}টিতে কথা হয়েছে`,
+              en: `Call reports submitted today (Dhaka, by submit time) · ${bn(stats.reportedConnected, lang)} marked connected`,
             })}
             loading={isPending}
           />
@@ -976,7 +977,7 @@ export function DeskCommandCenter({
               />
               <div className="mt-3 space-y-2.5 text-xs">
                 <Meter label={t({ bn: "লিড শেষ", en: "Completed" })} value={stats.done} total={stats.total} />
-                <Meter label={t({ bn: "কথা হয়েছে", en: "Connected" })} value={stats.connected} total={stats.calls} />
+                <Meter label={t({ bn: "কথা হয়েছে (রিপোর্ট)", en: "Connected (reports)" })} value={stats.reportedConnected} total={stats.reports} />
                 <Meter
                   label={t({ bn: "ফলো-আপ সময়মতো", en: "On-time follow-ups" })}
                   value={Math.max(stats.followUp - stats.overdue, 0)}
@@ -985,7 +986,7 @@ export function DeskCommandCenter({
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <MiniStat label={t({ bn: "আজ যোগ হওয়া লিড", en: "New today" })} value={bn(stats.newToday, lang)} />
-                <MiniStat label={t({ bn: "কথার সময়", en: "Talk time" })} value={formatTalkTime(stats.talk)} />
+                <MiniStat label={t({ bn: "আজ জমা রিপোর্ট", en: "Reports today" })} value={bn(stats.reports, lang)} />
               </div>
               {onJumpTab && (
                 <div className="mt-3 flex flex-wrap gap-2">

@@ -13,7 +13,6 @@ import {
   LogIn,
   MessageCircle,
   PhoneCall,
-  Timer,
   Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -58,12 +57,14 @@ import { SocialDesk } from "@/components/crm/social/SocialDesk";
 import { TodayHero } from "@/components/crm/desk/TodayHero";
 import { AiLeadPriority } from "@/components/crm/AiLeadPriority";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CONNECTED_THRESHOLD_SECONDS, useSnapshot } from "@/lib/crm-data";
-import { formatTalkTime } from "@/lib/crm-format";
-import { dhakaDay, plausibleSeconds } from "@/lib/lead-groups";
+import { useSnapshot } from "@/lib/crm-data";
+import { dhakaDay } from "@/lib/lead-groups";
 import { useMyAccount, useSignOut } from "@/lib/session";
 import { DeskRangeChip, useDeskRange } from "@/lib/desk-range";
-import { deskLeadCounts } from "@/lib/desk-counts";
+import { deskLeadCounts, deskReportCounts } from "@/lib/desk-counts";
+import { getDeskWork } from "@/lib/desk-work.functions";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/desk")({
   validateSearch: sectionSearch,
@@ -90,9 +91,11 @@ export const Route = createFileRoute("/desk")({
 /** Live counters for the agent's own day, each compared with yesterday. */
 function DeskStats() {
   const t = useT();
-  const { leads, calls, messages } = useSnapshot();
-  const { account } = useMyAccount();
-  const me = account?.profile?.id ?? "";
+  const { leads, messages } = useSnapshot();
+  const readDeskWork = useServerFn(getDeskWork);
+  // Same server session check that scopes reports — never the browser account.
+  const deskWork = useQuery({ queryKey: ["desk-work-stats"], queryFn: () => readDeskWork(), refetchInterval: 60_000 });
+  const me = deskWork.data?.agentId ?? "";
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -101,40 +104,30 @@ function DeskStats() {
     const yesterday = dhakaDay(now.getTime() - 86_400_000);
     const onDay = <T extends { created_at: string }>(rows: T[], day: string) =>
       rows.filter((r) => dhakaDay(r.created_at) === day);
-
-    const todayCalls = onDay(calls, today);
-    const yCalls = onDay(calls, yesterday);
-    const talk = todayCalls.reduce((sum, c) => sum + plausibleSeconds(c.duration_seconds), 0);
-    const yTalk = yCalls.reduce((sum, c) => sum + plausibleSeconds(c.duration_seconds), 0);
-    const connectedOf = (rows: typeof calls) =>
-      rows.filter((c) => c.duration_seconds > CONNECTED_THRESHOLD_SECONDS).length;
+    // Official call KPI = submitted call_reports (by submit time); phone-sync rows are never counted.
+    const rc = deskReportCounts(deskWork.data?.reports ?? [], today);
+    const lc = deskLeadCounts(leads, me, { from: today, to: today });
     return {
-      leads: deskLeadCounts(leads, me, { from: today, to: today }).active,
-      pending: deskLeadCounts(leads, me, { from: today, to: today }).activePending,
-      calls: todayCalls.length,
-      callsDelta: todayCalls.length - yCalls.length,
-      connected: connectedOf(todayCalls),
-      connectRate: todayCalls.length
-        ? Math.round((connectedOf(todayCalls) / todayCalls.length) * 100)
-        : 0,
-      talk,
-      talkDelta: Math.round((talk - yTalk) / 60),
+      leads: lc.active,
+      pending: lc.activePending,
+      reports: rc.submitted,
+      reportedConnected: rc.reportedConnected,
+      connectRate: rc.submitted ? Math.round((rc.reportedConnected / rc.submitted) * 100) : 0,
       whatsapp: onDay(messages, today).length,
       whatsappDelta: onDay(messages, today).length - onDay(messages, yesterday).length,
-      done: deskLeadCounts(leads, me, { from: today, to: today }).rangeCompleted,
-      // Quota gauge measures TODAY's assigned workload only — never the
-      // all-time list, so closed history cannot inflate completion.
-      todayAssigned: leads.filter((l) => l.work_date === today).length,
-      todayDone: leads.filter((l) => l.work_date === today && l.work_state === "completed").length,
+      done: lc.rangeCompleted,
+      // Quota gauge measures TODAY's assigned workload only.
+      todayAssigned: me ? leads.filter((l) => (l.assigned_agent_id ?? l.assigned_to) === me && l.work_date === today).length : 0,
+      todayDone: me ? leads.filter((l) => (l.assigned_agent_id ?? l.assigned_to) === me && l.work_date === today && l.work_state === "completed").length : 0,
     };
-  }, [leads, calls, messages, me]);
+  }, [leads, messages, me, deskWork.data]);
 
   const donePct = stats.todayAssigned ? Math.round((stats.done / stats.todayAssigned) * 100) : 0;
 
   return (
     <div className="grid gap-3 lg:grid-cols-[260px_minmax(0,1fr)]">
     <QuotaGauge done={stats.todayDone} total={stats.todayAssigned} />
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       <Tile
         icon={<Users className="size-4" />}
         label={t({ bn: "আমার সক্রিয় লিড", en: "My active assigned leads" })}
@@ -145,19 +138,9 @@ function DeskStats() {
       />
       <Tile
         icon={<PhoneCall className="size-4" />}
-        label={t({ bn: "আজকের কল", en: "Today's calls" })}
-        value={String(stats.calls)}
-        hint={t({ bn: `${stats.connected}টিতে কথা হয়েছে · ${stats.connectRate}%`, en: `${stats.connected} connected · ${stats.connectRate}%` })}
-        delta={stats.callsDelta}
-        deltaUnit={t({ bn: "টি", en: "" })}
-      />
-      <Tile
-        icon={<Timer className="size-4" />}
-        label={t({ bn: "আজকের কথার সময়", en: "Today's talk time" })}
-        value={formatTalkTime(stats.talk)}
-        hint={t({ bn: "সব কল মিলিয়ে", en: "Across all calls" })}
-        delta={stats.talkDelta}
-        deltaUnit={t({ bn: " মিনিট", en: " min" })}
+        label={t({ bn: "আজ জমা দেওয়া কল রিপোর্ট", en: "Call reports submitted today" })}
+        value={deskWork.isError ? t({ bn: "পাওয়া যায়নি", en: "Unavailable" }) : String(stats.reports)}
+        hint={t({ bn: `${stats.reportedConnected}টিতে কথা হয়েছে (রিপোর্ট) · ${stats.connectRate}%`, en: `${stats.reportedConnected} marked connected · ${stats.connectRate}%` })}
       />
       <Tile
         icon={<MessageCircle className="size-4" />}

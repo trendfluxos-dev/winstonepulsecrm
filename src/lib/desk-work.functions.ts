@@ -19,7 +19,7 @@ export const getDeskWork = createServerFn({ method: "POST" }).handler(async () =
       .eq("agent_id", me).in("status", ["upcoming", "rescheduled"]).order("id").range(a, b)),
   ]);
   if (reports.error || followUps.error) throw new Error("Desk work counts unavailable");
-  return { reports: reports.data ?? [], followUps: (followUps.data ?? []) as { id: string; status: string; scheduled_at: string | null }[], asOf: new Date().toISOString() };
+  return { agentId: me, reports: reports.data ?? [], followUps: (followUps.data ?? []) as { id: string; status: string; scheduled_at: string | null }[], asOf: new Date().toISOString() };
 });
 
 /** Signed-in agent's own submitted call reports (all time, paged, id-deduped). Read-only. */
