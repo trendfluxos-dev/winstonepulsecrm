@@ -52,7 +52,7 @@ function WorkspaceSigninPage() {
   }, []);
 
   return (
-    <div className="theme-exec min-h-screen bg-background">
+    <div className="theme-exec signin-focus min-h-screen bg-background">
       <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:h-16 sm:px-6">
           <Link to="/" className="flex min-w-0 items-center gap-2.5">
@@ -172,7 +172,7 @@ function EntryCard({
   secondary?: ReactNode;
 }) {
   return (
-    <section className="group relative flex flex-col gap-3 rounded-xl border border-border bg-card p-5 transition-colors hover:border-gold">
+    <section className="group relative flex flex-col gap-3 rounded-xl border border-border bg-card p-5 transition-colors hover:border-gold focus-within:border-gold focus-within:ring-2 focus-within:ring-gold/30">
       <span className="grid size-12 place-items-center rounded-full bg-gold/10 text-gold ring-1 ring-gold/40">
         {icon}
       </span>

@@ -414,6 +414,11 @@
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
+  /* Sign-in workspace: a bolder, unmistakable keyboard focus ring */
+  .signin-focus :where(a, button):focus-visible {
+    outline: 3px solid var(--ring) !important;
+    outline-offset: 3px !important;
+  }
 }
 
 /* Faint dot grid on the cream foundation */
