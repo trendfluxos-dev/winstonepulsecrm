@@ -148,8 +148,8 @@ export const openMyReport = createServerFn({ method: "POST" })
   });
 
 /**
- * Customer called the agent back. Logs the incoming call, claims the lead when
- * it is still unassigned, and opens the mandatory post-call report — the same
+ * Customer called the agent back. Logs only the agent's assigned lead,
+ * and opens the mandatory post-call report — the same
  * gate as an outgoing call, so callbacks get category/summary/note/follow-up
  * and land in the spreadsheet like every other report.
  */
@@ -162,27 +162,17 @@ export const logIncomingCallback = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const me = await agentOf(data.adminToken ?? null);
+    await (await import("@/lib/agent-briefing.server")).assertAgentBriefing(me.id);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: lead } = await supabaseAdmin
       .from("leads")
-      .select("id, name, phone_number, assigned_to")
+      .select("id, name, phone_number, assigned_to, assigned_agent_id")
       .eq("id", data.leadId)
       .maybeSingle();
     if (!lead) throw new Error("লিড পাওয়া যায়নি");
-    if (lead.assigned_to && lead.assigned_to !== me.id) {
-      throw new Error("এই লিড আপনার তালিকায় নেই");
-    }
-    if (!lead.assigned_to) {
-      await supabaseAdmin
-        .from("leads")
-        .update({
-          assigned_to: me.id,
-          assigned_agent_id: me.id,
-          assignment_source: "callback_claim",
-        })
-        .eq("id", lead.id);
-    }
+    const { leadNotAssignedTo, LEAD_NOT_YOURS } = await import("@/lib/lead-access.server");
+    if (leadNotAssignedTo(lead, me.id)) throw new Error(LEAD_NOT_YOURS);
 
     const { data: rec, error } = await supabaseAdmin
       .from("call_recordings")
@@ -254,7 +244,7 @@ export const logAnyNumberCall = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { normalizeLeadPhone, intakeLead } = await import("@/lib/lead-intake.server");
     const { resolveLeadIdByPhone } = await import("@/lib/lead-eligibility.server");
-    const { leadOwnerId } = await import("@/lib/lead-access.server");
+    const { leadNotAssignedTo, LEAD_NOT_YOURS } = await import("@/lib/lead-access.server");
 
     const phone = normalizeLeadPhone(data.phoneNumber);
     // Same number = same lead: an existing lead is reused, never duplicated.
@@ -270,34 +260,12 @@ export const logAnyNumberCall = createServerFn({ method: "POST" })
         .select("id, assigned_to, assigned_agent_id")
         .eq("id", leadId)
         .maybeSingle();
-      // An unowned number that called this agent becomes theirs to work.
-      if (lead && !leadOwnerId(lead)) {
-        await supabaseAdmin
-          .from("leads")
-          .update({
-            assigned_to: me.id,
-            assigned_agent_id: me.id,
-            assignment_source: data.direction === "outgoing" ? "dialer_claim" : "callback_claim",
-          })
-          .eq("id", leadId)
-          .is("assigned_to", null)
-          .is("assigned_agent_id", null);
-      }
-      // Re-read ownership: a number that belongs to another agent cannot carry this call.
-      const { data: owned } = await supabaseAdmin
-        .from("leads")
-        .select("assigned_to, assigned_agent_id")
-        .eq("id", leadId)
-        .maybeSingle();
-      if (!owned || leadOwnerId(owned) !== me.id) {
-        throw new Error("এই নম্বরটি অন্য এজেন্টের লিড — কোঅর্ডিনেটরের সাথে যোগাযোগ করুন");
-      }
+      if (!lead || leadNotAssignedTo(lead, me.id)) throw new Error(LEAD_NOT_YOURS);
     } else {
       const intake = await intakeLead({
         name: data.name?.trim() || `${data.direction === "outgoing" ? "কল" : "ফিরতি কল"} ${phone}`,
         phoneNumber: phone,
-        ownerId: me.id,
-        ownerName: me.name,
+        ownerId: null,
         referenceBy: data.direction === "outgoing" ? "ওয়েব থেকে কল" : "কলব্যাক",
         notes:
           data.direction === "outgoing"
@@ -306,7 +274,16 @@ export const logAnyNumberCall = createServerFn({ method: "POST" })
       });
       leadId = intake.leadId;
       createdLead = !intake.duplicate;
+      // Canonical intake is unassigned. A call must never assign it, even on a
+      // duplicate/race; LeadHub must assign before this agent can log work.
+      const { data: owned } = await supabaseAdmin.from("leads")
+        .select("assigned_to, assigned_agent_id").eq("id", leadId).maybeSingle();
+      if (!owned || leadNotAssignedTo(owned, me.id)) {
+        throw new Error("নম্বরটি লিড তালিকায় আছে। LeadHub থেকে আপনার নামে দেওয়ার পর কলের রিপোর্ট দিন।");
+      }
     }
+
+    if (!leadId) throw new Error("লিড পাওয়া যায়নি");
 
     const { data: rec } = await supabaseAdmin
       .from("call_recordings")
@@ -329,7 +306,7 @@ export const logAnyNumberCall = createServerFn({ method: "POST" })
 
     const { openCallReport } = await import("@/lib/call-reports.server");
     const report = await openCallReport({
-      leadId: leadId!,
+      leadId,
       agentId: me.id,
       recordingId: rec?.id ?? null,
       phoneNumber: phone,
@@ -340,7 +317,7 @@ export const logAnyNumberCall = createServerFn({ method: "POST" })
     await supabaseAdmin
       .from("leads")
       .update({ last_call_at: new Date().toISOString() })
-      .eq("id", leadId!);
+      .eq("id", leadId);
 
     const { logLeadEvent } = await import("@/lib/lead-events.server");
     await logLeadEvent({

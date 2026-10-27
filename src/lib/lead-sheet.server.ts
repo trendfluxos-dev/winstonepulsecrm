@@ -9,12 +9,28 @@ const GATEWAY = "https://connector-gateway.lovable.dev/google_sheets/v4";
 /** Accepts a full Google Sheets URL or a bare spreadsheet ID. */
 export function parseSheetId(input: string): string {
   const trimmed = input.trim();
-  const match = trimmed.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-  const id = match?.[1] ?? trimmed;
-  if (!/^[a-zA-Z0-9-_]{20,}$/.test(id)) {
-    throw new Error("Google Sheet লিংকটি ঠিক নেই — শিটের পূর্ণ লিংক দিন");
+  if (/^[a-zA-Z0-9_-]{20,200}$/.test(trimmed)) return trimmed;
+  try {
+    const url = new URL(trimmed);
+    const match = url.pathname.match(/^\/spreadsheets\/d\/([a-zA-Z0-9_-]{20,200})(?:\/|$)/);
+    if (url.protocol === "https:" && url.hostname === "docs.google.com" && !url.username && !url.password && !url.port && match?.[1]) return match[1];
+  } catch {
+    // All invalid inputs fail before connector access.
   }
-  return id;
+  throw new Error("Google Sheet লিংকটি ঠিক নেই — শিটের পূর্ণ লিংক দিন");
+}
+
+/** Only the existing server-configured CRM report workbooks are approved here.
+ * Inventory is a separate read scope and never becomes a lead-import source.
+ */
+async function requireApprovedLeadSheet(sheetId: string) {
+  const [{ reportSheetUrl }, { leadReportSheetUrl }] = await Promise.all([
+    import("@/lib/report-sheet.server"), import("@/lib/lead-report-sheet.server"),
+  ]);
+  const approved = [reportSheetUrl(), leadReportSheetUrl()].map(parseSheetId);
+  if (!approved.includes(sheetId)) {
+    throw new Error("এই শিটটি লিড পড়ার জন্য অনুমোদিত নয়। IT টিমের সঙ্গে যোগাযোগ করুন।");
+  }
 }
 
 function gatewayHeaders() {
@@ -108,9 +124,12 @@ export async function readSheetGrid(sheetId: string, tab: string): Promise<strin
 /** Sheet -> reviewable lead rows, using the shared CSV column mapping. */
 export async function readSheetLeads(sheetUrl: string, tab?: string | null) {
   const sheetId = parseSheetId(sheetUrl);
+  await requireApprovedLeadSheet(sheetId);
   const tabs = await listSheetTabs(sheetId);
   if (tabs.length === 0) throw new Error("এই শিটে কোনো ট্যাব পাওয়া যায়নি");
-  const chosen = tab && tabs.includes(tab) ? tab : tabs[0]!;
+  if (tab && !tabs.includes(tab)) throw new Error("এই ট্যাবটি শিটে নেই");
+  const chosen = tab || tabs[0];
+  if (!chosen) throw new Error("এই শিটে কোনো ট্যাব পাওয়া যায়নি");
   const grid = await readSheetGrid(sheetId, chosen);
   const { toLeadRows } = await import("@/lib/csv-leads");
   return { sheetId, tabs, tab: chosen, rows: toLeadRows(grid) };

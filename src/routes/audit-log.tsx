@@ -17,6 +17,8 @@ import {
   diffCrmRecord, downloadCrmBackup, listCrmBackups, listRecordAudit, restoreCrmRecord, runCrmBackupNow,
 } from "@/lib/crm-backup.functions";
 import { useAdminToken } from "@/lib/local-session";
+import { buildAuditCsv } from "@/lib/audit-export";
+import { downloadBlob } from "@/lib/download";
 
 export const Route = createFileRoute("/audit-log")({
   head: () => ({
@@ -44,7 +46,6 @@ const ACTION_STYLE: Record<string, string> = {
 const dhaka = (ms: number) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Dhaka" }).format(new Date(ms));
 const when = (iso: string) => new Date(iso).toLocaleString("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" });
 const short = (v: unknown) => { const s = v == null ? "—" : typeof v === "string" ? v : JSON.stringify(v); return s.length > 60 ? `${s.slice(0, 60)}…` : s; };
-const csv = (v: unknown) => { const s = String(v ?? ""); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 
 function Page() {
   const [tab, setTab] = useState<"log" | "backups" | "ai" | "meta">("log");
@@ -90,12 +91,11 @@ function AuditLog() {
   const who = (id: string | null) => (id ? q.data?.names[id] || "Staff" : "System");
 
   const exportCsv = () => {
-    const lines = [["When (Dhaka)", "Who", "Record type", "Record", "Action", "Changes"].join(",")];
-    for (const r of rows) lines.push([when(r.at), who(r.actor_id), TABLES[r.table_name] ?? r.table_name, r.record_id, r.action, JSON.stringify(r.changes)].map(csv).join(","));
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" }));
-    a.download = `audit-log-${from}-to-${to}.csv`;
-    a.click();
+    const csv = buildAuditCsv([
+      ["When (Dhaka)", "Who", "Record type", "Record", "Action", "Changes"],
+      ...rows.map((r) => [when(r.at), who(r.actor_id), TABLES[r.table_name] ?? r.table_name, r.record_id, r.action, JSON.stringify(r.changes)]),
+    ]);
+    downloadBlob(new Blob([csv], { type: "text/csv;charset=utf-8" }), `audit-log-${from}-to-${to}.csv`);
   };
 
   return (
