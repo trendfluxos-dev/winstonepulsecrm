@@ -16,7 +16,7 @@
 - Android V2 sends six raw yes/no answers, server scores; nearby-lead GPS never uploaded — why: one scoring rule, no staff tracking.
 - Project = inventory requirement labels; site visits/bookings only from saved report signals — why: no invented facts.
 - Staging E2E (tests/staging) is opt-in and refuses the live project ref — why: preview and live share one DB.
-- Read src/lib/AGENTS.md for scoped rules. HQ grants stay read-only; resolveWorkCaller preserves agent work, never PIN impersonation — why: no oversight escalation.
+- Read src/lib/AGENTS.md and android/AGENTS.md for scoped rules. HQ grants stay read-only; resolveWorkCaller preserves agent work, never PIN impersonation — why: no oversight escalation.
 - Copilot drafts locally; PIN attempts use atomic account/surface guards — why: no hidden AI cost or shared-IP lockout.
 - Dense CRM data views use compact cards below `md` and full tables at `md+`; lower-frequency wide tables scroll only inside `.table-scroll` — why: phone usability without weakening desktop comparison views.
 - Winstone OS inbound events only via POST /api/public/os/events (HMAC + idempotency in server-only os_event_receipts); mapping never invents entities — why: one verified, replay-safe bridge.
@@ -41,9 +41,7 @@
 - Winstone AI copilot is read-only and IT Console (full PIN) only; it never assigns leads — why: LeadHub Nexus is the one assignment path.
 - Release counts as deployed only when scripts/check-live-release.ts sees /manual version, $35.29 and 50-lead markers live — why: publish requests are not proof.
 - The operations manual's only source is docs/CRM_OPERATIONS_MANUAL.md (parsed by src/lib/manual-source.ts for /manual); rebuild the PDF with npm run manual:pdf; manual:check fails on hash/version drift — why: page and PDF can never disagree.
-- Android recordings fall back to the phone's own call-recorder file (PhoneRecordingPickupWorker, recorder_source=phone_recorder) through the same upload queue; no match = no upload — why: Android 10+ blocks app call-audio capture.
 - Recorder (/recorder) reads agent-own call_recordings plus server-only recorder_insights (voice notes, AI takeaways) via recorder.functions.ts; AI uses the shared ai-model helper and never invents facts — why: one scoped history for calls and notes.
-- android/whisper is GPL-3.0 code copied from NotelyVoice (owner decision 2026-10-24); any APK linking it must ship with its full source offered, and the module stays unlinked from :app until minSdk 26, model delivery and 16 kHz PCM conversion are decided — why: license obligation and app-size impact.
 - Browser-generated files are delivered through src/lib/download.ts (downloadBlob/deliverFile): build the blob first, then the click saves it, and object URLs are revoked after a delay — why: mobile browsers drop downloads started after a long await.
 - Call/audio reconciliation uses call-reconciliation.ts and the same Android call UID through lifecycle/upload/report; durable queued originals are deleted only after matching server checksum/upload acknowledgement — why: filenames, report sync and audio availability are different evidence.
 - Quantity assignment uses read-only candidate previews and server revalidation before the existing LeadHub write/audit path; overdue-evidence.ts gates follow-up fault counts on confirmed responsibility — why: no silent substitutions or blame from unresolved evidence.
@@ -67,4 +65,3 @@
 - Callback/manual call logging never assigns leads; new numbers enter canonical intake unassigned and require LeadHub ownership before reporting — why: calls cannot bypass routing or take another agent's lead.
 - Lead-import sheet previews use only existing server-configured report workbooks; inventory keeps its separate read scope, and audit exports neutralise every spreadsheet cell — why: workspace credentials and trusted exports cannot widen access or execute staff-supplied formulas.
 - Multi-page server reads use src/lib/page-all.ts (parallel 1,000-row pages, id-dedupe, fail on any page error); homepage device images are small WebP CDN assets and identical font files are referenced by one URL — why: sequential paging and duplicate downloads were the main load delays.
-- An Android release counts as ready only when docs/ANDROID_RELEASE_READINESS.md records signature/ID/version and device evidence for every gate row — why: a green CI build is not handset proof.
