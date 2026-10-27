@@ -3,7 +3,8 @@ import { readAgentLeads } from "@/lib/crm-agent-leads.server";
 
 const me = "11111111-1111-4111-8111-111111111111";
 const other = "22222222-2222-4222-8222-222222222222";
-function fixture(rows: any[], failPage = -1) {
+type FixtureLead = { id: string; assigned_to?: string | null; assigned_agent_id?: string | null };
+function fixture(rows: FixtureLead[], failPage = -1) {
   const reads: { from: number; to: number; filter: string }[] = [];
   const client = { from: () => {
     let filter = "";

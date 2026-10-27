@@ -4,7 +4,7 @@ type LeadRow = {
   id: string;
   assigned_to?: string | null;
   assigned_agent_id?: string | null;
-  [key: string]: any;
+  updated_at?: string | null;
 };
 type ReadResult = { data: LeadRow[] | null; error: { message: string } | null };
 type LeadQuery = {
