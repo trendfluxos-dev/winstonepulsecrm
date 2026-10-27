@@ -230,7 +230,7 @@ function EntryHall() {
           <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-4 p-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:items-stretch sm:gap-8 sm:p-8">
             <img
               src={brandArchitectAsset.url}
-              alt="Zahid Hasan Emon, the Brand Architect, speaking at a podium with a microphone at an event"
+              alt="Zahid Hasan Emon, wearing glasses, a black tuxedo and bow tie, speaking into a microphone at a dark lectern"
               loading="lazy"
               className="aspect-square w-16 shrink-0 rounded-xl border border-gold/40 object-cover object-top sm:row-span-3 sm:aspect-auto sm:size-full sm:rounded-lg"
             />
@@ -255,11 +255,11 @@ function EntryHall() {
               </p>
               <Button
                 asChild
-                className="mt-5 w-full focus-visible:ring-offset-card sm:mt-6 sm:w-auto"
+                className="mt-5 w-full focus-visible:ring-[3px] focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-card sm:mt-6 sm:w-auto"
               >
                 <a href="https://trendflux.digital/founder" target="_blank" rel="noopener noreferrer">
                   Meet the Brand Architect <ArrowUpRight className="size-4" />
-                  <span className="sr-only">(opens in a new tab)</span>
+                  <span className="sr-only">— opens the founder page on trendflux.digital in a new tab</span>
                 </a>
               </Button>
               <p className="mt-4 border-t border-border pt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
