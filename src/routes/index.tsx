@@ -92,7 +92,7 @@ function EntryHall() {
               alt="Winstone Pulse circular house emblem"
               width={64}
               height={64}
-              className="size-9 shrink-0 object-contain sm:size-16"
+              className="size-9 shrink-0 rounded-full object-cover sm:size-16"
             />
             <span className="min-w-0">
               <span className="block whitespace-nowrap text-base font-bold leading-tight text-foreground sm:text-3xl">WINSTONE <span className="text-gold">PULSE</span></span>
