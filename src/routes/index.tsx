@@ -18,9 +18,9 @@ import {
 import { useState } from "react";
 
 import logoAsset from "@/assets/winstone-mark.png.asset.json";
-import androidAsset from "@/assets/device-android.png.asset.json";
-import webAsset from "@/assets/device-web.png.asset.json";
-import desktopAsset from "@/assets/device-desktop.png.asset.json";
+import androidAsset from "@/assets/device-android.webp.asset.json";
+import webAsset from "@/assets/device-web.webp.asset.json";
+import desktopAsset from "@/assets/device-desktop.webp.asset.json";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
