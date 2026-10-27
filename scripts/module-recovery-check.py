@@ -68,8 +68,18 @@ async def main():
             await page.locator("#deploy-recovery").wait_for(timeout=5000)
             if await page.locator("#deploy-recovery button").count() == 0:
                 failures.append("fallback screen has no refresh button")
-        except Exception:
-            failures.append("fallback screen (#deploy-recovery) did not appear")
+            if await page.locator("#deploy-recovery a[href='/']").count() == 0:
+                failures.append("fallback screen has no home link")
+            await page.locator("#deploy-recovery button").click()
+            await page.wait_for_url("**_fresh=*", timeout=10_000)
+            await page.wait_for_load_state("networkidle", timeout=60_000)
+            if await page.locator("#deploy-recovery").count():
+                failures.append("fallback screen still shown after Try again")
+            left = await page.evaluate("() => sessionStorage.getItem('deployment-reload-attempted:n')")
+            if left:
+                failures.append("Try again did not reset the reload counter")
+        except Exception as e:
+            failures.append(f"fallback/retry flow failed: {str(e)[:160]}")
         await browser.close()
 
     if failures:
