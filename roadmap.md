@@ -555,3 +555,5 @@
 ## 2026-10-27 — Daily performance date history
 - [x] Add date selection, previous/next day and Latest controls to sign-in daily results; historical aggregate results are recomputed from saved activity, not immutable snapshots.
 - [x] Verified 26 tests, real October 26/25 results, empty-day state, latest return, phone/desktop layout and no browser errors; preview only, not published.
+- [x] Android: classifier tests for unknown/malformed call-log rows
+- [ ] Android: upload clean app copy to zhemongrowth-bd/Android-Call-recorder and build debug APK (needs GitHub link approval)
