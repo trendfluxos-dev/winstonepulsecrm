@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-27 — Security-gated release and live workflow verification
+- [x] 132 focused security/regression tests passed; basic scan clear. Live /manual passes v1.6.0/$35.29/50 markers, but these unchanged markers do not identify the latest unpublished security fixes.
+- [x] Live signed-out entry/gated routes and signed-in customer search, recorder and admin pages render without page errors; six real staff-session ownership read tests and eight local read-only/walkthrough tests pass. Desk contribution modal prevents completing the underlying desk flow; no contribution or customer write submitted, no password changed, public support chat unchanged.
+- [ ] Publish latest fixes only after the running deep security scan completes without unresolved serious blockers; then verify latest deployment and remaining gated workflows. Existing live release is not proof of these latest fixes.
+
 ## 2026-10-27 — Remaining security review
 - [x] Reviewed seven findings; four integrity/ownership/scoring findings fixed through the security tool. Public support chat remains unchanged.
 - [x] Device message/presence now revalidate canonical ownership; intake unassigned; connected reports require six V2 facts and trusted saved/analyzed grade, edits preserve classification, ranking requires completed matched phone evidence. 102 targeted tests pass; full suite 1202 pass, one pre-existing copy-only terminology test fails; harness build OK.
