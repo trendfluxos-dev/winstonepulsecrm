@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
 import { useT } from "@/lib/i18n";
 import { scrollToTopAdaptive } from "@/lib/motion";
+import { DailyPerformance } from "@/components/crm/DailyPerformance";
 
 export const Route = createFileRoute("/signin")({
   head: () => ({
@@ -147,6 +148,7 @@ function WorkspaceSigninPage() {
             </Link>
           </p>
         )}
+        <DailyPerformance />
       </main>
 
       <AdminPinDialog
