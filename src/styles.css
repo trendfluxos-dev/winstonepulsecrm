@@ -590,7 +590,8 @@
 [class*="shadow-xl"], [class*="shadow-2xl"], [class*="shadow-lg"] { box-shadow: var(--shadow-card); }
 [class*="tracking-"] { letter-spacing: 0; }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  html { scroll-behavior: auto !important; }
 }
 
 /* Bengali UI uses Hind Siliguri (matches the FinOS reference). */
