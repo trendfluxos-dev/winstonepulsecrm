@@ -7,12 +7,9 @@ import {
   Globe,
   Headphones,
   LifeBuoy,
-  Lock,
   Mic,
   Monitor,
-  Server,
   Smartphone,
-  Database,
   ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
@@ -63,36 +60,20 @@ function EntryHall() {
   const { scope } = useMyAccount();
   const [pinOpen, setPinOpen] = useState(false);
   const [pinTarget, setPinTarget] = useState<"/hq" | "/system" | "/leadhub">("/hq");
-  const [signinOpen, setSigninOpen] = useState(false);
-
   const openPin = (target: "/hq" | "/system" | "/leadhub") => {
     setPinTarget(target);
     setPinOpen(true);
   };
 
   // One CRM, three layouts: the choice is only a remembered preference.
-  // Every mode leads to the same existing access screen below.
-  // Reveal + move focus to the heading so screen readers announce the section.
-  const revealSignin = () => {
-    setSigninOpen(true);
-    setTimeout(() => {
-      const el = document.getElementById("workspace-signin");
-      if (!el) return;
-      el.focus({ preventScroll: true });
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 60);
-  };
-
+  // Every mode leads to the same access page.
   const chooseMode = (mode: "android" | "web" | "desktop") => {
     try {
       localStorage.setItem("winstone.view-mode", mode);
     } catch {
       // storage blocked: layout still adapts to the screen
     }
-    revealSignin();
   };
-
-  const openSignin = revealSignin;
 
 
   return (
@@ -206,82 +187,16 @@ function EntryHall() {
         </p>
 
         <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
-          <Button size="lg" className="btn-enter w-full rounded-md text-base font-bold" onClick={openSignin}>
-            {t({ bn: "শুরু করুন", en: "Get started" })} <ChevronRight className="size-5" />
+          <Button asChild size="lg" className="btn-enter w-full rounded-md text-base font-bold">
+            <Link to="/signin">
+              {t({ bn: "শুরু করুন", en: "Get started" })} <ChevronRight className="size-5" />
+            </Link>
           </Button>
           <p className="mt-2 text-center text-xs text-muted-foreground">
             {t({ bn: "ঐচ্ছিক — উপরে ডিভাইস বেছে নিলে আপনার পছন্দ মনে রাখা হবে।", en: "Optional — pick a device above so we remember your preferred view." })}
           </p>
         </div>
 
-        {signinOpen && (
-        <>
-        <div aria-hidden className="mt-12 border-t border-border" />
-
-        <h2
-          id="workspace-signin"
-          tabIndex={-1}
-          className="font-hand mt-12 scroll-mt-20 text-center text-3xl font-semibold tracking-normal outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:text-4xl"
-        >
-          {t({ bn: "আপনার কর্মঘরে প্রবেশ করুন", en: "Sign in to your workspace" })}
-          <span aria-hidden className="mx-auto mt-2 block h-0.5 w-12 bg-gold" />
-        </h2>
-        <div className="mt-5 grid gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4">
-          <EntryCard
-            icon={<Headphones className="size-6" />}
-            title={t({ bn: "সেলস এজেন্ট", en: "Sales Agent" })}
-            description={t({ bn: "আপনার নিজের লিড, কল, ফলো-আপ আর এআই কোচিং — সব এক জায়গায়।", en: "Your own leads, calls, follow-ups and AI coaching — all in one place." })}
-            primary={
-              <Button asChild className="btn-enter flex-1">
-                <Link to="/auth" search={{ role: "agent", mode: "signin" }}>
-                  {t({ bn: "প্রবেশ করুন", en: "Sign in" })}
-                </Link>
-              </Button>
-            }
-            secondary={
-              <Button asChild variant="secondary" className="flex-1">
-                <Link to="/auth" search={{ role: "agent", mode: "signup" }}>
-                  {t({ bn: "নতুন অ্যাকাউন্ট", en: "Create account" })}
-                </Link>
-              </Button>
-            }
-          />
-
-          <EntryCard
-            icon={<Database className="size-6" />}
-            title={t({ bn: "লিডহাব নেক্সাস", en: "LeadHub Nexus" })}
-            description={t({ bn: "নতুন লিড যোগ ও এজেন্টদের মাঝে ভাগ করার মূল ঘর।", en: "The main home for adding new leads and sharing them with agents." })}
-            primary={
-              <Button className="btn-enter flex-1" onClick={() => openPin("/leadhub")}>
-                <Lock className="size-4" /> {t({ bn: "পিন দিয়ে খুলুন", en: "Unlock PIN" })}
-              </Button>
-            }
-          />
-
-          <EntryCard
-            icon={<BarChart3 className="size-6" />}
-            title={t({ bn: "এক্সিকিউটিভ এইচকিউ", en: "Executive Headquarters (HQ)" })}
-            description={t({ bn: "পুরো টিমের ফলাফল, রিপোর্ট আর ব্যবসার সংখ্যা — সব এক নজরে।", en: "Team performance, reports and business numbers — all at a glance." })}
-            primary={
-              <Button className="btn-enter flex-1" onClick={() => openPin("/hq")}>
-                <Lock className="size-4" /> {t({ bn: "পিন দিয়ে খুলুন", en: "Unlock PIN" })}
-              </Button>
-            }
-          />
-
-          <EntryCard
-            icon={<Server className="size-6" />}
-            title={t({ bn: "আইটি কনসোল", en: "IT Console" })}
-            description={t({ bn: "অ্যাকাউন্ট, সেটিংস আর সংযোগ — টেকনিক্যাল কাজ এখানে হয়।", en: "Accounts, settings and connections — the technical home." })}
-            primary={
-              <Button className="btn-enter flex-1" onClick={() => openPin("/system")}>
-                <Lock className="size-4" /> {t({ bn: "পিন দিয়ে খুলুন", en: "Unlock PIN" })}
-              </Button>
-            }
-          />
-        </div>
-        </>
-        )}
 
         <section className="mt-10 rounded-xl border border-border bg-card p-5 sm:p-6">
           <h2 className="text-lg font-bold tracking-tight">{t({ bn: "আপনি কি Winstone-এর সেলস এজেন্ট?", en: "Are you a Winstone sales agent?" })}</h2>
@@ -343,35 +258,6 @@ function EntryHall() {
   );
 }
 
-function EntryCard({
-  icon,
-  title,
-  description,
-  primary,
-  secondary,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  primary: React.ReactNode;
-  secondary?: React.ReactNode;
-}) {
-  return (
-    <section className="group relative flex flex-col gap-3 rounded-xl border border-border bg-card p-5 transition-colors hover:border-gold">
-      <span className="grid size-12 place-items-center rounded-full bg-gold/10 text-gold ring-1 ring-gold/40">
-        {icon}
-      </span>
-      <div>
-        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      </div>
-      <div className="mt-auto flex flex-wrap gap-2 pt-2">
-        {primary}
-        {secondary}
-      </div>
-    </section>
-  );
-}
 
 function ModeCard({
   icon,

@@ -54,6 +54,7 @@ import { Route as SalesIntelRouteImport } from './routes/sales-intel'
 import { Route as SecurityRouteImport } from './routes/security'
 import { Route as ServiceBillAlertRouteImport } from './routes/service-bill-alert'
 import { Route as ServiceBillUnlockRouteImport } from './routes/service-bill-unlock'
+import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SiteVisitsRouteImport } from './routes/site-visits'
 import { Route as SocialPagesRouteImport } from './routes/social-pages'
 import { Route as StaffPortalRouteImport } from './routes/staff-portal'
@@ -351,6 +352,11 @@ const ServiceBillAlertRoute = ServiceBillAlertRouteImport.update({
 const ServiceBillUnlockRoute = ServiceBillUnlockRouteImport.update({
   id: '/service-bill-unlock',
   path: '/service-bill-unlock',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SigninRoute = SigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SiteVisitsRoute = SiteVisitsRouteImport.update({
@@ -790,6 +796,7 @@ export interface FileRoutesByFullPath {
   '/security': typeof SecurityRoute
   '/service-bill-alert': typeof ServiceBillAlertRoute
   '/service-bill-unlock': typeof ServiceBillUnlockRoute
+  '/signin': typeof SigninRoute
   '/site-visits': typeof SiteVisitsRoute
   '/social-pages': typeof SocialPagesRoute
   '/staff-portal': typeof StaffPortalRoute
@@ -910,6 +917,7 @@ export interface FileRoutesByTo {
   '/security': typeof SecurityRoute
   '/service-bill-alert': typeof ServiceBillAlertRoute
   '/service-bill-unlock': typeof ServiceBillUnlockRoute
+  '/signin': typeof SigninRoute
   '/site-visits': typeof SiteVisitsRoute
   '/social-pages': typeof SocialPagesRoute
   '/staff-portal': typeof StaffPortalRoute
@@ -1031,6 +1039,7 @@ export interface FileRoutesById {
   '/security': typeof SecurityRoute
   '/service-bill-alert': typeof ServiceBillAlertRoute
   '/service-bill-unlock': typeof ServiceBillUnlockRoute
+  '/signin': typeof SigninRoute
   '/site-visits': typeof SiteVisitsRoute
   '/social-pages': typeof SocialPagesRoute
   '/staff-portal': typeof StaffPortalRoute
@@ -1153,6 +1162,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/service-bill-alert'
     | '/service-bill-unlock'
+    | '/signin'
     | '/site-visits'
     | '/social-pages'
     | '/staff-portal'
@@ -1273,6 +1283,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/service-bill-alert'
     | '/service-bill-unlock'
+    | '/signin'
     | '/site-visits'
     | '/social-pages'
     | '/staff-portal'
@@ -1393,6 +1404,7 @@ export interface FileRouteTypes {
     | '/security'
     | '/service-bill-alert'
     | '/service-bill-unlock'
+    | '/signin'
     | '/site-visits'
     | '/social-pages'
     | '/staff-portal'
@@ -1514,6 +1526,7 @@ export interface RootRouteChildren {
   SecurityRoute: typeof SecurityRoute
   ServiceBillAlertRoute: typeof ServiceBillAlertRoute
   ServiceBillUnlockRoute: typeof ServiceBillUnlockRoute
+  SigninRoute: typeof SigninRoute
   SiteVisitsRoute: typeof SiteVisitsRoute
   SocialPagesRoute: typeof SocialPagesRoute
   StaffPortalRoute: typeof StaffPortalRoute
@@ -1904,6 +1917,13 @@ declare module '@tanstack/react-router' {
       path: '/service-bill-unlock'
       fullPath: '/service-bill-unlock'
       preLoaderRoute: typeof ServiceBillUnlockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/site-visits': {
@@ -2466,6 +2486,7 @@ const rootRouteChildren: RootRouteChildren = {
   SecurityRoute: SecurityRoute,
   ServiceBillAlertRoute: ServiceBillAlertRoute,
   ServiceBillUnlockRoute: ServiceBillUnlockRoute,
+  SigninRoute: SigninRoute,
   SiteVisitsRoute: SiteVisitsRoute,
   SocialPagesRoute: SocialPagesRoute,
   StaffPortalRoute: StaffPortalRoute,
