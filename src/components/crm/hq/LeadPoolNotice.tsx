@@ -18,7 +18,14 @@ export function LeadPoolNotice() {
   const q = useQuery({ queryKey: ["hq-lead-pool-notice", adminToken], queryFn: () => read({ data: { adminToken } }), refetchInterval: 5 * 60_000 });
   const [seen, setSeen] = useState<string[] | null>(null);
   useEffect(() => { try { setSeen(JSON.parse(sessionStorage.getItem(SEEN) ?? "[]")); } catch { setSeen([]); } }, []);
-  const fresh = (q.data?.alerts ?? []).filter((a) => seen && !seen.includes(a.id));
+  const d = q.data;
+  const live = d && d.pool < d.need
+    ? [{ id: `live-${d.workDate}-${d.pool}`, created_at: new Date().toISOString(),
+        title: t({ bn: `লিড পুলে পর্যাপ্ত লিড নেই — আছে ${d.pool}টি, দরকার ${d.need}টি`, en: `Not enough leads in the pool — ${d.pool} available, ${d.need} needed` }),
+        detail: t({ bn: `${d.agents} জন চালু এজেন্টের এক দিনের পূর্ণ বণ্টনের জন্য ${d.need}টি লিড লাগে; ${d.need - d.pool}টি কম।`, en: `One full daily round for ${d.agents} active agents needs ${d.need} leads; ${d.need - d.pool} short.` }),
+        action: t({ bn: "IT Console → লিড ডেটাবেজে নতুন লিড আপলোড করুন।", en: "Upload new leads in IT Console → Lead database." }) }]
+    : [];
+  const fresh = [...live, ...(d?.alerts ?? [])].filter((a) => seen && !seen.includes(a.id));
   if (!fresh.length) return null;
   const close = () => {
     const next = [...(seen ?? []), ...fresh.map((a) => a.id)];
