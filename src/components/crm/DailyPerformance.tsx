@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n";
 import { Bi } from "@/components/crm/Bi";
+import { SCORE_FORMULA } from "@/lib/performance-audit";
 
 const performanceQuery = queryOptions({
   queryKey: ["public-daily-performance"],
@@ -26,6 +27,7 @@ export function DailyPerformance() {
         <Bi en="Daily Task Performance" bn="প্রতিদিনের কাজের ফলাফল" />
       </h2>
       <p className="mt-3 text-sm text-muted-foreground">5:30 PM · Asia/Dhaka</p>
+      <p className="mt-3 text-xs text-muted-foreground">Score = {SCORE_FORMULA}. Audio and sync delays contribute no points or penalties. Historical results are recalculated from saved activity and current assignment state, not locked snapshots.</p>
       <Suspense fallback={<p className="mt-6 text-sm text-muted-foreground">Loading…</p>}>
         <PerformanceResults />
       </Suspense>

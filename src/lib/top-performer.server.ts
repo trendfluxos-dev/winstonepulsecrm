@@ -259,7 +259,7 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
     pageAllParallel((from, to) =>
     supabaseAdmin
       .from("call_reports")
-      .select("id, agent_id, lead_id, status, connected, duration_seconds, created_at, connection_verified, submitted_at")
+      .select("id, agent_id, lead_id, status, connected, duration_seconds, created_at, connection_verified, submitted_at, recording_id")
       .eq("status", "submitted")
       .gte("submitted_at", startIso)
       .lte("submitted_at", endIso).order("id").range(from, to)),
