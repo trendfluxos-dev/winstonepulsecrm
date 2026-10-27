@@ -124,6 +124,8 @@ export const recordYearArchive = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const caller = await callerOf(data.adminToken ?? null);
     if (caller.scope === "agent") throw new Error("এই কাজটি শুধু আইটি কনসোলের");
+    const { requireWrite } = await import("@/lib/access.server");
+    requireWrite(caller);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { error } = await supabaseAdmin.from("lead_year_archives").upsert(
