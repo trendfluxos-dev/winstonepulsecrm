@@ -338,10 +338,6 @@ function EntryHall() {
                   <span className="sr-only">— opens the founder page on trendflux.digital in a new tab</span>
                 </a>
               </Button>
-              <p className="mt-3 border-t border-border pt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Concept preview · Not a live website
-                <span lang="bn" className="mt-1 block text-[10px] font-normal normal-case tracking-normal">ধারণাগত প্রদর্শন · লাইভ ওয়েবসাইট নয়</span>
-              </p>
             </div>
           </div>
         </section>
