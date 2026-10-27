@@ -583,4 +583,4 @@
 - [ ] Lead-pool pop-up verified in HQ preview (blocked: needs HQ PIN sign-in)
 - [x] Release check + publish + live verify
 
-- [ ] Connect GitHub API in the new workspace (fresh connection)
+- [x] Connect GitHub API in the new workspace (fresh connection)
