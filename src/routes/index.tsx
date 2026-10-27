@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import logoAsset from "@/assets/winstone-pulse-logo.png.asset.json";
+import logoAsset from "@/assets/winstone-pulse-logo-black-tight.webp.asset.json";
 import androidAsset from "@/assets/device-android.webp.asset.json";
 import webAsset from "@/assets/device-web.webp.asset.json";
 import desktopAsset from "@/assets/device-desktop.webp.asset.json";
@@ -86,11 +86,13 @@ function EntryHall() {
     <div className="theme-exec min-h-screen bg-background">
       <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:h-16 sm:px-6">
-          <img
-            src={logoAsset.url}
-            alt="Winstone Pulse — The Premium Real Estate CRM"
-            className="h-9 w-auto shrink-0 sm:h-10"
-          />
+          <span className="inline-flex shrink-0 items-center overflow-hidden rounded-md bg-plate-ink px-2.5 py-1.5 ring-1 ring-gold/25">
+            <img
+              src={logoAsset.url}
+              alt="Winstone Pulse — The Premium Real Estate CRM"
+              className="block h-9 w-auto sm:h-11"
+            />
+          </span>
           <span className="inline-flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
             <span aria-hidden className="size-1.5 rounded-full bg-live" /> {t({ bn: "সার্ভার চালু আছে", en: "Server online" })}
           </span>
