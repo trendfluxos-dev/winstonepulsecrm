@@ -1,7 +1,7 @@
 # Roadmap
 
 ## 2026-10-27 — Sign-in daily performance
-- [ ] Show daily agent performance at 5:30 PM Dhaka, highlight Top 3 and list remaining agents below; blocked on confirmation of public versus signed-in staff visibility.
+- [ ] Show public daily agent performance at 5:30 PM Dhaka, highlight Top 3 and list remaining agents below; owner approved public names/results, no customer details.
 - [ ] Preserve the supplied reference's handwritten heading and clean supporting text in the performance section; keep existing scoring/finalization unchanged.
 
 ## 2026-10-27 — Database performance and Run usage
