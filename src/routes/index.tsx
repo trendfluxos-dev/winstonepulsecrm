@@ -207,23 +207,31 @@ function EntryHall() {
 
 
         <section className="mt-10 rounded-xl border border-border bg-card p-5 sm:p-6">
-          <h2 className="text-lg font-bold tracking-tight">{t({ bn: "আপনি কি Winstone-এর সেলস এজেন্ট?", en: "Are you a Winstone sales agent?" })}</h2>
+          <h2 className="text-lg font-bold tracking-tight">
+            <span lang="en" className="block">Are you a Winstone sales agent?</span>
+            <span lang="bn" className="mt-1 block text-sm font-normal text-muted-foreground">আপনি কি Winstone-এর সেলস এজেন্ট?</span>
+          </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            {t({ bn: "কাজ শুরুর আগে IT Console থেকে আপনার অ্যাকাউন্ট ও কোম্পানির ডিভাইস তৈরি করে দেওয়া হয়।", en: "The IT Console sets up your account and company device before you can start working." })}
+            <span lang="en" className="block">The IT Console sets up your account and company device before you can start working.</span>
+            <span lang="bn" className="mt-1 block text-xs">কাজ শুরুর আগে IT Console থেকে আপনার অ্যাকাউন্ট ও কোম্পানির ডিভাইস তৈরি করে দেওয়া হয়।</span>
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t({ bn: "অ্যাকাউন্ট থাকলে অনুমোদিত ডিভাইসে নিজের তথ্য দিয়ে প্রবেশ করুন।", en: "Already have an account? Sign in with your assigned credentials on the authorized device." })}
+          <p className="mt-3 text-sm text-muted-foreground">
+            <span lang="en" className="block">Already have an account? Sign in with your assigned credentials on the authorized device.</span>
+            <span lang="bn" className="mt-1 block text-xs">অ্যাকাউন্ট থাকলে অনুমোদিত ডিভাইসে নিজের তথ্য দিয়ে প্রবেশ করুন।</span>
           </p>
-          <p className="mt-4 border-t border-border pt-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-gold">
-            {t({ bn: "নতুন এজেন্ট অ্যাকাউন্ট IT Console-ই তৈরি করে।", en: "New agent accounts are created and managed by the IT Console." })}
+          <p className="mt-4 border-t border-border pt-4 text-xs font-semibold text-gold">
+            <span lang="en" className="block">New agent accounts are created and managed by the IT Console.</span>
+            <span lang="bn" className="mt-1 block text-[11px] font-normal text-muted-foreground">নতুন এজেন্ট অ্যাকাউন্ট IT Console-ই তৈরি করে।</span>
           </p>
         </section>
 
         {scope !== "none" && (
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            {t({ bn: "আগেই প্রবেশ করেছেন — ", en: "Already signed in — " })}
+            <span lang="en" className="block">Already signed in</span>
+            <span lang="bn" className="mt-1 block text-xs">আগেই প্রবেশ করেছেন</span>
             <Link to="/desk" className="font-semibold text-gold hover:underline">
-              {t({ bn: "আমার ডেস্কে যান", en: "go to my desk" })}
+              <span lang="en" className="mt-2 block">Go to my desk</span>
+              <span lang="bn" className="mt-1 block text-xs font-normal text-muted-foreground">আমার ডেস্কে যান</span>
             </Link>
           </p>
         )}
@@ -272,28 +280,33 @@ function EntryHall() {
         </section>
 
         <footer className="mt-auto pt-14 text-center text-xs text-muted-foreground">
-          <p className="inline-flex items-center gap-1.5">
-            <LifeBuoy className="size-3.5" /> {t({ bn: "সাহায্য দরকার?", en: "Need help?" })}{" "}
+          <div className="flex flex-wrap items-start justify-center gap-x-2 gap-y-2">
+            <LifeBuoy aria-hidden className="mt-0.5 size-3.5 shrink-0" />
+            <p><span lang="en" className="block">Need help?</span><span lang="bn" className="mt-1 block text-[10px]">সাহায্য দরকার?</span></p>
             <Link to="/support" className="font-semibold text-gold hover:underline">
-              {t({ bn: "IT Console-এর সাথে যোগাযোগ করুন", en: "Contact IT Console" })}
+              <span lang="en" className="block">Contact IT Console</span>
+              <span lang="bn" className="mt-1 block text-[10px] font-normal text-muted-foreground">IT Console-এর সাথে যোগাযোগ করুন</span>
             </Link>
-          </p>
-          <p className="mt-3">© 2026 TrendFlux Digital. All Rights Reserved.</p>
-          <p className="mt-1">Developed &amp; Powered by <span className="font-bold">Zahid Hasan Emon</span>.</p>
+          </div>
+          <p className="mt-3"><span lang="en" className="block">© 2026 TrendFlux Digital. All Rights Reserved.</span><span lang="bn" className="mt-1 block text-[10px]">© ২০২৬ TrendFlux Digital. সর্বস্বত্ব সংরক্ষিত।</span></p>
+          <p className="mt-3"><span lang="en" className="block">Developed &amp; Powered by <span className="font-bold">Zahid Hasan Emon</span>.</span><span lang="bn" className="mt-1 block text-[10px]">নির্মাণ ও প্রযুক্তিতে <span className="font-bold">Zahid Hasan Emon</span>।</span></p>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <Link to="/privacy" className="hover:text-foreground">
-              Privacy Policy
+              <span lang="en" className="block">Privacy Policy</span>
+              <span lang="bn" className="mt-1 block text-[10px]">গোপনীয়তা নীতি</span>
             </Link>
             <span className="hidden sm:inline">·</span>
             <Link to="/terms" className="hover:text-foreground">
-              Terms of Service
+              <span lang="en" className="block">Terms of Service</span>
+              <span lang="bn" className="mt-1 block text-[10px]">পরিষেবার শর্তাবলি</span>
             </Link>
             <span className="hidden sm:inline">·</span>
             <Link
               to="/voice-transcription"
-              className="inline-flex items-center gap-1 hover:text-foreground"
+              className="inline-flex items-start gap-1 hover:text-foreground"
             >
-              <Mic className="size-3" /> Voice Transcription
+              <Mic aria-hidden className="mt-0.5 size-3 shrink-0" />
+              <span><span lang="en" className="block">Voice Transcription</span><span lang="bn" className="mt-1 block text-[10px]">কণ্ঠ থেকে লেখা</span></span>
             </Link>
           </div>
         </footer>
