@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 
-import { leadOwner } from "./lead-owner";
 import { z } from "zod";
 
 import { PROFILE_SAFE_COLUMNS } from "@/lib/profile-columns";
@@ -79,16 +78,12 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
     // never cut short by a floor-wide limit or mixed with other agents' work.
     if (caller.scope === "agent" && caller.profile) {
       const me = caller.profile.id;
-      const [profile, ownLeadsA, ownLeadsB] = await Promise.all([
+      const { readAgentLeads } = await import("@/lib/crm-agent-leads.server");
+      const [profile, ownLeads] = await Promise.all([
         supabaseAdmin.from("profiles").select(PROFILE_SAFE_COLUMNS).eq("id", me),
-        supabaseAdmin.from("leads").select("*").eq("assigned_agent_id", me).limit(5000),
-        supabaseAdmin.from("leads").select("*").eq("assigned_to", me).limit(5000),
+        readAgentLeads(supabaseAdmin as never, me),
       ]);
-      const leadMap = new Map<string, any>();
-      for (const l of [...(ownLeadsA.data ?? []), ...(ownLeadsB.data ?? [])]) {
-        if (leadOwner(l) === me) leadMap.set(l.id, l);
-      }
-      const myLeads = [...leadMap.values()].sort((a, b) =>
+      const myLeads = [...(ownLeads.data ?? [])].sort((a, b) =>
         String(b.updated_at).localeCompare(String(a.updated_at)),
       );
       const [calls, messages, events] = await Promise.all([
@@ -99,7 +94,7 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
         pageAll((a, b) => supabaseAdmin.from("lead_events").select("*").eq("agent_id", me)
           .order("created_at", { ascending: false }).order("id").range(a, b)),
       ]);
-      const failed = [profile, ownLeadsA, ownLeadsB, calls, messages, events].find((r) => r.error);
+      const failed = [profile, ownLeads, calls, messages, events].find((r) => r.error);
       if (failed?.error) throw new Error(failed.error.message);
       const dedupe = <T extends { id: string }>(rows: T[]) => [
         ...new Map(rows.map((r) => [r.id, r])).values(),
