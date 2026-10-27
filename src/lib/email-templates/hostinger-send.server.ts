@@ -25,7 +25,7 @@ export function buildHostingerServiceBillPayload(input: {
   /** English-first: system mail language is English. */
   stage: string;
   /** Optional courtesy Bengali status line, appended to the body only. */
-  stageBn?: string;
+  stageBn?: string | undefined;
   reviewUrl?: string;
 }): HostingerServiceBillPayload {
   const reviewLine = input.reviewUrl ? `\n\nReview securely: ${input.reviewUrl}` : "";
@@ -123,7 +123,7 @@ export async function sendViaHostinger(
   to: string,
   stage: string,
   idempotencyKey: string,
-  stageBn?: string,
+  stageBn?: string | undefined,
 ): Promise<void> {
   const apiKey = token();
   if (!apiKey) throw new Error("Service-bill email is not configured (NOTIFY_EMAIL_API_KEY REQUIRED)");
