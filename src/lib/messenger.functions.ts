@@ -15,10 +15,18 @@ export const getMessengerLeadDetails = createServerFn({ method: "POST" })
     const { getMessengerService } = await import("@/lib/messenger.server");
     const connection = await getMessengerService().connection();
     if (!connection.connected) return { ok: false as const, code: "DISCONNECTED" as const };
-    const { readMessengerLinkedLead, messengerLeadDetailStore } = await import("@/lib/messenger-lead-details.server");
+    const { readMessengerLinkedLead, messengerLeadDetailStore } =
+      await import("@/lib/messenger-lead-details.server");
     try {
-      return await readMessengerLinkedLead(caller, connection.connected, data.messageId, await messengerLeadDetailStore());
-    } catch { return { ok: false as const, code: "UNAVAILABLE" as const }; }
+      return await readMessengerLinkedLead(
+        caller,
+        connection.connected,
+        data.messageId,
+        await messengerLeadDetailStore(),
+      );
+    } catch {
+      return { ok: false as const, code: "UNAVAILABLE" as const };
+    }
   });
 
 /** Role view + connection state. Uses the existing caller check; reads no Messenger data. */
@@ -51,7 +59,8 @@ export const sendMessengerReply = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { resolveCaller } = await import("@/lib/access.server");
     const caller = await resolveCaller(data.adminToken ?? null);
-    if (!messengerView(caller).canReply) return { ok: false as const, reason: "FORBIDDEN" as const };
+    if (!messengerView(caller).canReply)
+      return { ok: false as const, reason: "FORBIDDEN" as const };
     const { guardedSendReply, supabaseReplyStore } = await import("@/lib/messenger-reply.server");
     return guardedSendReply(
       {
@@ -60,7 +69,12 @@ export const sendMessengerReply = createServerFn({ method: "POST" })
         text: data.text,
         requestId: data.requestId,
         staffConfirmed: data.staffConfirmed,
-        actor: { scope: caller.scope, readOnly: caller.readOnly, userId: caller.userId, profileId: caller.profile?.id ?? null },
+        actor: {
+          scope: caller.scope,
+          readOnly: caller.readOnly,
+          userId: caller.userId,
+          profileId: caller.profile?.id ?? null,
+        },
       },
       { env: process.env, store: supabaseReplyStore() },
     );
@@ -93,7 +107,8 @@ export const reviewMessengerLead = createServerFn({ method: "POST" })
 
     const { getMessengerService } = await import("@/lib/messenger.server");
     const connection = await getMessengerService().connection();
-    if (!connection.connected) return { ok: false as const, code: "FACEBOOK_NOT_CONNECTED" as const };
+    if (!connection.connected)
+      return { ok: false as const, code: "FACEBOOK_NOT_CONNECTED" as const };
 
     const { reviewMessengerMessage } = await import("@/lib/messenger-review.server");
     const { supabaseMessengerReviewStore } = await import("@/lib/messenger-store.server");
