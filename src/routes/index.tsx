@@ -84,17 +84,20 @@ function EntryHall() {
 
   return (
     <div className="theme-exec min-h-screen bg-background">
-      <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:h-16 sm:px-6">
-          <span className="inline-flex shrink-0 items-center overflow-hidden rounded-md bg-plate-ink px-2.5 py-1.5 ring-1 ring-gold/25">
+      <div className="sticky top-0 z-20 bg-background/95 px-4 py-3 backdrop-blur sm:px-6 sm:py-4">
+        <div className="brand-nameplate mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-3 rounded-xl px-3 py-3 sm:min-h-24 sm:gap-6 sm:rounded-2xl sm:px-6 sm:py-4">
+          <span className="inline-flex min-w-0 max-w-[60%] items-center overflow-hidden sm:max-w-[65%]">
             <img
               src={logoAsset.url}
               alt="Winstone Pulse — The Premium Real Estate CRM"
-              className="block h-9 w-auto sm:h-11"
+              className="block h-auto max-h-12 w-full max-w-60 object-contain object-left sm:max-h-16 sm:max-w-sm"
             />
           </span>
-          <span className="inline-flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
-            <span aria-hidden className="size-1.5 rounded-full bg-live" /> {t({ bn: "সার্ভার চালু আছে", en: "Server online" })}
+          <span className="flex shrink-0 items-center gap-2 border-l border-gold/30 pl-3 sm:gap-4 sm:pl-6">
+            <span className="inline-flex items-center gap-2 rounded-full border border-gold/50 bg-charcoal px-2.5 py-2 text-[11px] font-medium text-button-foreground sm:gap-3 sm:px-5 sm:py-3 sm:text-base">
+              <span aria-hidden className="size-2 shrink-0 rounded-full bg-live sm:size-3" /> {t({ bn: "সার্ভার চালু আছে", en: "Server online" })}
+            </span>
+            <ChevronRight aria-hidden className="hidden size-5 text-gold sm:block" />
           </span>
         </div>
       </div>
