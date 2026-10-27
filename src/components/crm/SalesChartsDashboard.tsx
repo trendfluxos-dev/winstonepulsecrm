@@ -247,6 +247,15 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
           />
         ))}
       </div>
+      {scope === "agent" && (
+        <p className="text-xs text-muted-foreground">
+          {t({
+            bn: "রিপোর্ট = আপনার জমা দেওয়া কল রিপোর্ট (জমার তারিখ ধরে)। ফোন থেকে সিঙ্ক হওয়া কল = শুধু অ্যান্ড্রয়েড অ্যাপ যে কল পাঠাতে পেরেছে; এটি কম হলে সিঙ্কের সমস্যা, আপনার কাজ কম নয়। লিড = বরাদ্দ লিড, লিড তৈরির তারিখ ধরে।",
+            en: "Reports = call reports you submitted (by submit date). Phone-synced calls = only calls the Android app managed to send; a low number means a sync gap, not less work. Leads = your assigned leads, by lead created date.",
+          })}
+        </p>
+      )}
+
 
       <div className="rounded-2xl border bg-card p-4">
         <h3 className="text-base font-semibold">{t({ bn: "ধাপ অনুযায়ী লিড", en: "Leads by stage" })}</h3>
