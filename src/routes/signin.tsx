@@ -62,7 +62,7 @@ function WorkspaceSigninPage() {
               <img
                 src={logoAsset.url}
                 alt="Winstone Pulse — The Premium Real Estate CRM"
-                className="block h-9 w-auto sm:h-10"
+                className="block h-9 w-auto sm:h-11"
               />
             </span>
           </Link>

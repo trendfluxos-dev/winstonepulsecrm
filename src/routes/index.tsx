@@ -90,7 +90,7 @@ function EntryHall() {
             <img
               src={logoAsset.url}
               alt="Winstone Pulse — The Premium Real Estate CRM"
-              className="block h-9 w-auto sm:h-10"
+              className="block h-9 w-auto sm:h-11"
             />
           </span>
           <span className="inline-flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
