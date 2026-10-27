@@ -11,7 +11,6 @@ import {
   RotateCcw,
   Search,
   SlidersHorizontal,
-  Timer,
   TrendingUp,
   UserPlus,
   Users,
