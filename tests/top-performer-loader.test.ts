@@ -17,6 +17,7 @@ const state = {
   follow_up_events: [] as Row[],
   leads: [] as Row[],
   lead_extra_grants: [] as Row[],
+  call_recordings: [] as Row[],
   signed: [] as Row[],
   error: null as { message: string } | null,
   errorTable: null as string | null,
@@ -92,6 +93,7 @@ beforeEach(() => {
   state.follow_up_events = [];
   state.leads = [];
   state.lead_extra_grants = [];
+  state.call_recordings = [];
   state.signed = [];
   state.error = null;
   state.errorTable = null;
@@ -99,7 +101,7 @@ beforeEach(() => {
 });
 
 describe("Top Performer loader (dailyTopPerformer)", () => {
-  it("counts submitted reports and completed assigned work without reading audio uploads", async () => {
+  it("counts submitted reports and completed assigned work without requiring audio uploads", async () => {
     state.profiles = [agent("a1", "Agent")];
     state.call_reports = [{ ...report("a1", true, "lead-1"), connection_verified: true }];
     state.leads = [
@@ -111,7 +113,8 @@ describe("Top Performer loader (dailyTopPerformer)", () => {
     expect(board.winner?.reports).toBe(1);
     expect(board.winner?.connected).toBe(1);
     expect(board.winner?.completed).toBe(2);
-    expect(state.filters.some(f => f.table === "call_recordings" || f.table === "recorder_insights")).toBe(false);
+    expect(state.filters.some(f => f.table === "recorder_insights")).toBe(false);
+    expect(state.filters.find(f => f.table === "call_recordings" && f.method === "select")?.args[0]).not.toContain("storage_path");
   });
 
   it("reads the selected previous Dhaka day, including its own allocation grants", async () => {

@@ -8,7 +8,7 @@
  */
 import { dhakaInstant, dhakaParts } from "@/lib/shift.server";
 import { performanceDate } from "@/lib/performance-history";
-import { operationalScore, uniqueRows } from "@/lib/performance-audit";
+import { auditPerformance, operationalScore, uniqueRows } from "@/lib/performance-audit";
 
 /** Pure ranking used by the daily board: highest displayed score ranks first. */
 export function rankPerformers(lines: PerformerLine[]): PerformerLine[] {
@@ -254,7 +254,7 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
       .eq("role", "agent");
   if (!historical) agentsQuery = agentsQuery.eq("is_active", true);
   const { pageAllParallel } = await import("@/lib/page-all");
-  const [agentsRes, reportsRes, followRes] = await Promise.all([
+  const [agentsRes, reportsRes, followRes, callsRes] = await Promise.all([
     agentsQuery,
     pageAllParallel((from, to) =>
     supabaseAdmin
@@ -270,10 +270,14 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
       .eq("status", "done")
       .gte("completed_at", startIso)
       .lte("completed_at", endIso).order("id").range(from, to)),
+    pageAllParallel((from, to) => supabaseAdmin.from("call_recordings")
+      .select("id, agent_id, lead_id, created_at, started_at, external_call_id, call_status, call_source, duration_seconds, device_reported_duration_seconds")
+      .gte("created_at", startIso).lte("created_at", endIso).order("id").range(from, to)),
   ]);
   if (agentsRes.error) throw new Error(agentsRes.error.message);
   if (reportsRes.error) throw new Error(reportsRes.error.message);
   if (followRes.error) throw new Error(followRes.error.message);
+  if (callsRes.error) throw new Error("Performance call evidence unavailable");
 
   const { quotaFor, ratioScore, effectiveQuota, completionPercent } = await import(
     "@/lib/lead-quota"
@@ -299,6 +303,14 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
 
   const reports = uniqueRows(reportsRes.data ?? []);
   const follows = uniqueRows(followRes.data ?? []).filter(f => (f as { status?: string }).status === "done");
+  const operations = auditPerformance({
+    agents: (agentsRes.data ?? []).map(a => ({ id: a.id, name: a.name })),
+    leads: uniqueRows(todayLeads ?? []).map(l => ({ ...l, work_date: effectiveDateKey, assigned_agent_id: null, status: "pending", temperature: null, outcome_category: null, source: null, created_at: startIso })),
+    calls: callsRes.data ?? [],
+    reports: reports.map(r => ({ ...r, category: null, customer_response: null, next_action: null, requirement: null })),
+    followUps: follows.map(f => ({ ...f, lead_id: null, scheduled_at: null })),
+    filters: { fromDay: effectiveDateKey, toDay: effectiveDateKey, agentId: null, source: null, project: null }, now: at,
+  });
 
   const lines: PerformerLine[] = (agentsRes.data ?? []).map((agent) => {
     const mine = reports.filter((r) => r.agent_id === agent.id);
@@ -316,8 +328,8 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
       agentId: agent.id,
       name: agent.name,
       photoUrl: null as string | null,
-      called: mine.length,
-      connected,
+      called: operations.rows.find(row => row.id === agent.id)?.calls ?? mine.length,
+      connected: operations.rows.find(row => row.id === agent.id)?.connected ?? connected,
       reports: mine.filter((r) => r.status === "submitted").length,
       followUps: follows.filter((f) => f.agent_id === agent.id).length,
       talkMinutes,
@@ -404,10 +416,9 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
       reasons.push(
         `নিজের কোটার ${winner.completionPercent}% শেষ (${winner.completed}/${winner.targetQuota})`,
       );
-    reasons.push(`${winner.connected}টি কলে কথা হয়েছে — আজ সবচেয়ে বেশি`);
+    reasons.push(`${winner.connected}টি যাচাইকৃত সংযোগ · ${winner.completed}টি অ্যাসাইন কাজ সম্পন্ন`);
     if (winner.reports) reasons.push(`${winner.reports}টি কল রিপোর্ট নিজে জমা দিয়েছেন`);
-    if (winner.talkMinutes) reasons.push(`মোট ${winner.talkMinutes} মিনিট কথা বলেছেন`);
-    if (winner.followUps) reasons.push(`${winner.followUps}টি ফলো-আপ সময়সহ বসিয়েছেন`);
+    if (winner.followUps) reasons.push(`${winner.followUps}টি ফলো-আপ সম্পন্ন করেছেন`);
     if (winner.called) reasons.push(`কানেক্ট হার ${winner.connectRate}% (${winner.called}টি কলে)`);
     if (runnerUp)
       reasons.push(
@@ -423,15 +434,13 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
       );
     if (winner.followUps < 5)
       advice.push("প্রতিদিন কমপক্ষে ৫টি ফলো-আপ বসালে পরের দিনের কিউ শক্ত হয়");
-    if (winner.talkMinutes && winner.connected && winner.talkMinutes / winner.connected < 2)
-      advice.push("গড় কথা ২ মিনিটের কম — প্রয়োজন বুঝে অন্তত ২-৩ মিনিট কথা চালিয়ে যান");
     if (!advice.length) advice.push("এই ছন্দ ধরে রাখুন — কালও একই লক্ষ্য নিয়ে শুরু করুন");
   } else {
     advice.push("আজ কোনো কল রিপোর্ট জমা পড়েনি — কল শেষে রিপোর্ট জমা দিলেই বোর্ড তৈরি হবে");
   }
 
-  const assignedLeadRows = (todayLeads ?? []).length;
-  const completedLeadRows = (todayLeads ?? []).filter((row) => row.work_state === "completed").length;
+  const assignedLeadRows = uniqueRows(todayLeads ?? []).length;
+  const completedLeadRows = uniqueRows(todayLeads ?? []).filter((row) => row.work_state === "completed").length;
   const sources: TopPerformerSources = {
     windowStart: startIso,
     windowEnd: endIso,
