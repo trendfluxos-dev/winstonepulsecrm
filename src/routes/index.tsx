@@ -187,8 +187,10 @@ function EntryHall() {
         </p>
 
         <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
-          <Button size="lg" className="btn-enter w-full rounded-md text-base font-bold" onClick={openSignin}>
-            {t({ bn: "শুরু করুন", en: "Get started" })} <ChevronRight className="size-5" />
+          <Button asChild size="lg" className="btn-enter w-full rounded-md text-base font-bold">
+            <Link to="/signin">
+              {t({ bn: "শুরু করুন", en: "Get started" })} <ChevronRight className="size-5" />
+            </Link>
           </Button>
           <p className="mt-2 text-center text-xs text-muted-foreground">
             {t({ bn: "ঐচ্ছিক — উপরে ডিভাইস বেছে নিলে আপনার পছন্দ মনে রাখা হবে।", en: "Optional — pick a device above so we remember your preferred view." })}
