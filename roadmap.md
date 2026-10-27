@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-28 — My Desk scope fix (agent saw company-wide numbers)
+- [x] Root cause: a stored HQ/IT PIN token in the browser outranked the agent's sign-in, so the desk snapshot returned the whole floor (My leads 4,865 etc.). Fixed in getCrmSnapshot: view="agent" now resolves the signed-in session first; PIN only decides when nobody is signed in.
+- [x] Quota gauge denominator changed from all-time own leads to today's assigned leads (work_date = today, Dhaka); closed history no longer inflates completion. KPI strip and Completed card now state scope/timeframe in plain language.
+- [x] New tests/desk-snapshot-scope.test.ts (3 tests) pins session-over-PIN rule; typecheck clean; full suite 1263 pass, only the 6 agent-session integration checks remain environment-blocked. NOT published; no production rows touched.
+
 ## 2026-10-28 — Optional audio and performance count audit
 - [x] Implement shared operational counts, optional diagnostics and authorized record-ID reconciliation in existing HQ overview/performance; same scorer excludes audio/talk-time points. No production writes.
 - [x] Invalid/reversed/>400-day ranges hide totals and show errors. 56 focused tests pass; automatic typecheck/build OK, semantic-color and whitespace checks pass. Signed-in HQ read-back, refresh, 223 authorized issue IDs, desktop/mobile and reversed dates verified.
