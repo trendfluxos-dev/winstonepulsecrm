@@ -125,7 +125,7 @@ function EntryHall() {
                 width={1376}
                 height={768}
                 fetchPriority="high"
-                className="photo-merge block h-auto w-full rounded-none opacity-80 sm:rounded-xl sm:shadow-soft"
+                className="block h-auto w-full"
               />
             </figure>
             <div className="mt-8 grid overflow-hidden rounded-xl border border-border bg-card sm:mt-10 sm:grid-cols-2 lg:grid-cols-3">
