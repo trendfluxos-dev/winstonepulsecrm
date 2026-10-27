@@ -86,17 +86,11 @@ function EntryHall() {
     <div className="theme-exec min-h-screen bg-background">
       <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:h-16 sm:px-6">
-          <span className="flex min-w-0 items-center gap-2.5">
-            <img src={logoAsset.url} alt="" className="size-8 shrink-0 rounded-full object-cover sm:size-9" />
-            <span className="min-w-0 leading-tight">
-              <span className="block truncate text-sm font-bold tracking-[0.12em]">
-                WINSTONE <span className="text-gold">PULSE</span>
-              </span>
-              <span className="block truncate text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                The Premium Real Estate CRM
-              </span>
-            </span>
-          </span>
+          <img
+            src={logoAsset.url}
+            alt="Winstone Pulse — The Premium Real Estate CRM"
+            className="h-8 w-auto shrink-0 sm:h-9"
+          />
           <span className="inline-flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
             <span aria-hidden className="size-1.5 rounded-full bg-live" /> {t({ bn: "সার্ভার চালু আছে", en: "Server online" })}
           </span>
