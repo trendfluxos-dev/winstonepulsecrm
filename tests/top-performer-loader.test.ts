@@ -19,14 +19,16 @@ const state = {
   lead_extra_grants: [] as Row[],
   signed: [] as Row[],
   error: null as { message: string } | null,
+  errorTable: null as string | null,
+  filters: [] as { table: string; method: string; args: unknown[] }[],
 };
 
 /** Thenable query chain: every builder method returns itself, await resolves. */
 function queryFor(table: keyof typeof state & string) {
   const chain: Record<string, unknown> = {};
-  const resolve = () => ({ data: state[table as never] ?? [], error: state.error });
+  const resolve = () => ({ data: state[table as never] ?? [], error: state.errorTable === table ? { message: "read failed" } : state.error });
   for (const m of ["select", "eq", "neq", "not", "gte", "lte", "in", "limit", "order", "range"]) {
-    chain[m] = () => chain;
+    chain[m] = (...args: unknown[]) => { state.filters.push({ table, method: m, args }); return chain; };
   }
   chain.then = (res: (v: unknown) => unknown) => Promise.resolve(res(resolve()));
   return chain;
@@ -90,9 +92,43 @@ beforeEach(() => {
   state.lead_extra_grants = [];
   state.signed = [];
   state.error = null;
+  state.errorTable = null;
+  state.filters = [];
 });
 
 describe("Top Performer loader (dailyTopPerformer)", () => {
+  it("reads the selected previous Dhaka day, including its own allocation grants", async () => {
+    state.profiles = [agent("a1", "Monisha")];
+    state.call_reports = [report("a1", true)];
+    const board = await dailyTopPerformer(new Date("2026-10-27T04:00:00Z"), "2026-10-26");
+    expect(board.dateKey).toBe("2026-10-26");
+    expect(board.revealed).toBe(true);
+    expect(board.topThree[0]?.reports).toBe(1);
+    expect(state.filters).toEqual(expect.arrayContaining([
+      { table: "call_reports", method: "gte", args: ["created_at", "2026-10-25T18:00:00.000Z"] },
+      { table: "call_reports", method: "lte", args: ["created_at", "2026-10-26T17:59:59.000Z"] },
+      { table: "leads", method: "eq", args: ["work_date", "2026-10-26"] },
+      { table: "lead_extra_grants", method: "eq", args: ["work_date", "2026-10-26"] },
+    ]));
+  });
+
+  it("does not invent historical results for an agent with no saved evidence", async () => {
+    state.profiles = [agent("a1", "Monisha")];
+    const board = await dailyTopPerformer(new Date("2026-10-27T04:00:00Z"), "2026-10-26");
+    expect(board.topThree).toEqual([]);
+    expect(board.otherAgents).toEqual([]);
+  });
+
+  it("keeps the selected current day unrevealed until 5:30 pm", async () => {
+    const board = await dailyTopPerformer(new Date("2026-10-27T11:29:00Z"), "2026-10-27");
+    expect(board.revealed).toBe(false);
+  });
+
+  it("fails rather than presenting a partial historical allocation", async () => {
+    state.errorTable = "leads";
+    await expect(dailyTopPerformer(new Date("2026-10-27T04:00:00Z"), "2026-10-26")).rejects.toThrow("Performance allocation unavailable");
+  });
+
   it("returns a complete board with a winner, top 3 and signed photo links", async () => {
     state.profiles = [
       agent("a1", "Monisha", "a1/1.jpg"),
