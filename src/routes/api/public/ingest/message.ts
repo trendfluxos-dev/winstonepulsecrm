@@ -56,6 +56,17 @@ export const Route = createFileRoute("/api/public/ingest/message")({
           return json({ error: "সঠিক বাংলাদেশি মোবাইল নম্বর দিন", code: "invalid_phone" }, 422);
         if (!leadId) return json({ error: "Unknown lead" }, 404);
 
+        // Resolving a supplied ID or matching phone is not authorization.
+        // Unassigned intake stays in LeadHub; neither devices nor server ingest
+        // can attach agent work before current ownership is confirmed.
+        if (!agent?.id) return json({ error: "Unknown agent" }, 404);
+        const { assertAssignedLead } = await import("@/lib/assigned-lead-scope.server");
+        try {
+          await assertAssignedLead(agent.id, leadId);
+        } catch {
+          return json({ error: "This lead is not assigned to you", code: "lead_not_assigned" }, 403);
+        }
+
         const { error } = await supabaseAdmin.from("whatsapp_interactions").insert({
           lead_id: leadId,
           agent_id: agent?.id ?? null,

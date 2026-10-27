@@ -58,8 +58,17 @@ export const Route = createFileRoute("/api/public/agent/presence")({
         const lookup = supabaseAdmin.from("profiles").select("id, name, employee_id");
         const { data: agent } = agent_id
           ? await lookup.eq("id", agent_id).maybeSingle()
-          : await lookup.eq("employee_id", employee_id!).maybeSingle();
+          : await lookup.eq("employee_id", employee_id ?? "").maybeSingle();
         if (!agent) return json({ error: "Unknown agent" }, 404);
+
+        if (lead_id) {
+          const { assertAssignedLead } = await import("@/lib/assigned-lead-scope.server");
+          try {
+            await assertAssignedLead(agent.id, lead_id);
+          } catch {
+            return json({ error: "This lead is not assigned to you", code: "lead_not_assigned" }, 403);
+          }
+        }
 
         const now = new Date().toISOString();
         const { error } = await supabaseAdmin
