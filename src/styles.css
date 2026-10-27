@@ -416,8 +416,8 @@
   }
   /* Sign-in workspace: a bolder, unmistakable keyboard focus ring */
   .signin-focus :where(a, button):focus-visible {
-    outline: 3px solid var(--ring);
-    outline-offset: 3px;
+    outline: 3px solid var(--ring) !important;
+    outline-offset: 3px !important;
   }
 }
 
