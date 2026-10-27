@@ -50,7 +50,10 @@ export const Route = createFileRoute("/")({
       { name: "twitter:description", content: "Leads, calls, follow-ups and team performance — one connected sales workspace. সব কাজ এক জায়গায়।" },
       { name: "twitter:image", content: "https://crm.winstonebd.com/social/winstone-pulse.jpg" },
       { name: "twitter:image:alt", content: "Winstone Pulse — The Premium Real Estate CRM; leads, calls, follow-ups and team performance." },
+      { property: "og:url", content: "https://crm.winstonebd.com/" },
+      { property: "og:site_name", content: "Winstone Pulse" },
     ],
+    links: [{ rel: "canonical", href: "https://crm.winstonebd.com/" }],
   }),
   component: EntryHall,
 });
