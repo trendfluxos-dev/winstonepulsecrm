@@ -82,7 +82,7 @@ export async function guardedSendReply(
   } catch {
     row = null;
   }
-  const auth = authorizeReplyTarget(input.actor, row, { threadId: input.threadId, leadId: input.leadId });
+  const auth = authorizeReplyTarget(input.actor, row, { threadId: input.threadId, leadId: input.leadId ?? null });
   if (!auth.ok) return { ok: false, code: auth.code };
 
   const gateState = deps.gate ?? (await gatherReplyGateState(deps.env));
