@@ -5,6 +5,7 @@
  * per shift, newest first; reruns for the same shift replace its old block, so
  * repeats stay idempotent.
  */
+import { safeCell } from "@/lib/report-sheet.server";
 import type { ShiftAgentLine, ShiftSummaryRow } from "@/lib/shift-summary.server";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_sheets/v4";
@@ -158,7 +159,7 @@ function summaryRows(summary: ShiftSummaryRow): string[][] {
       categoryText(agent.categories),
     ]);
   }
-  return rows;
+  return rows.map((r) => r.map(safeCell));
 }
 
 /**
