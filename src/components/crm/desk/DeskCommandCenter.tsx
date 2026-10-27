@@ -528,67 +528,56 @@ export function DeskCommandCenter({
         </section>
       )}
 
-      {/* KPI strip — every figure from the agent's own snapshot */}
-      <p className="text-[10px] text-muted-foreground">
-        {t({
-          bn: "সব সংখ্যা শুধু আপনার অ্যাসাইন করা লিড থেকে · আজ = ঢাকা সময় · কোম্পানির মোট ইনভেন্টরি এই ডেস্কে দেখানো হয় না",
-          en: "All figures are from your own assigned leads only · Today = Dhaka time · company-wide inventory is not shown on this desk",
-        })}
-      </p>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <StatCard
-          icon={<Users />}
-          label={t({ bn: "আমার সক্রিয় লিড", en: "My active assigned leads" })}
-          value={bn(stats.total, lang)}
-          sub={t({ bn: `${bn(stats.pending, lang)}টি কল বাকি · বর্তমান · মোট মালিকানা ${bn(stats.allTime, lang)}`, en: `${bn(stats.pending, lang)} pending · current · ${bn(stats.allTime, lang)} owned all-time` })}
-          loading={isPending}
-        />
-        <StatCard
-          icon={<PhoneOutgoing />}
-          label={t({ bn: "আজকের কল", en: "Today's calls" })}
-          value={bn(stats.calls, lang)}
-          sub={t({
-            bn: `${bn(stats.connected, lang)}টিতে কথা · ${bn(stats.connectRate, lang)}% · ${bn(stats.reports, lang)}টি রিপোর্ট জমা (${bn(stats.reportedConnected, lang)}টিতে কথা হয়েছে বলে জানানো)`,
-            en: `${bn(stats.connected, lang)} connected · ${bn(stats.connectRate, lang)}% · ${bn(stats.reports, lang)} reports submitted (${bn(stats.reportedConnected, lang)} agent-reported connected)`,
+      {/* My Desk KPI frame — four own-work cards; audio/sync stay in diagnostics */}
+      <section aria-labelledby="desk-kpi-heading" className="card-elevated space-y-3 p-4">
+        <h2 id="desk-kpi-heading" className="text-base font-semibold">
+          {t({ bn: "আমার আজকের কাজ", en: "My work today" })}
+        </h2>
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard
+            icon={<Users />}
+            label={t({ bn: "আমার বরাদ্দ করা লিড · শুধু নিজের বরাদ্দ", en: "Assigned · my own leads only" })}
+            value={bn(stats.total, lang)}
+            sub={t({ bn: `সক্রিয় · ${bn(stats.hot, lang)}টি হট · মোট মালিকানা ${bn(stats.allTime, lang)}`, en: `Active · ${bn(stats.hot, lang)} hot · ${bn(stats.allTime, lang)} owned all-time` })}
+            loading={isPending}
+          />
+          <StatCard
+            icon={<CheckCircle2 />}
+            label={t({ bn: "আজকের সম্পন্ন কাজ · আজকের কাজের বিপরীতে", en: "Completed · against today's work" })}
+            value={`${bn(stats.done, lang)} / ${bn(stats.todayAssigned, lang)}`}
+            sub={t({ bn: `${bn(stats.donePct, lang)}% · আজকের (ঢাকা) কাজের তারিখ`, en: `${bn(stats.donePct, lang)}% · today's (Dhaka) work date` })}
+            tone="live"
+            loading={isPending}
+          />
+          <StatCard
+            icon={<PhoneOutgoing />}
+            label={t({ bn: "কল ও রিপোর্ট · আলাদা কাউন্ট", en: "Calls + Reports · counted separately" })}
+            value={`${bn(stats.calls, lang)} + ${bn(stats.reports, lang)}`}
+            sub={t({
+              bn: `${bn(stats.calls, lang)}টি কল (${bn(stats.connected, lang)}টিতে কথা) · ${bn(stats.reports, lang)}টি রিপোর্ট জমা`,
+              en: `${bn(stats.calls, lang)} calls (${bn(stats.connected, lang)} connected) · ${bn(stats.reports, lang)} reports submitted`,
+            })}
+            loading={isPending}
+          />
+          <StatCard
+            icon={<CalendarClock />}
+            label={t({ bn: "বাকি ও মেয়াদোত্তীর্ণ কাজ · শুধু নির্ধারিত কাজ", en: "Pending · scheduled work only" })}
+            value={bn(stats.pending + stats.followUp, lang)}
+            sub={t({
+              bn: `${bn(stats.pending, lang)}টি লিড বাকি · ${bn(stats.followUp, lang)}টি ফলো-আপ · সময় পেরিয়েছে ${bn(stats.overdue, lang)}টি`,
+              en: `${bn(stats.pending, lang)} leads pending · ${bn(stats.followUp, lang)} follow-ups · ${bn(stats.overdue, lang)} overdue`,
+            })}
+            tone="destructive"
+            loading={isPending}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {t({
+            bn: "কল রেকর্ডিং, অডিও আপলোড এবং ইন্টারনেট/সার্ভার সিঙ্ক আলাদা Diagnostics অংশে থাকবে—এগুলোকে বাধ্যতামূলক পারফরম্যান্স স্কোর করা হবে না।",
+            en: "Call recordings, audio upload and internet/server sync stay in a separate Diagnostics section — they are never a required performance score.",
           })}
-          tone="live"
-          loading={isPending}
-        />
-        <StatCard
-          icon={<Timer />}
-          label={t({ bn: "আজকের কথার সময়", en: "Talk time today" })}
-          value={formatTalkTime(stats.talk)}
-          sub={t({ bn: `${bn(stats.whatsapp, lang)}টি হোয়াটসঅ্যাপ আজ`, en: `${bn(stats.whatsapp, lang)} WhatsApp today` })}
-          loading={isPending}
-        />
-        <StatCard
-          icon={<CalendarClock />}
-          label={t({ bn: "ফলো-আপ", en: "Follow-ups" })}
-          value={bn(stats.followUp, lang)}
-          sub={t({
-            bn: `আজ ${bn(stats.dueToday, lang)}টি · সময় পেরিয়েছে ${bn(stats.overdue, lang)}টি`,
-            en: `${bn(stats.dueToday, lang)} due today · ${bn(stats.overdue, lang)} overdue`,
-          })}
-          tone="chart4"
-          loading={isPending}
-        />
-        <StatCard
-          icon={<Flame />}
-          label={t({ bn: "হট লিড", en: "Hot leads" })}
-          value={bn(stats.hot, lang)}
-          sub={t({ bn: `${bn(stats.uncalled, lang)}টিতে এখনো কল হয়নি`, en: `${bn(stats.uncalled, lang)} not yet called` })}
-          tone="destructive"
-          loading={isPending}
-        />
-        <StatCard
-          icon={<CheckCircle2 />}
-          label={t({ bn: "আজ শেষ হয়েছে", en: "Completed today" })}
-          value={`${bn(stats.done, lang)} / ${bn(stats.todayAssigned, lang)}`}
-          sub={t({ bn: `${bn(stats.donePct, lang)}% · আজকের (ঢাকা) কাজের তারিখের আমার লিড · বর্তমান অবস্থা`, en: `${bn(stats.donePct, lang)}% · my leads with today's (Dhaka) work date · current state` })}
-          tone="live"
-          loading={isPending}
-        />
-      </div>
+        </p>
+      </section>
 
       {/* Reference-style summary cards: what's coming up, and what already happened */}
       <div className="grid min-w-0 gap-3 lg:grid-cols-2">
