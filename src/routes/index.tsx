@@ -277,7 +277,7 @@ function EntryHall() {
             </Link>
           </p>
           <p className="mt-3">© 2026 TrendFlux Digital. All Rights Reserved.</p>
-          <p className="mt-1">Developed &amp; Powered by Zahid Hasan Emon.</p>
+          <p className="mt-1">Developed &amp; Powered by <span className="font-bold">Zahid Hasan Emon</span>.</p>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <Link to="/privacy" className="hover:text-foreground">
               Privacy Policy

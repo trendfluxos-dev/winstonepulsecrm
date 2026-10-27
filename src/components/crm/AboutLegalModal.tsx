@@ -38,7 +38,7 @@ export function AboutLegalModal() {
           </div>
 
           <p>
-            <span className="font-semibold">Developed &amp; Powered by:</span> Zahid Hasan Emon
+            <span className="font-semibold">Developed &amp; Powered by:</span> <span className="font-bold">Zahid Hasan Emon</span>
           </p>
 
           <p className="text-muted-foreground">
