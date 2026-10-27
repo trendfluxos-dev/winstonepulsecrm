@@ -7,6 +7,7 @@ import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
 import { useT } from "@/lib/i18n";
+import { scrollToTopAdaptive } from "@/lib/motion";
 
 export const Route = createFileRoute("/signin")({
   head: () => ({
@@ -48,8 +49,7 @@ function WorkspaceSigninPage() {
 
   // Adapt scrolling speed to prefers-reduced-motion, then announce the page.
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    scrollToTopAdaptive();
     document.getElementById("workspace-signin")?.focus({ preventScroll: true });
   }, []);
 
@@ -70,6 +70,7 @@ function WorkspaceSigninPage() {
           </Link>
           <Link
             to="/"
+            resetScroll={false}
             className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
           >
             ← {t({ bn: "হোমে ফিরুন", en: "Back to home" })}
