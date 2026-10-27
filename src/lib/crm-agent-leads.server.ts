@@ -24,10 +24,12 @@ export async function readAgentLeads(
   }
   const leads = new Map<string, LeadRow>();
   for (let from = 0; ; from += 1000) {
-    const { data, error } = await client.from("leads")
+    const { data, error } = await client
+      .from("leads")
       .select("*")
       .or(`assigned_agent_id.eq.${agentId},assigned_to.eq.${agentId}`)
-      .order("updated_at", { ascending: false }).order("id")
+      .order("updated_at", { ascending: false })
+      .order("id")
       .range(from, from + 999);
     if (error) return { data: null, error };
     for (const lead of data ?? []) {
