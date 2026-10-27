@@ -12,13 +12,15 @@ import {
   Smartphone,
   ShieldCheck,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import logoAsset from "@/assets/winstone-mark.png.asset.json";
 import androidAsset from "@/assets/device-android.webp.asset.json";
 import webAsset from "@/assets/device-web.webp.asset.json";
 import desktopAsset from "@/assets/device-desktop.webp.asset.json";
 import teamHeroAsset from "@/assets/home-team-hero-v7.webp.asset.json";
+import brandArchitectAsset from "@/assets/brand-architect.jpeg.asset.json";
+import { scrollToTopAdaptive } from "@/lib/motion";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
@@ -75,6 +77,10 @@ function EntryHall() {
     }
   };
 
+  // Returning to the homepage honors the same reduced-motion scroll behavior.
+  useEffect(() => {
+    scrollToTopAdaptive();
+  }, []);
 
   return (
     <div className="theme-exec min-h-screen bg-background">
@@ -219,6 +225,41 @@ function EntryHall() {
             </Link>
           </p>
         )}
+
+        <section className="mt-12 overflow-hidden rounded-xl border border-gold/30 bg-charcoal text-background sm:mt-14">
+          <div className="grid gap-6 p-5 sm:grid-cols-[minmax(0,16rem)_1fr] sm:gap-8 sm:p-8">
+            <img
+              src={brandArchitectAsset.url}
+              alt="Zahid Hasan Emon speaking at a podium"
+              loading="lazy"
+              className="mx-auto aspect-[4/5] w-full max-w-xs rounded-lg border border-gold/40 object-cover sm:max-w-none"
+            />
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold">
+                Brand Architect
+              </p>
+              <p className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Zahid Hasan Emon</p>
+              <p className="mt-1 text-sm text-background/70 sm:text-base">
+                AI Systems Architect · Product Builder · Brand Architect
+              </p>
+              <h2 className="mt-5 text-xl font-bold tracking-tight sm:text-2xl">
+                Building the Intelligence Behind Winstone.
+              </h2>
+              <p className="mt-2 text-sm text-background/70">
+                A unified operating ecosystem connecting property sales, customer relationships,
+                communication intelligence, and business operations.
+              </p>
+              <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-background/50">
+                Concept preview · Not a live website
+              </p>
+              <Button asChild variant="outline" className="mt-5 border-gold/60 bg-transparent text-gold hover:bg-gold/10">
+                <a href="https://trendflux.digital/founder" target="_blank" rel="noopener noreferrer">
+                  Meet the Brand Architect <ArrowUpRight className="size-4" />
+                </a>
+              </Button>
+            </div>
+          </div>
+        </section>
 
         <footer className="mt-auto pt-14 text-center text-xs text-muted-foreground">
           <p className="inline-flex items-center gap-1.5">
