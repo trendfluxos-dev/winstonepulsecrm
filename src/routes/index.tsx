@@ -63,6 +63,7 @@ function EntryHall() {
   const { scope } = useMyAccount();
   const [pinOpen, setPinOpen] = useState(false);
   const [pinTarget, setPinTarget] = useState<"/hq" | "/system" | "/leadhub">("/hq");
+  const [signinOpen, setSigninOpen] = useState(false);
 
   const openPin = (target: "/hq" | "/system" | "/leadhub") => {
     setPinTarget(target);
@@ -77,7 +78,17 @@ function EntryHall() {
     } catch {
       // storage blocked: layout still adapts to the screen
     }
-    document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setSigninOpen(true);
+    setTimeout(() => {
+      document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+  };
+
+  const openSignin = () => {
+    setSigninOpen(true);
+    setTimeout(() => {
+      document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
   };
 
 
@@ -192,7 +203,7 @@ function EntryHall() {
         </p>
 
         <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
-          <Button size="lg" className="btn-enter w-full rounded-md text-base font-bold" onClick={() => document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+          <Button size="lg" className="btn-enter w-full rounded-md text-base font-bold" onClick={openSignin}>
             {t({ bn: "শুরু করুন", en: "Get started" })} <ChevronRight className="size-5" />
           </Button>
           <p className="mt-2 text-center text-xs text-muted-foreground">
@@ -200,6 +211,8 @@ function EntryHall() {
           </p>
         </div>
 
+        {signinOpen && (
+        <>
         <div aria-hidden className="mt-12 border-t border-border" />
 
         <h2
@@ -263,6 +276,8 @@ function EntryHall() {
             }
           />
         </div>
+        </>
+        )}
 
         <section className="mt-10 rounded-xl border border-border bg-card p-5 sm:p-6">
           <h2 className="text-lg font-bold tracking-tight">{t({ bn: "আপনি কি Winstone-এর সেলস এজেন্ট?", en: "Are you a Winstone sales agent?" })}</h2>
