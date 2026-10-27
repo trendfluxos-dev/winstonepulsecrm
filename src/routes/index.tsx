@@ -226,7 +226,7 @@ function EntryHall() {
           </p>
         )}
 
-        <section className="mt-12 overflow-hidden rounded-xl border border-gold/30 bg-card text-foreground sm:mt-14">
+        <section className="mt-12 overflow-hidden rounded-xl border border-gold/40 bg-card text-foreground shadow-soft sm:mt-14">
           <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-4 p-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:items-stretch sm:gap-8 sm:p-8">
             <img
               src={brandArchitectAsset.url}

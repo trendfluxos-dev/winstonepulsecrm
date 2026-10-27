@@ -220,6 +220,7 @@
   --shadow-card: var(--shadow-card);
   --shadow-card-hover: var(--shadow-card-hover);
   --shadow-glass: var(--shadow-glass);
+  --shadow-soft: var(--shadow-soft);
   --animate-shimmer: shimmer 1.6s linear infinite;
   --animate-glow-ring: glow-ring 1.6s ease-in-out infinite;
   --animate-rise: rise 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -323,6 +324,7 @@
   --shadow-card: 0 1px 2px oklch(0.2 0 0 / 4%);
   --shadow-card-hover: var(--shadow-card);
   --shadow-glass: none;
+  --shadow-soft: 0 12px 32px -18px oklch(0.2 0 0 / 16%), 0 2px 8px -4px oklch(0.2 0 0 / 8%);
   --enter: var(--charcoal);
   --enter-hover: var(--button-hover);
   --enter-foreground: var(--card);
