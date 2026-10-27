@@ -86,7 +86,13 @@ export function CommandAgentPanel({ surface }: { surface: Surface }) {
       setTurns((prev) => [...prev, { id, question: value }]);
       try {
         const result = await ask({
-          data: { adminToken: getAdminToken(), surface, question: value, history, mode: typeof input === "string" ? "chat" : input.mode },
+          data: {
+            adminToken: getAdminToken(),
+            surface,
+            question: value,
+            history,
+            mode: typeof input === "string" ? "chat" : input.mode,
+          },
         });
         // A stale tab or interrupted request can resolve with no body or an
         // empty answer; show an error on this turn instead of crashing.
@@ -159,8 +165,20 @@ export function CommandAgentPanel({ surface }: { surface: Surface }) {
       </header>
 
       <div className="space-y-3 px-4 py-4">
-        <Button variant="outline" size="sm" disabled={send.isPending} onClick={() => send.mutate({ question: "আমার অনুমতির মধ্যে লিড, ফলো-আপ ও রিপোর্টের কোন কাজ আগে দেখা দরকার, কী জানা আছে আর কী অজানা—সহজভাবে বলুন। শুধু করণীয় প্রস্তাব করুন।", mode: "work_review" })}>
-          <Sparkle className="size-4" />{t({ bn: "কোন কাজ আগে দেখব?", en: "Review work priorities" })}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={send.isPending}
+          onClick={() =>
+            send.mutate({
+              question:
+                "আমার অনুমতির মধ্যে লিড, ফলো-আপ ও রিপোর্টের কোন কাজ আগে দেখা দরকার, কী জানা আছে আর কী অজানা—সহজভাবে বলুন। শুধু করণীয় প্রস্তাব করুন।",
+              mode: "work_review",
+            })
+          }
+        >
+          <Sparkle className="size-4" />
+          {t({ bn: "কোন কাজ আগে দেখব?", en: "Review work priorities" })}
         </Button>
         {turns.length === 0 ? (
           <p className="text-xs text-muted-foreground">

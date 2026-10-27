@@ -1,6 +1,11 @@
 /** Aggregate-only evidence for the assistant's read-only work review. */
 export function crmWorkReview(facts: {
-  totals: { leads: number; pending_leads: number; unfinished_reports: number; open_follow_ups: number };
+  totals: {
+    leads: number;
+    pending_leads: number;
+    unfinished_reports: number;
+    open_follow_ups: number;
+  };
   review_counts: { missed_follow_ups: number; due_follow_ups: number };
 }) {
   return {
