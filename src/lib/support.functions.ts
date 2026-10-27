@@ -370,7 +370,11 @@ export const listPublishedArticles = createServerFn({ method: "GET" }).handler(a
       .select("id, slug, name, description, sort_order")
       .order("sort_order"),
   ]);
-  return { articles: articles ?? [], categories: categories ?? [] };
+  const used = new Set((articles ?? []).map((a) => a.category_id).filter(Boolean));
+  return {
+    articles: articles ?? [],
+    categories: (categories ?? []).filter((c) => used.has(c.id)),
+  };
 });
 
 export const getPublishedArticle = createServerFn({ method: "POST" })
