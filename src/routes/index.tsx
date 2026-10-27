@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import logoAsset from "@/assets/winstone-mark.png.asset.json";
+import logoAsset from "@/assets/winstone-pulse-logo.png.asset.json";
 import androidAsset from "@/assets/device-android.webp.asset.json";
 import webAsset from "@/assets/device-web.webp.asset.json";
 import desktopAsset from "@/assets/device-desktop.webp.asset.json";
@@ -89,7 +89,7 @@ function EntryHall() {
           <img
             src={logoAsset.url}
             alt="Winstone Pulse — The Premium Real Estate CRM"
-            className="h-8 w-auto shrink-0 sm:h-9"
+            className="h-9 w-auto shrink-0 sm:h-10"
           />
           <span className="inline-flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
             <span aria-hidden className="size-1.5 rounded-full bg-live" /> {t({ bn: "সার্ভার চালু আছে", en: "Server online" })}
