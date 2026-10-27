@@ -121,7 +121,7 @@ function EntryHall() {
               <span lang="en" className="block">Leads, calls, follow-ups and team performance. One connected workspace for your sales floor.</span>
               <span lang="bn" className="mt-2 block text-xs leading-relaxed sm:text-sm">লিড, কল, ফলো-আপ আর টিমের ফলাফল — আপনার সেলস টিমের সব কাজ এক জায়গায়।</span>
             </p>
-            <Button asChild variant="outline" className="mt-6 h-auto max-w-full gap-3 whitespace-normal border-gold/50 bg-background px-4 py-3 text-left text-base font-medium active:border-gold-hover active:bg-accent focus-visible:ring-charcoal sm:mt-8 sm:px-6 sm:py-4 sm:text-lg">
+            <Button asChild variant="outline" className="mt-6 h-auto max-w-full gap-3 whitespace-normal border-gold/50 bg-background px-4 py-3 text-left text-base font-medium active:border-gold-hover active:bg-accent focus-visible:ring-charcoal sm:mt-8 sm:px-6 sm:py-4 sm:text-lg md:h-auto">
               <Link to="/walkthrough">
                 <BookOpen aria-hidden className="size-5 sm:size-6" />
                 <span>
