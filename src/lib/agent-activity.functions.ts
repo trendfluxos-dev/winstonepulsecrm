@@ -15,6 +15,8 @@ export type AgentActivityRow = {
   lastLoginAt: string | null;
   mustChangePassword: boolean;
   linkIssuedAt: string | null;
+  resetIssuedAt: string | null;
+  resetKind: "link" | "it_password" | null;
   pendingReports: number;
   overdueFollowUps: number;
   androidSignedIn: boolean;
@@ -52,10 +54,10 @@ export const listAgentActivity = createServerFn({ method: "POST" })
         .is("revoked_at", null),
       supabaseAdmin
         .from("audit_logs")
-        .select("entity_id, created_at")
-        .eq("action", "agent_password_reset_link_issued")
+        .select("entity_id, action, created_at, metadata")
+        .in("action", ["agent_password_reset_link_issued", "agent_account_updated"])
         .order("created_at", { ascending: false })
-        .limit(500),
+        .limit(1000),
     ]);
     if (profiles.error) throw new Error(profiles.error.message);
 
@@ -73,7 +75,11 @@ export const listAgentActivity = createServerFn({ method: "POST" })
       if (!prev || (d.last_seen_at ?? "") > (prev.last_seen_at ?? "")) device.set(d.profile_id, d);
     }
     const link = new Map<string, string>();
-    for (const l of links.data ?? []) if (l.entity_id && !link.has(l.entity_id)) link.set(l.entity_id, l.created_at);
+    for (const l of links.data ?? [])
+      if (l.action === "agent_password_reset_link_issued" && l.entity_id && !link.has(l.entity_id))
+        link.set(l.entity_id, l.created_at);
+    const { latestResets } = await import("@/lib/pending-password-resets");
+    const resets = latestResets(links.data ?? []);
 
     const rows = (profiles.data ?? []).map((p): AgentActivityRow => {
       const u = p.user_id ? userById.get(p.user_id) : undefined;
@@ -91,6 +97,8 @@ export const listAgentActivity = createServerFn({ method: "POST" })
         lastLoginAt: u?.last_sign_in_at ?? null,
         mustChangePassword: (u?.app_metadata as Record<string, unknown> | undefined)?.["must_change_password"] === true,
         linkIssuedAt: link.get(p.id) ?? null,
+        resetIssuedAt: resets.get(p.id)?.at ?? null,
+        resetKind: resets.get(p.id)?.kind ?? null,
         pendingReports: pending.get(p.id) ?? 0,
         overdueFollowUps: overdue.get(p.id) ?? 0,
         androidSignedIn: Boolean(d),

@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Activity, Loader2, Printer, RefreshCw, Smartphone } from "lucide-react";
+import { Activity, KeyRound, Loader2, Printer, RefreshCw, Smartphone } from "lucide-react";
 
 import { AppShell } from "@/components/crm/AppShell";
 import { dhaka, useAgentActivity } from "@/components/crm/AgentOnboarding";
 import { RoleGate } from "@/components/crm/RoleGate";
 import { Button } from "@/components/ui/button";
+import { daysWaiting, pendingResets } from "@/lib/pending-password-resets";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/agent-activity")({
   head: () => ({
@@ -59,6 +61,7 @@ function Board() {
       <p className="text-xs text-muted-foreground">
         IT-only · পাসওয়ার্ড এখানে নেই, কখনো দেখানো হয় না · তৈরি: {dhaka(data?.generatedAt ?? null)} (ঢাকা)
       </p>
+      {!isLoading && <PendingResets rows={data?.rows ?? []} />}
       {isLoading ? (
         <Loader2 className="size-5 animate-spin" />
       ) : (
@@ -109,5 +112,57 @@ function Board() {
         </div>
       )}
     </div>
+  );
+}
+
+type ActivityRows = NonNullable<ReturnType<typeof useAgentActivity>["data"]>["rows"];
+
+function PendingResets({ rows }: { rows: ActivityRows }) {
+  const t = useT();
+  const list = pendingResets(rows);
+  const now = new Date();
+  return (
+    <section className="rounded-lg border border-border bg-card p-3 print:hidden" aria-labelledby="pending-resets">
+      <h2 id="pending-resets" className="flex items-center gap-2 text-sm font-semibold">
+        <KeyRound className="size-4" />
+        {t({ bn: "নতুন পাসওয়ার্ড দেওয়া বাকি", en: "Still need to set a new password" })} ({list.length})
+      </h2>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {t({
+          bn: "এই অ্যাকাউন্টগুলো রিসেটের পর এখনো নতুন পাসওয়ার্ড সেভ করেনি। সবচেয়ে পুরোনো রিসেট আগে।",
+          en: "These accounts were reset but have not saved a new password yet. Oldest reset first.",
+        })}
+      </p>
+      {list.length === 0 ? (
+        <p className="mt-3 text-sm text-muted-foreground">
+          {t({ bn: "কেউ বাকি নেই — সবাই নতুন পাসওয়ার্ড দিয়েছে।", en: "Nobody is waiting — everyone has set a new password." })}
+        </p>
+      ) : (
+        <ul className="mt-3 divide-y divide-border">
+          {list.map((r) => {
+            const days = daysWaiting(r.resetIssuedAt, now);
+            return (
+              <li key={r.profileId} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2 text-sm">
+                <span className="min-w-0">
+                  <span className="font-medium">{r.name}</span>{" "}
+                  <span className="tabular text-xs text-muted-foreground">{r.employeeId ?? "—"}</span>
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {r.resetIssuedAt
+                    ? `${t({ bn: "রিসেট", en: "Reset" })}: ${dhaka(r.resetIssuedAt)} · ${
+                        r.resetKind === "link"
+                          ? t({ bn: "ইমেইল লিংক", en: "email link" })
+                          : t({ bn: "IT অস্থায়ী পাসওয়ার্ড", en: "IT temporary password" })
+                      } · ${days === 0 ? t({ bn: "আজ", en: "today" }) : `${days} ${t({ bn: "দিন অপেক্ষা", en: "days waiting" })}`}`
+                    : t({ bn: "রিসেটের সময় রেকর্ডে নেই", en: "Reset time not on record" })}
+                  {" · "}
+                  {t({ bn: "শেষ লগইন", en: "Last sign-in" })}: {dhaka(r.lastLoginAt)}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }
