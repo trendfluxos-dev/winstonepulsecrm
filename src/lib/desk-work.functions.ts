@@ -33,5 +33,5 @@ export const getDeskReports = createServerFn({ method: "POST" }).handler(async (
   const res = await pageAll((a, b) => supabaseAdmin.from("call_reports").select("id, submitted_at, connected")
     .eq("agent_id", me).not("submitted_at", "is", null).order("id").range(a, b));
   if (res.error) throw new Error("Report counts unavailable");
-  return { reports: (res.data ?? []) as { id: string; submitted_at: string; connected: boolean | null }[] };
+  return { agentId: me, reports: (res.data ?? []) as { id: string; submitted_at: string; connected: boolean | null }[] };
 });
