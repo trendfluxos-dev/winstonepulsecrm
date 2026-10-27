@@ -226,7 +226,7 @@ function EntryHall() {
           </p>
         )}
 
-        <section className="mt-12 overflow-hidden rounded-xl border border-gold/30 bg-charcoal text-background sm:mt-14">
+        <section className="mt-12 overflow-hidden rounded-xl border border-gold/30 bg-card text-foreground sm:mt-14">
           <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-4 p-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:gap-8 sm:p-8">
             <img
               src={brandArchitectAsset.url}
@@ -241,7 +241,7 @@ function EntryHall() {
               <p className="mt-1 text-2xl font-bold leading-tight tracking-tight sm:mt-2 sm:text-4xl">
                 Zahid Hasan Emon
               </p>
-              <p className="mt-1 text-xs leading-snug text-background/70 sm:text-base">
+              <p className="mt-1 text-xs leading-snug text-muted-foreground sm:text-base">
                 AI Systems Architect · Product Builder · Brand Architect
               </p>
             </div>
@@ -249,17 +249,17 @@ function EntryHall() {
               <h2 className="text-lg font-bold tracking-tight sm:text-2xl">
                 Building the Intelligence Behind Winstone.
               </h2>
-              <p className="mt-2 text-sm text-background/70">
+              <p className="mt-2 text-sm text-muted-foreground">
                 A unified operating ecosystem connecting property sales, customer relationships,
                 communication intelligence, and business operations.
               </p>
-              <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-background/50">
+              <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 Concept preview · Not a live website
               </p>
               <Button
                 asChild
                 variant="outline"
-                className="mt-4 w-full border-gold/60 bg-transparent text-gold hover:bg-gold/10 focus-visible:ring-gold focus-visible:ring-offset-charcoal sm:mt-5 sm:w-auto"
+                className="mt-4 w-full border-gold/60 bg-transparent text-gold-ink hover:bg-gold/10 focus-visible:ring-gold focus-visible:ring-offset-card sm:mt-5 sm:w-auto"
               >
                 <a href="https://trendflux.digital/founder" target="_blank" rel="noopener noreferrer">
                   Meet the Brand Architect <ArrowUpRight className="size-4" />
