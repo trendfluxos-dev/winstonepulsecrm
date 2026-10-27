@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-27 — Sign-in daily performance
+- [ ] Show daily agent performance at 5:30 PM Dhaka, highlight Top 3 and list remaining agents below; blocked on confirmation of public versus signed-in staff visibility.
+- [ ] Preserve the supplied reference's handwritten heading and clean supporting text in the performance section; keep existing scoring/finalization unchanged.
+
 ## 2026-10-27 — Database performance and Run usage
 - [x] Measured requested credits for Oct 14–27 (partial current day): Run 0.959740401, including database 0.1677 for 1 recorded small instance-hour, Gateway 0.78988, network 0.000660401 and realtime 0.0015; Build separate 78.13016. No realized savings claim.
 - [x] Replaced overlapping agent lead downloads with one fully paginated ownership union; preserved owner precedence, totals, quota, Friday, history and refresh cadence. 15 targeted tests pass; full suite 1220 pass / 1 pre-existing terminology-copy failure. No publish, schema, data, permissions, schedules or resource-size changes.
