@@ -437,6 +437,12 @@
 }
 
 /* Glassmorphism for nav, drawers and modal headers */
+@utility brand-nameplate {
+  background-color: var(--plate-ink);
+  border: 1px solid var(--gold);
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--gold) 25%, transparent), var(--shadow-soft);
+}
+
 @utility glass {
   background-color: var(--card);
   box-shadow: var(--shadow-glass);
