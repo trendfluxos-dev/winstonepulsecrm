@@ -159,7 +159,7 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
     return { total: rows.length, connected, rate: rows.length ? Math.round((connected / rows.length) * 100) : 0 };
   })();
   const na = t({ bn: "পাওয়া যায়নি", en: "Unavailable" });
-  const activeHot = leads.filter((l) => (range.from || range.to ? true : true) && l.temperature === "hot" && l.work_state !== "completed" && l.work_state !== "duplicate_skipped").length;
+  const activeHot = leads.filter((l) => l.temperature === "hot" && l.work_state !== "completed" && l.work_state !== "duplicate_skipped").length;
   const tiles = scope === "agent" ? [
     { label: t({ bn: "আমার লিড (সব বরাদ্দ)", en: "My leads (all assigned)" }), value: k.leads, icon: Users, tone: "primary" as const },
     { label: t({ bn: "হট লিড (চলমান)", en: "Hot leads (active)" }), value: activeHot, icon: Flame, tone: "destructive" as const },
