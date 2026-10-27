@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-27 — Remaining security review
+- [ ] Review all seven remaining findings; public support chat stays unchanged.
+- [ ] Fix cross-lead device message/history writes and unsafe scoring/ranking inputs with synthetic regressions.
+- [ ] Report lower-risk findings and verification limits; no customer data changes.
+
 ## 2026-10-27 — Approved security fixes and release
 - [x] Block callback/manual lead takeover; canonical intake remains unassigned, LeadHub-only routing and briefing enforced. 20 synthetic handler tests pass.
 - [x] Restrict lead-sheet previews to the existing server-configured report workbooks before provider reads; strict Google URL and tab validation. 9 transport/authority tests pass; inventory/scheduled sync unchanged.
