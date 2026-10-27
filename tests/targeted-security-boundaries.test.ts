@@ -17,7 +17,13 @@ vi.mock("@tanstack/react-start", () => ({ createServerFn: () => {
   const chain = { inputValidator: () => chain, middleware: () => chain, handler: (fn: unknown) => fn };
   return chain;
 } }));
-vi.mock("@/lib/access.server", () => ({ resolveCaller: async () => state.caller }));
+vi.mock("@/lib/access.server", () => ({
+  resolveCaller: async () => state.caller,
+  requireAuthority: (caller: typeof state.caller) => {
+    if (caller.scope === "none") throw new Error("Sign in required");
+    if (caller.scope !== "authority") throw new Error("Authority required");
+  },
+}));
 vi.mock("@/integrations/supabase/auth-middleware", () => ({ requireSupabaseAuth: {} }));
 vi.mock("@/lib/ai-model.server", () => ({
   getAiModelChoice: async () => { state.configReads++; return "gemini"; },
@@ -85,7 +91,8 @@ describe("private reads authenticate before accessing data", () => {
       await expect(invoke(fn)).rejects.toThrow("Sign in required");
       expect(state.configReads).toBe(0);
     });
-    it(`${name} keeps approved staff reads`, async () => {
+    it(`${name} keeps authorized reads`, async () => {
+      if (name === "bill alert") state.caller.scope = "authority";
       await invoke(fn); expect(state.configReads).toBe(1);
     });
   }
