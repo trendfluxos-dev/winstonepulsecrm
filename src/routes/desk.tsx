@@ -511,6 +511,7 @@ function FollowUpsInRange() {
   const range = useDeskRange();
   const { leads } = useSnapshot();
   if (!range.active) return null;
+  if (range.error) return <section className="card-elevated p-4"><DeskRangeChip /></section>;
   const rows = leads
     .filter((l) => l.status === "follow_up" && range.inRange(l.updated_at))
     .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
