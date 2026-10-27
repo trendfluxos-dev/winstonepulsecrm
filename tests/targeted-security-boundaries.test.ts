@@ -57,9 +57,9 @@ vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: { from:
     update: (patch: Record<string, unknown>) => { state.writes.push({ table, patch }); if (table === "call_reports" && !state.allowSubmit) throw new Error("captured submission"); return chain; },
     insert: (patch: Record<string, unknown>) => { state.writes.push({ table, patch }); return chain; },
     maybeSingle: async () => {
-      if (table === "call_reports") return { data: { id: "report-a", agent_id: "agent-a", lead_id: "lead-a", recording_id: "recording-a", channel: state.channel, connected: true, duration_seconds: 9000, created_at: "2026-10-19T00:00:00Z" }, error: null };
+      if (table === "call_reports") return { data: { id: "report-a", agent_id: "agent-a", lead_id: "lead-a", recording_id: "recording-a", grade: "B", channel: state.channel, connected: true, duration_seconds: 9000, created_at: "2026-10-19T00:00:00Z" }, error: null };
       if (table === "leads") return { data: { assigned_to: state.leadOwner, name: "Lead", phone_number: "01700000000", status: "pending" }, error: null };
-      if (table === "call_recordings") return { data: state.phoneSeconds === null ? { duration_seconds: 9000, call_source: "web_manual" } : { duration_seconds: state.phoneSeconds, call_source: "android_sim", created_at: "2026-10-19T00:01:00Z" }, error: null };
+      if (table === "call_recordings") return { data: state.phoneSeconds === null ? { duration_seconds: 9000, call_source: "web_manual" } : { agent_id: "agent-a", lead_id: "lead-a", call_status: "completed", duration_seconds: state.phoneSeconds, call_source: "android_sim", created_at: "2026-10-19T00:01:00Z" }, error: null };
       const r = result();
       return { ...r, data: r.data?.[0] ?? null };
     },
@@ -159,7 +159,17 @@ describe("read-only HQ cannot write project or support data", () => {
   });
 });
 describe("report submission verifies only phone-measured duration", () => {
-  const input = { reportId: "report-a", agentId: "agent-a", category: "interested", summary: "Requested details", temperature: "warm", grade: "B", direction: "outgoing", callStatus: "connected", durationSeconds: 9000, followUpNeeded: false, noFollowUpReason: "info_completed" };
+  const input = { reportId: "report-a", agentId: "agent-a", category: "interested", summary: "Requested details", temperature: "warm", grade: "A", evaluationAnswers: { project_interest: true, asked_price: true, wanted_info: false, visit_interest: false, decision_30d: false, wants_follow_up: false }, direction: "outgoing", callStatus: "connected", durationSeconds: 9000, followUpNeeded: false, noFollowUpReason: "info_completed" };
+  it("missing or partial answers cannot persist a chosen score", async () => {
+    for (const evaluationAnswers of [undefined, { project_interest: true }]) {
+      await expect(submitCallReport({ ...input, evaluationAnswers })).rejects.toThrow("ছয়টি");
+      expect(state.writes).toEqual([]);
+    }
+  });
+  it("the server derives 30 points and Warm, preserving saved grade instead of caller grade", async () => {
+    await expect(submitCallReport({ ...input, temperature: "hot", grade: "A" })).rejects.toThrow("captured submission");
+    expect(state.writes[0]?.patch).toMatchObject({ temperature: "warm", evaluation_score: 30, grade: "B" });
+  });
   it("a forged web time and connected claim do not earn verification", async () => {
     await expect(submitCallReport(input)).rejects.toThrow("captured submission");
     expect(state.writes[0]?.patch.connection_verified).toBe(false);
@@ -197,5 +207,6 @@ describe("report submission verifies only phone-measured duration", () => {
   it("new null verification cannot bypass ranking while historical reports remain eligible", () => {
     expect(countsTowardScore({ connection_verified: null, submitted_at: "2026-10-19T00:00:00Z" })).toBe(false);
     expect(countsTowardScore({ connection_verified: null, submitted_at: "2026-10-01T00:00:00Z" })).toBe(true);
+    expect(countsTowardScore({ connection_verified: null, submitted_at: null })).toBe(false);
   });
 });
