@@ -557,3 +557,6 @@
 - [x] Verified 26 tests, real October 26/25 results, empty-day state, latest return, phone/desktop layout and no browser errors; preview only, not published.
 - [x] Android: classifier tests for unknown/malformed call-log rows
 - [x] Android: upload clean app copy to zhemongrowth-bd/Android-Call-recorder and build debug APK (needs GitHub link approval)
+
+## Android release readiness
+- [ ] Track all Android build/device/signing evidence in docs/ANDROID_RELEASE_READINESS.md (supersedes earlier open Android items: Kotlin tests blocked, APK unbuilt, SIM-control/handset checks). Blocked on: owner signing-key decision, retry-policy patch file, Proton HyperX device test.
