@@ -1,4 +1,7 @@
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getDeskReports } from "@/lib/desk-work.functions";
 import {
   Area,
   AreaChart,
@@ -66,6 +69,8 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
   const t = useT();
   const { leads, calls, messages, isPending, isError, refetch } = useSnapshot();
   const [preset, setPreset] = useState<Preset>("14");
+  const readReports = useServerFn(getDeskReports);
+  const reportsQ = useQuery({ queryKey: ["desk-reports-all"], queryFn: () => readReports(), enabled: scope === "agent", staleTime: 60_000 });
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
@@ -141,7 +146,28 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
   }, [leads, calls, messages, range, t]);
 
   const k = data.kpi;
-  const tiles = [
+  const rk = (() => {
+    if (!reportsQ.data) return null;
+    const seen = new Set<string>();
+    const rows = reportsQ.data.reports.filter((r) => {
+      if (seen.has(r.id)) return false;
+      seen.add(r.id);
+      const d = dhakaKey(r.submitted_at);
+      return (!range.from || d >= range.from) && (!range.to || d <= range.to);
+    });
+    const connected = rows.filter((r) => r.connected).length;
+    return { total: rows.length, connected, rate: rows.length ? Math.round((connected / rows.length) * 100) : 0 };
+  })();
+  const na = t({ bn: "পাওয়া যায়নি", en: "Unavailable" });
+  const activeHot = leads.filter((l) => l.temperature === "hot" && l.work_state !== "completed" && l.work_state !== "duplicate_skipped").length;
+  const tiles = scope === "agent" ? [
+    { label: t({ bn: "আমার লিড (সব বরাদ্দ)", en: "My leads (all assigned)" }), value: k.leads, icon: Users, tone: "primary" as const },
+    { label: t({ bn: "হট লিড (চলমান)", en: "Hot leads (active)" }), value: activeHot, icon: Flame, tone: "destructive" as const },
+    { label: t({ bn: "জমা দেওয়া রিপোর্ট", en: "Submitted reports" }), value: rk ? rk.total : na, icon: CheckCircle2, tone: "accent" as const },
+    { label: t({ bn: "কথা হয়েছে (রিপোর্ট অনুযায়ী)", en: "Connected (per reports)" }), value: rk ? `${rk.connected} (${rk.rate}%)` : na, icon: PhoneCall, tone: "live" as const },
+    { label: t({ bn: "ফোন থেকে সিঙ্ক হওয়া কল", en: "Phone-synced calls" }), value: k.calls, icon: Phone, tone: "chart4" as const },
+    { label: t({ bn: "বন্ধ লিড", en: "Closed leads" }), value: k.closed, icon: CheckCircle2, tone: "muted" as const },
+  ] : [
     { label: scope === "hq" ? t({ bn: "মোট লিড", en: "Total leads" }) : t({ bn: "আমার লিড", en: "My leads" }), value: k.leads, icon: Users, tone: "primary" as const },
     { label: t({ bn: "হট লিড", en: "Hot leads" }), value: k.hot, icon: Flame, tone: "destructive" as const },
     { label: t({ bn: "মোট কল", en: "Total calls" }), value: k.calls, icon: Phone, tone: "accent" as const },
@@ -221,6 +247,15 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
           />
         ))}
       </div>
+      {scope === "agent" && (
+        <p className="text-xs text-muted-foreground">
+          {t({
+            bn: "রিপোর্ট = আপনার জমা দেওয়া কল রিপোর্ট (জমার তারিখ ধরে)। ফোন থেকে সিঙ্ক হওয়া কল = শুধু অ্যান্ড্রয়েড অ্যাপ যে কল পাঠাতে পেরেছে; এটি কম হলে সিঙ্কের সমস্যা, আপনার কাজ কম নয়। লিড = বরাদ্দ লিড, লিড তৈরির তারিখ ধরে।",
+            en: "Reports = call reports you submitted (by submit date). Phone-synced calls = only calls the Android app managed to send; a low number means a sync gap, not less work. Leads = your assigned leads, by lead created date.",
+          })}
+        </p>
+      )}
+
 
       <div className="rounded-2xl border bg-card p-4">
         <h3 className="text-base font-semibold">{t({ bn: "ধাপ অনুযায়ী লিড", en: "Leads by stage" })}</h3>
