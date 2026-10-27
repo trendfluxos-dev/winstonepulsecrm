@@ -97,6 +97,21 @@ beforeEach(() => {
 });
 
 describe("Top Performer loader (dailyTopPerformer)", () => {
+  it("counts submitted reports and completed assigned work without reading audio uploads", async () => {
+    state.profiles = [agent("a1", "Agent")];
+    state.call_reports = [{ ...report("a1", true, "lead-1"), connection_verified: true }];
+    state.leads = [
+      { id: "lead-1", assigned_to: "a1", work_state: "completed" },
+      { id: "lead-2", assigned_to: "a1", work_state: "completed" },
+    ];
+    const board = await dailyTopPerformer(new Date("2026-10-27T12:00:00Z"));
+    expect(board.winner?.called).toBe(1);
+    expect(board.winner?.reports).toBe(1);
+    expect(board.winner?.connected).toBe(1);
+    expect(board.winner?.completed).toBe(2);
+    expect(state.filters.some(f => f.table === "call_recordings" || f.table === "recorder_insights")).toBe(false);
+  });
+
   it("reads the selected previous Dhaka day, including its own allocation grants", async () => {
     state.profiles = [agent("a1", "Monisha")];
     state.call_reports = [report("a1", true)];
