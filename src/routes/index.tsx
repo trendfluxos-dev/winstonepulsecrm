@@ -204,21 +204,7 @@ function EntryHall() {
         </p>
 
         <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
-          <p className="text-sm font-semibold">{t({ bn: "আপনার ভূমিকা ও কর্মঘর", en: "Your role & workspace" })}</p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            {ROLES.map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                type="button"
-                aria-pressed={role === key}
-                onClick={() => setRole(key)}
-                className={`flex items-center gap-2 rounded-md border px-3 py-2.5 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${role === key ? "border-gold bg-secondary font-semibold" : "border-border bg-card hover:border-gold"}`}
-              >
-                <Icon className="size-4 shrink-0" /> <span className="truncate">{label}</span>
-              </button>
-            ))}
-          </div>
-          <Button size="lg" className="btn-enter mt-4 w-full rounded-md text-base font-bold" onClick={startRole}>
+          <Button size="lg" className="btn-enter w-full rounded-md text-base font-bold" onClick={() => document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
             {t({ bn: "শুরু করুন", en: "Get started" })} <ChevronRight className="size-5" />
           </Button>
           <p className="mt-2 text-center text-xs text-muted-foreground">
