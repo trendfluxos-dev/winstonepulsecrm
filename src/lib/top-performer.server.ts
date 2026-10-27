@@ -255,7 +255,7 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   let agentsQuery = supabaseAdmin
       .from("profiles")
-      .select("id, name, employee_id, photo_path")
+      .select("id, name, employee_id, photo_path, is_active")
       .eq("approval_status", "approved")
       .eq("role", "agent");
   if (!historical) agentsQuery = agentsQuery.eq("is_active", true);
@@ -342,7 +342,12 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
     };
   });
 
-  const ranked = rankPerformers(historical ? lines.filter((line) => line.called > 0 || line.followUps > 0 || line.assigned > 0) : lines);
+  // Past dates: switched-off accounts appear only if they did real work (calls/follow-ups);
+  // leads merely parked on them never put them on the board.
+  const activeById = new Map((agentsRes.data ?? []).map((a) => [a.id, (a as { is_active?: boolean }).is_active !== false] as const));
+  const ranked = rankPerformers(historical
+    ? lines.filter((line) => line.called > 0 || line.followUps > 0 || (line.assigned > 0 && activeById.get(line.agentId)))
+    : lines);
   const isActive = (line: PerformerLine) => line.score > 0 || line.completed > 0;
   const activeRanked = ranked.filter(isActive);
   const leaderScore = activeRanked[0]?.score ?? 0;
