@@ -255,7 +255,7 @@ function EntryHall() {
               </p>
               <Button
                 asChild
-                className="mt-5 w-full focus-visible:ring-[3px] focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-card sm:mt-6 sm:w-auto"
+                className="mt-5 w-full border border-gold-hover bg-gold font-semibold text-charcoal hover:bg-gold-strong focus-visible:ring-[3px] focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-card sm:mt-6 sm:w-auto"
               >
                 <a href="https://trendflux.digital/founder" target="_blank" rel="noopener noreferrer">
                   Meet the Brand Architect <ArrowUpRight className="size-4" />
