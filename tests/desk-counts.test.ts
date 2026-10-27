@@ -30,3 +30,11 @@ describe("desk counts", () => {
     expect(deskLeadCounts([L("1", { temperature: "hot" }), L("2", { temperature: "hot", work_state: "completed" })], me, { from: "2026-10-28", to: "2026-10-28" }).hot).toBe(1);
   });
 });
+
+import { deskRangeError } from "@/lib/desk-range";
+describe("desk date range", () => {
+  it("reversed range is an error, valid range is not", () => {
+    expect(deskRangeError("2026-10-28", "2026-10-01")).toBe("Start date must be on or before end date.");
+    expect(deskRangeError("2026-10-01", "2026-10-28")).toBeNull();
+  });
+});

@@ -8,8 +8,13 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 export type DeskRange = { from: string | undefined; to: string | undefined };
 
+/** Reversed ranges are invalid: never silently filter to an empty (zero) list. */
+export function deskRangeError(from: string | undefined, to: string | undefined): string | null {
+  return from && to && from > to ? "Start date must be on or before end date." : null;
+}
+
 /** Reads ?from=&to= (YYYY-MM-DD, Asia/Dhaka, inclusive) from the URL. */
-export function useDeskRange(): DeskRange & { active: boolean; inRange: (iso: string | null | undefined) => boolean } {
+export function useDeskRange(): DeskRange & { active: boolean; error: string | null; inRange: (iso: string | null | undefined) => boolean } {
   const search = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
   const from = typeof search["from"] === "string" && DAY.test(search["from"]) ? search["from"] : undefined;
   const to = typeof search["to"] === "string" && DAY.test(search["to"]) ? search["to"] : undefined;
@@ -19,6 +24,7 @@ export function useDeskRange(): DeskRange & { active: boolean; inRange: (iso: st
     from,
     to,
     active: Boolean(from || to),
+    error: deskRangeError(from, to),
     inRange: (iso) => {
       if (!from && !to) return true;
       if (!iso) return false;
@@ -33,13 +39,15 @@ const fmt = (d: string, lang: "bn" | "en") =>
 
 /** Visible chip with a clear action; keeps other search params. */
 export function DeskRangeChip() {
-  const { from, to, active } = useDeskRange();
+  const { from, to, active, error } = useDeskRange();
   const navigate = useNavigate();
   const t = useT();
   const lang = useLang();
   if (!active) return null;
   const label = `${from ? fmt(from, lang) : t({ bn: "শুরু", en: "Start" })} – ${to ? fmt(to, lang) : t({ bn: "আজ", en: "Today" })}`;
   return (
+    <>
+    {error && <p role="alert" className="text-xs font-semibold text-destructive">{t({ bn: "শুরুর তারিখ শেষের তারিখের আগে বা একই দিনে হতে হবে — ফলাফল দেখানো হচ্ছে না।", en: `${error} No results are shown for this range.` })}</p>}
     <div role="status" className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 py-1 pl-3 pr-1 text-xs font-semibold text-primary">
       <CalendarRange className="size-3.5" aria-hidden />
       {t({ bn: "তারিখ", en: "Dates" })}: {label}
@@ -62,5 +70,6 @@ export function DeskRangeChip() {
         <X className="size-3" /> {t({ bn: "সরান", en: "Clear" })}
       </Button>
     </div>
+    </>
   );
 }
