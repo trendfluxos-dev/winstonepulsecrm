@@ -73,4 +73,11 @@ describe("Operational performance count audit", () => {
   it("uses the transparent score formula with zero audio input", () => {
     expect(operationalScore({ completed: 3, reports: 4, calls: 5, connected: 2, followUps: 2 })).toBe(30);
   });
+  it("incomplete reports are auditable but earn no submitted-report points", () => {
+    const result = auditPerformance({ ...base, pendingReports: [{ ...report, id: "pending", status: "pending", submitted_at: null }] });
+    expect(result.totals.incompleteReports).toBe(1);
+    expect(result.totals.reports).toBe(1);
+    expect(result.rows[0]?.score).toBe(9);
+    expect(result.issues.find(x => x.kind === "Incomplete reports")?.ids).toEqual(["pending"]);
+  });
 });

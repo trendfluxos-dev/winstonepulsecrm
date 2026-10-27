@@ -259,6 +259,7 @@ function ControlBoard() {
             {tab === "performance" && (
               <div className="space-y-8">
                 <SalesCommandCenter snapshotTime={snapshotTime} snapshotError={readError} profiles={profiles} leads={leads} calls={calls} messages={messages} loading={isPending} onDrill={setDrill} onSelectAgent={setOpenAgentId} />
+                <details><summary className="cursor-pointer text-sm font-medium">Optional recording-based charts · not the operational score</summary><div className="mt-4 space-y-8">
                 <ExecutiveOverview
                   profiles={profiles}
                   leads={leads}
@@ -270,6 +271,7 @@ function ControlBoard() {
                 <AgentRadar agents={agents} calls={calls} onSelectAgent={setOpenAgentId} />
                 <HqTalkChart chartData={chartData} />
                 <Leaderboard stats={stats} onSelectAgent={setOpenAgentId} />
+                </div></details>
               </div>
             )}
 
