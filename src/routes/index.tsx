@@ -226,43 +226,41 @@ function EntryHall() {
           </p>
         )}
 
-        <section className="mt-12 overflow-hidden rounded-xl border border-gold/40 bg-card text-foreground shadow-soft sm:mt-14">
-          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-4 p-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:items-stretch sm:gap-8 sm:p-8">
+        <section className="mt-12 overflow-hidden rounded-xl bg-ink text-ink-foreground shadow-soft sm:mt-14">
+          <div className="grid sm:grid-cols-[minmax(0,17rem)_minmax(0,1fr)] sm:items-stretch">
             <img
               src={brandArchitectAsset.url}
               alt="Zahid Hasan Emon, wearing glasses, a black tuxedo and bow tie, speaking into a microphone at a dark lectern"
               loading="lazy"
-              className="aspect-square w-16 shrink-0 rounded-xl border border-gold/40 object-cover object-top sm:row-span-3 sm:aspect-auto sm:size-full sm:rounded-lg"
+              className="aspect-[4/3] w-full object-cover object-top sm:aspect-auto sm:h-full sm:min-h-[22rem]"
             />
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold-ink">
+            <div className="p-5 sm:p-8 lg:p-10">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[color:var(--color-gold)]">
                 Brand Architect
               </p>
-              <p className="mt-1 truncate text-xl font-bold leading-tight tracking-tight sm:mt-2 sm:text-4xl">
+              <h2 className="mt-2 text-2xl font-bold leading-tight tracking-tight sm:text-4xl">
                 Zahid Hasan Emon
-              </p>
-            </div>
-            <p className="col-span-2 text-xs leading-snug text-muted-foreground sm:col-start-2 sm:row-start-2 sm:mt-1 sm:text-base">
-              AI Systems Architect · Product Builder · Brand Architect
-            </p>
-            <div className="col-span-2 min-w-0 sm:col-span-1 sm:col-start-2">
-              <h2 className="border-t border-border pt-4 text-base font-semibold leading-snug tracking-tight sm:border-0 sm:pt-0 sm:text-2xl sm:font-bold">
-                Building the Intelligence Behind Winstone.
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              <p className="mt-2 text-xs font-medium uppercase tracking-[0.14em] text-ink-muted sm:text-sm">
+                AI Systems Architect · Product Builder · Brand Architect
+              </p>
+              <h3 className="mt-6 border-t border-ink-foreground/15 pt-5 text-lg font-semibold leading-snug tracking-tight sm:text-2xl">
+                Building the Intelligence Behind Winstone.
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-muted sm:text-base">
                 A unified operating ecosystem connecting property sales, customer relationships,
                 communication intelligence, and business operations.
               </p>
               <Button
                 asChild
-                className="mt-5 w-full border border-gold-hover bg-gold text-[15px] font-bold text-charcoal transition-[background-color,border-color,transform] duration-100 ease-out hover:bg-gold-strong active:translate-y-[1px] active:scale-[0.99] active:border-gold-ink active:bg-gold-strong focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-charcoal focus-visible:ring-offset-2 focus-visible:ring-offset-card sm:mt-6 sm:w-auto"
+                className="mt-6 w-full border border-gold-hover bg-gold text-[15px] font-bold text-charcoal transition-[background-color,border-color,transform] duration-100 ease-out hover:bg-gold-strong active:translate-y-[1px] active:scale-[0.99] active:border-gold-ink active:bg-gold-strong focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ink sm:w-auto"
               >
                 <a href="https://trendflux.digital/founder" target="_blank" rel="noopener noreferrer">
                   Meet the Brand Architect <ArrowUpRight className="size-4" />
                   <span className="sr-only">— opens the founder page on trendflux.digital in a new tab</span>
                 </a>
               </Button>
-              <p className="mt-4 border-t border-border pt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-muted">
                 Concept preview · Not a live website
               </p>
             </div>
