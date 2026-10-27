@@ -46,9 +46,11 @@ function WorkspaceSigninPage() {
     setPinOpen(true);
   };
 
-  // Move focus to the heading so screen readers announce the page.
+  // Adapt scrolling speed to prefers-reduced-motion, then announce the page.
   useEffect(() => {
-    document.getElementById("workspace-signin")?.focus();
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    document.getElementById("workspace-signin")?.focus({ preventScroll: true });
   }, []);
 
   return (
