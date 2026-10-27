@@ -543,5 +543,5 @@
 - [ ] Not published yet (owner decides when to push live).
 
 ## 2026-10-27 — Daily performance date history
-- [ ] Add date selection to sign-in daily results using saved historical evidence and the existing Top 3 layout.
-- [ ] Verify date validation, historical reads, current-day reveal and phone/desktop interaction.
+- [x] Add date selection, previous/next day and Latest controls to sign-in daily results; historical aggregate results are recomputed from saved activity, not immutable snapshots.
+- [x] Verified 26 tests, real October 26/25 results, empty-day state, latest return, phone/desktop layout and no browser errors; preview only, not published.
