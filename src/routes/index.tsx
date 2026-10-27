@@ -60,36 +60,20 @@ function EntryHall() {
   const { scope } = useMyAccount();
   const [pinOpen, setPinOpen] = useState(false);
   const [pinTarget, setPinTarget] = useState<"/hq" | "/system" | "/leadhub">("/hq");
-  const [signinOpen, setSigninOpen] = useState(false);
-
   const openPin = (target: "/hq" | "/system" | "/leadhub") => {
     setPinTarget(target);
     setPinOpen(true);
   };
 
   // One CRM, three layouts: the choice is only a remembered preference.
-  // Every mode leads to the same existing access screen below.
-  // Reveal + move focus to the heading so screen readers announce the section.
-  const revealSignin = () => {
-    setSigninOpen(true);
-    setTimeout(() => {
-      const el = document.getElementById("workspace-signin");
-      if (!el) return;
-      el.focus({ preventScroll: true });
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 60);
-  };
-
+  // Every mode leads to the same access page.
   const chooseMode = (mode: "android" | "web" | "desktop") => {
     try {
       localStorage.setItem("winstone.view-mode", mode);
     } catch {
       // storage blocked: layout still adapts to the screen
     }
-    revealSignin();
   };
-
-  const openSignin = revealSignin;
 
 
   return (
