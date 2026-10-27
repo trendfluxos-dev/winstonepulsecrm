@@ -74,7 +74,35 @@ What never goes in this file, chat or screenshots: keystore files, store/key pas
 
 **If A is chosen:** treat the committed key as possibly exposed — only acceptable if the project code has never been shared outside the owner/IT; otherwise prefer B.
 
-Owner decision: ☐ A ☐ B — by ________ date ________ reason ________
+Owner decision: ☐ A ☑ **B — switch to new key** — by owner (TrendFlux OS IT) date **2026-10-28** reason: the old keystore lived in the project tree and cannot be guaranteed uncompromised; enforce the safe switch checklist; back up the new key in IT password storage.
+
+### Encrypted backup and restore of the signing key
+
+GitHub secrets are write-only: nobody (including Lovable) can read the current key back out. The 2026-10-27 key therefore has **no backup** and must be replaced once, before agents switch, by a key IT creates and backs up itself. Never put the key, its passwords or the backup file in this project, chat, screenshots or the public repo.
+
+**Create (once, on an IT computer with JDK + GPG):**
+1. `keytool -genkeypair -v -keystore winstone-release.jks -alias winstone -keyalg RSA -keysize 4096 -validity 10000` — choose strong store/key passwords; save both in IT password storage.
+2. Encrypted backup: `gpg --symmetric --cipher-algo AES256 -o winstone-release.jks.gpg winstone-release.jks` — use a third, separate backup passphrase, saved in IT password storage.
+3. Store `winstone-release.jks.gpg` in two places (e.g. IT password vault attachment + offline USB in a safe). Record the SHA-256 of the `.gpg` file: `sha256sum winstone-release.jks.gpg`.
+4. Upload to GitHub → repo Settings → Secrets → Actions (overwrite): `WINSTONE_KEYSTORE_B64` = `base64 -w0 winstone-release.jks`, `WINSTONE_KEYSTORE_PASSWORD`, `WINSTONE_KEY_ALIAS`, `WINSTONE_KEY_PASSWORD`.
+5. Delete the plain `winstone-release.jks` from the computer; keep only the `.gpg`.
+6. Run the release build and record its SHA-256 certificate fingerprint (section 1). This fingerprint is the canonical one; every future release must match it.
+
+**Restore (lost GitHub secrets, new CI, new laptop):**
+1. Get `winstone-release.jks.gpg` from backup; check `sha256sum` matches the recorded value.
+2. `gpg -d -o winstone-release.jks winstone-release.jks.gpg` (backup passphrase).
+3. Check: `keytool -list -v -keystore winstone-release.jks` — SHA-256 must equal the canonical fingerprint. Different = wrong key, stop.
+4. Re-enter the four GitHub secrets (step 4 above) or `local.properties` `RELEASE_*` for a local build; build; verify the APK fingerprint again; delete the plain `.jks`.
+
+**Annual check:** IT decrypts the backup on an offline machine, confirms the fingerprint, deletes the plain copy, and records the date.
+
+| Item | Value |
+|---|---|
+| Canonical fingerprint (SHA-256) | ________ |
+| `.gpg` file SHA-256 | ________ |
+| Backup locations (names only, no secrets) | ________ |
+| Created by / date | ________ |
+| Last restore test | ________ |
 
 ## 4. Device results — Proton HyperX, Android 16
 
