@@ -4,7 +4,7 @@ import { MobileNavDrawer, NavSidebar, NAV_ICONS } from "@/components/crm/NavSide
 import { Suspense, lazy, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
-import logoAsset from "@/assets/winstone-mark.png.asset.json";
+import logoAsset from "@/assets/winstone-emblem.png.asset.json";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 
 import { ReminderBell } from "@/components/crm/ReminderBell";
