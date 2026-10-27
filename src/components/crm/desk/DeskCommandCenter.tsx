@@ -50,6 +50,7 @@ import { useMyAccount } from "@/lib/session";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getDeskWork } from "@/lib/desk-work.functions";
+import { getDailyAllocation } from "@/lib/daily-allocation.functions";
 import { deskFollowUpCounts, deskLeadCounts, deskReportCounts, isActiveAssigned, isHotActive } from "@/lib/desk-counts";
 import { cn } from "@/lib/utils";
 import { isParked } from "@/lib/no-answer-cadence";
@@ -179,6 +180,9 @@ export function DeskCommandCenter({
   const { leads, profiles, calls, messages, events, isPending } = useSnapshot();
   const me = account?.profile?.id ?? "";
   const readDeskWork = useServerFn(getDeskWork);
+  const readAllocation = useServerFn(getDailyAllocation);
+  const allocation = useQuery({ queryKey: ["daily-new-allocation", "self", null, me], queryFn: () => readAllocation({ data: { surface: "self", adminToken: null } }), enabled: Boolean(me) });
+  const ledgerToday = allocation.data?.agents.find((a) => a.id === me)?.received;
   const deskWork = useQuery({ queryKey: ["desk-work", me], queryFn: () => readDeskWork(), enabled: Boolean(me), refetchInterval: 60_000 });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   // ?lead=<id> (from Pipeline / Tasks / search) selects that lead if it is in the caller's own snapshot.
@@ -544,24 +548,24 @@ export function DeskCommandCenter({
             icon={<CheckCircle2 />}
             label={t({ bn: "আজকের সম্পন্ন কাজ · আজকের কাজের বিপরীতে", en: "Completed · against today's work" })}
             value={`${bn(stats.done, lang)} / ${bn(stats.todayAssigned, lang)}`}
-            sub={t({ bn: `${bn(stats.donePct, lang)}% · আজকের (ঢাকা) কাজের তারিখ`, en: `${bn(stats.donePct, lang)}% · today's (Dhaka) work date` })}
+            sub={t({ bn: `${bn(stats.donePct, lang)}% · আজকের (ঢাকা) কাজের তারিখ${ledgerToday !== undefined && ledgerToday !== stats.todayAssigned ? ` · বণ্টন রেকর্ডে আজ ${bn(ledgerToday, lang)}টি — মিল যাচাই দরকার` : ""}`, en: `${bn(stats.donePct, lang)}% · today's (Dhaka) work date${ledgerToday !== undefined && ledgerToday !== stats.todayAssigned ? ` · assignment record shows ${bn(ledgerToday, lang)} today — needs reconciliation` : ""}` })}
             tone="live"
             loading={isPending}
           />
           <StatCard
             icon={<PhoneOutgoing />}
             label={t({ bn: "কল ও রিপোর্ট · আলাদা কাউন্ট", en: "Calls + Reports · counted separately" })}
-            value={`${bn(stats.calls, lang)} + ${bn(stats.reports, lang)}`}
+            value={deskWork.isError ? t({ bn: "পাওয়া যায়নি", en: "Unavailable" }) : `${bn(stats.calls, lang)} + ${bn(stats.reports, lang)}`}
             sub={t({
-              bn: `${bn(stats.calls, lang)}টি কল (${bn(stats.connected, lang)}টিতে কথা) · ${bn(stats.reports, lang)}টি রিপোর্ট জমা`,
-              en: `${bn(stats.calls, lang)} calls (${bn(stats.connected, lang)} connected) · ${bn(stats.reports, lang)} reports submitted`,
+              bn: `আজ (ঢাকা) · ${bn(stats.calls, lang)}টি কল চেষ্টা (${bn(stats.connected, lang)}টি ফোনে ১০ সেকেন্ডের বেশি) · ${bn(stats.reports, lang)}টি রিপোর্ট জমা (${bn(stats.reportedConnected, lang)}টিতে কথা হয়েছে বলে জানানো)`,
+              en: `Today (Dhaka) · ${bn(stats.calls, lang)} call attempts (${bn(stats.connected, lang)} over 10s on phone) · ${bn(stats.reports, lang)} reports submitted (${bn(stats.reportedConnected, lang)} agent-reported connected)`,
             })}
             loading={isPending}
           />
           <StatCard
             icon={<CalendarClock />}
             label={t({ bn: "বাকি ও মেয়াদোত্তীর্ণ কাজ · শুধু নির্ধারিত কাজ", en: "Pending · scheduled work only" })}
-            value={bn(stats.pending + stats.followUp, lang)}
+            value={deskWork.isError ? t({ bn: "পাওয়া যায়নি", en: "Unavailable" }) : bn(stats.pending + stats.followUp, lang)}
             sub={t({
               bn: `${bn(stats.pending, lang)}টি লিড বাকি · ${bn(stats.followUp, lang)}টি ফলো-আপ · সময় পেরিয়েছে ${bn(stats.overdue, lang)}টি`,
               en: `${bn(stats.pending, lang)} leads pending · ${bn(stats.followUp, lang)} follow-ups · ${bn(stats.overdue, lang)} overdue`,
