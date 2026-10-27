@@ -11,12 +11,18 @@ const allClear = {
   syncEnabled: true,
 };
 
-const input = { threadId: "t1", text: "synthetic reply", requestId: crypto.randomUUID(), staffConfirmed: true, actorProfileId: null };
+const AGENT = "00000000-0000-4000-8000-0000000000a1";
+const THREAD = "00000000-0000-4000-8000-0000000000t1".replace("t1", "01");
+const LEAD = "00000000-0000-4000-8000-0000000000l1".replace("l1", "02");
+const actor = { scope: "agent" as const, readOnly: false, userId: "u-agent", profileId: AGENT };
+const input = { threadId: THREAD, leadId: LEAD, text: "synthetic reply", requestId: crypto.randomUUID(), staffConfirmed: true, actor };
 
 function fakeStore(psid: string | null = "PSID_SYNTHETIC") {
   const calls = { inserted: 0, sent: 0, failed: 0 };
   const store: ReplyStore = {
-    async getThreadPsid() { return psid; },
+    async getReplyTarget(id) {
+      return psid === null ? null : { id, psid, leadId: LEAD, assignedAgentId: AGENT, lead: { assigned_to: AGENT, assigned_agent_id: AGENT } };
+    },
     async insertOutbox() { calls.inserted += 1; return "outbox-1"; },
     async markSent() { calls.sent += 1; },
     async markFailed() { calls.failed += 1; },
