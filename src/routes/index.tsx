@@ -72,24 +72,27 @@ function EntryHall() {
 
   // One CRM, three layouts: the choice is only a remembered preference.
   // Every mode leads to the same existing access screen below.
+  // Reveal + move focus to the heading so screen readers announce the section.
+  const revealSignin = () => {
+    setSigninOpen(true);
+    setTimeout(() => {
+      const el = document.getElementById("workspace-signin");
+      if (!el) return;
+      el.focus({ preventScroll: true });
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+  };
+
   const chooseMode = (mode: "android" | "web" | "desktop") => {
     try {
       localStorage.setItem("winstone.view-mode", mode);
     } catch {
       // storage blocked: layout still adapts to the screen
     }
-    setSigninOpen(true);
-    setTimeout(() => {
-      document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 60);
+    revealSignin();
   };
 
-  const openSignin = () => {
-    setSigninOpen(true);
-    setTimeout(() => {
-      document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 60);
-  };
+  const openSignin = revealSignin;
 
 
   return (
