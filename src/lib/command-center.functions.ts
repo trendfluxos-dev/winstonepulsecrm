@@ -10,13 +10,10 @@ import { z } from "zod";
 const Input = z.object({ adminToken: z.string().nullable().optional() });
 
 async function pageAll<T>(fetchPage: (a: number, b: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>) {
-  const out: T[] = [];
-  for (let start = 0; ; start += 1000) {
-    const { data, error } = await fetchPage(start, start + 999);
-    if (error) throw new Error(error.message);
-    out.push(...(data ?? []));
-    if (!data || data.length < 1000) return out;
-  }
+  const { pageAllParallel } = await import("@/lib/page-all");
+  const { data, error } = await pageAllParallel(fetchPage);
+  if (error) throw new Error(error.message);
+  return data ?? [];
 }
 
 export const getCommandCenterFeed = createServerFn({ method: "POST" })
