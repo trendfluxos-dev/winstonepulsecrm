@@ -63,3 +63,4 @@
 - Automated Daily Lead Report uses the managed cron-authenticated callback and the shared sync helper with verified sheet backups, ID-matched updates and preserved HQ cells — why: scheduling must not erase existing sheet history or bypass caller authentication.
 - Inventory Sheets snapshots use server-only system_settings; staff read, IT links, cron refresh; never write units/bookings — why: external prices cannot replace CRM facts.
 - Allocation uses Dhaka receipts (HQ/LeadHub roster, Desk self); cron failures save safe reason/stage in system_alerts for HQ/IT — why: no false totals or private errors.
+- AppShell overlays/dialogs/gates (command palette, call dialog, copilot, post-call/briefing/contribution gates, runtime alerts, about modal) are React.lazy behind Suspense — why: keep the shared startup bundle small on phones.
