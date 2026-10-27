@@ -3,7 +3,8 @@
 ## 2026-10-28 — Optional audio and performance count audit
 - [x] Implement shared operational counts, optional diagnostics and authorized record-ID reconciliation in existing HQ overview/performance; same scorer excludes audio/talk-time points. No production writes.
 - [x] Invalid/reversed/>400-day ranges hide totals and show errors. 56 focused tests pass; automatic typecheck/build OK, semantic-color and whitespace checks pass. Signed-in HQ read-back, refresh, 223 authorized issue IDs, desktop/mobile and reversed dates verified.
-- [ ] Release blocked pending review of full-suite failures: six integration checks need an agent session (current session is admin); existing route-inventory assertion expects 60 pages, actual 61. This change is NOT published. Historical completion timestamps/phone-unsent queues/fresh audio-file existence are unavailable and labeled, not inferred.
+- [x] Route-inventory assertion updated to 61 pages (drift predated this change; signin.tsx was the uncounted route). Full suite: 1260 pass; only the six agent-session integration checks remain blocked — they need an agent-scoped staff session, unavailable in this sandbox.
+- [ ] This change is NOT published. Per owner rule, publish only after release check succeeds and live result is verified. Historical completion timestamps/phone-unsent queues/fresh audio-file existence are unavailable and labeled, not inferred.
 - [x] Verify requested Info Desk release: live historical results on October 25/26/27 exclude the account; /manual release markers pass.
 - [x] Earlier inspection found talk-time scoring and recording-heavy HQ tiles; the new preview implementation above supersedes those rules, but the earlier Info Desk publication did not include it.
 
