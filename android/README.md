@@ -108,3 +108,19 @@ company-owned handsets, one row per device:
 | 18 | Signed audio access | Recording is not reachable without a signed link |
 | 19 | Device revoke | After IT revokes the phone, it signs out and cannot sync |
 | 20 | Battery / doze | Queued items still sync after the phone sits idle overnight |
+
+## Debug APK in Android Studio (Pocket Call Archive features)
+
+1. Install Android Studio (JDK 17 bundled) and SDK Platform 35 + Build-Tools 35.0.0.
+2. File → Open → select the `android/` folder; let Gradle sync finish.
+3. Copy `local.properties.example` to `local.properties` if Studio did not set `sdk.dir`.
+4. Run `./gradlew testDebugUnitTest` (includes `CallLogClassifierTest`).
+5. Build → Build Bundle(s)/APK(s) → Build APK(s), or `./gradlew assembleDebug`.
+   Output: `app/build/outputs/apk/debug/app-debug.apk` (debug-signed; no release keys needed).
+6. On the phone allow Phone, Call log, Notifications and (for recordings) audio/files access.
+
+Call tracing: live `CallStateReceiver` + `CallLogSweeper` cover incoming, outgoing and missed calls
+with duration. `CallLogClassifier` keeps missed / rejected / blocked distinct on the phone while
+the CRM still receives the existing completed / no_answer states. Some OEMs log rejected calls as
+missed. The app never starts call recording itself on Android 10+; it only picks up files the
+phone's own recorder produced (no match = no upload).

@@ -79,18 +79,9 @@ object CallLogSweeper {
                 val number = c.getString(numCol)?.trim().orEmpty()
                 if (number.length < 5 || number.any { !it.isDigit() && it != '+' }) continue
                 val duration = c.getInt(durCol).coerceAtLeast(0)
-                val type = c.getInt(typeCol)
-                val direction = when (type) {
-                    CallLog.Calls.OUTGOING_TYPE -> "outgoing"
-                    else -> "incoming"
-                }
-                val state = when {
-                    type == CallLog.Calls.MISSED_TYPE -> "no_answer"
-                    type == CallLog.Calls.REJECTED_TYPE -> "no_answer"
-                    type == CallLog.Calls.BLOCKED_TYPE -> "no_answer"
-                    duration > 0 -> "completed"
-                    else -> "no_answer"
-                }
+                val classified = CallLogClassifier.classify(c.getInt(typeCol), duration)
+                val direction = classified.direction
+                val state = classified.state
                 CallSyncQueue.queueIncomingCall(
                     context = context,
                     callUid = "log-" + c.getLong(idCol) + "-" + number.filter(Char::isDigit).takeLast(11),
