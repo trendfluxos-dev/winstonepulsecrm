@@ -235,7 +235,7 @@ function EntryHall() {
               className="aspect-[4/5] w-24 shrink-0 rounded-lg border border-gold/40 object-cover sm:row-span-2 sm:aspect-auto sm:size-full"
             />
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold-ink">
                 Brand Architect
               </p>
               <p className="mt-1 text-2xl font-bold leading-tight tracking-tight sm:mt-2 sm:text-4xl">
