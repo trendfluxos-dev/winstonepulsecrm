@@ -29,6 +29,8 @@ export const setLeadWorkDate = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const caller = await callerOf(data.adminToken ?? null);
+    const { requireWrite } = await import("@/lib/access.server");
+    requireWrite(caller);
     const me = caller.profile!;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { leadHeldByOther, LEAD_NOT_YOURS } = await import("@/lib/lead-access.server");
@@ -124,6 +126,8 @@ export const recordYearArchive = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const caller = await callerOf(data.adminToken ?? null);
     if (caller.scope === "agent") throw new Error("এই কাজটি শুধু আইটি কনসোলের");
+    const { requireWrite } = await import("@/lib/access.server");
+    requireWrite(caller);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { error } = await supabaseAdmin.from("lead_year_archives").upsert(
