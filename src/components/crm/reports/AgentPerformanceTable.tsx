@@ -65,10 +65,10 @@ export function AgentPerformanceTable({
               {t({ bn: "কীভাবে পড়বেন? (সহজ ব্যাখ্যা)", en: "How to read this (simple guide)" })}
             </summary>
             <ul className="mt-1.5 list-disc space-y-1 pl-4">
-              <li>{t({ bn: "কল দোোোোোোয়োোোোোোা = এজোোোোোেন্ট যতবোোোোোোর ফোোোোোোোন করোোোোোেছোোোোোোে।", en: "Calls made = how many times the agent phoned." })}</li>
-              <li>{t({ bn: "কথোোোোোোোোা হোোোোোোোোযেছোোোোোোোোে = কত কলোোোোোোে কোোোোোোোাস্টমোোোোোোোোোোোোর কথোোোোোোোোা ধরোোোোোোোেছোে। % দোোোোোোোেখোোোোোোোোোোোোয় ১০০ কলোোোোোোে কতটুকু কথোোোোোোোোা হোোোোোোোোযেছোে।", en: "Answered = calls the customer picked up. The % shows answered out of every 100 calls." })}</li>
-              <li>{t({ bn: "কথোর সময় = সব কল মিলে মোট কতক্ষণ কথোোো হযেছোে।", en: "Talk time = total minutes spent talking." })}</li>
-              <li>{t({ bn: "বুকিংয়োর হোর = পোোোোোোয়োোোোোোয়ো লিডোর মধয্যে কতটুকু বুকিং হযেছোোে। বোোোোোোোোশি হলোোোোোোে ভোোোোোোোোোোলোোোোোোোো।", en: "Booking rate = how many of the assigned leads became bookings. Higher is better." })}</li>
+              <li>{t({ bn: "কল দেওয়া = এজেন্ট যতবার ফোন করেছেন।", en: "Calls made = how many times the agent phoned." })}</li>
+              <li>{t({ bn: "কথা হয়েছে = কতগুলো কলে কাস্টমার ফোন ধরেছেন। % দেখায় ১০০টি কলে কতটিতে কথা হয়েছে।", en: "Answered = calls the customer picked up. The % shows answered out of every 100 calls." })}</li>
+              <li>{t({ bn: "কথার সময় = সব কল মিলে মোট কতক্ষণ কথা হয়েছে।", en: "Talk time = total minutes spent talking." })}</li>
+              <li>{t({ bn: "বুকিংয়ের হার = পাওয়া লিডের মধ্যে কতগুলো বুকিং হয়েছে। বেশি হলে ভালো।", en: "Booking rate = how many of the assigned leads became bookings. Higher is better." })}</li>
             </ul>
           </details>
         </div>
