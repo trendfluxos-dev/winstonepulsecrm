@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { PROFILE_SAFE_COLUMNS } from "@/lib/profile-columns";
+import { pageAllParallel } from "@/lib/page-all";
 
 const AdminToken = z.string().min(1);
 /** PIN token is optional now: coordinators/agents authenticate with their account. */
@@ -55,13 +56,9 @@ async function allLeads(
  */
 /** Reads every matching row in 1000-row pages — no silent "latest N" cut-off. */
 async function pageAll(build: (from: number, to: number) => PromiseLike<{ data: any[] | null; error: any }>) {
-  const out: any[] = [];
-  for (let from = 0; ; from += 1000) {
-    const { data, error } = await build(from, from + 999);
-    if (error) return { data: null, error };
-    out.push(...(data ?? []));
-    if (!data || data.length < 1000) return { data: out, error: null };
-  }
+  // Several pages at once (same rows, same order) — sequential paging made
+  // the floor snapshot wait on ~10 back-to-back round trips.
+  return pageAllParallel(build);
 }
 
 export const getCrmSnapshot = createServerFn({ method: "POST" })
