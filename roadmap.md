@@ -1,5 +1,12 @@
 # Roadmap
 
+## 2026-10-28 — Live KPI dashboard and 14-day pool warning
+- [ ] Build an authorized per-agent KPI dashboard using the shared report/lead contract; no phone-sync performance metrics.
+- [ ] Use per-agent daily targets for a 14-day pool coverage warning; verify without creating shortage records.
+- [ ] Run focused/full tests and inspect automatic build/typecheck results.
+- [ ] Publish after security checks and verify signed-in live agent values, date range and report/lead breakdown against read-only database counts.
+- [ ] Verify HQ warning through a genuine HQ PIN session; blocked until that session is available.
+
 ## 2026-10-28 — My Desk scope fix (agent saw company-wide numbers)
 - [x] Root cause: a stored HQ/IT PIN token in the browser outranked the agent's sign-in, so the desk snapshot returned the whole floor (My leads 4,865 etc.). Fixed in getCrmSnapshot: view="agent" now resolves the signed-in session first; PIN only decides when nobody is signed in.
 - [x] Quota gauge denominator changed from all-time own leads to today's assigned leads (work_date = today, Dhaka); closed history no longer inflates completion. KPI strip and Completed card now state scope/timeframe in plain language.
