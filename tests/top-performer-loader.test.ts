@@ -16,6 +16,7 @@ const state = {
   call_reports: [] as Row[],
   follow_up_events: [] as Row[],
   leads: [] as Row[],
+  lead_extra_grants: [] as Row[],
   signed: [] as Row[],
   error: null as { message: string } | null,
 };
@@ -24,7 +25,7 @@ const state = {
 function queryFor(table: keyof typeof state & string) {
   const chain: Record<string, unknown> = {};
   const resolve = () => ({ data: state[table as never] ?? [], error: state.error });
-  for (const m of ["select", "eq", "neq", "not", "gte", "lte", "in", "limit", "order"]) {
+  for (const m of ["select", "eq", "neq", "not", "gte", "lte", "in", "limit", "order", "range"]) {
     chain[m] = () => chain;
   }
   chain.then = (res: (v: unknown) => unknown) => Promise.resolve(res(resolve()));
@@ -86,6 +87,7 @@ beforeEach(() => {
   state.call_reports = [];
   state.follow_up_events = [];
   state.leads = [];
+  state.lead_extra_grants = [];
   state.signed = [];
   state.error = null;
 });
