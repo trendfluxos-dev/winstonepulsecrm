@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-27 — Bilingual homepage and publish
+- [ ] Add Bengali supporting lines across homepage; improve phone spacing/wrapping and English-first search/share descriptions.
+- [ ] Verify 360px/428px/desktop rendering and existing navigation, check security, request publication and verify live release.
+
 ## 2026-10-27 — Sign-in daily performance
 - [x] Public sign-in daily performance reuses the existing 5:30 PM server reveal and scores; three leading results highlighted, remaining agents below, no customer details. Real signed-out read-back: 3 highlighted / 6 remaining, no overflow or page errors; 17 existing ranking/reveal tests pass, harness build OK. Not deployed.
 - [x] Reference handwritten heading and clean supporting text preserved. Existing scoring unchanged; existing code has no persisted 6:00 finalization, so no final/locked claim added.

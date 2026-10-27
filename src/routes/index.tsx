@@ -83,9 +83,9 @@ function EntryHall() {
   }, []);
 
   return (
-    <div className="theme-exec min-h-screen bg-background">
+    <div className="theme-exec min-h-screen bg-background [&_[lang=bn]]:leading-relaxed">
       <div className="sticky top-0 z-20 border-b border-border bg-background/95 px-4 py-4 backdrop-blur sm:px-6 sm:py-6">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2 sm:gap-6">
+        <div className="mx-auto grid w-full max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:justify-between sm:gap-6">
           <span className="inline-flex min-w-0 items-center gap-2 sm:gap-4">
             <img
               src={emblemAsset.url}
