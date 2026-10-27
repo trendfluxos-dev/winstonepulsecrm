@@ -1,6 +1,7 @@
 import { SystemManualCard } from "@/components/crm/SystemManualCard";
 import { DailyAllocationSummary } from "@/components/crm/DailyAllocationSummary";
 import { LeadPoolNotice } from "@/components/crm/hq/LeadPoolNotice";
+import { AgentTargetPanel } from "@/components/crm/hq/AgentTargetPanel";
 import { DistributionFailurePanel } from "@/components/crm/DistributionFailurePanel";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ChevronDown, ShieldCheck } from "lucide-react";
@@ -224,6 +225,7 @@ function ControlBoard() {
                 <WhatsappAgentSummary />
                 <LeadPoolNotice />
                 <DailyAllocationSummary surface="hq" />
+                <AgentTargetPanel />
                 <DistributionFailurePanel />
                 <SalesChartsDashboard scope="hq" />
                 <SalesCommandCenter

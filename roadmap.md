@@ -575,10 +575,10 @@
 - [ ] Track all Android build/device/signing evidence in docs/ANDROID_RELEASE_READINESS.md (supersedes earlier open Android items: Kotlin tests blocked, APK unbuilt, SIM-control/handset checks). Blocked on: owner signing-key decision, retry-policy patch file, Proton HyperX device test.
 
 ## Requested 2026-10-28
-- [ ] Phone check of 4-card My Desk layout, fix spacing if needed
-- [ ] HQ audit page: verify authorized issue IDs + role limits (read-only)
-- [ ] Reversed date range rejected in preview
-- [ ] My Desk verified with a second agent account
-- [ ] HQ setting for daily lead target per agent (blocked: conflicts with fixed 50 cap — awaiting owner)
-- [ ] Lead-pool pop-up verified in HQ preview
-- [ ] Release check + publish + live verify (awaiting owner go-ahead)
+- [x] Phone check of 4-card My Desk layout, fix spacing if needed
+- [ ] HQ audit page: verify authorized issue IDs + role limits (blocked: needs HQ PIN sign-in)
+- [x] Reversed date range rejected in preview
+- [x] My Desk verified with a second agent account
+- [x] HQ setting for daily lead target per agent
+- [ ] Lead-pool pop-up verified in HQ preview (blocked: needs HQ PIN sign-in)
+- [x] Release check + publish + live verify

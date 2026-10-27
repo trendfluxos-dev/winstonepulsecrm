@@ -187,11 +187,17 @@ export async function distributeDailyLeads(options: {
 
   // Each desk has its own daily quota: the floor-wide round, unless that person
   // runs on a fixed lighter quota (Sell Team Admin).
-  const { quotaFor } = await import("@/lib/lead-quota");
+  const { quotaFor, MAX_DAILY_LEADS_PER_AGENT } = await import("@/lib/lead-quota");
+  const targets = await agentDailyTargets(today);
   const quotas = new Map(
     agents.map((a) => [
       a.id,
-      options.ignoreFixedQuota ? options.perAgent : quotaFor(a.employee_id, options.perAgent),
+      Math.min(
+        MAX_DAILY_LEADS_PER_AGENT,
+        options.ignoreFixedQuota
+          ? options.perAgent
+          : targets.get(a.id) ?? quotaFor(a.employee_id, options.perAgent),
+      ),
     ]),
   );
 
@@ -453,6 +459,25 @@ export async function raiseShortageAlert(input: {
 }
 
 /** How many leads each agent gets on the automatic daily run. */
+/**
+ * HQ-set per-agent daily targets (1–50) from append-only agent_daily_target_history:
+ * the latest row with effective_day <= day wins. Agents without a row use the floor round.
+ */
+export async function agentDailyTargets(day: string): Promise<Map<string, number>> {
+  const supabaseAdmin = await admin();
+  const { data, error } = await supabaseAdmin
+    .from("agent_daily_target_history")
+    .select("agent_id, target, effective_day, created_at")
+    .lte("effective_day", day)
+    .order("effective_day", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(5000);
+  if (error) throw new Error("Could not read agent daily targets");
+  const out = new Map<string, number>();
+  for (const row of data ?? []) if (!out.has(row.agent_id)) out.set(row.agent_id, row.target);
+  return out;
+}
+
 export async function dailyPlan(): Promise<{ perAgent: number; lastRunDate: string | null }> {
   const supabaseAdmin = await admin();
   const { data } = await supabaseAdmin
