@@ -41,7 +41,8 @@ export const getMessengerStatus = createServerFn({ method: "POST" })
 export const sendMessengerReply = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     Base.extend({
-      threadId: z.string().min(1).max(100),
+      threadId: z.string().uuid(),
+      leadId: z.string().uuid().nullable().optional(),
       text: z.string().min(1).max(2000),
       requestId: z.string().uuid(),
       staffConfirmed: z.boolean(),
@@ -55,10 +56,11 @@ export const sendMessengerReply = createServerFn({ method: "POST" })
     return guardedSendReply(
       {
         threadId: data.threadId,
+        leadId: data.leadId ?? null,
         text: data.text,
         requestId: data.requestId,
         staffConfirmed: data.staffConfirmed,
-        actorProfileId: caller.profile?.id ?? null,
+        actor: { scope: caller.scope, readOnly: caller.readOnly, userId: caller.userId, profileId: caller.profile?.id ?? null },
       },
       { env: process.env, store: supabaseReplyStore() },
     );
