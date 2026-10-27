@@ -258,35 +258,6 @@ function EntryHall() {
   );
 }
 
-function EntryCard({
-  icon,
-  title,
-  description,
-  primary,
-  secondary,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  primary: React.ReactNode;
-  secondary?: React.ReactNode;
-}) {
-  return (
-    <section className="group relative flex flex-col gap-3 rounded-xl border border-border bg-card p-5 transition-colors hover:border-gold">
-      <span className="grid size-12 place-items-center rounded-full bg-gold/10 text-gold ring-1 ring-gold/40">
-        {icon}
-      </span>
-      <div>
-        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      </div>
-      <div className="mt-auto flex flex-wrap gap-2 pt-2">
-        {primary}
-        {secondary}
-      </div>
-    </section>
-  );
-}
 
 function ModeCard({
   icon,
