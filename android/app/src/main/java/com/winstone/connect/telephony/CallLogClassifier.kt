@@ -23,7 +23,7 @@ object CallLogClassifier {
             CallLog.Calls.REJECTED_TYPE -> "rejected"
             CallLog.Calls.BLOCKED_TYPE -> "blocked"
             CallLog.Calls.VOICEMAIL_TYPE -> "voicemail"
-            CallLog.Calls.ANSWERED_EXTERNALLY_TYPE -> "answered_elsewhere"
+            7 /* ANSWERED_EXTERNALLY_TYPE, API 25; minSdk is 24 */ -> "answered_elsewhere"
             else -> "unknown"
         }
         val state = when (kind) {
