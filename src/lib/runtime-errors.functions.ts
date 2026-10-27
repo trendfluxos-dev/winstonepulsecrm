@@ -49,7 +49,7 @@ export const listRuntimeOccurrences = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows } = await supabaseAdmin
       .from("runtime_error_occurrences")
-      .select("id, route, detail, browser, occurred_at")
+      .select("id, route, detail, browser, occurred_at, recovery_outcome")
       .eq("issue_id", data.issueId)
       .order("occurred_at", { ascending: false })
       .limit(50);

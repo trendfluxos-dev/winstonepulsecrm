@@ -8,6 +8,8 @@ export type ReportInput = {
   message: string;
   route: string;
   browser?: string | null;
+  /** Outcome of the automatic reload recovery, when the crash triggered one. */
+  recovery?: "reloading" | "recovered" | "failed";
 };
 
 const clip = (v: string, n: number) => v.replace(/[\u0000-\u001f]/g, " ").trim().slice(0, n);
@@ -44,6 +46,20 @@ export async function recordRuntimeError(input: ReportInput) {
     .select("id, routes, occurrences, status, reopened_count, last_seen")
     .eq("fingerprint", fingerprint)
     .maybeSingle();
+
+  // A "recovered" report is not a new crash: log the outcome on the original
+  // issue without bumping the count or reopening it.
+  if (input.recovery === "recovered") {
+    if (!existing) return { issueId: null, isNew: false };
+    await supabaseAdmin.from("runtime_error_occurrences").insert({
+      issue_id: existing.id,
+      route,
+      detail: message.slice(0, 1000),
+      browser: input.browser ? clip(input.browser, 200) : null,
+      recovery_outcome: "recovered",
+    });
+    return { issueId: existing.id, isNew: false };
+  }
 
   let issueId: string;
   let isNew = false;
@@ -85,12 +101,13 @@ export async function recordRuntimeError(input: ReportInput) {
     .eq("issue_id", issueId)
     .gte("occurred_at", new Date(Date.now() - 10_000).toISOString())
     .limit(1);
-  if (!recent?.length) {
+  if (!recent?.length || input.recovery) {
     await supabaseAdmin.from("runtime_error_occurrences").insert({
       issue_id: issueId,
       route,
       detail: message.slice(0, 1000),
       browser: input.browser ? clip(input.browser, 200) : null,
+      recovery_outcome: input.recovery ?? null,
     });
   }
   return { issueId, isNew };

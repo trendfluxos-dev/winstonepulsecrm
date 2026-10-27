@@ -10,6 +10,7 @@ const Body = z.object({
   kind: z.string().min(1).max(60),
   message: z.string().min(1).max(2000),
   route: z.string().max(500).default("/"),
+  recovery: z.enum(["reloading", "recovered", "failed"]).optional(),
 });
 
 export const Route = createFileRoute("/api/public/telemetry/runtime-error")({
