@@ -9,7 +9,7 @@ export type ReportInput = {
   route: string;
   browser?: string | null;
   /** Outcome of the automatic reload recovery, when the crash triggered one. */
-  recovery?: "reloading" | "recovered" | "failed";
+  recovery?: "reloading" | "recovered" | "failed" | undefined;
 };
 
 const clip = (v: string, n: number) => v.replace(/[\u0000-\u001f]/g, " ").trim().slice(0, n);
