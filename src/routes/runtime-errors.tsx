@@ -236,6 +236,11 @@ function IssueDialog({ issue, onClose }: { issue: Issue | null; onClose: () => v
                   {(occ.data ?? []).map((o) => (
                     <li key={o.id} className="rounded-lg border border-border p-2">
                       <span className="font-medium">{fmt(o.occurred_at)}</span> · {o.route}
+                      {o.recovery_outcome && (
+                        <span className={o.recovery_outcome === "recovered" ? "ml-1 font-semibold text-success" : o.recovery_outcome === "failed" ? "ml-1 font-semibold text-destructive" : "ml-1 text-muted-foreground"}>
+                          · {o.recovery_outcome === "recovered" ? "পুনরুদ্ধার হয়েছে" : o.recovery_outcome === "failed" ? "পুনরুদ্ধার ব্যর্থ — রিফ্রেশ বোতাম দেখানো হয়েছে" : "স্বয়ংক্রিয় রিলোড চলছে"}
+                        </span>
+                      )}
                       {o.browser && <span className="block truncate text-muted-foreground">{o.browser}</span>}
                     </li>
                   ))}
