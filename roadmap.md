@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-28 — Optional audio and performance count audit
+- [x] Verify requested Info Desk release: live historical results on October 25/26/27 exclude the account; /manual release markers pass.
+- [ ] Audit performance/HQ evidence: recordings optional; prioritize saved reports, calls and completed assigned work, without penalizing missing uploads.
+
 ## 2026-10-27 — Homepage English only
 - [x] Removed every Bengali line from the homepage (34 lines: header, hero, feature strip, workspace cards, guidance, brand architect, footer) plus the Bengali parts of the search/share descriptions; owner decision "Only ENG". In-app screens keep their own bilingual headings.
 - [x] Verified zero Bengali characters in visible page text at 360px/428px/1280px with no horizontal overflow or page errors; 7 language/terminology tests pass; harness build OK. Not yet published.
