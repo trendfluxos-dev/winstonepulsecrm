@@ -424,15 +424,15 @@ export async function submitCallReport(input: {
   if (received && !answers) throw new Error("কথা হওয়া কলের ছয়টি প্রশ্নের উত্তর দিন। পুরোনো অ্যাপ হলে আপডেট করুন।");
   const evaluation = answers ? evaluate(answers, Boolean(input.followUpAt)) : null;
   const effectiveTemperature = evaluation?.category ?? null;
-  // Grade has no approved V2 formula: preserve a server-saved classification
-  // or analyzed recording suggestion, never invent a mapping or accept a pick.
+  // Grade: a server-saved classification or analyzed recording wins; otherwise
+  // the agent's own A/B/C/D pick (validated below) is used, never invented.
   let trustedGrade = LEAD_GRADES.includes(report.grade as LeadGrade) ? report.grade : null;
   if (received && !trustedGrade && report.recording_id) {
     const { data: gradedRecording } = await supabaseAdmin.from("call_recordings")
       .select("ai_grade, analysis_status, agent_id, lead_id").eq("id", report.recording_id).maybeSingle();
     if (gradedRecording?.agent_id === input.agentId && gradedRecording.lead_id === report.lead_id && gradedRecording.analysis_status === "completed" && LEAD_GRADES.includes(gradedRecording.ai_grade as LeadGrade)) trustedGrade = gradedRecording.ai_grade;
   }
-  if (received && !trustedGrade) throw new Error("এই কলের যাচাইকৃত গ্রেড এখনও নেই। IT টিমকে জানান; আপনার রিপোর্ট মুছে যায়নি।");
+  if (received && !trustedGrade && LEAD_GRADES.includes(input.grade as LeadGrade)) trustedGrade = input.grade as LeadGrade;
   const { followUpPriorityFor } = await import("@/lib/follow-up-priority");
   const followUpPriority = input.followUpAt
     ? evaluation?.priority ?? followUpPriorityFor(effectiveTemperature)
@@ -994,7 +994,9 @@ export async function editSubmittedReport(input: {
   const received = report.connected !== false;
   // Edits can change notes, never replace saved classification with a pick.
   const temperature = received ? report.temperature as LeadTemperature | null : null;
-  const grade = received ? report.grade as LeadGrade | null : null;
+  const grade = received
+    ? (LEAD_GRADES.includes(input.grade as LeadGrade) ? input.grade as LeadGrade : report.grade as LeadGrade | null)
+    : null;
   const invalid = validateReport({ ...input, temperature, grade, connected: received });
   if (invalid) throw new Error(invalid.message);
 
