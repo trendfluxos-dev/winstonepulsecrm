@@ -263,13 +263,13 @@ function EntryHall() {
           </p>
         )}
 
-        <section className="glass-hairline mt-12 overflow-hidden rounded-xl bg-card text-foreground shadow-soft sm:mt-14">
-          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-4 p-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] sm:items-stretch sm:gap-8 sm:p-8">
+        <section className="glass-hairline mt-8 overflow-hidden rounded-xl bg-card text-foreground shadow-soft sm:mt-10">
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2.5 p-3 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)] sm:items-stretch sm:gap-x-5 sm:gap-y-1 sm:p-5">
             <img
               src={brandArchitectAsset.url}
               alt="Zahid Hasan Emon, wearing glasses, a black tuxedo and bow tie, speaking into a microphone at a dark lectern"
               loading="lazy"
-              className="aspect-square w-16 shrink-0 rounded-xl border border-gold/40 object-cover object-top sm:row-span-3 sm:aspect-auto sm:size-full sm:rounded-lg"
+              className="aspect-square w-14 shrink-0 rounded-xl border border-gold/40 object-cover object-top sm:row-span-3 sm:aspect-auto sm:size-full sm:rounded-lg"
             />
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold-ink">
@@ -285,11 +285,11 @@ function EntryHall() {
               <span lang="bn" className="mt-1 block text-[11px]">এআই সিস্টেম আর্কিটেক্ট · প্রোডাক্ট বিল্ডার · ব্র্যান্ড আর্কিটেক্ট</span>
             </p>
             <div className="col-span-2 min-w-0 sm:col-span-1 sm:col-start-2">
-              <h2 className="border-t border-border pt-4 text-base font-semibold leading-snug tracking-tight sm:border-0 sm:pt-0 sm:text-2xl sm:font-bold">
+              <h2 className="border-t border-border pt-2.5 text-base font-semibold leading-snug tracking-tight sm:border-0 sm:pt-0 sm:text-xl sm:font-bold">
                 <span lang="en" className="block">Building the Intelligence Behind Winstone.</span>
                 <span lang="bn" className="mt-1 block text-xs font-normal text-muted-foreground sm:text-sm">Winstone-এর পেছনের বুদ্ধিমত্তা তৈরি করছি।</span>
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 <span lang="en" className="block">A unified operating ecosystem connecting property sales, customer relationships, communication intelligence, and business operations.</span>
                 <span lang="bn" className="mt-1 block text-xs">প্রপার্টি বিক্রি, কাস্টমার সম্পর্ক, যোগাযোগ ও ব্যবসার কাজ একসাথে যুক্ত করার একটি ব্যবস্থা।</span>
               </p>
@@ -302,7 +302,7 @@ function EntryHall() {
                   <span className="sr-only">— opens the founder page on trendflux.digital in a new tab</span>
                 </a>
               </Button>
-              <p className="mt-4 border-t border-border pt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="mt-3 border-t border-border pt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Concept preview · Not a live website
                 <span lang="bn" className="mt-1 block text-[10px] font-normal normal-case tracking-normal">ধারণাগত প্রদর্শন · লাইভ ওয়েবসাইট নয়</span>
               </p>
