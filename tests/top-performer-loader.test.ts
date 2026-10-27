@@ -17,6 +17,7 @@ const state = {
   follow_up_events: [] as Row[],
   leads: [] as Row[],
   lead_extra_grants: [] as Row[],
+  call_recordings: [] as Row[],
   signed: [] as Row[],
   error: null as { message: string } | null,
   errorTable: null as string | null,
@@ -69,6 +70,7 @@ const agent = (id: string, name: string, photo_path: string | null = null): Row 
 });
 
 const report = (agent_id: string, connected: boolean, lead_id: string | null = null): Row => ({
+  id: `report-${reportSequence++}`,
   agent_id,
   lead_id,
   status: "submitted",
@@ -76,6 +78,7 @@ const report = (agent_id: string, connected: boolean, lead_id: string | null = n
   duration_seconds: connected ? 120 : 0,
   created_at: "2026-10-07T06:00:00Z",
 });
+let reportSequence = 0;
 
 const lead = (assigned_to: string, work_state: string): Row => ({
   id: `lead-${assigned_to}-${Math.random().toString(36).slice(2, 8)}`,
@@ -90,6 +93,7 @@ beforeEach(() => {
   state.follow_up_events = [];
   state.leads = [];
   state.lead_extra_grants = [];
+  state.call_recordings = [];
   state.signed = [];
   state.error = null;
   state.errorTable = null;
@@ -97,9 +101,9 @@ beforeEach(() => {
 });
 
 describe("Top Performer loader (dailyTopPerformer)", () => {
-  it("counts submitted reports and completed assigned work without reading audio uploads", async () => {
+  it("counts submitted reports and completed assigned work without requiring audio uploads", async () => {
     state.profiles = [agent("a1", "Agent")];
-    state.call_reports = [{ ...report("a1", true, "lead-1"), connection_verified: true }];
+    state.call_reports = [{ ...report("a1", true, "lead-1"), connection_verified: true, submitted_at: "2026-10-27T06:00:00Z" }];
     state.leads = [
       { id: "lead-1", assigned_to: "a1", work_state: "completed" },
       { id: "lead-2", assigned_to: "a1", work_state: "completed" },
@@ -109,19 +113,20 @@ describe("Top Performer loader (dailyTopPerformer)", () => {
     expect(board.winner?.reports).toBe(1);
     expect(board.winner?.connected).toBe(1);
     expect(board.winner?.completed).toBe(2);
-    expect(state.filters.some(f => f.table === "call_recordings" || f.table === "recorder_insights")).toBe(false);
+    expect(state.filters.some(f => f.table === "recorder_insights")).toBe(false);
+    expect(state.filters.find(f => f.table === "call_recordings" && f.method === "select")?.args[0]).not.toContain("storage_path");
   });
 
   it("reads the selected previous Dhaka day, including its own allocation grants", async () => {
     state.profiles = [agent("a1", "Monisha")];
-    state.call_reports = [report("a1", true)];
+    state.call_reports = [{ ...report("a1", true), submitted_at: "2026-10-26T06:00:00Z" }];
     const board = await dailyTopPerformer(new Date("2026-10-27T04:00:00Z"), "2026-10-26");
     expect(board.dateKey).toBe("2026-10-26");
     expect(board.revealed).toBe(true);
     expect(board.topThree[0]?.reports).toBe(1);
     expect(state.filters).toEqual(expect.arrayContaining([
-      { table: "call_reports", method: "gte", args: ["created_at", "2026-10-25T18:00:00.000Z"] },
-      { table: "call_reports", method: "lte", args: ["created_at", "2026-10-26T17:59:59.000Z"] },
+      { table: "call_reports", method: "gte", args: ["submitted_at", "2026-10-25T18:00:00.000Z"] },
+      { table: "call_reports", method: "lte", args: ["submitted_at", "2026-10-26T17:59:59.000Z"] },
       { table: "leads", method: "eq", args: ["work_date", "2026-10-26"] },
       { table: "lead_extra_grants", method: "eq", args: ["work_date", "2026-10-26"] },
     ]));

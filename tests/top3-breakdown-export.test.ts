@@ -10,7 +10,7 @@ describe("Top 3 breakdown and tie-breakers", () => {
     const total = scoreBreakdown(l).reduce((s, p) => s + p.points, 0);
     expect(total).toBeCloseTo(scoreOf(l), 5);
   });
-  it("equal scores break by calls, then reports, then talk minutes, then id", () => {
+  it("equal scores break by completion, calls, reports and ID, ignoring talk minutes", () => {
     const r = rankPerformers([
       line({ agentId: "d", called: 5, reports: 5, talkMinutes: 5 }),
       line({ agentId: "c", called: 5, reports: 5, talkMinutes: 9 }),

@@ -8,6 +8,7 @@
  */
 import { dhakaInstant, dhakaParts } from "@/lib/shift.server";
 import { performanceDate } from "@/lib/performance-history";
+import { auditPerformance, operationalScore, uniqueRows } from "@/lib/performance-audit";
 
 /** Pure ranking used by the daily board: highest displayed score ranks first. */
 export function rankPerformers(lines: PerformerLine[]): PerformerLine[] {
@@ -15,11 +16,11 @@ export function rankPerformers(lines: PerformerLine[]): PerformerLine[] {
     (a, b) =>
       // The board sorts by the score everyone sees on the card — biggest first.
       b.score - a.score ||
-      // Fixed tie-breakers for equal scores: calls → reports → talk minutes,
+      // Fixed tie-breakers for equal scores: completed work → calls → reports,
       // then agent id so the order never flips between refreshes.
+      b.completed - a.completed ||
       b.called - a.called ||
       b.reports - a.reports ||
-      b.talkMinutes - a.talkMinutes ||
       (a.agentId < b.agentId ? -1 : a.agentId > b.agentId ? 1 : 0),
   );
 }
@@ -115,35 +116,36 @@ export type TopPerformerBoard = {
 };
 
 /**
- * Score weights: connected conversations matter most, then submitted updates,
- * then talk time and follow-ups booked. Deliberately simple so the reason lines
+ * Operational score: completed assigned work, reports, attempts, verified
+ * connections and completed follow-ups; audio/talk time never earns points.
+ * Deliberately simple so the reason lines
  * on the homepage can be read straight off the numbers.
  */
 export function scoreOf(
-  line: Pick<PerformerLine, "connected" | "reports" | "followUps" | "talkMinutes">,
+  line: Pick<PerformerLine, "connected" | "reports" | "followUps" | "talkMinutes"> & Partial<Pick<PerformerLine, "called" | "completed">>,
 ): number {
-  return line.connected * 4 + line.reports * 2 + line.followUps * 1.5 + line.talkMinutes * 0.4;
+  return operationalScore({ ...line, calls: line.called ?? 0, completed: line.completed ?? 0 });
 }
 
 export type ScorePart = { label: string; count: number; weight: number; points: number };
 
 /** How the displayed score was built — same weights as scoreOf, rounded per line. */
 export function scoreBreakdown(
-  line: Pick<PerformerLine, "connected" | "reports" | "followUps" | "talkMinutes">,
+  line: Pick<PerformerLine, "connected" | "reports" | "followUps" | "talkMinutes"> & Partial<Pick<PerformerLine, "called" | "completed">>,
 ): ScorePart[] {
   const part = (label: string, count: number, weight: number) => ({
     label, count, weight, points: Math.round(count * weight * 10) / 10,
   });
   return [
+    part("সম্পন্ন অ্যাসাইন কাজ", line.completed ?? 0, 2),
+    part("কলের চেষ্টা", line.called ?? 0, 1),
     part("সংযোগ", line.connected, 4),
     part("রিপোর্ট", line.reports, 2),
     part("ফলো-আপ", line.followUps, 1.5),
-    part("কথার মিনিট", line.talkMinutes, 0.4),
   ];
 }
 
 export function performerInsight(line: PerformerLine): Pick<RankedPerformer, "reason" | "gap" | "advice"> {
-  const averageTalk = line.connected ? line.talkMinutes / line.connected : 0;
   const reportGap = Math.max(0, line.called - line.reports);
 
   // Completion is always shown as the person's OWN quota ratio, so a 15-lead
@@ -160,11 +162,11 @@ export function performerInsight(line: PerformerLine): Pick<RankedPerformer, "re
         ? quotaLine
         : "আজ এখনো যাচাইকৃত কল কার্যক্রম নেই";
 
-  if (!line.called) {
+  if (!line.called && !line.reports && !line.completed) {
     return {
       reason,
-      gap: "আজকের কল শুরু হয়নি",
-      advice: "আগামীকাল প্রথম শিফটেই নির্ধারিত কিউ থেকে কল শুরু করুন",
+      gap: "সংরক্ষিত কাজের হিসাব নেই; সিঙ্ক অবস্থা অজানা",
+      advice: "রিপোর্ট ও কলের তথ্য মিলিয়ে দেখুন; অডিও না থাকা কাজ না করার প্রমাণ নয়",
     };
   }
   if (line.targetQuota > 0 && line.completionPercent < 100) {
@@ -193,13 +195,6 @@ export function performerInsight(line: PerformerLine): Pick<RankedPerformer, "re
       reason,
       gap: `ফলো-আপ মাত্র ${line.followUps}টি`,
       advice: "আগ্রহী কথোপকথন থেকে অন্তত ৫টি ফলো-আপ ঠিক করুন",
-    };
-  }
-  if (line.connected > 0 && averageTalk < 2) {
-    return {
-      reason,
-      gap: `গড় কথা ${averageTalk.toFixed(1)} মিনিট`,
-      advice: "প্রয়োজন বুঝতে প্রতিটি সংযোগে আরও একটি প্রশ্ন করুন",
     };
   }
   return {
@@ -260,24 +255,30 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
       .eq("role", "agent");
   if (!historical) agentsQuery = agentsQuery.eq("is_active", true);
   const { pageAllParallel } = await import("@/lib/page-all");
-  const [agentsRes, reportsRes, followRes] = await Promise.all([
+  const [agentsRes, reportsRes, followRes, callsRes] = await Promise.all([
     agentsQuery,
     pageAllParallel((from, to) =>
     supabaseAdmin
       .from("call_reports")
-      .select("id, agent_id, lead_id, status, connected, duration_seconds, created_at, connection_verified, submitted_at")
-      .gte("created_at", startIso)
-      .lte("created_at", endIso).order("id").range(from, to)),
+      .select("id, agent_id, lead_id, status, connected, duration_seconds, created_at, connection_verified, submitted_at, recording_id")
+      .eq("status", "submitted")
+      .gte("submitted_at", startIso)
+      .lte("submitted_at", endIso).order("id").range(from, to)),
     pageAllParallel((from, to) =>
     supabaseAdmin
       .from("follow_up_events")
-      .select("id, agent_id, created_at")
-      .gte("created_at", startIso)
-      .lte("created_at", endIso).order("id").range(from, to)),
+      .select("id, agent_id, created_at, status, completed_at")
+      .eq("status", "done")
+      .gte("completed_at", startIso)
+      .lte("completed_at", endIso).order("id").range(from, to)),
+    pageAllParallel((from, to) => supabaseAdmin.from("call_recordings")
+      .select("id, agent_id, lead_id, created_at, started_at, external_call_id, call_status, call_source, duration_seconds, device_reported_duration_seconds")
+      .gte("created_at", startIso).lte("created_at", endIso).order("id").range(from, to)),
   ]);
   if (agentsRes.error) throw new Error(agentsRes.error.message);
   if (reportsRes.error) throw new Error(reportsRes.error.message);
   if (followRes.error) throw new Error(followRes.error.message);
+  if (callsRes.error) throw new Error("Performance call evidence unavailable");
 
   const { quotaFor, ratioScore, effectiveQuota, completionPercent } = await import(
     "@/lib/lead-quota"
@@ -295,14 +296,21 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
   // The scored day's own list per desk: how many leads arrived and how many are finished.
   const { data: todayLeads, error: leadsError } = await pageAllParallel((from, to) => supabaseAdmin
     .from("leads")
-    .select("id, assigned_to, work_state")
+    .select("id, assigned_to, assigned_agent_id, work_state")
     .eq("work_date", effectiveDateKey)
-    .not("assigned_to", "is", null)
     .order("id").range(from, to));
   if (leadsError) throw new Error("Performance allocation unavailable");
 
-  const reports = reportsRes.data ?? [];
-  const follows = followRes.data ?? [];
+  const reports = uniqueRows(reportsRes.data ?? []);
+  const follows = uniqueRows(followRes.data ?? []).filter(f => (f as { status?: string }).status === "done");
+  const operations = auditPerformance({
+    agents: (agentsRes.data ?? []).map(a => ({ id: a.id, name: a.name })),
+    leads: uniqueRows(todayLeads ?? []).map(l => ({ ...l, work_date: effectiveDateKey, status: "pending", temperature: null, outcome_category: null, source: null, created_at: startIso })),
+    calls: callsRes.data ?? [],
+    reports: reports.map(r => ({ ...r, category: null, customer_response: null, next_action: null, requirement: null })),
+    followUps: follows.map(f => ({ ...f, lead_id: null, scheduled_at: null })),
+    filters: { fromDay: effectiveDateKey, toDay: effectiveDateKey, agentId: null, source: null, project: null }, now: at,
+  });
 
   const lines: PerformerLine[] = (agentsRes.data ?? []).map((agent) => {
     const mine = reports.filter((r) => r.agent_id === agent.id);
@@ -311,18 +319,17 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
     const talkMinutes = Math.round(
       scored.reduce((sum, r) => sum + (r.duration_seconds ?? 0), 0) / 60,
     );
-    const myLeads = (todayLeads ?? []).filter((row) => row.assigned_to === agent.id);
+    const myLeads = uniqueRows(todayLeads ?? []).filter((row) => (row.assigned_agent_id ?? row.assigned_to) === agent.id);
     const quota = quotaFor(agent.employee_id, floorQuota);
     const targetQuota = effectiveQuota(quota, extraToday[agent.id] ?? 0);
-    // A lead counts as worked once it is completed OR has a call report today.
-    const reportedIds = new Set(mine.map((r) => r.lead_id).filter(Boolean));
-    const completed = myLeads.filter((row) => row.work_state === "completed" || reportedIds.has(row.id)).length;
+    // Reports are separate evidence; completion requires the saved completed state.
+    const completed = myLeads.filter((row) => row.work_state === "completed").length;
     const base = {
       agentId: agent.id,
       name: agent.name,
       photoUrl: null as string | null,
-      called: mine.length,
-      connected,
+      called: operations.rows.find(row => row.id === agent.id)?.calls ?? mine.length,
+      connected: operations.rows.find(row => row.id === agent.id)?.connected ?? connected,
       reports: mine.filter((r) => r.status === "submitted").length,
       followUps: follows.filter((f) => f.agent_id === agent.id).length,
       talkMinutes,
@@ -409,10 +416,9 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
       reasons.push(
         `নিজের কোটার ${winner.completionPercent}% শেষ (${winner.completed}/${winner.targetQuota})`,
       );
-    reasons.push(`${winner.connected}টি কলে কথা হয়েছে — আজ সবচেয়ে বেশি`);
+    reasons.push(`${winner.connected}টি যাচাইকৃত সংযোগ · ${winner.completed}টি অ্যাসাইন কাজ সম্পন্ন`);
     if (winner.reports) reasons.push(`${winner.reports}টি কল রিপোর্ট নিজে জমা দিয়েছেন`);
-    if (winner.talkMinutes) reasons.push(`মোট ${winner.talkMinutes} মিনিট কথা বলেছেন`);
-    if (winner.followUps) reasons.push(`${winner.followUps}টি ফলো-আপ সময়সহ বসিয়েছেন`);
+    if (winner.followUps) reasons.push(`${winner.followUps}টি ফলো-আপ সম্পন্ন করেছেন`);
     if (winner.called) reasons.push(`কানেক্ট হার ${winner.connectRate}% (${winner.called}টি কলে)`);
     if (runnerUp)
       reasons.push(
@@ -428,15 +434,13 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
       );
     if (winner.followUps < 5)
       advice.push("প্রতিদিন কমপক্ষে ৫টি ফলো-আপ বসালে পরের দিনের কিউ শক্ত হয়");
-    if (winner.talkMinutes && winner.connected && winner.talkMinutes / winner.connected < 2)
-      advice.push("গড় কথা ২ মিনিটের কম — প্রয়োজন বুঝে অন্তত ২-৩ মিনিট কথা চালিয়ে যান");
     if (!advice.length) advice.push("এই ছন্দ ধরে রাখুন — কালও একই লক্ষ্য নিয়ে শুরু করুন");
   } else {
     advice.push("আজ কোনো কল রিপোর্ট জমা পড়েনি — কল শেষে রিপোর্ট জমা দিলেই বোর্ড তৈরি হবে");
   }
 
-  const assignedLeadRows = (todayLeads ?? []).length;
-  const completedLeadRows = (todayLeads ?? []).filter((row) => row.work_state === "completed").length;
+  const assignedLeadRows = operations.totals.assigned;
+  const completedLeadRows = operations.totals.completed;
   const sources: TopPerformerSources = {
     windowStart: startIso,
     windowEnd: endIso,

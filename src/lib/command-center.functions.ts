@@ -22,7 +22,7 @@ async function pageAll<T>(fetchPage: (a: number, b: number) => PromiseLike<{ dat
   return data ?? [];
 }
 
-const REPORT_COLUMNS = "id, lead_id, agent_id, category, customer_response, next_action, requirement, submitted_at, created_at, connected, recording_id";
+const REPORT_COLUMNS = "id, lead_id, agent_id, category, customer_response, next_action, requirement, submitted_at, created_at, connected, recording_id, status, connection_verified";
 
 export const getCommandCenterFeed = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input ?? {}))
@@ -36,7 +36,7 @@ export const getCommandCenterFeed = createServerFn({ method: "POST" })
     const freshness = { generatedAt: new Date().toISOString(), timezone: "Asia/Dhaka", reportsPaged: true, followUpsPaged: true };
     const since = me ? null : data.reportsSince ?? null;
 
-    const [reports, followUps, total] = await Promise.all([
+    const [reports, followUps, total, pendingReports] = await Promise.all([
       pageAll((a, b) => {
         let q = supabaseAdmin.from("call_reports").select(REPORT_COLUMNS).eq("status", "submitted");
         if (me) q = q.eq("agent_id", me);
@@ -52,12 +52,17 @@ export const getCommandCenterFeed = createServerFn({ method: "POST" })
       since
         ? supabaseAdmin.from("call_reports").select("id", { count: "exact", head: true }).eq("status", "submitted")
         : Promise.resolve({ count: null, error: null }),
+      pageAll((a, b) => {
+        let q = supabaseAdmin.from("call_reports").select(REPORT_COLUMNS).neq("status", "submitted");
+        if (me) q = q.eq("agent_id", me);
+        return q.order("created_at").order("id").range(a, b);
+      }),
     ]);
     if (total.error) throw new Error(total.error.message);
     if (me) {
       const { assignedLeadIds, filterAssignedActivity } = await import('@/lib/assigned-lead-scope.server');
       const ids = await assignedLeadIds(me);
-      return { reports: filterAssignedActivity(reports, ids), followUps: filterAssignedActivity(followUps, ids), freshness, reportsMode: "full" as "full" | "delta", reportCount: null as number | null };
+      return { reports: filterAssignedActivity(reports, ids), pendingReports: filterAssignedActivity(pendingReports, ids), followUps: filterAssignedActivity(followUps, ids), freshness, reportsMode: "full" as "full" | "delta", reportCount: null as number | null };
     }
-    return { reports, followUps, freshness, reportsMode: (since ? "delta" : "full") as "full" | "delta", reportCount: (since ? total.count : reports.length) as number | null };
+    return { reports, pendingReports, followUps, freshness, reportsMode: (since ? "delta" : "full") as "full" | "delta", reportCount: (since ? total.count : reports.length) as number | null };
   });
