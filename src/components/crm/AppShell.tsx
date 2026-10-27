@@ -1,26 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { Lock, LockOpen, LogOut, Smartphone, Sparkles } from "lucide-react";
 import { MobileNavDrawer, NavSidebar, NAV_ICONS } from "@/components/crm/NavSidebar";
-import { CommandPalette } from "@/components/crm/CommandPalette";
-import { useEffect, useState, type ReactNode } from "react";
+import { Suspense, lazy, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import logoAsset from "@/assets/winstone-mark.png.asset.json";
-import { AboutLegalModal } from "@/components/crm/AboutLegalModal";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
-import { AnyNumberCallDialog } from "@/components/crm/AnyNumberCallDialog";
-import { PostCallReportGate } from "@/components/crm/PostCallReportGate";
-import { AgentBriefingGate } from "@/components/crm/AgentBriefingGate";
-import { AgentContributionGate } from "@/components/crm/AgentContributionGate";
 
 import { ReminderBell } from "@/components/crm/ReminderBell";
 import { NoticeBoardBell } from "@/components/crm/NoticeBoardBell";
 import { VisitRequestBell } from "@/components/crm/HubAlerts";
 import { InstallAppButton } from "@/components/crm/InstallAppButton";
 import { AgentSelector } from "@/components/crm/AgentSelector";
-import { CopilotDrawer } from "@/components/crm/CopilotDrawer";
 import { OfflineSyncBar } from "@/components/crm/OfflineSyncBar";
-import { RuntimeAlertWatcher } from "@/components/crm/RuntimeAlertWatcher";
 
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +20,16 @@ import { useCrmRealtime } from "@/hooks/use-crm-realtime";
 import { setAdminToken, useAdminToken } from "@/lib/local-session";
 import { useMyAccount, useSignOut } from "@/lib/session";
 import { NAV_LABELS, setLang, useLang, useT } from "@/lib/i18n";
+
+// Overlays, dialogs and gates load on demand so the shared page frame stays small on phones.
+const CommandPalette = lazy(() => import("@/components/crm/CommandPalette").then((m) => ({ default: m.CommandPalette })));
+const AboutLegalModal = lazy(() => import("@/components/crm/AboutLegalModal").then((m) => ({ default: m.AboutLegalModal })));
+const AnyNumberCallDialog = lazy(() => import("@/components/crm/AnyNumberCallDialog").then((m) => ({ default: m.AnyNumberCallDialog })));
+const PostCallReportGate = lazy(() => import("@/components/crm/PostCallReportGate").then((m) => ({ default: m.PostCallReportGate })));
+const AgentBriefingGate = lazy(() => import("@/components/crm/AgentBriefingGate").then((m) => ({ default: m.AgentBriefingGate })));
+const AgentContributionGate = lazy(() => import("@/components/crm/AgentContributionGate").then((m) => ({ default: m.AgentContributionGate })));
+const CopilotDrawer = lazy(() => import("@/components/crm/CopilotDrawer").then((m) => ({ default: m.CopilotDrawer })));
+const RuntimeAlertWatcher = lazy(() => import("@/components/crm/RuntimeAlertWatcher").then((m) => ({ default: m.RuntimeAlertWatcher })));
 
 // Latest build is streamed from the backend; the bundled asset stays as a fallback.
 const APK_URL = "/api/public/download/apk";
@@ -123,7 +125,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 
           <div className="col-span-2 flex min-w-0 flex-wrap items-center justify-start gap-2 border-t border-border pt-2 sm:ml-auto sm:justify-end sm:border-0 sm:pt-0 [&>*]:shrink-0">
-            {scope !== "none" && <CommandPalette items={nav} icons={NAV_ICONS} />}
+            {scope !== "none" && <Suspense fallback={null}><CommandPalette items={nav} icons={NAV_ICONS} /></Suspense>}
 
             <div role="group" aria-label="Language" className="inline-flex h-8 items-center rounded-full border border-border bg-card p-0.5 text-[11px] font-semibold">
               {(["bn", "en"] as const).map((l) => (
@@ -147,7 +149,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
             {scope === "agent" && <VisitRequestBell />}
 
-            {scope !== "none" && <AnyNumberCallDialog />}
+            {scope !== "none" && <Suspense fallback={null}><AnyNumberCallDialog /></Suspense>}
 
             <InstallAppButton />
 
@@ -248,13 +250,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             Terms of Service
           </Link>
           <span className="hidden sm:inline">·</span>
-          <AboutLegalModal />
+          <Suspense fallback={null}><AboutLegalModal /></Suspense>
         </div>
       </footer>
 
       {adminToken && (
         <div className="fixed bottom-5 right-5 z-40">
-          <CopilotDrawer
+          <Suspense fallback={null}><CopilotDrawer
             trigger={
               <Button
                 size="lg"
@@ -263,17 +265,17 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Sparkles className="size-4" /> AI Copilot
               </Button>
             }
-          />
+          /></Suspense>
         </div>
       )}
 
       {/* The mandatory post-call report follows the agent across every page, not
           just the desk: a call that ended anywhere must be reported. */}
-      {scope !== "none" && <PostCallReportGate />}
-      {scope === "agent" && <AgentBriefingGate />}
-      {scope === "agent" && <AgentContributionGate />}
+      {scope !== "none" && <Suspense fallback={null}><PostCallReportGate /></Suspense>}
+      {scope === "agent" && <Suspense fallback={null}><AgentBriefingGate /></Suspense>}
+      {scope === "agent" && <Suspense fallback={null}><AgentContributionGate /></Suspense>}
 
-      {scope === "authority" && <RuntimeAlertWatcher />}
+      {scope === "authority" && <Suspense fallback={null}><RuntimeAlertWatcher /></Suspense>}
       <AdminPinDialog open={pinOpen} onOpenChange={setPinOpen} />
     </div>
   );
