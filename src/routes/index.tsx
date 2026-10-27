@@ -21,7 +21,7 @@ import logoAsset from "@/assets/winstone-mark.png.asset.json";
 import androidAsset from "@/assets/device-android.webp.asset.json";
 import webAsset from "@/assets/device-web.webp.asset.json";
 import desktopAsset from "@/assets/device-desktop.webp.asset.json";
-import teamHeroAsset from "@/assets/home-team-hero-v3.webp.asset.json";
+import teamHeroAsset from "@/assets/home-team-hero-v4.webp.asset.json";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
