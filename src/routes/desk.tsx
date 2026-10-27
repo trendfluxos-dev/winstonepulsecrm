@@ -119,6 +119,10 @@ function DeskStats() {
       whatsapp: onDay(messages, today).length,
       whatsappDelta: onDay(messages, today).length - onDay(messages, yesterday).length,
       done: leads.filter((l) => l.work_state === "completed").length,
+      // Quota gauge measures TODAY's assigned workload only — never the
+      // all-time list, so closed history cannot inflate completion.
+      todayAssigned: leads.filter((l) => l.work_date === today).length,
+      todayDone: leads.filter((l) => l.work_date === today && l.work_state === "completed").length,
     };
   }, [leads, calls, messages]);
 
@@ -126,7 +130,7 @@ function DeskStats() {
 
   return (
     <div className="grid gap-3 lg:grid-cols-[260px_minmax(0,1fr)]">
-    <QuotaGauge done={stats.done} total={stats.leads} />
+    <QuotaGauge done={stats.todayDone} total={stats.todayAssigned} />
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <Tile
         icon={<Users className="size-4" />}

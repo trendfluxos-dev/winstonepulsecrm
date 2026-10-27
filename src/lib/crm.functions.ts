@@ -63,12 +63,26 @@ async function pageAll(build: (from: number, to: number) => PromiseLike<{ data: 
   return pageAllParallel(build);
 }
 
+/**
+ * My Desk is personal: a signed-in staff account always gets its own scope,
+ * even when an HQ/IT PIN token is stored in the same browser. The PIN only
+ * decides when nobody is signed in.
+ */
+export async function resolveSnapshotCaller(token: string | null | undefined, view?: "default" | "agent") {
+  const { resolveCaller, resolveWorkCaller } = await import("@/lib/access.server");
+  if (view === "agent") {
+    const session = await resolveWorkCaller(null);
+    if (session.profile) return session;
+    return resolveWorkCaller(token);
+  }
+  return resolveCaller(token);
+}
+
 export const getCrmSnapshot = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => SnapshotScope.parse(input ?? {}))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { resolveCaller, resolveWorkCaller } = await import("@/lib/access.server");
-    const caller = await (data.view === "agent" ? resolveWorkCaller(data.token) : resolveCaller(data.token));
+    const caller = await resolveSnapshotCaller(data.token, data.view);
 
     if (caller.scope === "none")
       return { profiles: [], leads: [], calls: [], messages: [], events: [], leadsMode: "full" as "delta" | "full", leadCount: 0 as number | null, serverTime: new Date().toISOString() };
