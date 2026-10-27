@@ -12,6 +12,8 @@ const state = vi.hoisted(() => ({
   channel: "call",
   leadOwner: "agent-a" as string | null,
   allowSubmit: false,
+  phoneStatus: "completed",
+  phoneOwner: "agent-a",
 }));
 vi.mock("@tanstack/react-start", () => ({ createServerFn: () => {
   const chain = { inputValidator: () => chain, middleware: () => chain, handler: (fn: unknown) => fn };
@@ -59,7 +61,7 @@ vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: { from:
     maybeSingle: async () => {
       if (table === "call_reports") return { data: { id: "report-a", agent_id: "agent-a", lead_id: "lead-a", recording_id: "recording-a", grade: "B", channel: state.channel, connected: true, duration_seconds: 9000, created_at: "2026-10-19T00:00:00Z" }, error: null };
       if (table === "leads") return { data: { assigned_to: state.leadOwner, name: "Lead", phone_number: "01700000000", status: "pending" }, error: null };
-      if (table === "call_recordings") return { data: state.phoneSeconds === null ? { duration_seconds: 9000, call_source: "web_manual" } : { agent_id: "agent-a", lead_id: "lead-a", call_status: "completed", duration_seconds: state.phoneSeconds, call_source: "android_sim", created_at: "2026-10-19T00:01:00Z" }, error: null };
+      if (table === "call_recordings") return { data: state.phoneSeconds === null ? { duration_seconds: 9000, call_source: "web_manual" } : { agent_id: state.phoneOwner, lead_id: "lead-a", call_status: state.phoneStatus, duration_seconds: state.phoneSeconds, call_source: "android_sim", created_at: "2026-10-19T00:01:00Z" }, error: null };
       const r = result();
       return { ...r, data: r.data?.[0] ?? null };
     },
@@ -82,6 +84,7 @@ beforeEach(() => {
   state.assignee = "agent-a"; state.accessError = false; state.writes = []; state.configReads = 0;
   state.escalations = 0; state.customerFilter = ""; state.phoneSeconds = null; state.channel = "call";
   state.leadOwner = "agent-a"; state.allowSubmit = false;
+  state.phoneStatus = "completed"; state.phoneOwner = "agent-a";
 });
 
 describe("private reads authenticate before accessing data", () => {
@@ -178,6 +181,16 @@ describe("report submission verifies only phone-measured duration", () => {
     state.phoneSeconds = 95;
     await expect(submitCallReport(input)).rejects.toThrow("captured submission");
     expect(state.writes[0]?.patch).toMatchObject({ connection_verified: true, duration_seconds: 95, duration_source: "phone_sync", duration_synced_at: "2026-10-19T00:01:00Z" });
+  });
+  for (const phoneStatus of ["no_answer", "busy", "failed"]) it(`a claimed connection cannot upgrade ${phoneStatus} phone evidence`, async () => {
+    state.phoneSeconds = 95; state.phoneStatus = phoneStatus;
+    await expect(submitCallReport(input)).rejects.toThrow("captured submission");
+    expect(state.writes[0]?.patch.connection_verified).toBe(false);
+  });
+  it("another agent's linked recording cannot supply ranking evidence", async () => {
+    state.phoneSeconds = 95; state.phoneOwner = "agent-b";
+    await expect(submitCallReport(input)).rejects.toThrow("captured submission");
+    expect(state.writes[0]?.patch.connection_verified).toBe(false);
   });
   it("WhatsApp typed time remains unverified even with a linked phone row", async () => {
     state.phoneSeconds = 95; state.channel = "whatsapp";
