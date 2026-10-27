@@ -29,4 +29,29 @@ class CallLogClassifierTest {
         assertEquals("rejected", CallLogClassifier.classify(CallLog.Calls.REJECTED_TYPE, 0).kind)
         assertEquals("blocked", CallLogClassifier.classify(CallLog.Calls.BLOCKED_TYPE, 0).kind)
     }
+
+    @Test fun unknownTypeIsSafeIncomingNoAnswer() {
+        for (type in listOf(0, 99, -1, Int.MAX_VALUE, Int.MIN_VALUE)) {
+            val r = CallLogClassifier.classify(type, 120)
+            assertEquals("incoming", r.direction)
+            assertEquals("no_answer", r.state)
+            assertEquals("unknown", r.kind)
+        }
+    }
+
+    @Test fun negativeDurationNeverCountsAsConnected() {
+        assertEquals("no_answer", CallLogClassifier.classify(CallLog.Calls.OUTGOING_TYPE, -5).state)
+        assertEquals("no_answer", CallLogClassifier.classify(CallLog.Calls.INCOMING_TYPE, Int.MIN_VALUE).state)
+    }
+
+    @Test fun missedWithDurationStaysMissed() {
+        val r = CallLogClassifier.classify(CallLog.Calls.MISSED_TYPE, 30)
+        assertEquals("no_answer", r.state); assertEquals("missed", r.kind)
+    }
+
+    @Test fun voicemailAndAnsweredElsewhereAreNotCompleted() {
+        assertEquals("no_answer", CallLogClassifier.classify(CallLog.Calls.VOICEMAIL_TYPE, 40).state)
+        assertEquals("answered_elsewhere", CallLogClassifier.classify(7, 40).kind)
+        assertEquals("no_answer", CallLogClassifier.classify(7, 40).state)
+    }
 }
