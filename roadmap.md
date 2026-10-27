@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-27 — Homepage English only
+- [x] Removed every Bengali line from the homepage (34 lines: header, hero, feature strip, workspace cards, guidance, brand architect, footer) plus the Bengali parts of the search/share descriptions; owner decision "Only ENG". In-app screens keep their own bilingual headings.
+- [x] Verified zero Bengali characters in visible page text at 360px/428px/1280px with no horizontal overflow or page errors; 7 language/terminology tests pass; harness build OK. Not yet published.
+- [x] Repaired one stale pre-existing test that asserted a workspace card no longer present on the page, and added a test pinning the English-only homepage rule.
+
 ## 2026-10-27 — Bilingual homepage and publish
 - [x] Add Bengali supporting lines across homepage; improve phone spacing/wrapping and English-first search/share descriptions.
 - [x] Verify 360px/428px/desktop rendering and Get started navigation; 43 Bengali lines, no overflow or page errors, harness build OK, basic security scan clear. Five older deep-scan warnings remain, not a security-clear claim.
