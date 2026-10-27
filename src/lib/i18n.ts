@@ -5,9 +5,14 @@ export type Lang = "bn" | "en";
 const KEY = "winstone.lang";
 const listeners = new Set<() => void>();
 
+/** English is the primary language; Bengali is used only when it was explicitly saved. */
+export function langFromStored(stored: string | null): Lang {
+  return stored === "bn" ? "bn" : "en";
+}
+
 function read(): Lang {
   if (typeof window === "undefined") return "en";
-  return window.localStorage.getItem(KEY) === "bn" ? "bn" : "en";
+  return langFromStored(window.localStorage.getItem(KEY));
 }
 
 export function setLang(lang: Lang) {

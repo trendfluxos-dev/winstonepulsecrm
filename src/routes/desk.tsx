@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useLang, useT } from "@/lib/i18n";
+import { Bi } from "@/components/crm/Bi";
 
 
 import { SalesChartsDashboard } from "@/components/crm/SalesChartsDashboard";
@@ -67,16 +68,16 @@ export const Route = createFileRoute("/desk")({
   validateSearch: sectionSearch,
   head: () => ({
     meta: [
-      { title: "আমার ডেস্ক — Winstone Pulse" },
+      { title: "My Desk — Winstone Pulse" },
       {
         name: "description",
         content:
-          "নিজের লিড তালিকা, কল রেকর্ড, হোয়াটসঅ্যাপ ইনবক্স আর নতুন লিড জমা দেওয়ার জায়গা — সব এক ডেস্কে।",
+          "Your own lead list, call recordings, WhatsApp inbox and a place to add new leads — all in one desk.",
       },
-      { property: "og:title", content: "আমার ডেস্ক — Winstone Pulse" },
+      { property: "og:title", content: "My Desk — Winstone Pulse" },
       {
         property: "og:description",
-        content: "এক চাপে কল, হোয়াটসঅ্যাপ কথা আর নিজের লিড — Winstone Pulse এজেন্ট ডেস্ক।",
+        content: "One tap to call, WhatsApp conversations and your own leads — the Winstone Pulse agent desk.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -303,7 +304,7 @@ function DeskPage() {
             <>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">
-                  {recovery ? t(recovery.title) : t({ bn: "প্রোফাইল যাচাই প্রয়োজন", en: "Profile review required" })}
+                  {recovery ? t(recovery.title) : <Bi en="Profile review required" bn="প্রোফাইল যাচাই প্রয়োজন" />}
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {recovery ? t(recovery.recovery) : t({ bn: "আইটি কনসোলের কাছে নিজের প্রোফাইল যাচাই করুন।", en: "Ask IT Console to review your own profile." })}
@@ -316,7 +317,7 @@ function DeskPage() {
           ) : (
             <>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight">{t({ bn: "নিজের ডেস্কে সাইন ইন করুন", en: "Sign in to your desk" })}</h1>
+                <h1 className="text-2xl font-bold tracking-tight"><Bi en="Sign in to your desk" bn="নিজের ডেস্কে সাইন ইন করুন" /></h1>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {t({ bn: "এজেন্ট ও কোঅর্ডিনেটর নিজের ইমেইল ও পাসওয়ার্ড ব্যবহার করবেন।", en: "Agents and coordinators should use their own email and password." })}
                 </p>
