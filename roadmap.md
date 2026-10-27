@@ -541,3 +541,7 @@
 - [x] Checked signed-in in the browser (Bengali): desk tabs, HQ tabs and cards, phone menu all read plainly; no page errors. 55 related tests pass, typecheck and build OK.
 - [x] Even simpler report-board wording: one-line filter helper, match-count line (date range + "এই শর্তে মিলেছোে: N জন এজোেন্ট, Mটোি লোিড, Kটোি কল" + chip hint), two-step empty-state guidance, and shortened "কীভোোোোোবোোোে পড়োোোোবোোোে?" guide bullets. Verified signed-in in Bengali (empty state, 90-day match line, guide); typecheck and build OK.
 - [ ] Not published yet (owner decides when to push live).
+
+## 2026-10-27 — Daily performance date history
+- [ ] Add date selection to sign-in daily results using saved historical evidence and the existing Top 3 layout.
+- [ ] Verify date validation, historical reads, current-day reveal and phone/desktop interaction.
