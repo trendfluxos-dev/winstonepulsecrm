@@ -22,15 +22,19 @@ export type HostingerServiceBillPayload = {
 
 export function buildHostingerServiceBillPayload(input: {
   recipient: string;
+  /** English-first: system mail language is English. */
   stage: string;
+  /** Optional courtesy Bengali status line, appended to the body only. */
+  stageBn?: string;
   reviewUrl?: string;
 }): HostingerServiceBillPayload {
   const reviewLine = input.reviewUrl ? `\n\nReview securely: ${input.reviewUrl}` : "";
+  const bnLine = input.stageBn ? `\nবাংলা: ${input.stageBn}` : "";
   return {
     to: [input.recipient],
     displayName: "Winstone IT Team",
     subject: `Service-Bill Alert: ${input.stage} - Winstone Pulse`,
-    text: `WINSTONE PULSE — SERVICE BILL ALERT\n\nStatus: ${input.stage}\nAmount: ${MAINTENANCE_FEE_LABEL}\n\nThis notice requires authorized human review. It does not execute or approve a payment.${reviewLine}`,
+    text: `WINSTONE PULSE — SERVICE BILL ALERT\n\nStatus: ${input.stage}${bnLine}\nAmount: ${MAINTENANCE_FEE_LABEL}\n\nThis notice requires authorized human review. It does not execute or approve a payment.${reviewLine}`,
   };
 }
 
@@ -88,10 +92,18 @@ export function senderAddress(): string {
   return s === SERVICE_BILL_SENDER ? s : SERVICE_BILL_SENDER;
 }
 
-async function sendViaRelay(endpoint: string, apiKey: string, to: string, stage: string, key: string) {
+async function sendViaRelay(
+  endpoint: string,
+  apiKey: string,
+  to: string,
+  stage: string,
+  stageBn: string | undefined,
+  key: string,
+) {
   const p = buildHostingerServiceBillPayload({
     recipient: to,
     stage,
+    stageBn,
     reviewUrl: "https://crm.winstonebd.com/service-bill-unlock",
   });
   const res = await fetch(endpoint, {
@@ -111,15 +123,17 @@ export async function sendViaHostinger(
   to: string,
   stage: string,
   idempotencyKey: string,
+  stageBn?: string,
 ): Promise<void> {
   const apiKey = token();
   if (!apiKey) throw new Error("Service-bill email is not configured (NOTIFY_EMAIL_API_KEY REQUIRED)");
   const relay = relayEndpoint();
-  if (relay) return sendViaRelay(relay, apiKey, to, stage, idempotencyKey);
+  if (relay) return sendViaRelay(relay, apiKey, to, stage, stageBn, idempotencyKey);
   const mailboxId = await senderMailboxId(apiKey);
   const payload = buildHostingerServiceBillPayload({
     recipient: to,
     stage,
+    stageBn,
     reviewUrl: "https://crm.winstonebd.com/service-bill-unlock",
   });
   const res = await fetch(
