@@ -125,7 +125,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 
           <div className="col-span-2 flex min-w-0 flex-wrap items-center justify-start gap-2 border-t border-border pt-2 sm:ml-auto sm:justify-end sm:border-0 sm:pt-0 [&>*]:shrink-0">
-            {scope !== "none" && <Suspense fallback={null}><CommandPalette items={nav} icons={NAV_ICONS} />}
+            {scope !== "none" && <Suspense fallback={null}><CommandPalette items={nav} icons={NAV_ICONS} /></Suspense>}
 
             <div role="group" aria-label="Language" className="inline-flex h-8 items-center rounded-full border border-border bg-card p-0.5 text-[11px] font-semibold">
               {(["bn", "en"] as const).map((l) => (
@@ -149,7 +149,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
             {scope === "agent" && <VisitRequestBell />}
 
-            {scope !== "none" && <Suspense fallback={null}><AnyNumberCallDialog />}
+            {scope !== "none" && <Suspense fallback={null}><AnyNumberCallDialog /></Suspense>}
 
             <InstallAppButton />
 
@@ -250,7 +250,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             Terms of Service
           </Link>
           <span className="hidden sm:inline">·</span>
-          <Suspense fallback={null}><AboutLegalModal />
+          <Suspense fallback={null}><AboutLegalModal /></Suspense>
         </div>
       </footer>
 
@@ -265,17 +265,17 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Sparkles className="size-4" /> AI Copilot
               </Button>
             }
-          />
+          /></Suspense>
         </div>
       )}
 
       {/* The mandatory post-call report follows the agent across every page, not
           just the desk: a call that ended anywhere must be reported. */}
-      {scope !== "none" && <Suspense fallback={null}><PostCallReportGate />}
-      {scope === "agent" && <Suspense fallback={null}><AgentBriefingGate />}
-      {scope === "agent" && <Suspense fallback={null}><AgentContributionGate />}
+      {scope !== "none" && <Suspense fallback={null}><PostCallReportGate /></Suspense>}
+      {scope === "agent" && <Suspense fallback={null}><AgentBriefingGate /></Suspense>}
+      {scope === "agent" && <Suspense fallback={null}><AgentContributionGate /></Suspense>}
 
-      {scope === "authority" && <Suspense fallback={null}><RuntimeAlertWatcher />}
+      {scope === "authority" && <Suspense fallback={null}><RuntimeAlertWatcher /></Suspense>}
       <AdminPinDialog open={pinOpen} onOpenChange={setPinOpen} />
     </div>
   );
