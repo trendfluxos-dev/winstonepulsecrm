@@ -1092,6 +1092,19 @@ private fun StatusCards(state: DeskUiState) {
                 fontSize = 12.sp,
                 color = WinInkMuted,
             )
+            val recLabel = com.winstone.connect.data.sync.RecordingSyncLabel.of(state.sync)
+            Text(
+                "Recording: ${recLabel.english} · ${recLabel.bangla}",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = when (recLabel) {
+                    com.winstone.connect.data.sync.RecordingSyncLabel.FAILED -> WinRed
+                    com.winstone.connect.data.sync.RecordingSyncLabel.SYNCED -> WinGreen
+                    com.winstone.connect.data.sync.RecordingSyncLabel.SYNCING,
+                    com.winstone.connect.data.sync.RecordingSyncLabel.PENDING_SYNC -> WinAmber
+                    else -> WinInkMuted
+                },
+            )
             Text(
                 "পাঠানোর অপেক্ষায়: ${state.sync.pending} · ব্যর্থ: ${state.sync.failed}",
                 fontSize = 12.sp,

@@ -247,6 +247,12 @@ object CallSyncQueue {
 class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
+        val isRecording = inputData.getString(CallSyncQueue.KEY_KIND) == CallSyncQueue.KIND_RECORDING
+        if (isRecording) SyncStatus.uploadStarted()
+        return try { doSyncWork() } finally { if (isRecording) SyncStatus.uploadEnded() }
+    }
+
+    private suspend fun doSyncWork(): Result {
         val employeeId = AgentSession.employeeIdNow(applicationContext) ?: return Result.retry()
         val leadId = inputData.getString(CallSyncQueue.KEY_LEAD)
         val kind = inputData.getString(CallSyncQueue.KEY_KIND)
