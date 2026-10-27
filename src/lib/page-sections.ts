@@ -5,6 +5,7 @@ import { useCallback } from "react";
 export const PAGE_SECTIONS = {
   "/hq": [
     { key: "overview", label: "সারকথো", en: "Summary" },
+    { key: "kpis", label: "এজেন্ট KPI ড্যাশবোর্ড", en: "Agent KPI dashboard" },
     { key: "lead360", label: "লিডের পুরো নথি", en: "Lead details" },
     { key: "followups", label: "ফলো-আপ ও রিপোর্ট", en: "Follow-ups & reports" },
     { key: "performance", label: "এজেন্টেদের কাজ", en: "Agent work" },

@@ -57,7 +57,7 @@ export async function usablePoolCount(): Promise<number> {
   const supabaseAdmin = await admin();
   const ids: string[] = [];
   for (let from = 0; from < 20000; from += 1000) {
-    const { data } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("leads")
       .select("id")
       .is("assigned_to", null)
@@ -65,9 +65,11 @@ export async function usablePoolCount(): Promise<number> {
       .or(USABLE)
       .order("id")
       .range(from, from + 999);
+    if (error) throw new Error("Usable pool count unavailable");
     (data ?? []).forEach((row) => ids.push(row.id));
     if (!data || data.length < 1000) break;
   }
+  if (ids.length >= 20000) throw new Error("Usable pool exceeds verified read limit");
   const { eligibleLeadIds } = await import("@/lib/lead-eligibility.server");
   return (await eligibleLeadIds(ids)).length;
 }

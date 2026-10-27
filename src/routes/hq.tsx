@@ -2,6 +2,7 @@ import { SystemManualCard } from "@/components/crm/SystemManualCard";
 import { DailyAllocationSummary } from "@/components/crm/DailyAllocationSummary";
 import { LeadPoolNotice } from "@/components/crm/hq/LeadPoolNotice";
 import { AgentTargetPanel } from "@/components/crm/hq/AgentTargetPanel";
+import { AgentKpiDashboard } from "@/components/crm/hq/AgentKpiDashboard";
 import { DistributionFailurePanel } from "@/components/crm/DistributionFailurePanel";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ChevronDown, ShieldCheck } from "lucide-react";
@@ -212,6 +213,7 @@ function ControlBoard() {
           {/* White content surface */}
           <div className="min-w-0 flex-1 rounded-2xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-6">
             <MaintenanceProfileNotice />
+            {tab === "kpis" && <AgentKpiDashboard />}
             {tab === "overview" && (
               <div className="space-y-8">
                 <HqSmartSummary
