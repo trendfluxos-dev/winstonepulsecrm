@@ -72,24 +72,27 @@ function EntryHall() {
 
   // One CRM, three layouts: the choice is only a remembered preference.
   // Every mode leads to the same existing access screen below.
+  // Reveal + move focus to the heading so screen readers announce the section.
+  const revealSignin = () => {
+    setSigninOpen(true);
+    setTimeout(() => {
+      const el = document.getElementById("workspace-signin");
+      if (!el) return;
+      el.focus({ preventScroll: true });
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+  };
+
   const chooseMode = (mode: "android" | "web" | "desktop") => {
     try {
       localStorage.setItem("winstone.view-mode", mode);
     } catch {
       // storage blocked: layout still adapts to the screen
     }
-    setSigninOpen(true);
-    setTimeout(() => {
-      document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 60);
+    revealSignin();
   };
 
-  const openSignin = () => {
-    setSigninOpen(true);
-    setTimeout(() => {
-      document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 60);
-  };
+  const openSignin = revealSignin;
 
 
   return (
@@ -217,7 +220,8 @@ function EntryHall() {
 
         <h2
           id="workspace-signin"
-          className="font-hand mt-12 scroll-mt-20 text-center text-3xl font-semibold tracking-normal sm:text-4xl"
+          tabIndex={-1}
+          className="font-hand mt-12 scroll-mt-20 text-center text-3xl font-semibold tracking-normal outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:text-4xl"
         >
           {t({ bn: "আপনার কর্মঘরে প্রবেশ করুন", en: "Sign in to your workspace" })}
           <span aria-hidden className="mx-auto mt-2 block h-0.5 w-12 bg-gold" />
