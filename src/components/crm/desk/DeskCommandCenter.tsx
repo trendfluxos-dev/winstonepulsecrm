@@ -51,7 +51,7 @@ import { useMyAccount } from "@/lib/session";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getDeskWork } from "@/lib/desk-work.functions";
-import { deskFollowUpCounts, deskLeadCounts, deskReportCounts, isHotActive } from "@/lib/desk-counts";
+import { deskFollowUpCounts, deskLeadCounts, deskReportCounts, isActiveAssigned, isHotActive } from "@/lib/desk-counts";
 import { cn } from "@/lib/utils";
 import { isParked } from "@/lib/no-answer-cadence";
 
@@ -232,7 +232,7 @@ export function DeskCommandCenter({
       dueToday: fu.dueToday,
       hot: lc.hot,
       newToday: onToday(leads).length,
-      uncalled: leads.filter((l) => l.call_attempts === 0 && !l.last_call_at).length,
+      uncalled: leads.filter((l) => isActiveAssigned(l, me) && l.call_attempts === 0 && !l.last_call_at).length,
     };
   }, [calls, leads, messages, me, deskWork.data]);
 
