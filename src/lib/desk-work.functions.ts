@@ -21,3 +21,17 @@ export const getDeskWork = createServerFn({ method: "POST" }).handler(async () =
   if (reports.error || followUps.error) throw new Error("Desk work counts unavailable");
   return { reports: reports.data ?? [], followUps: (followUps.data ?? []) as { id: string; status: string; scheduled_at: string | null }[], asOf: new Date().toISOString() };
 });
+
+/** Signed-in agent's own submitted call reports (all time, paged, id-deduped). Read-only. */
+export const getDeskReports = createServerFn({ method: "POST" }).handler(async () => {
+  const { resolveWorkCaller } = await import("@/lib/access.server");
+  const caller = await resolveWorkCaller(null);
+  if (caller.scope !== "agent" || !caller.profile) throw new Error("Agent access required");
+  const me = caller.profile.id;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { pageAllParallel: pageAll } = await import("@/lib/page-all");
+  const res = await pageAll((a, b) => supabaseAdmin.from("call_reports").select("id, submitted_at, connected")
+    .eq("agent_id", me).not("submitted_at", "is", null).order("id").range(a, b));
+  if (res.error) throw new Error("Report counts unavailable");
+  return { reports: (res.data ?? []) as { id: string; submitted_at: string; connected: boolean | null }[] };
+});
