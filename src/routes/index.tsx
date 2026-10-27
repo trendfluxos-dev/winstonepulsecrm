@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import logoAsset from "@/assets/winstone-pulse-logo-black-tight.webp.asset.json";
+import emblemAsset from "@/assets/winstone-emblem.png.asset.json";
 import androidAsset from "@/assets/device-android.webp.asset.json";
 import webAsset from "@/assets/device-web.webp.asset.json";
 import desktopAsset from "@/assets/device-desktop.webp.asset.json";
@@ -84,36 +84,39 @@ function EntryHall() {
 
   return (
     <div className="theme-exec min-h-screen bg-background">
-      <div className="sticky top-0 z-20 bg-background/95 px-4 py-3 backdrop-blur sm:px-6 sm:py-4">
-        <div className="brand-nameplate mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-3 rounded-xl px-3 py-3 sm:min-h-24 sm:gap-6 sm:rounded-2xl sm:px-6 sm:py-4">
-          <span className="inline-flex min-w-0 max-w-[60%] items-center overflow-hidden sm:max-w-[65%]">
+      <div className="sticky top-0 z-20 border-b border-border bg-background/95 px-4 py-4 backdrop-blur sm:px-6 sm:py-6">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2 sm:gap-6">
+          <span className="inline-flex min-w-0 items-center gap-2 sm:gap-4">
             <img
-              src={logoAsset.url}
-              alt="Winstone Pulse — The Premium Real Estate CRM"
-              className="block h-auto max-h-12 w-full max-w-60 object-contain object-left sm:max-h-16 sm:max-w-sm"
+              src={emblemAsset.url}
+              alt="Winstone Pulse circular house emblem"
+              width={64}
+              height={64}
+              className="size-9 shrink-0 object-contain sm:size-16"
             />
-          </span>
-          <span className="flex shrink-0 items-center gap-2 border-l border-gold/30 pl-3 sm:gap-4 sm:pl-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-gold/50 bg-charcoal px-2.5 py-2 text-[11px] font-medium text-button-foreground sm:gap-3 sm:px-5 sm:py-3 sm:text-base">
-              <span aria-hidden className="size-2 shrink-0 rounded-full bg-live sm:size-3" /> {t({ bn: "সার্ভার চালু আছে", en: "Server online" })}
+            <span className="min-w-0">
+              <span className="block whitespace-nowrap text-base font-bold leading-tight text-foreground sm:text-3xl">WINSTONE <span className="text-gold">PULSE</span></span>
+              <span className="mt-1 block text-[8px] leading-tight text-muted-foreground min-[400px]:text-[9px] sm:text-base">THE PREMIUM REAL ESTATE CRM</span>
             </span>
-            <ChevronRight aria-hidden className="hidden size-5 text-gold sm:block" />
+          </span>
+          <span className="inline-flex shrink-0 items-center gap-1.5 text-[10px] text-muted-foreground min-[400px]:text-xs sm:gap-3 sm:text-xl">
+            <span aria-hidden className="size-2 shrink-0 rounded-full bg-live sm:size-3" /> {t({ bn: "সার্ভার চালু আছে", en: "Server online" })}
           </span>
         </div>
       </div>
       <main className="mx-auto flex min-h-screen w-full max-w-6xl animate-rise flex-col px-4 py-10 sm:px-6 sm:py-14">
         <header className="border-b border-border pb-8 sm:pb-10">
           <div className="text-left">
-            <p className="text-[11px] font-semibold uppercase text-gold">
+            <p className="text-xs font-semibold uppercase text-gold sm:text-base">
               Winstone Properties Ltd. · Find. Build. Invest.
             </p>
-            <h1 className="font-hand mt-5 text-5xl font-semibold leading-[1.15] text-foreground sm:mt-6 sm:text-7xl lg:text-8xl">
+            <h1 className="font-hand mt-6 text-6xl font-semibold leading-[1.15] text-foreground sm:mt-8 sm:text-8xl">
               Winstone <span className="text-gold">Pulse</span>
             </h1>
-            <p className="mt-3 text-xl font-medium text-foreground sm:text-2xl">
+            <p className="mt-5 text-2xl font-medium leading-snug text-foreground sm:mt-6 sm:text-4xl">
               The Premium Real Estate CRM.
             </p>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            <p className="mt-5 max-w-3xl text-base leading-relaxed text-muted-foreground sm:mt-6 sm:text-xl">
               {t({ bn: "লিড, কল, ফলো-আপ আর টিমের ফলাফল — আপনার সেলস টিমের সব কাজ এক জায়গায়।", en: "Leads, calls, follow-ups and team performance. One connected workspace for your sales floor." })}
             </p>
             <Button asChild variant="plate" className="mt-5"><Link to="/walkthrough"><BookOpen />{t({ bn: "CRM walkthrough দেখুন", en: "Explore the CRM walkthrough" })}</Link></Button>
