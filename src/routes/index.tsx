@@ -21,6 +21,7 @@ import logoAsset from "@/assets/winstone-mark.png.asset.json";
 import androidAsset from "@/assets/device-android.webp.asset.json";
 import webAsset from "@/assets/device-web.webp.asset.json";
 import desktopAsset from "@/assets/device-desktop.webp.asset.json";
+import teamHeroAsset from "@/assets/home-team-hero.webp.asset.json";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
@@ -128,6 +129,16 @@ function EntryHall() {
               {t({ bn: "লিড, কল, ফলো-আপ আর টিমের ফলাফল — আপনার সেলস টিমের সব কাজ এক জায়গায়।", en: "Leads, calls, follow-ups and team performance. One connected workspace for your sales floor." })}
             </p>
             <Button asChild variant="outline" className="mt-5"><Link to="/walkthrough"><BookOpen />{t({ bn: "CRM walkthrough দেখুন", en: "Explore the CRM walkthrough" })}</Link></Button>
+            <figure className="mt-8 overflow-hidden rounded-xl border border-border bg-card sm:mt-10">
+              <img
+                src={teamHeroAsset.url}
+                alt={t({ bn: "Winstone Pulse CRM নিয়ে আলোচনা করছেন দুইজন", en: "Two professionals discussing the Winstone Pulse CRM" })}
+                width={1600}
+                height={900}
+                fetchPriority="high"
+                className="block h-auto w-full"
+              />
+            </figure>
             <div className="mt-8 grid overflow-hidden rounded-xl border border-border bg-card sm:mt-10 sm:grid-cols-3">
               {[
                 { icon: Headphones, label: t({ bn: "টিম সামলান", en: "Manage your team" }), sub: t({ bn: "এজেন্ট, ভূমিকা ও ফলাফল", en: "Agents, roles & performance" }) },
