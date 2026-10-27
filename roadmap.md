@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-27 — Database performance and Run usage
+- [x] Measured requested credits for Oct 14–27 (partial current day): Run 0.959740401, including database 0.1677 for 1 recorded small instance-hour, Gateway 0.78988, network 0.000660401 and realtime 0.0015; Build separate 78.13016. No realized savings claim.
+- [x] Replaced overlapping agent lead downloads with one fully paginated ownership union; preserved owner precedence, totals, quota, Friday, history and refresh cadence. 15 targeted tests pass; full suite 1220 pass / 1 pre-existing terminology-copy failure. No publish, schema, data, permissions, schedules or resource-size changes.
+- [ ] Live slow-query plans, existing indexes, table/index sizes, schedule inventory and signed-in before/after measurement blocked by unavailable database diagnostics; do not add speculative indexes or resize/pause without measurements.
+
 ## 2026-10-27 — OpenAI CRM work review
 - [x] Added read-only work-review button inside existing OpenAI Command Agent; aggregate sampled counts only, no customer payload/history, empty action allowlist, canonical agent ownership and fail-closed reads; provider settings unchanged.
 - [x] 57 focused tests passed; full suite 1216 passed / 1 pre-existing role-terminology copy failure; changed-file lint clean and harness build OK. Synthetic OpenAI HTTP 200 completed; signed-in HQ tools button returned a three-part review with no action buttons or page errors. No deployment, migrations, permissions or customer-record changes. Ordinary AI usage telemetry recorded by existing path.

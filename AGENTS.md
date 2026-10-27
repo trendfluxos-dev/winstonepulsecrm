@@ -62,6 +62,7 @@
 - Inventory Sheets snapshots use server-only system_settings; staff read, IT links, cron refresh; never write units/bookings — why: external prices cannot replace CRM facts.
 - Allocation uses Dhaka receipts (HQ/LeadHub roster, Desk self); cron failures save safe reason/stage in system_alerts for HQ/IT — why: no false totals or private errors.
 - AppShell overlays/dialogs/gates are React.lazy behind Suspense — why: small phone startup bundle.
+- Agent snapshots use crm-agent-leads.server.ts paged ownership union, preserving leadOwner precedence and failing on partial reads — why: no duplicate lead transfer or truncated totals.
 - Command Agent work reviews reuse its existing OpenAI Responses path with aggregate-only sampled evidence and empty action allowlists; current canonical ownership gates agent facts — why: no customer payloads, fabricated totals or automatic CRM changes.
 - Callback/manual call logging never assigns leads; new numbers enter canonical intake unassigned and require LeadHub ownership before reporting — why: calls cannot bypass routing or take another agent's lead.
 - Lead-import sheet previews use only existing server-configured report workbooks; inventory keeps its separate read scope, and audit exports neutralise every spreadsheet cell — why: workspace credentials and trusted exports cannot widen access or execute staff-supplied formulas.
