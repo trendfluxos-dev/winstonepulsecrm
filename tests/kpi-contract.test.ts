@@ -74,3 +74,19 @@ describe("follow-ups and WhatsApp", () => {
     expect(whatsappKpi([{ id: "m", created_at: "2026-10-28T04:00:00Z" }], { from: "2026-10-28", to: "2026-10-28" })).toBe(1);
   });
 });
+
+describe("regression: agent Analytics lead tiles showed 0 while reports loaded", () => {
+  // Shape returned by readAgentLeads (select *): both owner columns present, sometimes only one set.
+  const snapshot = [
+    { id: "a", status: "closed", work_state: "completed", temperature: "hot", work_date: "2026-10-20", assigned_agent_id: "11111111-1111-4111-8111-111111111111", assigned_to: "11111111-1111-4111-8111-111111111111", updated_at: "x" },
+    { id: "b", status: "pending", work_state: "pending", temperature: "hot", work_date: null, assigned_agent_id: null, assigned_to: "11111111-1111-4111-8111-111111111111", updated_at: "x" },
+    { id: "c", status: "pending", work_state: "pending", temperature: null, work_date: null, assigned_agent_id: "22222222-2222-4222-8222-222222222222", assigned_to: "22222222-2222-4222-8222-222222222222", updated_at: "x" },
+  ];
+  it("an empty browser identity yields zeros — which is why tiles now wait for the server agent id", () => {
+    expect(leadKpis(snapshot, "").owned).toBe(0);
+  });
+  it("the server session id counts its own rows and isolates the other agent", () => {
+    expect(leadKpis(snapshot, "11111111-1111-4111-8111-111111111111")).toEqual({ owned: 2, active: 1, activePending: 1, completedOwned: 1, closed: 1, hot: 1 });
+    expect(leadKpis(snapshot, "22222222-2222-4222-8222-222222222222")).toMatchObject({ owned: 1, active: 1, hot: 0, closed: 0 });
+  });
+});
