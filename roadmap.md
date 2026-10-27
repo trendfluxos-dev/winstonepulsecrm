@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-27 — OpenAI CRM work review
+- [x] Added read-only work-review button inside existing OpenAI Command Agent; aggregate sampled counts only, no customer payload/history, empty action allowlist, canonical agent ownership and fail-closed reads; provider settings unchanged.
+- [x] 57 focused tests passed; full suite 1216 passed / 1 pre-existing role-terminology copy failure; changed-file lint clean and harness build OK. Synthetic OpenAI HTTP 200 completed; signed-in HQ tools button returned a three-part review with no action buttons or page errors. No deployment, migrations, permissions or customer-record changes. Ordinary AI usage telemetry recorded by existing path.
+- [ ] Independent completed deep scan reports read-only HQ archive overwrite (error), shared shift-sheet formula injection and three older warnings; not changed by this CRM-assistance task and require separately scoped security fixes before a security-clear release.
+
 ## 2026-10-27 — Security-gated release and live workflow verification
 - [x] 132 focused security/regression tests passed; basic scan clear. Live /manual passes v1.6.0/$35.29/50 markers, but these unchanged markers do not identify the latest unpublished security fixes.
 - [x] Live signed-out entry/gated routes and signed-in customer search, recorder and admin pages render without page errors; six real staff-session ownership read tests and eight local read-only/walkthrough tests pass. Desk contribution modal prevents completing the underlying desk flow; no contribution or customer write submitted, no password changed, public support chat unchanged.

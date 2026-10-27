@@ -19,6 +19,7 @@ const AskInput = z.object({
   adminToken: OptionalToken,
   surface: SurfaceSchema,
   question: z.string().trim().min(3).max(1000),
+  mode: z.enum(["chat", "work_review"]).default("chat"),
   history: z
     .array(
       z.object({
@@ -38,7 +39,7 @@ export const askCommandAgent = createServerFn({ method: "POST" })
     if (caller.scope === "none") throw new Error("সাইন ইন করুন");
 
     const { runCommandAgent } = await import("@/lib/command-agent.server");
-    return runCommandAgent(caller, data.surface as Surface, data.question, data.history);
+    return runCommandAgent(caller, data.surface as Surface, data.question, data.history, data.mode);
   });
 
 const Temperature = z.enum(["hot", "warm", "cold"]);
@@ -293,10 +294,17 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
       requireAuthority(caller);
       const recordingId = str(params, "recording_id");
       const requestedStep = str(params, "step");
-      if (requestedStep !== "drive" && requestedStep !== "analysis") throw new Error("আটকে থাকা ধাপ নিশ্চিত করুন: drive অথবা analysis");
+      if (requestedStep !== "drive" && requestedStep !== "analysis")
+        throw new Error("আটকে থাকা ধাপ নিশ্চিত করুন: drive অথবা analysis");
       const step = requestedStep;
       if (!recordingId) throw new Error("কোন রেকর্ডিং আবার চালানো হবে তা বেছে নিন");
-      const { data: recording, error } = await supabaseAdmin.from("call_recordings").select("storage_path, audio_url, upload_status, analysis_status, analysis_error, stt_error_message, transcription_text, ai_summary, updated_at").eq("id", recordingId).maybeSingle();
+      const { data: recording, error } = await supabaseAdmin
+        .from("call_recordings")
+        .select(
+          "storage_path, audio_url, upload_status, analysis_status, analysis_error, stt_error_message, transcription_text, ai_summary, updated_at",
+        )
+        .eq("id", recordingId)
+        .maybeSingle();
       if (error) throw new Error(error.message);
       if (!recording) throw new Error("রেকর্ডিং পাওয়া যায়নি");
       assertRecordingRetry(recording, step);
@@ -310,7 +318,10 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
       const { analyzeOne } = await import("@/lib/analysis-queue.server");
       const outcome = await analyzeOne(recordingId);
       await audit(`analysis:${outcome}`);
-      return { ok: analysisOutcomeOk(outcome), message: `ট্রান্সক্রিপ্ট / এআই: ${String(outcome)}` };
+      return {
+        ok: analysisOutcomeOk(outcome),
+        message: `ট্রান্সক্রিপ্ট / এআই: ${String(outcome)}`,
+      };
     }
 
     if (type === "verify_drive") {
@@ -331,8 +342,12 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
       let unverified = 0;
       for (const row of backups ?? []) {
         let meta;
-        try { meta = row.drive_file_id ? await driveFileMeta(row.drive_file_id) : null; }
-        catch { unverified += 1; continue; }
+        try {
+          meta = row.drive_file_id ? await driveFileMeta(row.drive_file_id) : null;
+        } catch {
+          unverified += 1;
+          continue;
+        }
         const ok = Boolean(meta && !meta.trashed);
         if (ok) verified += 1;
         else missing += 1;
