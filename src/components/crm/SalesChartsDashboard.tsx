@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getDeskReports } from "@/lib/desk-work.functions";
 import { callKpis, leadKpis, rangeError, reportKpis, whatsappKpi } from "@/lib/kpi-contract";
-import { useMyAccount } from "@/lib/session";
 import {
   Area,
   AreaChart,
@@ -71,8 +70,6 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
   const t = useT();
   const { leads, calls, messages, isPending, isError, refetch } = useSnapshot();
   const [preset, setPreset] = useState<Preset>("14");
-  const { account } = useMyAccount();
-  const me = account?.profile?.id ?? "";
   const readReports = useServerFn(getDeskReports);
   const reportsQ = useQuery({ queryKey: ["desk-reports-all"], queryFn: () => readReports(), enabled: scope === "agent", staleTime: 60_000 });
   const [from, setFrom] = useState("");
@@ -152,15 +149,18 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
   const k = data.kpi;
   const rangeErr = rangeError(range);
   const na = t({ bn: "পাওয়া যায়নি", en: "Unavailable" });
-  const lk = leadKpis(leads, me);
+  // Agent identity comes from the same server session check that scopes the
+  // snapshot and reports (never a browser-side account that a stored PIN can change).
+  const me = reportsQ.data?.agentId ?? null;
+  const lk = me ? leadKpis(leads, me) : null;
   const rk = reportsQ.data ? reportKpis(reportsQ.data.reports, range) : null;
   const ck = callKpis(calls, range);
   const wa = whatsappKpi(messages, range);
   const tiles = scope === "agent" ? [
-    { label: t({ bn: "আমার মালিকানার লিড (এখন)", en: "Owned leads (now)" }), value: lk.owned, icon: Users, tone: "primary" as const },
-    { label: t({ bn: "চলমান বরাদ্দ কাজ (এখন)", en: "Active assigned (now)" }), value: lk.active, icon: Users, tone: "primary" as const },
-    { label: t({ bn: "হট লিড (চলমান, এখন)", en: "Hot leads (active, now)" }), value: lk.hot, icon: Flame, tone: "destructive" as const },
-    { label: t({ bn: "বন্ধ লিড (স্ট্যাটাস, এখন)", en: "Closed leads (status, now)" }), value: lk.closed, icon: CheckCircle2, tone: "muted" as const },
+    { label: t({ bn: "আমার মালিকানার লিড (এখন)", en: "Owned leads (now)" }), value: rangeErr ? "—" : lk ? lk.owned : na, icon: Users, tone: "primary" as const },
+    { label: t({ bn: "চলমান বরাদ্দ কাজ (এখন)", en: "Active assigned (now)" }), value: rangeErr ? "—" : lk ? lk.active : na, icon: Users, tone: "primary" as const },
+    { label: t({ bn: "হট লিড (চলমান, এখন)", en: "Hot leads (active, now)" }), value: rangeErr ? "—" : lk ? lk.hot : na, icon: Flame, tone: "destructive" as const },
+    { label: t({ bn: "বন্ধ লিড (স্ট্যাটাস, এখন)", en: "Closed leads (status, now)" }), value: rangeErr ? "—" : lk ? lk.closed : na, icon: CheckCircle2, tone: "muted" as const },
     { label: t({ bn: "জমা দেওয়া রিপোর্ট", en: "Submitted reports" }), value: rangeErr ? "—" : rk ? rk.submitted : na, icon: CheckCircle2, tone: "accent" as const },
     { label: t({ bn: "কথা হয়েছে (রিপোর্ট অনুযায়ী)", en: "Connected (per reports)" }), value: rangeErr ? "—" : rk ? `${rk.reportedConnected} (${rk.rate}%)` : na, icon: PhoneCall, tone: "live" as const },
     { label: t({ bn: "ফোনে সিঙ্ক হওয়া কল (>১০ সে. কথা)", en: "Phone-synced calls (>10s talk)" }), value: rangeErr ? "—" : `${ck.attempts} (${ck.connected})`, icon: Phone, tone: "chart4" as const },

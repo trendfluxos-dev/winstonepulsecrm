@@ -19,7 +19,9 @@ describe("agent report counts are scoped to the signed-in agent", () => {
   it("filters by the session agent's own id only", async () => {
     m.caller = { scope: "agent", profile: { id: "agent-b" } };
     m.eqs = [];
-    await run();
+    const out = (await run()) as { agentId: string };
     expect(m.eqs).toEqual([["agent_id", "agent-b"]]);
+    // Analytics lead tiles use this server-resolved id, not a browser account lookup.
+    expect(out.agentId).toBe("agent-b");
   });
 });
