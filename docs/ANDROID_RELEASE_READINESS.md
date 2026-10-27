@@ -15,6 +15,28 @@ Code readiness or a green CI run is never device proof.
 | Version | 2.17 (28) | build.gradle.kts | unverified on built APK |
 | Release signing fingerprint (SHA-256) | _fill from `apksigner verify --print-certs`_ | | ☐ |
 
+## 1a. How to verify signature, application ID and version (no secrets needed)
+
+Only the **public** certificate is read from the built APK. Never open, copy or paste the keystore,
+its password, the GitHub secret values or `local.properties` while doing this.
+
+1. Download `winstone-agent-release-apk` and `winstone-agent-debug-apk` from the CI run in the ledger; unzip each to get the `.apk`.
+2. Use a computer with the Android SDK build-tools installed (Android Studio includes them). Find them under `<sdk>/build-tools/<version>/`.
+3. **Signature** — run:
+   `apksigner verify --verbose --print-certs app-release.apk`
+   - Must print `Verifies` and `Verified using v2 scheme ... true`.
+   - Copy only the `Signer #1 certificate SHA-256 digest` line into the ledger. This is a public fingerprint, safe to share.
+   - The debug APK must show a **different** digest (Android debug key). The same digest on both = stop, wrong signing.
+4. **Application ID and version** — run:
+   `aapt2 dump badging app-release.apk | head -1`
+   - Release must show `package: name='com.winstone.connect'` and the expected `versionCode` / `versionName`.
+   - Repeat for the debug APK: must show `com.winstone.connect.test` and `versionName` ending in `-test`.
+5. **On the phone (optional cross-check)** — Settings → Apps → Winstone Pulse → App details shows the version; both "Winstone Pulse" and "Winstone Pulse TEST" must be installed side by side.
+6. **Every later release** must show the **same** release SHA-256 digest as recorded here; a different digest means agents cannot update in place — do not distribute.
+7. Record in the ledger: digest, package name, versionCode/versionName, who checked, date. Screenshots of terminal output are fine; crop out file paths that reveal key locations.
+
+What never goes in this file, chat or screenshots: keystore files, store/key passwords, key alias secrets, GitHub secret values.
+
 ## 2. Included fixes
 
 | Fix | Status |
