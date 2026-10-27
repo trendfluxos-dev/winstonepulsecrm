@@ -127,3 +127,7 @@ Run `android/DEVICE_TEST_CHECKLIST.md`, plus:
 ## 5. Release gate
 
 ☐ Sections 1–4 complete with evidence → share release APK with one agent → repeat outgoing call + recording → share with all agents.
+
+### Build 2026-10-28 — audit fixes (commit 51d820c, run 40583215365)
+- Unit tests: passed in CI. Debug + signed release APK built. Release artifact 1.7 MB (R8 shrinking on; was 11.5 MB).
+- Not yet verified: fingerprint/app ID/version (section 1a), on-device run of the minified release.
