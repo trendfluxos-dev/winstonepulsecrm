@@ -521,6 +521,12 @@ export function DeskCommandCenter({
       )}
 
       {/* KPI strip — every figure from the agent's own snapshot */}
+      <p className="text-[10px] text-muted-foreground">
+        {t({
+          bn: "সব সংখ্যা শুধু আপনার অ্যাসাইন করা লিড থেকে · আজ = ঢাকা সময় · কোম্পানির মোট ইনভেন্টরি এই ডেস্কে দেখানো হয় না",
+          en: "All figures are from your own assigned leads only · Today = Dhaka time · company-wide inventory is not shown on this desk",
+        })}
+      </p>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <StatCard
           icon={<Users />}
@@ -570,7 +576,7 @@ export function DeskCommandCenter({
           icon={<CheckCircle2 />}
           label={t({ bn: "শেষ হয়েছে", en: "Completed" })}
           value={`${bn(stats.done, lang)} / ${bn(stats.total, lang)}`}
-          sub={t({ bn: `${bn(stats.donePct, lang)}% কাজ শেষ`, en: `${bn(stats.donePct, lang)}% complete` })}
+          sub={t({ bn: `${bn(stats.donePct, lang)}% কাজ শেষ · আমার সব অ্যাসাইন লিডের মধ্যে`, en: `${bn(stats.donePct, lang)}% complete · of all my assigned leads` })}
           tone="live"
           loading={isPending}
         />
