@@ -13,7 +13,6 @@ import {
   LogIn,
   MessageCircle,
   PhoneCall,
-  Timer,
   Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -58,12 +57,14 @@ import { SocialDesk } from "@/components/crm/social/SocialDesk";
 import { TodayHero } from "@/components/crm/desk/TodayHero";
 import { AiLeadPriority } from "@/components/crm/AiLeadPriority";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CONNECTED_THRESHOLD_SECONDS, useSnapshot } from "@/lib/crm-data";
-import { formatTalkTime } from "@/lib/crm-format";
-import { dhakaDay, plausibleSeconds } from "@/lib/lead-groups";
+import { useSnapshot } from "@/lib/crm-data";
+import { dhakaDay } from "@/lib/lead-groups";
 import { useMyAccount, useSignOut } from "@/lib/session";
 import { DeskRangeChip, useDeskRange } from "@/lib/desk-range";
-import { deskLeadCounts } from "@/lib/desk-counts";
+import { deskLeadCounts, deskReportCounts } from "@/lib/desk-counts";
+import { getDeskWork } from "@/lib/desk-work.functions";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/desk")({
   validateSearch: sectionSearch,
@@ -126,7 +127,7 @@ function DeskStats() {
   return (
     <div className="grid gap-3 lg:grid-cols-[260px_minmax(0,1fr)]">
     <QuotaGauge done={stats.todayDone} total={stats.todayAssigned} />
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       <Tile
         icon={<Users className="size-4" />}
         label={t({ bn: "আমার সক্রিয় লিড", en: "My active assigned leads" })}
