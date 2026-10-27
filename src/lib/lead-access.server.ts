@@ -16,6 +16,7 @@ export type LeadOwnerRow = {
 export const LEAD_OWNER_COLUMNS = "assigned_to, assigned_agent_id";
 
 export function leadOwnerId(lead: LeadOwnerRow | null | undefined): string | null {
+  if (lead?.assigned_to && lead.assigned_agent_id && lead.assigned_to !== lead.assigned_agent_id) return null;
   return lead?.assigned_to ?? lead?.assigned_agent_id ?? null;
 }
 

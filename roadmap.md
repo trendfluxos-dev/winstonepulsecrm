@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-27 — Remaining security review
+- [x] Reviewed seven findings; four integrity/ownership/scoring findings fixed through the security tool. Public support chat remains unchanged.
+- [x] Device message/presence now revalidate canonical ownership; intake unassigned; connected reports require six V2 facts and trusted saved/analyzed grade, edits preserve classification, ranking requires completed matched phone evidence. 102 targeted tests pass; full suite 1202 pass, one pre-existing copy-only terminology test fails; harness build OK.
+- [x] Public endpoint unauthenticated POSTs return 401 and sign-in renders without page errors. Real authenticated customer writes not exercised, no data/migration/provider/deployment changes. Lower-risk categories and five-minute photo bearer window remain active, along with intentionally public support AI; connected reports without a trusted grade fail closed pending IT review rather than inventing grades.
+
 ## 2026-10-27 — Approved security fixes and release
 - [x] Block callback/manual lead takeover; canonical intake remains unassigned, LeadHub-only routing and briefing enforced. 20 synthetic handler tests pass.
 - [x] Restrict lead-sheet previews to the existing server-configured report workbooks before provider reads; strict Google URL and tab validation. 9 transport/authority tests pass; inventory/scheduled sync unchanged.

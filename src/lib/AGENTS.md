@@ -17,6 +17,8 @@
 
 - Follow-up transitions/recovery use follow-up-lifecycle.server.ts and atomic DB functions; recovery appends one child/action without modifying the source, rescheduling links a new task, completion never edits the lead — why: one scoped, append-only lifecycle.
 - Agent activity readers use assigned-lead-scope.server.ts current canonical ownership in addition to historic actor filters; single-record operations recheck assignment — why: transfers must not expose former customers through APIs.
+- Device message/presence writes check canonical ownership before persistence; ingest creates only unassigned leads, conflicting owner columns fail closed — why: device identities cannot attach work to foreign customers.
+- Connected report submission requires all V2 facts and a server-saved/analyzed grade; edits preserve classification, scoring evidence requires a completed matched phone row — why: omitted answers or caller picks cannot manufacture classification or ranking evidence.
 - Active follow-up feeds use active_follow_up_events/current_follow_up_work_items views, while history reads the original table — why: recovery preserves its source without duplicating reminders or active counts.
 - Instruction copilot drafts locally without AI calls; LeadHub prefills the existing confirmation form, IT links to Nexus, app changes stay copy-only — why: no second write path or hidden credit usage.
 - IT/HQ vault checks read only master/it_console PINs, never LeadHub — why: Nexus credentials must not unlock IT.
