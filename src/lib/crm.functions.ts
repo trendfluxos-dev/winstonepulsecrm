@@ -12,6 +12,8 @@ const OptionalToken = z.string().nullable().optional();
 const SnapshotScope = z.object({
   token: z.string().nullable().optional(),
   view: z.enum(["default", "agent"]).optional(),
+  /** Floor scope only: return just leads updated at/after this time. */
+  leadsSince: z.string().datetime().nullable().optional(),
 });
 
 /**
@@ -107,9 +109,19 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
       };
     }
 
+    const serverTime = new Date().toISOString();
+    // Changed-leads refresh: only rows touched since the cursor, plus the total
+    // so the browser can prove its merged list is complete (else full reload).
+    const leadsRead = data.leadsSince
+      ? Promise.all([
+          pageAll((a, b) => supabaseAdmin.from("leads").select("*").gte("updated_at", data.leadsSince!)
+            .order("updated_at", { ascending: false }).order("id").range(a, b)),
+          supabaseAdmin.from("leads").select("id", { count: "exact", head: true }),
+        ]).then(([rows, c]) => ({ data: rows.data, error: rows.error ?? c.error, count: c.count ?? null }))
+      : allLeads(supabaseAdmin as never).then((r) => ({ ...r, count: r.data.length }));
     const [profiles, leads, calls, messages, events] = await Promise.all([
       supabaseAdmin.from("profiles").select(PROFILE_SAFE_COLUMNS).order("name"),
-      allLeads(supabaseAdmin as never),
+      leadsRead,
       pageAll((a, b) => supabaseAdmin.from("call_recordings").select("*")
         .order("created_at", { ascending: false }).order("id").range(a, b)),
       pageAll((a, b) => supabaseAdmin.from("whatsapp_interactions").select("*")
@@ -128,6 +140,9 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
       calls: calls.data ?? [],
       messages: messages.data ?? [],
       events: events.data ?? [],
+      leadsMode: (data.leadsSince ? "delta" : "full") as "delta" | "full",
+      leadCount: leads.count as number | null,
+      serverTime,
     };
   });
 
