@@ -16,7 +16,7 @@ export function rankPerformers(lines: PerformerLine[]): PerformerLine[] {
     (a, b) =>
       // The board sorts by the score everyone sees on the card — biggest first.
       b.score - a.score ||
-      // Fixed tie-breakers for equal scores: calls → reports → talk minutes,
+      // Fixed tie-breakers for equal scores: completed work → calls → reports,
       // then agent id so the order never flips between refreshes.
       b.completed - a.completed ||
       b.called - a.called ||
@@ -116,8 +116,9 @@ export type TopPerformerBoard = {
 };
 
 /**
- * Score weights: connected conversations matter most, then submitted updates,
- * then talk time and follow-ups booked. Deliberately simple so the reason lines
+ * Operational score: completed assigned work, reports, attempts, verified
+ * connections and completed follow-ups; audio/talk time never earns points.
+ * Deliberately simple so the reason lines
  * on the homepage can be read straight off the numbers.
  */
 export function scoreOf(
@@ -295,9 +296,8 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
   // The scored day's own list per desk: how many leads arrived and how many are finished.
   const { data: todayLeads, error: leadsError } = await pageAllParallel((from, to) => supabaseAdmin
     .from("leads")
-    .select("id, assigned_to, work_state")
+    .select("id, assigned_to, assigned_agent_id, work_state")
     .eq("work_date", effectiveDateKey)
-    .not("assigned_to", "is", null)
     .order("id").range(from, to));
   if (leadsError) throw new Error("Performance allocation unavailable");
 
@@ -305,7 +305,7 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
   const follows = uniqueRows(followRes.data ?? []).filter(f => (f as { status?: string }).status === "done");
   const operations = auditPerformance({
     agents: (agentsRes.data ?? []).map(a => ({ id: a.id, name: a.name })),
-    leads: uniqueRows(todayLeads ?? []).map(l => ({ ...l, work_date: effectiveDateKey, assigned_agent_id: null, status: "pending", temperature: null, outcome_category: null, source: null, created_at: startIso })),
+    leads: uniqueRows(todayLeads ?? []).map(l => ({ ...l, work_date: effectiveDateKey, status: "pending", temperature: null, outcome_category: null, source: null, created_at: startIso })),
     calls: callsRes.data ?? [],
     reports: reports.map(r => ({ ...r, category: null, customer_response: null, next_action: null, requirement: null })),
     followUps: follows.map(f => ({ ...f, lead_id: null, scheduled_at: null })),
@@ -319,10 +319,10 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
     const talkMinutes = Math.round(
       scored.reduce((sum, r) => sum + (r.duration_seconds ?? 0), 0) / 60,
     );
-    const myLeads = uniqueRows(todayLeads ?? []).filter((row) => row.assigned_to === agent.id);
+    const myLeads = uniqueRows(todayLeads ?? []).filter((row) => (row.assigned_agent_id ?? row.assigned_to) === agent.id);
     const quota = quotaFor(agent.employee_id, floorQuota);
     const targetQuota = effectiveQuota(quota, extraToday[agent.id] ?? 0);
-    // A lead counts as worked once it is completed OR has a call report today.
+    // Reports are separate evidence; completion requires the saved completed state.
     const completed = myLeads.filter((row) => row.work_state === "completed").length;
     const base = {
       agentId: agent.id,
@@ -439,8 +439,8 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
     advice.push("আজ কোনো কল রিপোর্ট জমা পড়েনি — কল শেষে রিপোর্ট জমা দিলেই বোর্ড তৈরি হবে");
   }
 
-  const assignedLeadRows = uniqueRows(todayLeads ?? []).length;
-  const completedLeadRows = uniqueRows(todayLeads ?? []).filter((row) => row.work_state === "completed").length;
+  const assignedLeadRows = operations.totals.assigned;
+  const completedLeadRows = operations.totals.completed;
   const sources: TopPerformerSources = {
     windowStart: startIso,
     windowEnd: endIso,

@@ -1,8 +1,9 @@
 # Roadmap
 
 ## 2026-10-28 — Optional audio and performance count audit
-- [ ] Implement shared operational counts, optional diagnostics and authorized record-ID reconciliation in existing HQ overview/performance.
-- [ ] Guard invalid ranges, test formulas/deduplication/scope, inspect preview and diffs; no production writes or automatic publication.
+- [x] Implement shared operational counts, optional diagnostics and authorized record-ID reconciliation in existing HQ overview/performance; same scorer excludes audio/talk-time points. No production writes.
+- [x] Invalid/reversed/>400-day ranges hide totals and show errors. 56 focused tests pass; automatic typecheck/build OK, semantic-color and whitespace checks pass. Signed-in HQ read-back, refresh, 223 authorized issue IDs, desktop/mobile and reversed dates verified.
+- [ ] Release blocked pending review of full-suite failures: six integration checks need an agent session (current session is admin); existing route-inventory assertion expects 60 pages, actual 61. This change is NOT published. Historical completion timestamps/phone-unsent queues/fresh audio-file existence are unavailable and labeled, not inferred.
 - [x] Verify requested Info Desk release: live historical results on October 25/26/27 exclude the account; /manual release markers pass.
 - [x] Audit performance/HQ evidence: daily ranking reads reports/follow-ups/assigned work, not audio storage; HQ brief and accountability use saved work evidence. Phone-measured talk time still contributes to the existing score, distinct from audio upload availability. HQ headline tiles still emphasize synced recordings; reprioritizing those tiles and changing scoring weights are not part of the completed Info Desk publication.
 
