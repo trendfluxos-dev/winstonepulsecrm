@@ -180,20 +180,25 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
   const rr = reportsQ.data && me
     ? reportLeadReconciliation(reportsQ.data.reports, range, new Set(leads.filter((l) => ownerOf(l) === me).map((l) => l.id)))
     : null;
+  const rangeLabel =
+    preset === "all" ? t({ bn: "সব সময়", en: "All time" })
+    : preset === "custom" ? (range.from || range.to ? `${range.from ?? t({ bn: "শুরু", en: "Start" })} → ${range.to ?? t({ bn: "আজ", en: "Today" })}` : t({ bn: "তারিখ বেছে নিন", en: "Pick dates" }))
+    : range.from === range.to ? range.from!
+    : `${range.from} → ${range.to}`;
   const tiles = scope === "agent" ? [
     { label: t({ bn: "আমার মালিকানার লিড (এখন)", en: "Owned leads (now)" }), value: rangeErr ? "—" : lk ? lk.owned : na, icon: Users, tone: "primary" as const },
     { label: t({ bn: "চলমান বরাদ্দ কাজ (এখন)", en: "Active assigned (now)" }), value: rangeErr ? "—" : lk ? lk.active : na, icon: Users, tone: "primary" as const },
     { label: t({ bn: "হট লিড (চলমান, এখন)", en: "Hot leads (active, now)" }), value: rangeErr ? "—" : lk ? lk.hot : na, icon: Flame, tone: "destructive" as const },
     { label: t({ bn: "বন্ধ লিড (স্ট্যাটাস, এখন)", en: "Closed leads (status, now)" }), value: rangeErr ? "—" : lk ? lk.closed : na, icon: CheckCircle2, tone: "muted" as const },
-    { label: t({ bn: "জমা দেওয়া রিপোর্ট", en: "Submitted reports" }), value: rangeErr ? "—" : rk ? rk.submitted : na, icon: CheckCircle2, tone: "accent" as const },
+    { label: `${t({ bn: "জমা দেওয়া রিপোর্ট", en: "Submitted reports" })} · ${rangeLabel}`, value: rangeErr ? "—" : rk ? rk.submitted : na, icon: CheckCircle2, tone: "accent" as const },
     { label: t({ bn: "কথা হয়েছে (রিপোর্ট অনুযায়ী)", en: "Connected (per reports)" }), value: rangeErr ? "—" : rk ? `${rk.reportedConnected} (${rk.rate}%)` : na, icon: PhoneCall, tone: "live" as const },
-    { label: t({ bn: "রিপোর্ট হওয়া আলাদা লিড", en: "Distinct leads reported on" }), value: rangeErr ? "—" : rr ? rr.leads : na, icon: Users, tone: "accent" as const },
+    { label: `${t({ bn: "রিপোর্ট হওয়া আলাদা লিড", en: "Distinct leads reported on" })} · ${rangeLabel}`, value: rangeErr ? "—" : rr ? rr.leads : na, icon: Users, tone: "accent" as const },
     { label: t({ bn: "হোয়াটসঅ্যাপ", en: "WhatsApp" }), value: rangeErr ? "—" : wa ?? na, icon: MessageCircle, tone: "chart4" as const },
   ] : [
     { label: scope === "hq" ? t({ bn: "মোট লিড", en: "Total leads" }) : t({ bn: "আমার লিড", en: "My leads" }), value: k.leads, icon: Users, tone: "primary" as const },
     { label: t({ bn: "হট লিড", en: "Hot leads" }), value: k.hot, icon: Flame, tone: "destructive" as const },
     ...(scope === "hq" ? [
-      { label: t({ bn: "মোট কল কাজ (জমা রিপোর্ট)", en: "Total call work (submitted reports)" }), value: rangeErr ? "—" : hk ? hk.submitted : na, icon: CheckCircle2, tone: "accent" as const },
+      { label: `${t({ bn: "মোট কল কাজ (জমা রিপোর্ট)", en: "Total call work (submitted reports)" })} · ${rangeLabel}`, value: rangeErr ? "—" : hk ? hk.submitted : na, icon: CheckCircle2, tone: "accent" as const },
       { label: t({ bn: "কথা হয়েছে (রিপোর্ট অনুযায়ী)", en: "Connected (per reports)" }), value: rangeErr ? "—" : hk ? `${hk.reportedConnected} (${hk.rate}%)` : na, icon: PhoneCall, tone: "live" as const },
       { label: t({ bn: "ফোন-সিঙ্ক কল (প্রযুক্তিগত, KPI নয়)", en: "Phone-synced calls (technical, not KPI)" }), value: `${k.calls} (${k.connected} >10s)`, icon: Phone, tone: "muted" as const },
     ] : [
@@ -203,11 +208,6 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
     { label: t({ bn: "হোয়াটসঅ্যাপ", en: "WhatsApp" }), value: k.whatsapp, icon: MessageCircle, tone: "chart4" as const },
     { label: t({ bn: "বন্ধ লিড", en: "Closed leads" }), value: k.closed, icon: CheckCircle2, tone: "muted" as const },
   ];
-  const rangeLabel =
-    preset === "all" ? t({ bn: "সব সময়", en: "All time" })
-    : preset === "custom" ? (range.from || range.to ? `${range.from ?? t({ bn: "শুরু", en: "Start" })} → ${range.to ?? t({ bn: "আজ", en: "Today" })}` : t({ bn: "তারিখ বেছে নিন", en: "Pick dates" }))
-    : range.from === range.to ? range.from!
-    : `${range.from} → ${range.to}`;
 
   return (
     <section className="space-y-4" aria-label={t({ bn: "ছবিতে হিসাব", en: "Charts" })}>
@@ -285,8 +285,8 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
           <p className="font-semibold">{t({ bn: "রিপোর্ট ও লিড মিলিয়ে দেখা", en: "Reports vs leads reconciliation" })} · {rangeLabel}</p>
           <p className="mt-1 text-muted-foreground">
             {t({
-              bn: `${rr.reports}টি জমা রিপোর্ট ${rr.leads}টি আলাদা লিডের (গড়ে ${rr.avgPerLead}টি, সর্বোচ্চ ${rr.maxPerLead}টি/লিড; ${rr.multiReportLeads}টি লিডে একাধিক রিপোর্ট)। প্রতিটি কলের পর আলাদা রিপোর্ট হয়, তাই রিপোর্ট লিডের চেয়ে বেশি হতে পারে। এর মধ্যে ${rr.stillOwned}টি লিড এখনো আপনার, ${rr.movedAway}টি পরে অন্যত্র গেছে${rr.withoutLead ? `, ${rr.withoutLead}টি রিপোর্টে লিড নেই` : ""}। এটি সংখ্যা ও পরিধি মেলায়; রিপোর্টের বিষয়বস্তু সঠিক কিনা তা যাচাই করে না।`,
-              en: `${rr.reports} submitted reports cover ${rr.leads} distinct leads (avg ${rr.avgPerLead}, max ${rr.maxPerLead} per lead; ${rr.multiReportLeads} leads have more than one). A report is written after every call, so reports can exceed leads. ${rr.stillOwned} of those leads are still yours, ${rr.movedAway} were moved later${rr.withoutLead ? `, ${rr.withoutLead} reports have no lead` : ""}. This reconciles counts and scope only, not report content.`,
+              bn: `${rr.reports}টি জমা রিপোর্ট ${rr.leads}টি আলাদা লিডের (গড়ে ${rr.avgPerLead}টি, সর্বোচ্চ ${rr.maxPerLead}টি/লিড; ${rr.multiReportLeads}টি লিডে একাধিক রিপোর্ট)। একটি লিডে একাধিক রিপোর্ট থাকতে পারে (প্রতি কলে একটি), তাই রিপোর্ট লিডের চেয়ে বেশি হতে পারে। এর মধ্যে ${rr.stillOwned}টি লিড এখনো আপনার, ${rr.movedAway}টি পরে অন্যত্র গেছে${rr.withoutLead ? `, ${rr.withoutLead}টি রিপোর্টে লিড নেই` : ""}। এটি সংখ্যা ও পরিধি মেলায়; রিপোর্টের বিষয়বস্তু সঠিক কিনা তা যাচাই করে না।`,
+              en: `${rr.reports} submitted reports cover ${rr.leads} distinct leads (avg ${rr.avgPerLead}, max ${rr.maxPerLead} per lead; ${rr.multiReportLeads} leads have more than one). One lead can have multiple reports (one per call), so reports can exceed leads. ${rr.stillOwned} of those leads are still yours, ${rr.movedAway} were moved later${rr.withoutLead ? `, ${rr.withoutLead} reports have no lead` : ""}. This reconciles counts and scope only, not report content.`,
             })}
           </p>
         </div>
