@@ -20,24 +20,26 @@ interface Props {
   period?: string;
   amount?: string;
   stageLabel?: string;
+  /** Optional courtesy Bengali status — system mail itself stays English. */
+  stageLabelBn?: string;
   reviewUrl?: string;
 }
 
 // React Email registry modules intentionally export the component through `template` below.
 // eslint-disable-next-line react-refresh/only-export-components
-const Email = ({ title, detail, period, amount, stageLabel, reviewUrl }: Props) => (
-  <Html lang="bn" dir="ltr">
+const Email = ({ title, detail, period, amount, stageLabel, stageLabelBn, reviewUrl }: Props) => (
+  <Html lang="en" dir="ltr">
     <Head />
-    <Preview>{title || "সার্ভিস বিল সংক্রান্ত জরুরি তথ্য"}</Preview>
+    <Preview>{title || "Service bill update — action may be required"}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Text style={brand}>Winstone Pulse</Text>
-        <Heading style={heading}>{title || "সার্ভিস বিল আপডেট"}</Heading>
-        <Text style={text}>{detail || "বিস্তারিত IT কনসোলে দেখুন।"}</Text>
+        <Heading style={heading}>{title || "Service Bill Update"}</Heading>
+        <Text style={text}>{detail || "See the IT console for details."}</Text>
         <Section style={box}>
-          {period ? <Text style={row}>পিরিয়ড: {period}</Text> : null}
-          {amount ? <Text style={row}>পরিমাণ: {amount}</Text> : null}
-          {stageLabel ? <Text style={row}>অবস্থা: {stageLabel}</Text> : null}
+          {period ? <Text style={row}>Period: {period}</Text> : null}
+          {amount ? <Text style={row}>Amount: {amount}</Text> : null}
+          {stageLabel ? <Text style={row}>Status: {stageLabel}</Text> : null}
         </Section>
         <Button
           href={reviewUrl || "https://crm.winstonebd.com/service-bill-unlock"}
@@ -46,8 +48,9 @@ const Email = ({ title, detail, period, amount, stageLabel, reviewUrl }: Props) 
           Secure human review
         </Button>
         <Text style={muted}>
-          এই alert কোনো payment, transfer বা automatic approval সম্পন্ন করে না।
+          This alert does not complete any payment, transfer or automatic approval.
         </Text>
+        {stageLabelBn ? <Text style={muted}>বাংলা — অবস্থা: {stageLabelBn}</Text> : null}
       </Container>
     </Body>
   </Html>
@@ -58,14 +61,15 @@ export const template = {
   subject: (data: Record<string, unknown>) =>
     typeof data["title"] === "string" && data["title"]
       ? data["title"]
-      : "Winstone Pulse — সার্ভিস বিল আপডেট",
+      : "Winstone Pulse — Service Bill Update",
   displayName: "Service bill alert",
   previewData: {
-    title: "2026-10 সার্ভিস বিল বকেয়া — $35.29 USD",
-    detail: "আজ মেয়াদ শেষ; ১৮ অক্টোবর পর্যন্ত গ্রেস।",
+    title: "2026-10 service bill due — $35.29 USD",
+    detail: "Due today; grace period runs until 18 October.",
     period: "2026-10",
     amount: "$35.29 USD",
-    stageLabel: "মেয়াদ শেষ",
+    stageLabel: "Due Today",
+    stageLabelBn: "মেয়াদ শেষ",
     reviewUrl: "https://crm.winstonebd.com/service-bill-unlock",
   },
 } satisfies TemplateEntry;

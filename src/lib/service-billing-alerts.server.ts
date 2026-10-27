@@ -105,7 +105,13 @@ async function recipients(): Promise<{ ids: string[]; emails: string[] }> {
   return { ids: rows.map((row) => row.id), emails };
 }
 
-const STAGE_LABEL: Record<AlertStage, string> = {
+// System mail is English-first; Bengali stays as an optional courtesy line.
+const STAGE_LABEL_EN: Record<AlertStage, string> = {
+  due_soon: "Due Soon",
+  due: "Due Today",
+  overdue: "Overdue",
+};
+const STAGE_LABEL_BN: Record<AlertStage, string> = {
   due_soon: "মেয়াদ সামনে",
   due: "মেয়াদ শেষ",
   overdue: "মেয়াদোত্তীর্ণ",
@@ -134,7 +140,8 @@ async function emailRecipients(
         detail: copy.detail,
         period: invoice.period,
         amount: MAINTENANCE_FEE_LABEL,
-        stageLabel: STAGE_LABEL[stage],
+        stageLabel: STAGE_LABEL_EN[stage],
+        stageLabelBn: STAGE_LABEL_BN[stage],
       };
       // Service-bill alerts use Hostinger only. Authentication emails continue
       // to use the managed email system through their separate auth handler.
@@ -144,7 +151,12 @@ async function emailRecipients(
       if (!hostingerConfigured()) {
         throw new Error("Hostinger service-bill email is not configured");
       }
-      await sendViaHostinger(email, String(templateData.stageLabel), idempotencyKey);
+      await sendViaHostinger(
+        email,
+        String(templateData.stageLabel),
+        idempotencyKey,
+        String(templateData.stageLabelBn),
+      );
       sent += 1;
     } catch (error) {
       failed += 1;
