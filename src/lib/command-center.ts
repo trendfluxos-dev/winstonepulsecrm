@@ -1,4 +1,5 @@
 import { isOpenFollowUp } from "@/lib/follow-up-lifecycle";
+import { auditPerformance, rangeError, uniqueRows } from "@/lib/performance-audit";
 /**
  * Sales Command Center — pure aggregation over canonical rows already loaded
  * for the caller's permitted scope. No numbers are invented: every figure is a
@@ -16,8 +17,10 @@ export type CcLead = {
   created_at: string;
   assigned_agent_id: string | null;
   assigned_to: string | null;
+  work_date?: string | null;
+  work_state?: string | null;
 };
-export type CcCall = { id: string; lead_id: string | null; agent_id: string | null; created_at: string; duration_seconds: number };
+export type CcCall = { id: string; lead_id: string | null; agent_id: string | null; created_at: string; duration_seconds: number; started_at?: string | null; external_call_id?: string | null; call_status?: string; call_source?: string; device_reported_duration_seconds?: number | null; upload_status?: string; sync_status?: string; analysis_status?: string; storage_path?: string | null; checksum?: string | null; file_size_bytes?: number | null };
 export type CcReport = {
   id: string;
   lead_id: string | null;
@@ -30,6 +33,8 @@ export type CcReport = {
   created_at: string;
   connected?: boolean | null;
   recording_id?: string | null;
+  status?: string;
+  connection_verified?: boolean | null;
 };
 export type CcFollowUp = {
   id: string;
@@ -54,6 +59,8 @@ const inRange = (day: string, f: CcFilters) => day >= f.fromDay && day <= f.toDa
 const pct = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 1000) / 10 : null);
 
 export function listDays(fromDay: string, toDay: string): string[] {
+  const error = rangeError(fromDay, toDay);
+  if (error) throw new Error(error);
   const out: string[] = [];
   let t = Date.parse(`${fromDay}T00:00:00Z`);
   const end = Date.parse(`${toDay}T00:00:00Z`);
@@ -75,6 +82,8 @@ export function computeCommandCenter(input: {
   dailyLeadQuota: number;
 }) {
   const { filters: f, now } = input;
+  const audit = auditPerformance(input);
+  input = { ...input, leads: uniqueRows(input.leads), calls: uniqueRows(input.calls), reports: uniqueRows(input.reports), followUps: uniqueRows(input.followUps) };
   const today = dhakaDay(now);
 
   // ---- scope: agent + source + project filters applied consistently ----
@@ -136,7 +145,7 @@ export function computeCommandCenter(input: {
     key: k,
     count: stage[k].length,
     leadIds: stage[k],
-    fromPrev: i === 0 ? null : pct(stage[k].length, stage[order[i - 1]!].length),
+    fromPrev: i === 0 ? null : pct(stage[k].length, stage[order[i - 1] ?? "leads"].length),
   }));
 
   // ---- agent execution today ----
@@ -223,14 +232,14 @@ export function computeCommandCenter(input: {
   }
   const bigSources = sources.filter((s) => s.leads >= 30);
   if (bigSources.length >= 2) {
-    const best = [...bigSources].sort((a, b) => b.qualified / b.leads - a.qualified / a.leads)[0]!;
-    insights.push(`৩০+ লিডের সোর্সগুলোর মধ্যে "${best.name}"-এ আগ্রহী লিডের হার সর্বোচ্চ (${pct(best.qualified, best.leads)}%)।`);
+    const best = [...bigSources].sort((a, b) => b.qualified / b.leads - a.qualified / a.leads)[0];
+    if (best) insights.push(`৩০+ লিডের সোর্সগুলোর মধ্যে "${best.name}"-এ আগ্রহী লিডের হার সর্বোচ্চ (${pct(best.qualified, best.leads)}%)।`);
   }
-  const contacted = funnel[1]!.count;
-  const stuck = contacted - funnel[2]!.count;
+  const contacted = funnel[1]?.count ?? 0;
+  const stuck = contacted - (funnel[2]?.count ?? 0);
   if (contacted >= 30 && stuck > 0) insights.push(`যোগাযোগ হওয়া ${contacted} লিডের মধ্যে ${stuck}টি এখনো আগ্রহী ধাপে পৌঁছায়নি।`);
 
-  return { kpi, funnel, agentRows, execution, trend, sources, followUpHealth, insights, today };
+  return { kpi, funnel, agentRows, execution, trend, sources, followUpHealth, insights, today, audit };
 }
 
 export function presetRange(preset: "7d" | "30d" | "month", now: Date): { fromDay: string; toDay: string } {

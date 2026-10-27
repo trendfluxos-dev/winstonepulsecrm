@@ -22,7 +22,7 @@ async function pageAll<T>(fetchPage: (a: number, b: number) => PromiseLike<{ dat
   return data ?? [];
 }
 
-const REPORT_COLUMNS = "id, lead_id, agent_id, category, customer_response, next_action, requirement, submitted_at, created_at, connected, recording_id";
+const REPORT_COLUMNS = "id, lead_id, agent_id, category, customer_response, next_action, requirement, submitted_at, created_at, connected, recording_id, status, connection_verified";
 
 export const getCommandCenterFeed = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input ?? {}))
