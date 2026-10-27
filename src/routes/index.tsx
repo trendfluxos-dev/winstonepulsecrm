@@ -118,14 +118,14 @@ function EntryHall() {
               {t({ bn: "লিড, কল, ফলো-আপ আর টিমের ফলাফল — আপনার সেলস টিমের সব কাজ এক জায়গায়।", en: "Leads, calls, follow-ups and team performance. One connected workspace for your sales floor." })}
             </p>
             <Button asChild variant="outline" className="mt-5"><Link to="/walkthrough"><BookOpen />{t({ bn: "CRM walkthrough দেখুন", en: "Explore the CRM walkthrough" })}</Link></Button>
-            <figure className="-mx-4 mt-8 overflow-hidden border-y border-border bg-card sm:mx-0 sm:mt-10 sm:rounded-xl sm:border">
+            <figure className="-mx-4 mt-8 sm:mx-0 sm:mt-10">
               <img
                 src={teamHeroAsset.url}
                 alt={t({ bn: "Winstone Pulse CRM নিয়ে আলোচনা করছেন দুইজন", en: "Two professionals discussing the Winstone Pulse CRM" })}
                 width={1376}
                 height={768}
                 fetchPriority="high"
-                className="block h-auto w-full opacity-80"
+                className="block h-auto w-full rounded-none opacity-80 sm:rounded-xl sm:shadow-soft"
               />
             </figure>
             <div className="mt-8 grid overflow-hidden rounded-xl border border-border bg-card sm:mt-10 sm:grid-cols-2 lg:grid-cols-3">
