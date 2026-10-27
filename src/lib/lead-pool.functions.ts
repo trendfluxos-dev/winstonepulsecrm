@@ -346,14 +346,15 @@ export const quotaOverview = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => TokenInput.parse(input))
   .handler(async ({ data }) => {
     await deckReader(data.adminToken);
-    const { activeAgents, dailyPlan, extraGrantsToday, dhakaToday } = await import(
+    const { activeAgents, dailyPlan, extraGrantsToday, dhakaToday, agentDailyTargets } = await import(
       "@/lib/lead-pool.server"
     );
     const { quotaFor } = await import("@/lib/lead-quota");
-    const [agents, plan, extra] = await Promise.all([
+    const [agents, plan, extra, targets] = await Promise.all([
       activeAgents(),
       dailyPlan(),
       extraGrantsToday(),
+      agentDailyTargets(dhakaToday()),
     ]);
     return {
       workDate: dhakaToday(),
@@ -362,7 +363,7 @@ export const quotaOverview = createServerFn({ method: "GET" })
         id: agent.id,
         name: agent.name,
         employeeId: agent.employee_id ?? null,
-        baseQuota: quotaFor(agent.employee_id, plan.perAgent),
+        baseQuota: Math.min(MAX_DAILY_LEADS_PER_AGENT, targets.get(agent.id) ?? quotaFor(agent.employee_id, plan.perAgent)),
         extraToday: extra[agent.id] ?? 0,
       })),
     };
