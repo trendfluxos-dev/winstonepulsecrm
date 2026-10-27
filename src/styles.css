@@ -584,6 +584,20 @@
 }
 
 
+/* Hero photo merges into the page: a shallow feather on every edge dissolves the
+   hard crop seam into the ivory background while the logo, screens and badge stay
+   inside the opaque core. */
+.photo-merge {
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 3%, #000 97%, transparent),
+    linear-gradient(to bottom, transparent, #000 3%, #000 97%, transparent);
+  mask-image:
+    linear-gradient(to right, transparent, #000 3%, #000 97%, transparent),
+    linear-gradient(to bottom, transparent, #000 3%, #000 97%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
 /* Accessible accent text: gold is decorative, darker gold is used for text. */
 .text-primary, .text-gold, .text-gold-strong { color: var(--gold-ink); }
 :is(svg.text-primary, svg.text-gold, svg.text-gold-strong),
