@@ -6,14 +6,28 @@
  * is never logged, returned, or stored. Provider error bodies are never
  * read — only the HTTP status becomes a generic failure code.
  */
-import { evaluateReplyGate, type ReplyBlockerId, type ReplyGateInput } from "@/lib/messenger-reply-gate";
-import { authorizeReplyTarget, replyActorBlock, type ReplyActor, type ReplyTargetRow } from "@/lib/messenger-reply-auth.server";
+import {
+  evaluateReplyGate,
+  type ReplyBlockerId,
+  type ReplyGateInput,
+} from "@/lib/messenger-reply-gate";
+import {
+  authorizeReplyTarget,
+  replyActorBlock,
+  type ReplyActor,
+  type ReplyTargetRow,
+} from "@/lib/messenger-reply-auth.server";
 
 export type ReplyStore = {
   /** Trusted thread row (recipient, linked lead, assignee, lead owner columns); null when unknown. */
   getReplyTarget(threadId: string): Promise<ReplyTargetRow | null>;
   /** Insert a pending outbox row; returns its id. */
-  insertOutbox(row: { requestId: string; threadId: string; body: string; createdBy: string | null }): Promise<string>;
+  insertOutbox(row: {
+    requestId: string;
+    threadId: string;
+    body: string;
+    createdBy: string | null;
+  }): Promise<string>;
   markSent(outboxId: string, sentMid: string): Promise<void>;
   markFailed(outboxId: string, code: string): Promise<void>;
 };
@@ -21,10 +35,16 @@ export type ReplyStore = {
 export type GuardedReplyResult =
   | { ok: true; sentMid: string }
   | { ok: false; blockers: ReplyBlockerId[] }
-  | { ok: false; code: "UNAUTHENTICATED" | "FORBIDDEN" | "THREAD_NOT_FOUND" | "SEND_FAILED" | "OUTBOX_UNAVAILABLE" };
+  | {
+      ok: false;
+      code:
+        "UNAUTHENTICATED" | "FORBIDDEN" | "THREAD_NOT_FOUND" | "SEND_FAILED" | "OUTBOX_UNAVAILABLE";
+    };
 
 /** Presence-only secret flags plus verification/sync state. Fail-closed. */
-export async function gatherReplyGateState(env: Record<string, string | undefined>): Promise<Omit<ReplyGateInput, "staffConfirmed">> {
+export async function gatherReplyGateState(
+  env: Record<string, string | undefined>,
+): Promise<Omit<ReplyGateInput, "staffConfirmed">> {
   const state = {
     appSecretConfigured: Boolean(env["META_APP_SECRET"]),
     pageTokenConfigured: Boolean(env["META_PAGE_ACCESS_TOKEN"]),
@@ -50,10 +70,15 @@ export async function gatherReplyGateState(env: Record<string, string | undefine
     for (const row of (tracks ?? []) as unknown as { track: string; outcome: string }[]) {
       if (!latest.has(row.track)) latest.set(row.track, row.outcome);
     }
-    state.allTracksVerified =
-      ["app_review", "live_mode", "page_consent", "messages_subscription"].every((t) => latest.get(t) === "verified");
+    state.allTracksVerified = [
+      "app_review",
+      "live_mode",
+      "page_consent",
+      "messages_subscription",
+    ].every((t) => latest.get(t) === "verified");
     state.syncEnabled =
-      Array.isArray(decisions) && (decisions[0] as { action?: string } | undefined)?.action === "enable";
+      Array.isArray(decisions) &&
+      (decisions[0] as { action?: string } | undefined)?.action === "enable";
   } catch {
     // Any lookup error keeps the gate closed.
   }
@@ -65,7 +90,14 @@ export async function gatherReplyGateState(env: Record<string, string | undefine
  * `sendFetch` is injectable so tests never touch the network.
  */
 export async function guardedSendReply(
-  input: { threadId: string; leadId?: string | null; text: string; requestId: string; staffConfirmed: boolean; actor: ReplyActor },
+  input: {
+    threadId: string;
+    leadId?: string | null;
+    text: string;
+    requestId: string;
+    staffConfirmed: boolean;
+    actor: ReplyActor;
+  },
   deps: {
     env: Record<string, string | undefined>;
     store: ReplyStore;
@@ -82,7 +114,10 @@ export async function guardedSendReply(
   } catch {
     row = null;
   }
-  const auth = authorizeReplyTarget(input.actor, row, { threadId: input.threadId, leadId: input.leadId ?? null });
+  const auth = authorizeReplyTarget(input.actor, row, {
+    threadId: input.threadId,
+    leadId: input.leadId ?? null,
+  });
   if (!auth.ok) return { ok: false, code: auth.code };
 
   const gateState = deps.gate ?? (await gatherReplyGateState(deps.env));
@@ -143,7 +178,12 @@ export function supabaseReplyStore(): ReplyStore {
         .eq("id", threadId)
         .maybeSingle();
       if (error || !data) return null;
-      const t = data as { id: string; psid: string | null; lead_id: string | null; assigned_agent_id: string | null };
+      const t = data as {
+        id: string;
+        psid: string | null;
+        lead_id: string | null;
+        assigned_agent_id: string | null;
+      };
       let lead: ReplyTargetRow["lead"] = null;
       if (t.lead_id) {
         const { data: l, error: le } = await supabaseAdmin
@@ -154,7 +194,13 @@ export function supabaseReplyStore(): ReplyStore {
         if (le) return null;
         lead = (l as ReplyTargetRow["lead"]) ?? null;
       }
-      return { id: t.id, psid: t.psid, leadId: t.lead_id, assignedAgentId: t.assigned_agent_id, lead };
+      return {
+        id: t.id,
+        psid: t.psid,
+        leadId: t.lead_id,
+        assignedAgentId: t.assigned_agent_id,
+        lead,
+      };
     },
     async insertOutbox(row) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -174,11 +220,17 @@ export function supabaseReplyStore(): ReplyStore {
     },
     async markSent(outboxId, sentMid) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await supabaseAdmin.from("messenger_outbox" as never).update({ sent_mid: sentMid } as never).eq("id", outboxId);
+      await supabaseAdmin
+        .from("messenger_outbox" as never)
+        .update({ sent_mid: sentMid } as never)
+        .eq("id", outboxId);
     },
     async markFailed(outboxId, code) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await supabaseAdmin.from("messenger_outbox" as never).update({ last_error: code } as never).eq("id", outboxId);
+      await supabaseAdmin
+        .from("messenger_outbox" as never)
+        .update({ last_error: code } as never)
+        .eq("id", outboxId);
     },
   };
 }

@@ -47,7 +47,8 @@ export function authorizeReplyTarget(
   // Missing, mismatched or foreign threads all look the same to the caller.
   if (!row || row.id !== claimed.threadId) return { ok: false, code: "THREAD_NOT_FOUND" };
   if (!row.psid || !row.leadId || !row.lead) return { ok: false, code: "THREAD_NOT_FOUND" };
-  if (claimed.leadId != null && claimed.leadId !== row.leadId) return { ok: false, code: "THREAD_NOT_FOUND" };
+  if (claimed.leadId != null && claimed.leadId !== row.leadId)
+    return { ok: false, code: "THREAD_NOT_FOUND" };
   if (row.assignedAgentId !== actor.profileId) return { ok: false, code: "THREAD_NOT_FOUND" };
   if (leadOwnerId(row.lead) !== actor.profileId) return { ok: false, code: "THREAD_NOT_FOUND" };
   return { ok: true, threadId: row.id, leadId: row.leadId, psid: row.psid };

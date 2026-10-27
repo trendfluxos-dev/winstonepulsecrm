@@ -15,30 +15,66 @@ const AGENT = "00000000-0000-4000-8000-0000000000a1";
 const THREAD = "00000000-0000-4000-8000-0000000000t1".replace("t1", "01");
 const LEAD = "00000000-0000-4000-8000-0000000000l1".replace("l1", "02");
 const actor = { scope: "agent" as const, readOnly: false, userId: "u-agent", profileId: AGENT };
-const input = { threadId: THREAD, leadId: LEAD, text: "synthetic reply", requestId: crypto.randomUUID(), staffConfirmed: true, actor };
+const input = {
+  threadId: THREAD,
+  leadId: LEAD,
+  text: "synthetic reply",
+  requestId: crypto.randomUUID(),
+  staffConfirmed: true,
+  actor,
+};
 
 function fakeStore(psid: string | null = "PSID_SYNTHETIC") {
   const calls = { inserted: 0, sent: 0, failed: 0 };
   const store: ReplyStore = {
     async getReplyTarget(id) {
-      return psid === null ? null : { id, psid, leadId: LEAD, assignedAgentId: AGENT, lead: { assigned_to: AGENT, assigned_agent_id: AGENT } };
+      return psid === null
+        ? null
+        : {
+            id,
+            psid,
+            leadId: LEAD,
+            assignedAgentId: AGENT,
+            lead: { assigned_to: AGENT, assigned_agent_id: AGENT },
+          };
     },
-    async insertOutbox() { calls.inserted += 1; return "outbox-1"; },
-    async markSent() { calls.sent += 1; },
-    async markFailed() { calls.failed += 1; },
+    async insertOutbox() {
+      calls.inserted += 1;
+      return "outbox-1";
+    },
+    async markSent() {
+      calls.sent += 1;
+    },
+    async markFailed() {
+      calls.failed += 1;
+    },
   };
   return { store, calls };
 }
 
 describe("evaluateReplyGate — every blocker must clear", () => {
   it("refuses when secrets are missing", () => {
-    const gate = evaluateReplyGate({ ...allClear, appSecretConfigured: false, pageTokenConfigured: false, pageIdConfigured: false, staffConfirmed: true });
+    const gate = evaluateReplyGate({
+      ...allClear,
+      appSecretConfigured: false,
+      pageTokenConfigured: false,
+      pageIdConfigured: false,
+      staffConfirmed: true,
+    });
     expect(gate).toEqual({ ok: false, blockers: ["app_secret", "page_token", "page_id"] });
   });
 
   it("refuses without verified tracks, sync enable or staff confirmation", () => {
-    const gate = evaluateReplyGate({ ...allClear, allTracksVerified: false, syncEnabled: false, staffConfirmed: false });
-    expect(gate).toEqual({ ok: false, blockers: ["verification", "sync_disabled", "no_staff_confirm"] });
+    const gate = evaluateReplyGate({
+      ...allClear,
+      allTracksVerified: false,
+      syncEnabled: false,
+      staffConfirmed: false,
+    });
+    expect(gate).toEqual({
+      ok: false,
+      blockers: ["verification", "sync_disabled", "no_staff_confirm"],
+    });
   });
 
   it("passes only when everything is clear", () => {
@@ -72,12 +108,15 @@ describe("guardedSendReply — nothing leaves while blocked", () => {
   it("refuses without explicit staff confirmation even when everything else is clear", async () => {
     const { store, calls } = fakeStore();
     const sendFetch = vi.fn();
-    const result = await guardedSendReply({ ...input, staffConfirmed: false }, {
-      env: {},
-      store,
-      gate: allClear,
-      sendFetch: sendFetch as never,
-    });
+    const result = await guardedSendReply(
+      { ...input, staffConfirmed: false },
+      {
+        env: {},
+        store,
+        gate: allClear,
+        sendFetch: sendFetch as never,
+      },
+    );
     expect(result).toEqual({ ok: false, blockers: ["no_staff_confirm"] });
     expect(calls.inserted).toBe(0);
     expect(sendFetch).not.toHaveBeenCalled();
@@ -99,7 +138,9 @@ describe("guardedSendReply — nothing leaves while blocked", () => {
 
   it("queues then sends when the gate is fully clear, recording the provider message id", async () => {
     const { store, calls } = fakeStore();
-    const sendFetch = vi.fn(async () => new Response(JSON.stringify({ message_id: "mid_synthetic" }), { status: 200 }));
+    const sendFetch = vi.fn(
+      async () => new Response(JSON.stringify({ message_id: "mid_synthetic" }), { status: 200 }),
+    );
     const result = await guardedSendReply(input, {
       env: { META_PAGE_ID: "page1", META_PAGE_ACCESS_TOKEN: "synthetic-token" },
       store,
@@ -116,7 +157,9 @@ describe("guardedSendReply — nothing leaves while blocked", () => {
 
   it("records a generic failure code on provider refusal — never the error body", async () => {
     const { store, calls } = fakeStore();
-    const sendFetch = vi.fn(async () => new Response("provider detail that must not leak", { status: 400 }));
+    const sendFetch = vi.fn(
+      async () => new Response("provider detail that must not leak", { status: 400 }),
+    );
     const result = await guardedSendReply(input, {
       env: { META_PAGE_ID: "page1", META_PAGE_ACCESS_TOKEN: "synthetic-token" },
       store,
@@ -130,7 +173,9 @@ describe("guardedSendReply — nothing leaves while blocked", () => {
 
   it("records NETWORK on transport errors", async () => {
     const { store, calls } = fakeStore();
-    const sendFetch = vi.fn(async () => { throw new Error("boom"); });
+    const sendFetch = vi.fn(async () => {
+      throw new Error("boom");
+    });
     const result = await guardedSendReply(input, {
       env: { META_PAGE_ID: "page1", META_PAGE_ACCESS_TOKEN: "synthetic-token" },
       store,
