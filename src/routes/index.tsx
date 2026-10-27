@@ -29,19 +29,27 @@ import { useT } from "@/lib/i18n";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Winstone Pulse Gateway — The Premium Real Estate CRM" },
+      { title: "Winstone Pulse — The Premium Real Estate CRM" },
       {
         name: "description",
         content:
-          "Winstone Pulse Gateway: choose your workspace — Android, Web / iOS or Desktop — and enter the same Winstone Pulse CRM, the same data on every device.",
+          "লিড, কল, ফলো-আপ ও টিমের ফলাফল — Winstone Pulse-এ সেলস টিমের সব কাজ এক জায়গায়। মোবাইল ও কম্পিউটারে একই CRM।",
       },
-      { property: "og:title", content: "Winstone Pulse Gateway — The Premium Real Estate CRM" },
+      { property: "og:title", content: "Winstone Pulse — The Premium Real Estate CRM" },
       {
         property: "og:description",
-        content: "One gateway. One CRM. One data layer. Every device. Choose Android, Web / iOS or Desktop.",
+        content: "লিড থেকে ফলো-আপ, কল থেকে টিমের ফলাফল — সেলস টিমের সব কাজ এক জায়গায়।",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://crm.winstonebd.com/social/winstone-pulse.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Winstone Pulse — The Premium Real Estate CRM; leads, calls, follow-ups and team performance." },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Winstone Pulse — The Premium Real Estate CRM" },
+      { name: "twitter:description", content: "লিড, কল, ফলো-আপ ও টিমের ফলাফল — আপনার সেলস টিমের সব কাজ এক জায়গায়।" },
+      { name: "twitter:image", content: "https://crm.winstonebd.com/social/winstone-pulse.jpg" },
+      { name: "twitter:image:alt", content: "Winstone Pulse — The Premium Real Estate CRM; leads, calls, follow-ups and team performance." },
     ],
   }),
   component: EntryHall,
