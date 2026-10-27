@@ -418,23 +418,31 @@ export async function submitCallReport(input: {
     ? input.callStatus === "connected"
     : report.connected !== false;
 
-  // LOCKED V2 rule: when the six yes/no answers are sent, Hot/Warm/Cold is
-  // derived here and any client-picked temperature is ignored. Older phone
-  // builds without answers stay on the legacy path until they are updated.
+  // A missing answer set must not reopen the caller-selected legacy score path.
   const { parseAnswers, evaluate, EVALUATION_MODEL } = await import("@/lib/lead-evaluation");
   const answers = received ? parseAnswers(input.evaluationAnswers) : null;
+  if (received && !answers) throw new Error("কথা হওয়া কলের ছয়টি প্রশ্নের উত্তর দিন। পুরোনো অ্যাপ হলে আপডেট করুন।");
   const evaluation = answers ? evaluate(answers, Boolean(input.followUpAt)) : null;
-  const effectiveTemperature = evaluation ? evaluation.category : (input.temperature ?? null);
+  const effectiveTemperature = evaluation?.category ?? null;
+  // Grade has no approved V2 formula: preserve a server-saved classification
+  // or analyzed recording suggestion, never invent a mapping or accept a pick.
+  let trustedGrade = LEAD_GRADES.includes(report.grade as LeadGrade) ? report.grade : null;
+  if (received && !trustedGrade && report.recording_id) {
+    const { data: gradedRecording } = await supabaseAdmin.from("call_recordings")
+      .select("ai_grade, analysis_status, agent_id, lead_id").eq("id", report.recording_id).maybeSingle();
+    if (gradedRecording?.agent_id === input.agentId && gradedRecording.lead_id === report.lead_id && gradedRecording.analysis_status === "completed" && LEAD_GRADES.includes(gradedRecording.ai_grade as LeadGrade)) trustedGrade = gradedRecording.ai_grade;
+  }
+  if (received && !trustedGrade) throw new Error("এই কলের যাচাইকৃত গ্রেড এখনও নেই। IT টিমকে জানান; আপনার রিপোর্ট মুছে যায়নি।");
   const { followUpPriorityFor } = await import("@/lib/follow-up-priority");
   const followUpPriority = input.followUpAt
     ? evaluation?.priority ?? followUpPriorityFor(effectiveTemperature)
     : followUpPriorityFor(effectiveTemperature);
 
-  const invalid = validateReport({ ...input, temperature: effectiveTemperature, connected: received, requireCallFacts: true });
+  const invalid = validateReport({ ...input, temperature: effectiveTemperature, grade: trustedGrade, connected: received, requireCallFacts: true });
   if (invalid) throw new Error(invalid.message);
 
   const temperature = received ? ((effectiveTemperature ?? null) as LeadTemperature | null) : null;
-  const grade = received ? ((input.grade ?? null) as LeadGrade | null) : null;
+  const grade = received ? (trustedGrade as LeadGrade | null) : null;
   const classified = Boolean(temperature && grade);
 
   // Phone-measured call time wins; time spent filling out the report never counts.
@@ -444,10 +452,10 @@ export async function submitCallReport(input: {
   if (report.recording_id && !isWhatsapp) {
     const { data: rec } = await supabaseAdmin
       .from("call_recordings")
-      .select("duration_seconds, call_source, created_at")
+      .select("duration_seconds, call_source, created_at, agent_id, lead_id, call_status")
       .eq("id", report.recording_id)
       .maybeSingle();
-    if (rec && !String(rec.call_source ?? "").startsWith("web")) {
+    if (rec && rec.agent_id === input.agentId && rec.lead_id === report.lead_id && ["android_sim", "phone_recorder"].includes(String(rec.call_source ?? "")) && rec.call_status === "completed") {
       phoneSeconds = rec.duration_seconds ?? null;
       phoneSyncedAt = rec.created_at ?? null;
     }
@@ -457,14 +465,14 @@ export async function submitCallReport(input: {
     const since = new Date(new Date(report.created_at).getTime() - 3 * 60 * 60 * 1000).toISOString();
     const { data: phoneRows } = await supabaseAdmin
       .from("call_recordings")
-      .select("started_at, created_at, duration_seconds, call_source")
+      .select("started_at, created_at, duration_seconds, call_source, call_status")
       .eq("lead_id", report.lead_id)
       .eq("agent_id", report.agent_id)
       .gte("created_at", since)
       .order("created_at", { ascending: false })
       .limit(10);
     const { pickPhoneMeasuredCall } = await import("@/lib/call-duration");
-    const match = pickPhoneMeasuredCall(report.created_at, phoneRows ?? []);
+    const match = pickPhoneMeasuredCall(report.created_at, (phoneRows ?? []).filter((row) => row.call_status === "completed" && ["android_sim", "phone_recorder"].includes(String(row.call_source ?? ""))));
     phoneSeconds = match?.seconds ?? null;
     phoneSyncedAt = match?.syncedAt ?? null;
   }
@@ -984,12 +992,13 @@ export async function editSubmittedReport(input: {
   }
 
   const received = report.connected !== false;
-  const invalid = validateReport({ ...input, connected: received });
+  // Edits can change notes, never replace saved classification with a pick.
+  const temperature = received ? report.temperature as LeadTemperature | null : null;
+  const grade = received ? report.grade as LeadGrade | null : null;
+  const invalid = validateReport({ ...input, temperature, grade, connected: received });
   if (invalid) throw new Error(invalid.message);
 
   const category = input.category as CallCategory;
-  const temperature = received ? ((input.temperature ?? null) as LeadTemperature | null) : null;
-  const grade = received ? ((input.grade ?? null) as LeadGrade | null) : null;
   const nowIso = new Date().toISOString();
   const { followUpPriorityFor } = await import("@/lib/follow-up-priority");
 
