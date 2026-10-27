@@ -19,6 +19,7 @@ const AskInput = z.object({
   adminToken: OptionalToken,
   surface: SurfaceSchema,
   question: z.string().trim().min(3).max(1000),
+  mode: z.enum(["chat", "work_review"]).default("chat"),
   history: z
     .array(
       z.object({
@@ -38,7 +39,7 @@ export const askCommandAgent = createServerFn({ method: "POST" })
     if (caller.scope === "none") throw new Error("সাইন ইন করুন");
 
     const { runCommandAgent } = await import("@/lib/command-agent.server");
-    return runCommandAgent(caller, data.surface as Surface, data.question, data.history);
+    return runCommandAgent(caller, data.surface as Surface, data.question, data.history, data.mode);
   });
 
 const Temperature = z.enum(["hot", "warm", "cold"]);

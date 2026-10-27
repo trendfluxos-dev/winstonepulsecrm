@@ -2,6 +2,8 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Caller } from "@/lib/access.server";
 import { logAiUsage } from "@/lib/ai-usage.server";
 import { recordingRecovery } from "./recording-recovery";
+import { leadOwnerId } from "./lead-access.server";
+import { crmWorkReview, CRM_WORK_REVIEW_PROMPT } from "./crm-work-review";
 
 /**
  * Command Agent — one in-app assistant shared by all four surfaces
@@ -74,15 +76,16 @@ export function allowedActions(caller: Caller): CommandActionType[] {
 
 /** Live, role-scoped facts. An agent only ever sees their own rows. */
 export async function buildCommandFacts(caller: Caller, surface: Surface) {
+  if (caller.scope === "none" || (caller.scope === "agent" && !caller.profile?.id)) throw new Error("সাইন ইন করুন");
   const me = caller.profile?.id ?? null;
   const isAgentScope = caller.scope === "agent";
 
   const [
-    { data: profiles },
-    { data: leads },
-    { data: calls },
-    { data: reports },
-    { data: followUps },
+    { data: profiles, error: profilesError },
+    { data: leads, error: leadsError },
+    { data: calls, error: callsError },
+    { data: reports, error: reportsError },
+    { data: followUps, error: followUpsError },
   ] = await Promise.all([
     supabaseAdmin.from("profiles").select("id, name, role, is_active, approval_status, presence"),
     supabaseAdmin
@@ -114,19 +117,19 @@ export async function buildCommandFacts(caller: Caller, surface: Surface) {
       .limit(300),
   ]);
 
-  const owner = (lead: { assigned_to: string | null; assigned_agent_id: string | null }) =>
-    lead.assigned_to ?? lead.assigned_agent_id ?? null;
+  if (profilesError || leadsError || callsError || reportsError || followUpsError) throw new Error("কাজের তথ্য পড়া যায়নি—এখন কোনো হিসাব বলা যাচ্ছে না।");
+  const owner = leadOwnerId;
 
   const myLeads = isAgentScope ? (leads ?? []).filter((l) => owner(l) === me) : (leads ?? []);
   const myLeadIds = new Set(myLeads.map((l) => l.id));
   const myCalls = isAgentScope
-    ? (calls ?? []).filter((c) => c.agent_id === me || (c.lead_id && myLeadIds.has(c.lead_id)))
+    ? (calls ?? []).filter((c) => c.agent_id === me && c.lead_id && myLeadIds.has(c.lead_id))
     : (calls ?? []);
   const myReports = isAgentScope
-    ? (reports ?? []).filter((r) => r.agent_id === me)
+    ? (reports ?? []).filter((r) => r.agent_id === me && myLeadIds.has(r.lead_id))
     : (reports ?? []);
   const myFollowUps = isAgentScope
-    ? (followUps ?? []).filter((f) => f.agent_id === me)
+    ? (followUps ?? []).filter((f) => f.agent_id === me && myLeadIds.has(f.lead_id))
     : (followUps ?? []);
 
   const staff = (profiles ?? []).filter((p) => p.approval_status === "approved" && p.is_active);
@@ -135,6 +138,10 @@ export async function buildCommandFacts(caller: Caller, surface: Surface) {
     surface,
     scope: caller.scope,
     read_only: caller.readOnly,
+    review_counts: {
+      missed_follow_ups: myFollowUps.filter((f) => f.status === "missed").length,
+      due_follow_ups: myFollowUps.filter((f) => f.status === "due").length,
+    },
     me: caller.profile?.name ?? (caller.scope === "authority" ? "Authority PIN" : null),
     totals: {
       leads: myLeads.length,
@@ -324,7 +331,7 @@ const ANSWER_SCHEMA = {
 } as const;
 
 /** Reads the streamed Responses SSE body and returns the joined answer text. */
-async function readResponsesStream(body: ReadableStream<Uint8Array>): Promise<string> {
+export async function readResponsesStream(body: ReadableStream<Uint8Array>): Promise<string> {
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -343,20 +350,24 @@ async function readResponsesStream(body: ReadableStream<Uint8Array>): Promise<st
       if (!line.startsWith("data:")) continue;
       const payload = line.slice(5).trim();
       if (!payload || payload === "[DONE]") continue;
+      let event: { type?: string; delta?: string; response?: { output_text?: string } };
       try {
-        const event = JSON.parse(payload) as {
+        event = JSON.parse(payload) as {
           type?: string;
           delta?: string;
           response?: { output_text?: string };
         };
+      } catch {
+        continue;
+      }
+      if (event.type === "response.failed" || event.type === "error" || event.type === "response.incomplete" || event.type?.includes("refusal")) {
+        throw new Error("এআই এই অনুরোধের উত্তর সম্পূর্ণ করেনি।");
+      }
         if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
           text += event.delta;
         } else if (event.type === "response.completed" && event.response?.output_text) {
           if (!text) text = event.response.output_text;
         }
-      } catch {
-        // A partial SSE frame is normal mid-stream; the next chunk completes it.
-      }
     }
   }
   return text;
@@ -367,12 +378,15 @@ export async function runCommandAgent(
   surface: Surface,
   question: string,
   history: { role: "user" | "assistant"; content: string }[] = [],
+  mode: "chat" | "work_review" = "chat",
 ): Promise<CommandAnswer> {
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) throw new Error("এআই এখন কনফিগার করা নেই");
 
   const facts = await buildCommandFacts(caller, surface);
-  const allowed = allowedActions(caller);
+  const review = mode === "work_review";
+  const allowed = review ? [] : allowedActions(caller);
+  const modelFacts = review ? crmWorkReview(facts) : facts;
 
   // Reasoning model on the Responses API: it must stream, or a long thinking run
   // is cut off by the request timeout and billed for nothing.
@@ -388,6 +402,7 @@ export async function runCommandAgent(
       stream: true,
       store: false,
       reasoning: { effort: "medium", summary: "auto" },
+      include: ["reasoning.encrypted_content"],
       text: {
         format: {
           type: "json_schema",
@@ -397,8 +412,8 @@ export async function runCommandAgent(
         },
       },
       input: [
-        { role: "system", content: [{ type: "input_text", text: SYSTEM }] },
-        ...(history.length
+        { role: "system", content: [{ type: "input_text", text: review ? `You are Winstone AI. Reply in Bengali. ${CRM_WORK_REVIEW_PROMPT}` : SYSTEM }] },
+        ...(!review && history.length
           ? [
               {
                 role: "user",
@@ -422,7 +437,7 @@ export async function runCommandAgent(
             {
               type: "input_text",
               text: `allowed_actions: ${JSON.stringify(allowed)}\nlive_data: ${JSON.stringify(
-                facts,
+                modelFacts,
               )}\n\nপ্রশ্ন/নির্দেশ: ${question}`,
             },
           ],
@@ -434,8 +449,7 @@ export async function runCommandAgent(
   if (response.status === 429) throw new Error("এআই এখন ব্যস্ত — একটু পরে আবার চেষ্টা করুন");
   if (response.status === 402) throw new Error("এআই ক্রেডিট শেষ হয়ে গেছে");
   if (!response.ok || !response.body) {
-    const detail = response.ok ? "" : await response.text().catch(() => "");
-    console.error("[command-agent] gateway error", response.status, detail.slice(0, 300));
+    console.error("[command-agent] gateway error", response.status);
     throw new Error(`এআই সাড়া দেয়নি (${response.status})`);
   }
 
