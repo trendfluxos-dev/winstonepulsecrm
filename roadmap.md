@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-27 — OpenAI CRM work review
+- [ ] Add a read-only review inside Winstone AI for scoped lead, follow-up and report evidence; no automatic actions or provider-setting changes.
+- [ ] Verify ownership, incomplete-evidence handling, tests, preview and a synthetic OpenAI call; report any service blocker without deploying.
+
 ## 2026-10-27 — Security-gated release and live workflow verification
 - [x] 132 focused security/regression tests passed; basic scan clear. Live /manual passes v1.6.0/$35.29/50 markers, but these unchanged markers do not identify the latest unpublished security fixes.
 - [x] Live signed-out entry/gated routes and signed-in customer search, recorder and admin pages render without page errors; six real staff-session ownership read tests and eight local read-only/walkthrough tests pass. Desk contribution modal prevents completing the underlying desk flow; no contribution or customer write submitted, no password changed, public support chat unchanged.
