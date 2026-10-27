@@ -210,6 +210,7 @@
   --color-gold: var(--gold);
   --color-gold-strong: var(--gold-strong);
   --color-charcoal: var(--charcoal);
+  --color-plate-ink: var(--plate-ink);
   --color-button-foreground: var(--button-foreground);
   --color-button-hover: var(--button-hover);
   --color-gold-hover: var(--gold-hover);
@@ -274,6 +275,7 @@
   --gold-strong: var(--gold-hover);
   --gold-ink: oklch(0.46 0.08 80);
   --charcoal: var(--foreground);
+  --plate-ink: oklch(0 0 0);
   --button-foreground: var(--card);
   --button-hover: oklch(0.27 0 0);
   --primary: var(--gold);

@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { BarChart3, Database, Headphones, Lock, Server } from "lucide-react";
-import logoAsset from "@/assets/winstone-pulse-logo.png.asset.json";
+import logoAsset from "@/assets/winstone-pulse-logo-black.png.asset.json";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
