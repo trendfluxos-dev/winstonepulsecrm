@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 import { createSaveLatch, matchCallShortcut, SHORTCUT_LABELS } from "@/lib/call-shortcuts";
 import { useLang, useT, type Lang } from "@/lib/i18n";
+import { Bi } from "@/components/crm/Bi";
 import { DictateButton } from "@/components/crm/DictateButton";
 import { DEFAULT_RETRY_PICK, NoAnswerRetryPicker, type RetryPick } from "@/components/crm/NoAnswerRetryPicker";
 import { Button } from "@/components/ui/button";
@@ -943,7 +944,8 @@ function ReportDialog({
         <DialogContent data-call-report-dialog className="h-[100dvh] max-h-[100dvh] w-full max-w-lg space-y-1 overflow-y-auto rounded-none p-4 pb-8 sm:h-auto sm:max-h-[90vh] sm:rounded-xl sm:p-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base">
-              <AlertTriangle className="size-4 text-warning" /> Post-Call Smart Report
+              <AlertTriangle className="size-4 text-warning" />
+              <Bi en="Post-Call Smart Report" bn="কল-শেষের স্মার্ট রিপোর্ট" />
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/40 p-3 text-xs">

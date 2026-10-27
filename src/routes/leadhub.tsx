@@ -20,6 +20,7 @@ import { LeadHubTokenScope, useLeadHubToken } from "@/lib/local-session";
 import { useMyAccount } from "@/lib/session";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { useT } from "@/lib/i18n";
+import { Bi } from "@/components/crm/Bi";
 import { InstructionCopilot } from "@/components/crm/InstructionCopilot";
 import { useCoordinatorAllocation } from "@/components/crm/deck/AssignLeadsWorkspace";
 
@@ -70,7 +71,7 @@ function LeadHubGate() {
       <span className="mx-auto grid size-12 place-items-center rounded-full bg-primary/15 text-primary"><KeyRound className="size-6" /></span>
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">{t({ bn: "HQ / IT সুরক্ষিত ওয়ার্কস্পেস", en: "HQ / IT secured workspace" })}</p>
-        <h1 className="text-xl font-bold">LeadHub Nexus</h1>
+        <h1 className="text-xl font-bold"><Bi en="LeadHub Nexus" bn="লিড হাব (সব লিড)" /></h1>
         <p className="mt-1 text-sm text-muted-foreground">{t({ bn: "LeadHub-এর আলাদা PIN দিন। HQ দেখার অনুমতি বা সাধারণ IT PIN এখানে প্রযোজ্য নয়।", en: "Enter the dedicated LeadHub PIN. HQ viewing access and ordinary IT PINs do not unlock this workspace." })}</p>
       </div>
       <Button size="lg" className="w-full" onClick={() => setPinOpen(true)}><KeyRound className="size-4" /> {t({ bn: "PIN দিয়ে খুলুন", en: "Unlock with PIN" })}</Button>
@@ -92,7 +93,7 @@ function LeadHubWorkspace() {
     <div className="hq-luxe space-y-5 rounded-3xl p-3 sm:p-5">
       <header>
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">{t({ bn: "একক লিড ইন্টেলিজেন্স ও পরিচয় স্তর", en: "Single lead intelligence and identity layer" })}</p>
-        <h1 className="text-2xl font-bold">LeadHub Nexus</h1>
+        <h1 className="text-2xl font-bold"><Bi en="LeadHub Nexus" bn="লিড হাব (সব লিড)" /></h1>
         <p className="text-sm text-muted-foreground">{t({ bn: "ইমপোর্ট → ঠিকঠাক করা → পরিচয় মেলানো → মূল লিড ডেটাবেস → এজেন্টে বণ্টন", en: "Import → normalize → identity resolve → Canonical Lead Database → agent assignment" })}</p>
       </header>
       <InstructionCopilot surface="leadhub" onAssignment={(employeeId, count) => {
