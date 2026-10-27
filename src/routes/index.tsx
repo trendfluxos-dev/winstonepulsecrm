@@ -114,7 +114,7 @@ function EntryHall() {
             <p className="mt-3 text-xl font-medium text-foreground sm:text-2xl">
               The Premium Real Estate CRM.
             </p>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            <p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-foreground sm:text-base">
               {t({ bn: "লিড, কল, ফলো-আপ আর টিমের ফলাফল — আপনার সেলস টিমের সব কাজ এক জায়গায়।", en: "Leads, calls, follow-ups and team performance. One connected workspace for your sales floor." })}
             </p>
             <Button asChild variant="outline" className="mt-5"><Link to="/walkthrough"><BookOpen />{t({ bn: "CRM walkthrough দেখুন", en: "Explore the CRM walkthrough" })}</Link></Button>
