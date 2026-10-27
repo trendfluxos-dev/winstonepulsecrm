@@ -1,1 +1,8 @@
+# Copy to local.properties (never commit it).
 sdk.dir=/path/to/Android/sdk
+# Optional local release signing (CI uses WINSTONE_* GitHub secrets instead)
+RELEASE_STORE_FILE=/secure/path/winstone-release.jks
+RELEASE_STORE_PASSWORD=
+RELEASE_KEY_ALIAS=winstone
+RELEASE_KEY_PASSWORD=
+CRM_BASE_URL=https://crm.winstonebd.com
