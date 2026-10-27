@@ -204,7 +204,7 @@ function EntryHall() {
 
         <h2
           id="workspace-signin"
-          className="font-hand mt-12 scroll-mt-6 text-center text-3xl font-semibold tracking-normal sm:text-4xl"
+          className="font-hand mt-12 scroll-mt-20 text-center text-3xl font-semibold tracking-normal sm:text-4xl"
         >
           {t({ bn: "আপনার কর্মঘরে প্রবেশ করুন", en: "Sign in to your workspace" })}
           <span aria-hidden className="mx-auto mt-2 block h-0.5 w-12 bg-gold" />
