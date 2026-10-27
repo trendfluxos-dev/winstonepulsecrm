@@ -58,11 +58,13 @@ function WorkspaceSigninPage() {
       <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:h-16 sm:px-6">
           <Link to="/" className="flex min-w-0 items-center gap-2.5">
-            <img
-              src={logoAsset.url}
-              alt="Winstone Pulse — The Premium Real Estate CRM"
-              className="h-9 w-auto shrink-0 sm:h-10"
-            />
+            <span className="inline-flex shrink-0 items-center overflow-hidden rounded-lg bg-plate-ink">
+              <img
+                src={logoAsset.url}
+                alt="Winstone Pulse — The Premium Real Estate CRM"
+                className="block h-9 w-auto sm:h-10"
+              />
+            </span>
           </Link>
           <Link
             to="/"
