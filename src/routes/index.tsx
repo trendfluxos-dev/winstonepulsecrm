@@ -129,7 +129,7 @@ function EntryHall() {
               {t({ bn: "লিড, কল, ফলো-আপ আর টিমের ফলাফল — আপনার সেলস টিমের সব কাজ এক জায়গায়।", en: "Leads, calls, follow-ups and team performance. One connected workspace for your sales floor." })}
             </p>
             <Button asChild variant="outline" className="mt-5"><Link to="/walkthrough"><BookOpen />{t({ bn: "CRM walkthrough দেখুন", en: "Explore the CRM walkthrough" })}</Link></Button>
-            <figure className="mt-8 overflow-hidden rounded-xl border border-border bg-card sm:mt-10">
+            <figure className="-mx-4 mt-8 overflow-hidden border-y border-border bg-card sm:mx-0 sm:mt-10 sm:rounded-xl sm:border">
               <img
                 src={teamHeroAsset.url}
                 alt={t({ bn: "Winstone Pulse CRM নিয়ে আলোচনা করছেন দুইজন", en: "Two professionals discussing the Winstone Pulse CRM" })}
@@ -139,13 +139,13 @@ function EntryHall() {
                 className="block h-auto w-full"
               />
             </figure>
-            <div className="mt-8 grid overflow-hidden rounded-xl border border-border bg-card sm:mt-10 sm:grid-cols-3">
+            <div className="mt-8 grid overflow-hidden rounded-xl border border-border bg-card sm:mt-10 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { icon: Headphones, label: t({ bn: "টিম সামলান", en: "Manage your team" }), sub: t({ bn: "এজেন্ট, ভূমিকা ও ফলাফল", en: "Agents, roles & performance" }) },
                 { icon: BarChart3, label: t({ bn: "কাজের ধাপ দেখুন", en: "Track your pipeline" }), sub: t({ bn: "লিড, ফলো-আপ ও বুকিং", en: "Leads, follow-ups & bookings" }) },
                 { icon: Smartphone, label: t({ bn: "কলের কাজ দেখুন", en: "Review call activity" }), sub: t({ bn: "কল রিপোর্ট ও কাস্টমারের ইতিহাস", en: "Call reports & customer history" }) },
               ].map(({ icon: Icon, label, sub }) => (
-                <span key={label} className="flex items-center gap-3 border-border p-4 text-left text-sm font-semibold text-foreground [&:not(:first-child)]:border-t sm:p-5 sm:[&:not(:first-child)]:border-l sm:[&:not(:first-child)]:border-t-0">
+                <span key={label} className="flex items-center gap-3 border-border p-4 text-left text-sm font-semibold text-foreground [&:not(:first-child)]:border-t sm:p-5 sm:[&:nth-child(2)]:border-l sm:[&:nth-child(2)]:border-t-0 sm:[&:nth-child(3)]:col-span-2 lg:[&:nth-child(3)]:col-span-1 lg:[&:nth-child(3)]:border-l lg:[&:nth-child(3)]:border-t-0">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full text-gold ring-1 ring-gold/40">
                     <Icon className="size-4" />
                   </span>
