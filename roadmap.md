@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-27 — Approved security fixes and release
+- [ ] Block callback lead takeover without adding an assignment path.
+- [ ] Restrict lead-sheet previews to server-approved spreadsheet sources.
+- [ ] Neutralise spreadsheet formulas in audit CSV downloads; verify targeted regressions.
+- [ ] Publish verified fixes and check live release; leave public support AI and category findings unchanged.
+
 ## HQ screenshot — false no-call/untouched claims
 - [x] Diagnose recording-only counts, omitted submitted reports, browser-local day and unsupported inactivity claims.
 - [x] Reconciled command-center evidence, distinguished unknown phone sync, excluded saved attempts/last-call markers and removed unsupported projections. 12 tests, colors and harness build pass; signed-in HQ English/Bangla and desktop/428px inspected, no overflow/errors. Live read-back: 212 pending without evidence, zero recorded calls today; actual phone sync remains unverified. No data or deployment changes.
