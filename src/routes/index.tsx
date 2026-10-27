@@ -203,7 +203,7 @@ function EntryHall() {
         </p>
 
         <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
-          <Button size="lg" className="btn-enter w-full rounded-md text-base font-bold" onClick={() => document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+          <Button size="lg" className="btn-enter w-full rounded-md text-base font-bold" onClick={openSignin}>
             {t({ bn: "শুরু করুন", en: "Get started" })} <ChevronRight className="size-5" />
           </Button>
           <p className="mt-2 text-center text-xs text-muted-foreground">
