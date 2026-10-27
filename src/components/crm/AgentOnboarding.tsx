@@ -104,14 +104,17 @@ export function AgentOnboarding() {
                   size="sm"
                   variant="secondary"
                   disabled={!r.hasAccount || link.isPending}
-                  onClick={() => link.mutate(r.profileId)}
+                  title="এজেন্টের নিজের ইমেইলে একবার ব্যবহারযোগ্য রিসেট লিংক যাবে; কেউ পাসওয়ার্ড দেখবে না"
+                  onClick={() => {
+                    if (window.confirm(`${r.name}-এর ইমেইলে একবার ব্যবহারযোগ্য পাসওয়ার্ড রিসেট লিংক পাঠাবেন?`)) link.mutate(r.profileId);
+                  }}
                 >
                   {link.isPending && link.variables === r.profileId ? (
                     <Loader2 className="size-3.5 animate-spin" />
                   ) : (
                     <KeyRound className="size-3.5" />
                   )}
-                  লিংক তৈরি
+                  রিসেট লিংক ইমেইলে পাঠান
                 </Button>
                 {!(r.isActive && r.approved) && (
                   <Button
