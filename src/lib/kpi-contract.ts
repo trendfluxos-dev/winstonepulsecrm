@@ -23,7 +23,7 @@ import { dhakaDay } from "@/lib/lead-groups";
 export const CONNECTED_SECONDS = 10;
 export type DayRange = { from: string | null; to: string | null };
 export type KpiLead = { id: string; status: string; work_state?: string | null; work_date?: string | null; temperature?: string | null; assigned_agent_id?: string | null; assigned_to?: string | null };
-export type KpiReport = { id: string; submitted_at: string | null; connected: boolean | null };
+export type KpiReport = { id: string; submitted_at: string | null; connected: boolean | null; lead_id?: string | null };
 export type KpiCall = { id: string; started_at?: string | null; created_at: string; duration_seconds: number | null };
 export type KpiFollowUp = { id: string; status: string; scheduled_at: string | null };
 
@@ -79,6 +79,29 @@ export function reportKpis(reports: KpiReport[], range: DayRange) {
   const rows = uniqueById(reports).filter((r) => inDhakaRange(r.submitted_at, range));
   const reportedConnected = rows.filter((r) => r.connected === true).length;
   return { submitted: rows.length, reportedConnected, rate: rows.length ? Math.round((reportedConnected / rows.length) * 100) : 0 };
+}
+
+/**
+ * Reconciles report count vs lead count: one lead can carry many reports (one per call),
+ * so submitted reports may exceed owned leads. `stillOwned` = reported leads the agent owns now.
+ */
+export function reportLeadReconciliation(reports: KpiReport[], range: DayRange, ownedLeadIds: ReadonlySet<string>) {
+  const rows = uniqueById(reports).filter((r) => inDhakaRange(r.submitted_at, range));
+  const perLead = new Map<string, number>();
+  for (const r of rows) if (r.lead_id) perLead.set(r.lead_id, (perLead.get(r.lead_id) ?? 0) + 1);
+  const counts = [...perLead.values()];
+  const leads = perLead.size;
+  const stillOwned = [...perLead.keys()].filter((id) => ownedLeadIds.has(id)).length;
+  return {
+    reports: rows.length,
+    leads,
+    stillOwned,
+    movedAway: leads - stillOwned,
+    withoutLead: rows.filter((r) => !r.lead_id).length,
+    avgPerLead: leads ? Math.round((rows.length / leads) * 10) / 10 : 0,
+    maxPerLead: counts.length ? Math.max(...counts) : 0,
+    multiReportLeads: counts.filter((n) => n > 1).length,
+  };
 }
 
 export function callKpis(calls: KpiCall[], range: DayRange) {
