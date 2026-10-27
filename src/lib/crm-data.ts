@@ -177,6 +177,7 @@ export function useSnapshot() {
     ...(query.data ?? EMPTY_SNAPSHOT),
     isPending: accountPending || (scope !== "none" && query.isPending),
     isError: query.isError && !query.data,
+    readError: query.isError,
     refetch: () => void query.refetch(),
   };
 }

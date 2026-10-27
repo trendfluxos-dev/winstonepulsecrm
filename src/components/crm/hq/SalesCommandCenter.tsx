@@ -59,6 +59,8 @@ export function SalesCommandCenter({
   loading,
   onDrill,
   onSelectAgent,
+  snapshotTime,
+  snapshotError,
 }: {
   profiles: Profile[];
   leads: Lead[];
@@ -67,6 +69,8 @@ export function SalesCommandCenter({
   loading: boolean;
   onDrill: (spec: DrillSpec) => void;
   onSelectAgent: (id: string) => void;
+  snapshotTime?: string;
+  snapshotError?: boolean;
 }) {
   const t = useT();
   const adminToken = useAdminToken();
@@ -104,6 +108,7 @@ export function SalesCommandCenter({
         leads,
         calls,
         reports: feed.data?.reports ?? [],
+        pendingReports: feed.data?.pendingReports ?? [],
         followUps: feed.data?.followUps ?? [],
         agents,
         filters: invalidRange ? { ...filters, ...presetRange("7d", new Date()) } : filters,
@@ -177,8 +182,8 @@ export function SalesCommandCenter({
         </select>
         <span className="ml-auto text-[11px] text-muted-foreground">{range.fromDay} – {range.toDay} · Asia/Dhaka</span>
       </div>
-      {invalidRange ? <p role="alert" className="text-sm text-destructive">{invalidRange} No performance totals are shown for this invalid range.</p> : feed.error ? <div role="alert"><p className="text-sm text-destructive">The latest read failed. Performance totals are unavailable; cached numbers are not shown as fresh.</p><Button variant="outline" onClick={() => void feed.refetch()}>Try again</Button></div> : <>
-      <PerformanceCountAudit audit={cc.audit} period={`${range.fromDay} – ${range.toDay}`} freshness={feed.data?.freshness.generatedAt} refreshing={feed.isFetching} onRefresh={() => void feed.refetch()} onAgent={onSelectAgent} onLeads={drill} />
+      {invalidRange ? <p role="alert" className="text-sm text-destructive">{invalidRange} No performance totals are shown for this invalid range.</p> : feed.error || snapshotError ? <div role="alert"><p className="text-sm text-destructive">The latest read failed. Performance totals are unavailable; cached numbers are not shown as fresh.</p><Button variant="outline" onClick={() => { void feed.refetch(); void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] }); }}>Try again</Button></div> : <>
+      <PerformanceCountAudit audit={cc.audit} period={`${range.fromDay} – ${range.toDay}`} freshness={feed.data?.freshness.generatedAt} snapshotTime={snapshotTime} refreshing={feed.isFetching} onRefresh={() => { void feed.refetch(); void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] }); }} onAgent={onSelectAgent} onLeads={drill} />
       <details><summary className="cursor-pointer text-sm font-medium">Sales context · current-state funnel / today-only legacy summaries (not the operational score)</summary><div className="mt-4 space-y-5">
       {/* KPI pulse */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">

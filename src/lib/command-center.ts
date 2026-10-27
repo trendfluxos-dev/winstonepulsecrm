@@ -75,6 +75,7 @@ export function computeCommandCenter(input: {
   leads: CcLead[];
   calls: CcCall[];
   reports: CcReport[];
+  pendingReports?: CcReport[];
   followUps: CcFollowUp[];
   agents: CcAgent[];
   filters: CcFilters;

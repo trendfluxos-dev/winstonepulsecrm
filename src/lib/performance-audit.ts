@@ -17,7 +17,7 @@ export function uniqueRows<T extends { id: string }>(rows: T[]): T[] {
   return [...new Map(rows.map(row => [row.id, row])).values()];
 }
 
-export type AuditInput = { leads: CcLead[]; calls: CcCall[]; reports: CcReport[]; followUps: CcFollowUp[]; agents: CcAgent[]; filters: CcFilters; now: Date };
+export type AuditInput = { leads: CcLead[]; calls: CcCall[]; reports: CcReport[]; pendingReports?: CcReport[]; followUps: CcFollowUp[]; agents: CcAgent[]; filters: CcFilters; now: Date };
 export type AuditIssue = { kind: string; table: string; ids: string[]; explanation: string };
 const owner = (lead: CcLead) => lead.assigned_agent_id ?? lead.assigned_to;
 const validTime = (value: string | null | undefined) => Boolean(value && Number.isFinite(Date.parse(value)));
@@ -42,6 +42,7 @@ export function auditPerformance(input: AuditInput) {
   const rawReports = input.reports.filter(scoped).filter(r => inRange(r.submitted_at ?? r.created_at));
   const rawCalls = input.calls.filter(scoped).filter(c => inRange(c.started_at ?? c.created_at));
   const reports = uniqueRows(rawReports).filter(r => r.status === undefined || r.status === "submitted");
+  const pendingReports = uniqueRows(input.pendingReports ?? []).filter(scoped).filter(r => inRange(r.created_at));
   const callRows = uniqueRows(rawCalls);
   // External call IDs are scoped to the actor; never merge different agents or guess by phone/time.
   const calls = [...new Map(callRows.map(c => [physicalCallKey(c), c])).values()];
@@ -87,9 +88,11 @@ export function auditPerformance(input: AuditInput) {
   add("Connection discrepancy", "call_reports", reports.filter(r => { const c = linked(r); return c && typeof r.connected === "boolean" && r.connected !== (c.call_status === "completed" && (c.device_reported_duration_seconds ?? c.duration_seconds) > 10); }).map(r => r.id), "Submitted answer and saved call outcome differ; review, do not silently replace either.");
   add("Unknown assignment date", "leads", leads.filter(l => owner(l) && !l.work_date).map(l => l.id), "Excluded from date-cohort denominator because saved work date is absent.");
   add("Unknown actor", "call_reports", reports.filter(r => !input.agents.some(a => a.id === r.agent_id)).map(r => r.id), "Range totals include this record, but it is not attributed to an active roster row.");
+  add("Incomplete reports", "call_reports", pendingReports.map(r => r.id), "Report created in range but not submitted; excluded from submitted-report score. This is saved status, not an audio-upload verdict.");
+  add("Assignment roster mismatch", "leads", assigned.filter(l => !rows.some(a => a.id === owner(l))).map(l => l.id), "Assigned-cohort total differs from active-agent sum; inactive/unknown owners are retained in totals, not silently removed or reassigned.");
   add("Invalid activity timestamp", "call_reports", input.reports.filter(scoped).filter(r => !validTime(r.submitted_at ?? r.created_at)).map(r => r.id), "Cannot place record in the selected time range.");
   const totalAttempts = [...attempts.values()];
-  const totals = { calls: totalAttempts.length, connected: totalAttempts.filter(c => c.connected && c.verified).length, reportedConnected: totalAttempts.filter(c => c.connected).length, reports: reports.length, assigned: assigned.length, completed: completed.length, pending: assigned.length - completed.length, overdue: overdueFu.length, followUps: doneFu.length };
+  const totals = { calls: totalAttempts.length, connected: totalAttempts.filter(c => c.connected && c.verified).length, reportedConnected: totalAttempts.filter(c => c.connected).length, reports: reports.length, incompleteReports: pendingReports.length, assigned: assigned.length, completed: completed.length, pending: assigned.length - completed.length, overdue: overdueFu.length, followUps: doneFu.length };
   const sum = rows.reduce((n, row) => n + row.calls, 0);
   if (sum !== totals.calls) add("Roster total mismatch", "activity", totalAttempts.filter(c => !rows.some(a => a.id === c.agent_id)).map(c => c.id), `Range call total ${totals.calls}; per-agent sum ${sum}. Unknown/inactive actors remain unassigned to roster.`);
   const diagnostics = {
@@ -101,5 +104,5 @@ export function auditPerformance(input: AuditInput) {
     verifiedAudio: calls.filter(c => c.sync_status === "verified" && Boolean(c.storage_path) && Boolean(c.checksum) && (c.file_size_bytes ?? 0) > 0).length,
     unknownAudio: calls.filter(c => !(c.sync_status === "verified" && c.storage_path && c.checksum && (c.file_size_bytes ?? 0) > 0)).length,
   };
-  return { rows, totals, issues, diagnostics, reports, calls, assigned, completed, dueFu, overdueFu, asOf: input.now.toISOString() };
+  return { rows, totals, issues, diagnostics, reports, calls, assigned, completed, dueFu, overdueFu, pendingReports, asOf: input.now.toISOString() };
 }

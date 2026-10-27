@@ -91,7 +91,7 @@ function ControlBoardPage() {
 }
 
 function ControlBoard() {
-  const { profiles, leads, calls, messages, events, isPending } = useSnapshot();
+  const { profiles, leads, calls, messages, events, isPending, serverTime, readError } = useSnapshot();
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
   const [openAgentId, setOpenAgentId] = useState<string | null>(null);
   /** Which number card / mix-card row the executive drilled into. */
@@ -225,6 +225,8 @@ function ControlBoard() {
                 <DistributionFailurePanel />
                 <SalesChartsDashboard scope="hq" />
                 <SalesCommandCenter
+                  snapshotTime={serverTime}
+                  snapshotError={readError}
                   profiles={profiles}
                   leads={leads}
                   calls={calls}
@@ -256,7 +258,7 @@ function ControlBoard() {
 
             {tab === "performance" && (
               <div className="space-y-8">
-                <SalesCommandCenter profiles={profiles} leads={leads} calls={calls} messages={messages} loading={isPending} onDrill={setDrill} onSelectAgent={setOpenAgentId} />
+                <SalesCommandCenter snapshotTime={serverTime} snapshotError={readError} profiles={profiles} leads={leads} calls={calls} messages={messages} loading={isPending} onDrill={setDrill} onSelectAgent={setOpenAgentId} />
                 <ExecutiveOverview
                   profiles={profiles}
                   leads={leads}
