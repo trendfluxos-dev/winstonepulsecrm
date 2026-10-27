@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getDeskReports } from "@/lib/desk-work.functions";
-import { leadKpis, rangeError, reportKpis, whatsappKpi } from "@/lib/kpi-contract";
+import { leadKpis, ownerOf, rangeError, reportLeadReconciliation, reportKpis, whatsappKpi } from "@/lib/kpi-contract";
 import {
   Area,
   AreaChart,
@@ -155,6 +155,9 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
   const lk = me ? leadKpis(leads, me) : null;
   const rk = reportsQ.data ? reportKpis(reportsQ.data.reports, range) : null;
   const wa = whatsappKpi(messages, range);
+  const rr = reportsQ.data && me
+    ? reportLeadReconciliation(reportsQ.data.reports, range, new Set(leads.filter((l) => ownerOf(l) === me).map((l) => l.id)))
+    : null;
   const tiles = scope === "agent" ? [
     { label: t({ bn: "আমার মালিকানার লিড (এখন)", en: "Owned leads (now)" }), value: rangeErr ? "—" : lk ? lk.owned : na, icon: Users, tone: "primary" as const },
     { label: t({ bn: "চলমান বরাদ্দ কাজ (এখন)", en: "Active assigned (now)" }), value: rangeErr ? "—" : lk ? lk.active : na, icon: Users, tone: "primary" as const },
@@ -162,6 +165,7 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
     { label: t({ bn: "বন্ধ লিড (স্ট্যাটাস, এখন)", en: "Closed leads (status, now)" }), value: rangeErr ? "—" : lk ? lk.closed : na, icon: CheckCircle2, tone: "muted" as const },
     { label: t({ bn: "জমা দেওয়া রিপোর্ট", en: "Submitted reports" }), value: rangeErr ? "—" : rk ? rk.submitted : na, icon: CheckCircle2, tone: "accent" as const },
     { label: t({ bn: "কথা হয়েছে (রিপোর্ট অনুযায়ী)", en: "Connected (per reports)" }), value: rangeErr ? "—" : rk ? `${rk.reportedConnected} (${rk.rate}%)` : na, icon: PhoneCall, tone: "live" as const },
+    { label: t({ bn: "রিপোর্ট হওয়া আলাদা লিড", en: "Distinct leads reported on" }), value: rangeErr ? "—" : rr ? rr.leads : na, icon: Users, tone: "accent" as const },
     { label: t({ bn: "হোয়াটসঅ্যাপ", en: "WhatsApp" }), value: rangeErr ? "—" : wa ?? na, icon: MessageCircle, tone: "chart4" as const },
   ] : [
     { label: scope === "hq" ? t({ bn: "মোট লিড", en: "Total leads" }) : t({ bn: "আমার লিড", en: "My leads" }), value: k.leads, icon: Users, tone: "primary" as const },
@@ -248,6 +252,17 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
           />
         ))}
       </div>
+      {scope === "agent" && rr && !rangeErr && rr.reports > 0 && (
+        <div className="rounded-xl border bg-muted/40 p-3 text-xs leading-relaxed">
+          <p className="font-semibold">{t({ bn: "রিপোর্ট ও লিড মিলিয়ে দেখা", en: "Reports vs leads reconciliation" })} · {rangeLabel}</p>
+          <p className="mt-1 text-muted-foreground">
+            {t({
+              bn: `${rr.reports}টি জমা রিপোর্ট ${rr.leads}টি আলাদা লিডের (গড়ে ${rr.avgPerLead}টি, সর্বোচ্চ ${rr.maxPerLead}টি/লিড; ${rr.multiReportLeads}টি লিডে একাধিক রিপোর্ট)। প্রতিটি কলের পর আলাদা রিপোর্ট হয়, তাই রিপোর্ট লিডের চেয়ে বেশি হতে পারে। এর মধ্যে ${rr.stillOwned}টি লিড এখনো আপনার, ${rr.movedAway}টি পরে অন্যত্র গেছে${rr.withoutLead ? `, ${rr.withoutLead}টি রিপোর্টে লিড নেই` : ""}। এটি সংখ্যা ও পরিধি মেলায়; রিপোর্টের বিষয়বস্তু সঠিক কিনা তা যাচাই করে না।`,
+              en: `${rr.reports} submitted reports cover ${rr.leads} distinct leads (avg ${rr.avgPerLead}, max ${rr.maxPerLead} per lead; ${rr.multiReportLeads} leads have more than one). A report is written after every call, so reports can exceed leads. ${rr.stillOwned} of those leads are still yours, ${rr.movedAway} were moved later${rr.withoutLead ? `, ${rr.withoutLead} reports have no lead` : ""}. This reconciles counts and scope only, not report content.`,
+            })}
+          </p>
+        </div>
+      )}
       {scope === "agent" && (
         <p className="text-xs text-muted-foreground">
           {t({

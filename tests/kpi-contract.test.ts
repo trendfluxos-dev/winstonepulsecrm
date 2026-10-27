@@ -90,3 +90,23 @@ describe("regression: agent Analytics lead tiles showed 0 while reports loaded",
     expect(leadKpis(snapshot, "22222222-2222-4222-8222-222222222222")).toMatchObject({ owned: 1, active: 1, hot: 0, closed: 0 });
   });
 });
+
+import { reportLeadReconciliation } from "@/lib/kpi-contract";
+describe("reports vs leads reconciliation", () => {
+  const reps = [
+    { id: "r1", submitted_at: "2026-10-20T04:00:00Z", connected: true, lead_id: "L1" },
+    { id: "r2", submitted_at: "2026-10-21T04:00:00Z", connected: false, lead_id: "L1" },
+    { id: "r2", submitted_at: "2026-10-21T04:00:00Z", connected: false, lead_id: "L1" },
+    { id: "r3", submitted_at: "2026-10-22T04:00:00Z", connected: true, lead_id: "L2" },
+    { id: "r4", submitted_at: "2026-09-01T04:00:00Z", connected: true, lead_id: "L3" },
+  ];
+  it("counts many reports per lead and splits still-owned vs moved", () => {
+    const r = reportLeadReconciliation(reps, { from: null, to: null }, new Set(["L1"]));
+    expect(r).toMatchObject({ reports: 4, leads: 3, stillOwned: 1, movedAway: 2, maxPerLead: 2, multiReportLeads: 1, withoutLead: 0 });
+  });
+  it("respects the selected Dhaka range", () => {
+    const r = reportLeadReconciliation(reps, { from: "2026-10-01", to: "2026-10-31" }, new Set());
+    expect(r.reports).toBe(3);
+    expect(r.leads).toBe(2);
+  });
+});
