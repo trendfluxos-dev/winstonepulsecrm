@@ -21,9 +21,8 @@ export type AuditInput = { leads: CcLead[]; calls: CcCall[]; reports: CcReport[]
 export type AuditIssue = { kind: string; table: string; ids: string[]; explanation: string };
 const owner = (lead: CcLead) => lead.assigned_agent_id ?? lead.assigned_to;
 const validTime = (value: string | null | undefined) => Boolean(value && Number.isFinite(Date.parse(value)));
-const callDay = (call: CcCall) => dhakaDay(call.started_at ?? call.created_at);
 export const physicalCallKey = (call: CcCall) => `${call.agent_id ?? "unknown"}:${call.external_call_id ?? call.id}`;
-export const operationalScore = (row: { completed: number; reports: number; calls: number; connected: number; followUps: number }) => Math.round(row.completed * 2 + row.reports * 2 + row.calls + row.connected * 4 + row.followUps * 1.5);
+export const operationalScore = (row: { completed: number; reports: number; calls: number; connected: number; followUps: number }) => row.completed * 2 + row.reports * 2 + row.calls + row.connected * 4 + row.followUps * 1.5;
 export const SCORE_FORMULA = "Completed assigned leads × 2 + submitted reports × 2 + call attempts × 1 + verified connected calls × 4 + completed follow-ups × 1.5";
 
 /** Pure audit over already-authorized rows. Audio presence is never an activity or score gate. */

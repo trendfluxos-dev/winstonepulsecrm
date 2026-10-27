@@ -30,7 +30,7 @@ const line = (overrides: Partial<PerformerLine> = {}): PerformerLine => ({
 });
 
 describe("Top 3 performer intelligence", () => {
-  it("keeps the agreed transparent scoring weights", () => {
+  it("scores operational work without talk-time points", () => {
     expect(
       scoreOf({
         agentId: "agent-1",
@@ -41,7 +41,7 @@ describe("Top 3 performer intelligence", () => {
         followUps: 5,
         talkMinutes: 20,
       }),
-    ).toBe(55.5);
+    ).toBe(57.5);
   });
 
   it("ranks by the displayed score, highest first — not by quota completion", () => {
@@ -68,12 +68,12 @@ describe("Top 3 performer intelligence", () => {
     expect(ranked[1].agentId).toBe("a");
   });
 
-  it("breaks score ties by calls, then reports, then talk minutes", () => {
+  it("breaks score ties by completion, calls, reports and ID, never talk time", () => {
     const tieA = line({ agentId: "a", score: 30, called: 4, reports: 9, talkMinutes: 3 });
     const tieB = line({ agentId: "b", score: 30, called: 6, reports: 1 });
     const tieC = line({ agentId: "c", score: 30, called: 4, reports: 9, talkMinutes: 12 });
     const ranked = rankPerformers([tieA, tieC, tieB]);
-    expect(ranked.map((l) => l.agentId)).toEqual(["b", "c", "a"]);
+    expect(ranked.map((l) => l.agentId)).toEqual(["b", "a", "c"]);
   });
 
   it("does not mutate the input list", () => {

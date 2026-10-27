@@ -69,6 +69,7 @@ const agent = (id: string, name: string, photo_path: string | null = null): Row 
 });
 
 const report = (agent_id: string, connected: boolean, lead_id: string | null = null): Row => ({
+  id: `report-${reportSequence++}`,
   agent_id,
   lead_id,
   status: "submitted",
@@ -76,6 +77,7 @@ const report = (agent_id: string, connected: boolean, lead_id: string | null = n
   duration_seconds: connected ? 120 : 0,
   created_at: "2026-10-07T06:00:00Z",
 });
+let reportSequence = 0;
 
 const lead = (assigned_to: string, work_state: string): Row => ({
   id: `lead-${assigned_to}-${Math.random().toString(36).slice(2, 8)}`,
@@ -120,8 +122,8 @@ describe("Top Performer loader (dailyTopPerformer)", () => {
     expect(board.revealed).toBe(true);
     expect(board.topThree[0]?.reports).toBe(1);
     expect(state.filters).toEqual(expect.arrayContaining([
-      { table: "call_reports", method: "gte", args: ["created_at", "2026-10-25T18:00:00.000Z"] },
-      { table: "call_reports", method: "lte", args: ["created_at", "2026-10-26T17:59:59.000Z"] },
+      { table: "call_reports", method: "gte", args: ["submitted_at", "2026-10-25T18:00:00.000Z"] },
+      { table: "call_reports", method: "lte", args: ["submitted_at", "2026-10-26T17:59:59.000Z"] },
       { table: "leads", method: "eq", args: ["work_date", "2026-10-26"] },
       { table: "lead_extra_grants", method: "eq", args: ["work_date", "2026-10-26"] },
     ]));

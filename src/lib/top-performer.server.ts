@@ -145,7 +145,6 @@ export function scoreBreakdown(
 }
 
 export function performerInsight(line: PerformerLine): Pick<RankedPerformer, "reason" | "gap" | "advice"> {
-  const averageTalk = line.connected ? line.talkMinutes / line.connected : 0;
   const reportGap = Math.max(0, line.called - line.reports);
 
   // Completion is always shown as the person's OWN quota ratio, so a 15-lead
@@ -261,14 +260,16 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
     supabaseAdmin
       .from("call_reports")
       .select("id, agent_id, lead_id, status, connected, duration_seconds, created_at, connection_verified, submitted_at")
-      .gte("created_at", startIso)
-      .lte("created_at", endIso).order("id").range(from, to)),
+      .eq("status", "submitted")
+      .gte("submitted_at", startIso)
+      .lte("submitted_at", endIso).order("id").range(from, to)),
     pageAllParallel((from, to) =>
     supabaseAdmin
       .from("follow_up_events")
-      .select("id, agent_id, created_at")
-      .gte("created_at", startIso)
-      .lte("created_at", endIso).order("id").range(from, to)),
+      .select("id, agent_id, created_at, status, completed_at")
+      .eq("status", "done")
+      .gte("completed_at", startIso)
+      .lte("completed_at", endIso).order("id").range(from, to)),
   ]);
   if (agentsRes.error) throw new Error(agentsRes.error.message);
   if (reportsRes.error) throw new Error(reportsRes.error.message);
@@ -310,7 +311,6 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
     const quota = quotaFor(agent.employee_id, floorQuota);
     const targetQuota = effectiveQuota(quota, extraToday[agent.id] ?? 0);
     // A lead counts as worked once it is completed OR has a call report today.
-    const reportedIds = new Set(mine.map((r) => r.lead_id).filter(Boolean));
     const completed = myLeads.filter((row) => row.work_state === "completed").length;
     const base = {
       agentId: agent.id,

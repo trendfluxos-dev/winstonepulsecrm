@@ -180,9 +180,6 @@ export function SalesCommandCenter({
       {invalidRange ? <p role="alert" className="text-sm text-destructive">{invalidRange} No performance totals are shown for this invalid range.</p> : feed.error ? <div role="alert"><p className="text-sm text-destructive">The latest read failed. Performance totals are unavailable; cached numbers are not shown as fresh.</p><Button variant="outline" onClick={() => void feed.refetch()}>Try again</Button></div> : <>
       <PerformanceCountAudit audit={cc.audit} period={`${range.fromDay} – ${range.toDay}`} freshness={feed.data?.freshness.generatedAt} refreshing={feed.isFetching} onRefresh={() => void feed.refetch()} onAgent={onSelectAgent} onLeads={drill} />
       <details><summary className="cursor-pointer text-sm font-medium">Sales context · current-state funnel / today-only legacy summaries (not the operational score)</summary><div className="mt-4 space-y-5">
-      {feed.error && <p className="text-xs text-destructive">রিপোর্ট ডেটা লোড হয়নি — সাইট ভিজিট/বুকিং/ফলো-আপ সংখ্যা অসম্পূর্ণ।</p>}
-
-      {feed.error ? <Button variant="outline" onClick={() => void feed.refetch()}>আবার চেষ্টা করুন</Button> : <>
       {/* KPI pulse */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         {kpis.map((k) => {
@@ -206,8 +203,6 @@ export function SalesCommandCenter({
       </div>
 
       <ExecutiveKpiBoard profiles={profiles} leads={leads.filter((l) => cc.funnel[0]?.leadIds.includes(l.id))} calls={calls} messages={messages} metrics={cc} period={`${range.fromDay} – ${range.toDay}`} />
-      </>}
-
       <div className="grid gap-4 lg:grid-cols-12">
         {/* Arrow-style funnel */}
         <Panel title="সেলস ফানেল" question="লিড কোন ধাপে আটকে যাচ্ছে? (বর্তমান ফিল্টার, সব সময়ের)" className="lg:col-span-5">
