@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-27 — Database performance and Run usage
+- [ ] Measure project Run usage, inspect query/index/storage diagnostics and schedules; current database diagnostics are unavailable, so index changes and sizing remain blocked pending measurements.
+- [ ] Remove duplicated agent lead reads with fully paginated source-scoped reads; preserve canonical owner precedence, totals, quota, Friday, history and refresh cadence; verify synthetic regressions and report deployment/measurement limits.
+
 ## 2026-10-27 — OpenAI CRM work review
 - [x] Added read-only work-review button inside existing OpenAI Command Agent; aggregate sampled counts only, no customer payload/history, empty action allowlist, canonical agent ownership and fail-closed reads; provider settings unchanged.
 - [x] 57 focused tests passed; full suite 1216 passed / 1 pre-existing role-terminology copy failure; changed-file lint clean and harness build OK. Synthetic OpenAI HTTP 200 completed; signed-in HQ tools button returned a three-part review with no action buttons or page errors. No deployment, migrations, permissions or customer-record changes. Ordinary AI usage telemetry recorded by existing path.
