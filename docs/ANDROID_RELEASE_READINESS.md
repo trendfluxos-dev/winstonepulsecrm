@@ -9,7 +9,7 @@ Code readiness or a green CI run is never device proof.
 |---|---|---|---|
 | Repository | github.com/zhemongrowth-bd/Android-Call-recorder (public) | — | — |
 | Earlier reported commits | a6938e4 (uploaded ZIP), 948177d (older debug APK) | owner report | superseded |
-| Latest CI run | 40578159123 — unit tests ✓, debug APK ✓, signed release APK ✓ | GitHub Actions log | CI 2026-10-27 |
+| Latest CI run (only artifacts kept) | 40579865289 — unit tests ✓, debug APK ✓ (16.9 MB zip), signed release APK ✓ (11.5 MB zip); older artifacts deleted | GitHub Actions log | CI 2026-10-27 |
 | Release application ID | com.winstone.connect | build.gradle.kts | unverified on built APK |
 | Test application ID | com.winstone.connect.test ("Winstone Pulse TEST") | build.gradle.kts | unverified on built APK |
 | Version | 2.17 (28) | build.gradle.kts | unverified on built APK |
@@ -24,6 +24,7 @@ Code readiness or a green CI run is never device proof.
 | Pocket Call Archive: pickup copy cleanup after durable queue | included |
 | Pocket Call Archive: retry exhaustion visible as failure | included |
 | Per-recording sync status + "Retry failed uploads" | included |
+| Recording filters (All/Pending/Syncing/Synced/Failed), date, duration, last error | included (run 40579865289) |
 | Recording upload / CRM sync retry policy (429/5xx backoff, permanent 4xx, 401/403) | **missing — patch file not received** |
 
 ## 3. Signing decision (owner)
