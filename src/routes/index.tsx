@@ -63,6 +63,7 @@ function EntryHall() {
   const { scope } = useMyAccount();
   const [pinOpen, setPinOpen] = useState(false);
   const [pinTarget, setPinTarget] = useState<"/hq" | "/system" | "/leadhub">("/hq");
+  const [signinOpen, setSigninOpen] = useState(false);
 
   const openPin = (target: "/hq" | "/system" | "/leadhub") => {
     setPinTarget(target);
@@ -77,7 +78,17 @@ function EntryHall() {
     } catch {
       // storage blocked: layout still adapts to the screen
     }
-    document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setSigninOpen(true);
+    setTimeout(() => {
+      document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+  };
+
+  const openSignin = () => {
+    setSigninOpen(true);
+    setTimeout(() => {
+      document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
   };
 
 
