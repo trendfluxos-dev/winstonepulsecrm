@@ -4621,6 +4621,7 @@ export type Database = {
           id: number
           issue_id: string
           occurred_at: string
+          recovery_outcome: string | null
           route: string
         }
         Insert: {
@@ -4629,6 +4630,7 @@ export type Database = {
           id?: never
           issue_id: string
           occurred_at?: string
+          recovery_outcome?: string | null
           route: string
         }
         Update: {
@@ -4637,6 +4639,7 @@ export type Database = {
           id?: never
           issue_id?: string
           occurred_at?: string
+          recovery_outcome?: string | null
           route?: string
         }
         Relationships: [
