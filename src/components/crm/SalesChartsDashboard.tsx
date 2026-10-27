@@ -164,6 +164,19 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
   const rk = reportsQ.data ? reportKpis(reportsQ.data.reports, range) : null;
   const wa = whatsappKpi(messages, range);
   const hk = hqFeed.data ? reportKpis(hqFeed.data.reports, range) : null;
+  // Daily chart: official call work = submitted reports per Dhaka day (UTC+6, no DST); phone-sync stays a separate line.
+  const officialReports = scope === "hq" ? hqFeed.data?.reports : reportsQ.data?.reports;
+  const trend = useMemo(() => {
+    const per = new Map<string, { n: number; c: number }>();
+    for (const r of officialReports ?? []) {
+      if (!r.submitted_at) continue;
+      const d = new Date(Date.parse(r.submitted_at) + 6 * 3_600_000).toISOString().slice(5, 10);
+      const v = per.get(d) ?? { n: 0, c: 0 };
+      v.n++; if (r.connected === true) v.c++;
+      per.set(d, v);
+    }
+    return data.trend.map((row) => ({ ...row, reports: per.get(row.day)?.n ?? 0, reportsConnected: per.get(row.day)?.c ?? 0 }));
+  }, [data.trend, officialReports]);
   const rr = reportsQ.data && me
     ? reportLeadReconciliation(reportsQ.data.reports, range, new Set(leads.filter((l) => ownerOf(l) === me).map((l) => l.id)))
     : null;
@@ -318,13 +331,14 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
           <h3 className="mb-2 text-sm font-medium">{t({ bn: "দৈনিক লিড ও কল", en: "Daily leads and calls" })}</h3>
           <div className="h-60">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.trend} margin={{ left: -20, right: 8, top: 4 }}>
+              <AreaChart data={trend} margin={{ left: -20, right: 8, top: 4 }}>
                 <CartesianGrid stroke="var(--border)" strokeOpacity={0.5} vertical={false} />
                 <XAxis dataKey="day" {...axis} />
                 <YAxis allowDecimals={false} {...axis} />
                 <Tooltip {...tip} />
-                <Area type="monotone" dataKey="calls" name={t({ bn: "কল", en: "Calls" })} stroke="var(--chart-1)" fill="var(--chart-1)" fillOpacity={0.15} />
-                <Area type="monotone" dataKey="connected" name={t({ bn: "কথা হয়েছে", en: "Connected" })} stroke="var(--chart-2)" fill="var(--chart-2)" fillOpacity={0.15} />
+                <Area type="monotone" dataKey="reports" name={t({ bn: "জমা রিপোর্ট (কল কাজ)", en: "Submitted reports (call work)" })} stroke="var(--chart-1)" fill="var(--chart-1)" fillOpacity={0.15} />
+                <Area type="monotone" dataKey="reportsConnected" name={t({ bn: "কথা হয়েছে (রিপোর্ট)", en: "Connected (reports)" })} stroke="var(--chart-2)" fill="var(--chart-2)" fillOpacity={0.15} />
+                {scope === "hq" && <Area type="monotone" dataKey="calls" name={t({ bn: "ফোন-সিঙ্ক কল (প্রযুক্তিগত)", en: "Phone-synced calls (technical)" })} stroke="var(--muted-foreground)" strokeDasharray="4 3" fill="none" />}
                 <Area type="monotone" dataKey="leads" name={t({ bn: "নতুন লিড", en: "New leads" })} stroke="var(--chart-3)" fill="var(--chart-3)" fillOpacity={0.1} />
               </AreaChart>
             </ResponsiveContainer>
