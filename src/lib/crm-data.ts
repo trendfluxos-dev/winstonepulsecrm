@@ -8,20 +8,23 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { getCrmSnapshot } from "@/lib/crm.functions";
 import { useAdminToken } from "@/lib/local-session";
+import type { getCommandCenterFeed } from "@/lib/command-center.functions";
 import { byCreatedAsc, byUpdatedDesc, deltaCursor, mergeDelta } from "@/lib/delta-merge";
+
+type Feed = Awaited<ReturnType<typeof getCommandCenterFeed>>;
 
 /** Shared HQ reports/follow-ups query: later refreshes fetch changed reports only. */
 export function commandCenterFeedQuery(
   queryClient: ReturnType<typeof useQueryClient>,
   adminToken: string | null,
-  fetchFeed: (args: { data: { adminToken: string | null; reportsSince?: string | null } }) => Promise<any>,
+  fetchFeed: (args: { data: { adminToken: string | null; reportsSince?: string | null } }) => Promise<Feed>,
 ) {
   const queryKey = ["command-center-feed", adminToken];
   return {
     queryKey,
     refetchInterval: 30_000,
-    queryFn: async () => {
-      const prev = queryClient.getQueryData<any>(queryKey);
+    queryFn: async (): Promise<Feed> => {
+      const prev = queryClient.getQueryData<Feed>(queryKey);
       if (prev?.reportsMode && prev.freshness?.generatedAt) {
         const next = await fetchFeed({ data: { adminToken, reportsSince: deltaCursor(prev.freshness.generatedAt) } });
         if (next.reportsMode !== "delta") return next;
