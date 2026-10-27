@@ -21,7 +21,7 @@ import logoAsset from "@/assets/winstone-mark.png.asset.json";
 import androidAsset from "@/assets/device-android.webp.asset.json";
 import webAsset from "@/assets/device-web.webp.asset.json";
 import desktopAsset from "@/assets/device-desktop.webp.asset.json";
-import teamHeroAsset from "@/assets/home-team-hero.webp.asset.json";
+import teamHeroAsset from "@/assets/home-team-hero-v2.webp.asset.json";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
@@ -133,8 +133,8 @@ function EntryHall() {
               <img
                 src={teamHeroAsset.url}
                 alt={t({ bn: "Winstone Pulse CRM নিয়ে আলোচনা করছেন দুইজন", en: "Two professionals discussing the Winstone Pulse CRM" })}
-                width={1600}
-                height={900}
+                width={1376}
+                height={768}
                 fetchPriority="high"
                 className="block h-auto w-full"
               />
