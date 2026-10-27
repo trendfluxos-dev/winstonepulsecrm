@@ -7,12 +7,9 @@ import {
   Globe,
   Headphones,
   LifeBuoy,
-  Lock,
   Mic,
   Monitor,
-  Server,
   Smartphone,
-  Database,
   ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
