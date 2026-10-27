@@ -28,22 +28,27 @@ android {
         buildConfig = true
     }
 
+    // Release signing comes only from CI secrets (never committed). Without them the
+    // release build is left unsigned and CI refuses to publish it.
+    val ksPath = System.getenv("WINSTONE_KEYSTORE_PATH")
     signingConfigs {
-        create("winstone") {
-            // Project-internal distribution key (not a Play Store upload key):
-            // kept in the repo so every rebuild keeps the same signature and
-            // agents can update the app without uninstalling first.
-            storeFile = rootProject.file("winstone-release.jks")
-            storePassword = "winstone2026"
-            keyAlias = "winstone"
-            keyPassword = "winstone2026"
+        if (ksPath != null) create("release") {
+            storeFile = file(ksPath)
+            storePassword = System.getenv("WINSTONE_KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("WINSTONE_KEY_ALIAS")
+            keyPassword = System.getenv("WINSTONE_KEYSTORE_PASSWORD")
         }
     }
 
     buildTypes {
+        // Test build installs side by side with the agent release (own package id + name).
+        debug {
+            applicationIdSuffix = ".test"
+            versionNameSuffix = "-test"
+        }
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("winstone")
+            if (ksPath != null) signingConfig = signingConfigs.getByName("release")
         }
     }
 
