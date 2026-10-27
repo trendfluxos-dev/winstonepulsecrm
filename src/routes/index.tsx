@@ -24,7 +24,6 @@ import { scrollToTopAdaptive } from "@/lib/motion";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { Button } from "@/components/ui/button";
 import { useMyAccount } from "@/lib/session";
-import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,12 +32,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Leads, calls, follow-ups and team performance in one premium real estate CRM. লিড, কল, ফলো-আপ ও টিমের ফলাফল এক জায়গায়।",
+          "Leads, calls, follow-ups and team performance in one premium real estate CRM.",
       },
       { property: "og:title", content: "Winstone Pulse — The Premium Real Estate CRM" },
       {
         property: "og:description",
-        content: "One connected workspace for your real estate sales floor. সেলস টিমের সব কাজ এক জায়গায়।",
+        content: "One connected workspace for your real estate sales floor.",
       },
       { property: "og:type", content: "website" },
       { property: "og:image", content: "https://crm.winstonebd.com/social/winstone-pulse.jpg" },
@@ -47,7 +46,7 @@ export const Route = createFileRoute("/")({
       { property: "og:image:alt", content: "Winstone Pulse — The Premium Real Estate CRM; leads, calls, follow-ups and team performance." },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Winstone Pulse — The Premium Real Estate CRM" },
-      { name: "twitter:description", content: "Leads, calls, follow-ups and team performance — one connected sales workspace. সব কাজ এক জায়গায়।" },
+      { name: "twitter:description", content: "Leads, calls, follow-ups and team performance — one connected sales workspace." },
       { name: "twitter:image", content: "https://crm.winstonebd.com/social/winstone-pulse.jpg" },
       { name: "twitter:image:alt", content: "Winstone Pulse — The Premium Real Estate CRM; leads, calls, follow-ups and team performance." },
       { property: "og:url", content: "https://crm.winstonebd.com/" },
@@ -73,7 +72,7 @@ export const Route = createFileRoute("/")({
               "@id": "https://crm.winstonebd.com/#website",
               name: "Winstone Pulse",
               url: "https://crm.winstonebd.com/",
-              inLanguage: ["en", "bn"],
+              inLanguage: "en",
               publisher: { "@id": "https://crm.winstonebd.com/#org" },
             },
             {
@@ -96,7 +95,6 @@ export const Route = createFileRoute("/")({
 
 
 function EntryHall() {
-  const t = useT();
   const navigate = useNavigate();
   const { scope } = useMyAccount();
   const [pinOpen, setPinOpen] = useState(false);
@@ -122,7 +120,7 @@ function EntryHall() {
   }, []);
 
   return (
-    <div className="theme-exec min-h-screen bg-background [&_[lang=bn]]:leading-relaxed">
+    <div className="theme-exec min-h-screen bg-background">
       <div className="sticky top-0 z-20 border-b border-border bg-background/95 px-4 py-4 backdrop-blur sm:px-6 sm:py-6">
         <div className="mx-auto grid w-full max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:justify-between sm:gap-6">
           <span className="inline-flex min-w-0 items-center gap-2 sm:gap-4">
@@ -136,12 +134,11 @@ function EntryHall() {
             <span className="min-w-0">
               <span className="block whitespace-nowrap text-base font-bold leading-tight text-foreground sm:text-3xl">WINSTONE <span className="text-gold">PULSE</span></span>
               <span className="mt-1 block text-[8px] leading-tight text-muted-foreground min-[400px]:text-[9px] sm:text-base">THE PREMIUM REAL ESTATE CRM</span>
-              <span lang="bn" className="mt-0.5 block text-[8px] leading-tight text-muted-foreground min-[400px]:text-[9px] sm:text-sm">প্রিমিয়াম রিয়েল এস্টেট CRM</span>
             </span>
           </span>
           <span className="inline-flex shrink-0 items-center gap-1.5 text-[10px] text-muted-foreground min-[400px]:text-xs sm:gap-3 sm:text-xl">
             <span aria-hidden className="size-2 shrink-0 rounded-full bg-live sm:size-3" />
-            <span className="leading-tight"><span lang="en" className="block">Server online</span><span lang="bn" className="mt-0.5 block text-[9px] sm:text-sm">সার্ভার চালু আছে</span></span>
+            <span className="leading-tight"><span lang="en" className="block">Server online</span></span>
           </span>
         </div>
       </div>
@@ -150,33 +147,28 @@ function EntryHall() {
           <div className="text-left">
             <p className="text-xs font-semibold uppercase text-gold sm:text-base">
               Winstone Properties Ltd. · Find. Build. Invest.
-              <span lang="bn" className="mt-1.5 block text-[11px] font-normal normal-case text-muted-foreground sm:text-sm">উইনস্টোন প্রপার্টিজ লিমিটেড · খুঁজুন। গড়ুন। বিনিয়োগ করুন।</span>
             </p>
             <h1 className="font-hand mt-6 text-6xl font-semibold leading-[1.15] text-foreground sm:mt-8 sm:text-8xl">
               Winstone <span className="text-gold">Pulse</span>
-              <span lang="bn" className="mt-1 block font-sans text-base font-normal text-muted-foreground sm:text-xl">উইনস্টোন পালস</span>
             </h1>
             <p className="mt-4 text-[1.65rem] font-medium leading-tight text-balance text-foreground sm:mt-6 sm:text-4xl">
               <span lang="en" className="block">The Premium Real Estate CRM.</span>
-              <span lang="bn" className="mt-1.5 block text-sm font-normal leading-snug text-muted-foreground sm:text-lg">প্রিমিয়াম রিয়েল এস্টেট CRM।</span>
             </p>
             <p className="mt-5 max-w-3xl text-[15px] leading-relaxed text-muted-foreground text-pretty sm:mt-6 sm:text-xl">
               <span lang="en" className="block">Leads, calls, follow-ups and team performance. One connected workspace for your sales floor.</span>
-              <span lang="bn" className="mt-2 block text-[13px] leading-relaxed sm:text-sm">লিড, কল, ফলো-আপ আর টিমের ফলাফল — আপনার সেলস টিমের সব কাজ এক জায়গায়।</span>
             </p>
             <Button asChild variant="outline" className="mt-5 h-auto max-w-full gap-3 whitespace-normal border-gold/50 bg-background px-4 py-3 text-left text-base font-medium active:border-gold-hover active:bg-accent focus-visible:ring-charcoal sm:mt-8 sm:px-6 sm:py-4 sm:text-lg md:h-auto">
               <Link to="/walkthrough">
                 <BookOpen aria-hidden className="size-5 sm:size-6" />
                 <span>
                   <span lang="en" className="block">Explore the CRM walkthrough</span>
-                  <span lang="bn" className="mt-1 block text-xs font-normal text-muted-foreground sm:text-sm">CRM walkthrough দেখুন</span>
                 </span>
               </Link>
             </Button>
             <figure className="mt-8 overflow-hidden rounded-xl border border-border/70 bg-card shadow-soft sm:mt-10">
               <img
                 src={teamHeroAsset.url}
-                alt={t({ bn: "Winstone Pulse CRM নিয়ে আলোচনা করছেন দুইজন", en: "Two professionals discussing the Winstone Pulse CRM" })}
+                alt="Two professionals discussing the Winstone Pulse CRM"
                 width={1376}
                 height={768}
                 fetchPriority="high"
@@ -185,19 +177,17 @@ function EntryHall() {
             </figure>
             <div className="mt-8 grid overflow-hidden rounded-xl border border-border bg-card sm:mt-10 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                { icon: Headphones, label: "Manage your team", labelBn: "টিম সামলান", sub: "Agents, roles & performance", subBn: "এজেন্ট, ভূমিকা ও ফলাফল" },
-                { icon: BarChart3, label: "Track your pipeline", labelBn: "কাজের ধাপ দেখুন", sub: "Leads, follow-ups & bookings", subBn: "লিড, ফলো-আপ ও বুকিং" },
-                { icon: Smartphone, label: "Review call activity", labelBn: "কলের কাজ দেখুন", sub: "Call reports & customer history", subBn: "কল রিপোর্ট ও কাস্টমারের ইতিহাস" },
-              ].map(({ icon: Icon, label, labelBn, sub, subBn }) => (
+                { icon: Headphones, label: "Manage your team", sub: "Agents, roles & performance" },
+                { icon: BarChart3, label: "Track your pipeline", sub: "Leads, follow-ups & bookings" },
+                { icon: Smartphone, label: "Review call activity", sub: "Call reports & customer history" },
+              ].map(({ icon: Icon, label, sub }) => (
                 <span key={label} className="flex items-center gap-3 border-border p-4 text-left text-sm font-semibold text-foreground [&:not(:first-child)]:border-t sm:p-5 sm:[&:nth-child(2)]:border-l sm:[&:nth-child(2)]:border-t-0 sm:[&:nth-child(3)]:col-span-2 lg:[&:nth-child(3)]:col-span-1 lg:[&:nth-child(3)]:border-l lg:[&:nth-child(3)]:border-t-0">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full text-gold ring-1 ring-gold/40">
                     <Icon className="size-4" />
                   </span>
                   <span className="min-w-0 leading-tight">
                     <span lang="en" className="block">{label}</span>
-                    <span lang="bn" className="mt-0.5 block text-[11px] font-normal text-muted-foreground">{labelBn}</span>
                     <span lang="en" className="mt-1.5 block text-xs font-normal text-muted-foreground">{sub}</span>
-                    <span lang="bn" className="mt-0.5 block text-[10px] font-normal text-muted-foreground">{subBn}</span>
                   </span>
                 </span>
               ))}
@@ -208,12 +198,10 @@ function EntryHall() {
 
         <h2 className="mt-10 text-center text-xl font-bold tracking-tight sm:text-3xl">
           <span lang="en" className="block">Choose Your Workspace</span>
-          <span lang="bn" className="mt-1 block text-sm font-normal text-muted-foreground sm:text-base">আপনার কর্মঘর বেছে নিন</span>
           <span aria-hidden className="mx-auto mt-2 block h-0.5 w-12 bg-gold" />
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground text-pretty">
           <span lang="en" className="block">Select the mode you are using — the Winstone Pulse Gateway opens the same CRM on every device.</span>
-          <span lang="bn" className="mt-1 block text-xs">যে ডিভাইসে কাজ করেন সেটা বেছে নিন — প্রতিটি ডিভাইসে একই CRM খোলে।</span>
         </p>
 
         <div className="mt-5 grid grid-cols-2 gap-2 sm:mt-8 sm:gap-4 lg:grid-cols-4">
@@ -222,7 +210,6 @@ function EntryHall() {
             illustration={<SmartphoneIllustration />}
             title="Android"
             subtitle="Mobile-first CRM"
-            subtitleBn="মোবাইলে কাজের জন্য"
             onClick={() => chooseMode("android")}
           />
           <ModeCard
@@ -230,7 +217,6 @@ function EntryHall() {
             illustration={<WebIllustration />}
             title="Web / iOS"
             subtitle="Responsive CRM"
-            subtitleBn="যেকোনো ব্রাউজারে"
             onClick={() => chooseMode("web")}
           />
           <ModeCard
@@ -238,7 +224,6 @@ function EntryHall() {
             illustration={<DesktopIllustration />}
             title="Desktop"
             subtitle="Full CRM Workspace"
-            subtitleBn="পুরো ডেস্কটপ ভিউ"
             onClick={() => chooseMode("desktop")}
           />
           <ModeCard
@@ -246,25 +231,22 @@ function EntryHall() {
             illustration={<span className="grid h-16 w-full shrink-0 place-items-center rounded-md bg-secondary text-gold sm:h-24 sm:w-24 lg:w-28"><ShieldCheck className="size-10" /></span>}
             title="IT Console"
             subtitle="Secure administration"
-            subtitleBn="নিরাপদ প্রশাসন"
             onClick={() => openPin("/system")}
           />
         </div>
 
         <p className="mt-5 text-center text-[10px] font-medium uppercase sm:mt-8 sm:text-xs tracking-[0.2em] text-muted-foreground">
           <span lang="en" className="block">One CRM. One data layer. Every device.</span>
-          <span lang="bn" className="mt-1 block text-[10px] normal-case tracking-normal">এক CRM · এক ডেটা · প্রতিটি ডিভাইস</span>
         </p>
 
         <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
           <Button asChild variant="plate" size="lg" className="h-auto w-full rounded-md py-2.5 text-base font-bold md:h-auto">
             <Link to="/signin" resetScroll={false}>
-              <span className="leading-tight"><span lang="en" className="block">Get started</span><span lang="bn" className="mt-0.5 block text-xs font-normal">শুরু করুন</span></span> <ChevronRight className="size-5" />
+              <span className="leading-tight"><span lang="en" className="block">Get started</span></span> <ChevronRight className="size-5" />
             </Link>
           </Button>
           <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
             <span lang="en" className="block">Optional — pick a device above so we remember your preferred view.</span>
-            <span lang="bn" className="mt-1 block text-[11px]">ঐচ্ছিক — উপরে ডিভাইস বেছে নিলে আপনার পছন্দ মনে রাখা হবে।</span>
           </p>
         </div>
 
@@ -272,29 +254,23 @@ function EntryHall() {
         <section className="mt-10 rounded-xl border border-border bg-card p-5 sm:p-6">
           <h2 className="text-lg font-bold tracking-tight">
             <span lang="en" className="block">Are you a Winstone sales agent?</span>
-            <span lang="bn" className="mt-1 block text-sm font-normal text-muted-foreground">আপনি কি Winstone-এর সেলস এজেন্ট?</span>
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             <span lang="en" className="block">The IT Console sets up your account and company device before you can start working.</span>
-            <span lang="bn" className="mt-1 block text-xs">কাজ শুরুর আগে IT Console থেকে আপনার অ্যাকাউন্ট ও কোম্পানির ডিভাইস তৈরি করে দেওয়া হয়।</span>
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
             <span lang="en" className="block">Already have an account? Sign in with your assigned credentials on the authorized device.</span>
-            <span lang="bn" className="mt-1 block text-xs">অ্যাকাউন্ট থাকলে অনুমোদিত ডিভাইসে নিজের তথ্য দিয়ে প্রবেশ করুন।</span>
           </p>
           <p className="mt-4 border-t border-border pt-4 text-xs font-semibold text-gold">
             <span lang="en" className="block">New agent accounts are created and managed by the IT Console.</span>
-            <span lang="bn" className="mt-1 block text-[11px] font-normal text-muted-foreground">নতুন এজেন্ট অ্যাকাউন্ট IT Console-ই তৈরি করে।</span>
           </p>
         </section>
 
         {scope !== "none" && (
           <p className="mt-8 text-center text-sm text-muted-foreground">
             <span lang="en" className="block">Already signed in</span>
-            <span lang="bn" className="mt-1 block text-xs">আগেই প্রবেশ করেছেন</span>
             <Link to="/desk" className="font-semibold text-gold hover:underline">
               <span lang="en" className="mt-2 block">Go to my desk</span>
-              <span lang="bn" className="mt-1 block text-xs font-normal text-muted-foreground">আমার ডেস্কে যান</span>
             </Link>
           </p>
         )}
@@ -310,7 +286,6 @@ function EntryHall() {
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold-ink">
                 Brand Architect
-                <span lang="bn" className="mt-0.5 block text-[10px] font-normal normal-case tracking-normal text-muted-foreground">ব্র্যান্ড আর্কিটেক্ট</span>
               </p>
               <p className="mt-1 truncate text-xl font-bold leading-tight tracking-tight sm:mt-2 sm:text-4xl">
                 Zahid Hasan Emon
@@ -318,23 +293,20 @@ function EntryHall() {
             </div>
             <p className="col-span-2 text-xs leading-snug text-muted-foreground sm:col-start-2 sm:row-start-2 sm:mt-1 sm:text-base">
               <span lang="en" className="block">AI Systems Architect · Product Builder · Brand Architect</span>
-              <span lang="bn" className="mt-1 block text-[11px]">এআই সিস্টেম আর্কিটেক্ট · প্রোডাক্ট বিল্ডার · ব্র্যান্ড আর্কিটেক্ট</span>
             </p>
             <div className="col-span-2 min-w-0 sm:col-span-1 sm:col-start-2">
               <h2 className="border-t border-border pt-2.5 text-base font-semibold leading-snug tracking-tight sm:border-0 sm:pt-0 sm:text-xl sm:font-bold">
                 <span lang="en" className="block">Building the Intelligence Behind Winstone.</span>
-                <span lang="bn" className="mt-1 block text-xs font-normal text-muted-foreground sm:text-sm">Winstone-এর পেছনের বুদ্ধিমত্তা তৈরি করছি।</span>
               </h2>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 <span lang="en" className="block">A unified operating ecosystem connecting property sales, customer relationships, communication intelligence, and business operations.</span>
-                <span lang="bn" className="mt-1 block text-xs">প্রপার্টি বিক্রি, কাস্টমার সম্পর্ক, যোগাযোগ ও ব্যবসার কাজ একসাথে যুক্ত করার একটি ব্যবস্থা।</span>
               </p>
               <Button
                 asChild
                 className="mt-3 h-auto w-full whitespace-normal py-2 md:h-auto border border-gold/70 bg-charcoal text-[15px] font-bold text-card transition-[background-color,border-color,transform] duration-100 ease-out hover:border-gold hover:bg-plate-ink active:translate-y-[1px] active:scale-[0.99] active:border-gold-hover active:bg-plate-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-charcoal focus-visible:ring-offset-2 focus-visible:ring-offset-card sm:mt-3 sm:w-auto"
               >
                 <a href="https://trendflux.digital/founder" target="_blank" rel="noopener noreferrer">
-                  <span className="leading-tight"><span lang="en" className="block">Meet the Brand Architect</span><span lang="bn" className="mt-0.5 block text-xs font-normal">ব্র্যান্ড আর্কিটেক্টের সাথে পরিচিত হোন</span></span> <ArrowUpRight className="size-4" />
+                  <span className="leading-tight"><span lang="en" className="block">Meet the Brand Architect</span></span> <ArrowUpRight className="size-4" />
                   <span className="sr-only">— opens the founder page on trendflux.digital in a new tab</span>
                 </a>
               </Button>
@@ -345,23 +317,20 @@ function EntryHall() {
         <footer className="mt-auto pt-14 text-center text-xs text-muted-foreground">
           <div className="flex flex-wrap items-start justify-center gap-x-2 gap-y-2">
             <LifeBuoy aria-hidden className="mt-0.5 size-3.5 shrink-0" />
-            <p><span lang="en" className="block">Need help?</span><span lang="bn" className="mt-1 block text-[10px]">সাহায্য দরকার?</span></p>
+            <p><span lang="en" className="block">Need help?</span></p>
             <Link to="/support" className="font-semibold text-gold hover:underline">
               <span lang="en" className="block">Contact IT Console</span>
-              <span lang="bn" className="mt-1 block text-[10px] font-normal text-muted-foreground">IT Console-এর সাথে যোগাযোগ করুন</span>
             </Link>
           </div>
-          <p className="mt-3"><span lang="en" className="block">© 2026 TrendFlux Digital. All Rights Reserved.</span><span lang="bn" className="mt-1 block text-[10px]">© ২০২৬ TrendFlux Digital. সর্বস্বত্ব সংরক্ষিত।</span></p>
-          <p className="mt-3"><span lang="en" className="block">Developed &amp; Powered by <span className="font-bold">Zahid Hasan Emon</span>.</span><span lang="bn" className="mt-1 block text-[10px]">নির্মাণ ও প্রযুক্তিতে <span className="font-bold">Zahid Hasan Emon</span>।</span></p>
+          <p className="mt-3"><span lang="en" className="block">© 2026 TrendFlux Digital. All Rights Reserved.</span></p>
+          <p className="mt-3"><span lang="en" className="block">Developed &amp; Powered by <span className="font-bold">Zahid Hasan Emon</span>.</span></p>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <Link to="/privacy" className="hover:text-foreground">
               <span lang="en" className="block">Privacy Policy</span>
-              <span lang="bn" className="mt-1 block text-[10px]">গোপনীয়তা নীতি</span>
             </Link>
             <span className="hidden sm:inline">·</span>
             <Link to="/terms" className="hover:text-foreground">
               <span lang="en" className="block">Terms of Service</span>
-              <span lang="bn" className="mt-1 block text-[10px]">পরিষেবার শর্তাবলি</span>
             </Link>
             <span className="hidden sm:inline">·</span>
             <Link
@@ -369,7 +338,7 @@ function EntryHall() {
               className="inline-flex items-start gap-1 hover:text-foreground"
             >
               <Mic aria-hidden className="mt-0.5 size-3 shrink-0" />
-              <span><span lang="en" className="block">Voice Transcription</span><span lang="bn" className="mt-1 block text-[10px]">কণ্ঠ থেকে লেখা</span></span>
+              <span><span lang="en" className="block">Voice Transcription</span></span>
             </Link>
           </div>
         </footer>
@@ -391,14 +360,12 @@ function ModeCard({
   illustration,
   title,
   subtitle,
-  subtitleBn,
   onClick,
 }: {
   icon: React.ReactNode;
   illustration: React.ReactNode;
   title: string;
   subtitle: string;
-  subtitleBn: string;
   onClick: () => void;
 }) {
   return (
@@ -414,12 +381,11 @@ function ModeCard({
           </span>
           <span className="block text-sm font-bold tracking-tight sm:mt-4 sm:text-lg">{title}</span>
           <span lang="en" className="mt-0.5 block text-[11px] leading-tight text-muted-foreground sm:text-xs">{subtitle}</span>
-          <span lang="bn" className="mt-0.5 block text-[10px] leading-tight text-muted-foreground sm:text-[11px]">{subtitleBn}</span>
         </span>
         {illustration}
       </span>
       <span className="mt-auto flex items-center justify-between rounded-md border border-border bg-secondary px-2 py-2 text-[11px] font-semibold sm:px-3 sm:text-sm">
-        <span className="min-w-0 leading-tight"><span lang="en" className="block truncate">Select workspace</span><span lang="bn" className="mt-0.5 block truncate text-[10px] font-normal text-muted-foreground">এই কর্মঘর খুলুন</span></span>
+        <span className="min-w-0 leading-tight"><span lang="en" className="block truncate">Select workspace</span></span>
         <ArrowUpRight className="size-4 shrink-0" />
       </span>
     </button>

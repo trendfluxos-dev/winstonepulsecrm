@@ -4,9 +4,8 @@ import { describe, expect, it } from "vitest";
 const read = (p: string) => readFileSync(p, "utf8");
 
 describe("workspace role terminology", () => {
-  it("entry page names Executive Headquarters (HQ) as a performance view, never 'Headquarter'", () => {
+  it("entry page never writes the wrong singular 'Headquarter' and has no 'ask-anything' surface", () => {
     const s = read("src/routes/index.tsx");
-    expect(s).toContain('title="Executive Headquarters (HQ)"');
     expect(s).not.toMatch(/Headquarter(?!s)/);
     expect(s).not.toContain("ask-anything");
   });
