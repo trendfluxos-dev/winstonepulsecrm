@@ -295,7 +295,7 @@ function EntryHall() {
               </p>
               <Button
                 asChild
-                className="mt-5 h-auto w-full whitespace-normal py-2.5 md:h-auto border border-gold/70 bg-charcoal text-[15px] font-bold text-card transition-[background-color,border-color,transform] duration-100 ease-out hover:border-gold hover:bg-plate-ink active:translate-y-[1px] active:scale-[0.99] active:border-gold-hover active:bg-plate-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-charcoal focus-visible:ring-offset-2 focus-visible:ring-offset-card sm:mt-6 sm:w-auto"
+                className="mt-3 h-auto w-full whitespace-normal py-2 md:h-auto border border-gold/70 bg-charcoal text-[15px] font-bold text-card transition-[background-color,border-color,transform] duration-100 ease-out hover:border-gold hover:bg-plate-ink active:translate-y-[1px] active:scale-[0.99] active:border-gold-hover active:bg-plate-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-charcoal focus-visible:ring-offset-2 focus-visible:ring-offset-card sm:mt-3 sm:w-auto"
               >
                 <a href="https://trendflux.digital/founder" target="_blank" rel="noopener noreferrer">
                   <span className="leading-tight"><span lang="en" className="block">Meet the Brand Architect</span><span lang="bn" className="mt-0.5 block text-xs font-normal">ব্র্যান্ড আর্কিটেক্টের সাথে পরিচিত হোন</span></span> <ArrowUpRight className="size-4" />
