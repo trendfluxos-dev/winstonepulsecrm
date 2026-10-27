@@ -26,9 +26,9 @@ export function HqStatTiles({
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <StatTile
         icon={<PhoneCall className="size-4" />}
-        label="মোট কল"
+        label="সংরক্ষিত কল/রেকর্ডিং সারি"
         value={String(calls.length)}
-        hint={`${connected}টি কল ${CONNECTED_THRESHOLD_SECONDS} সেকেন্ডের বেশি কথা হয়েছে`}
+        hint={`${connected}টি সারিতে সময় > ${CONNECTED_THRESHOLD_SECONDS} সেকেন্ড · ঐচ্ছিক, সব সময়ের`}
         onOpen={() =>
           onDrill({
             title: "মোট কল",
@@ -40,9 +40,9 @@ export function HqStatTiles({
       />
       <StatTile
         icon={<Timer className="size-4" />}
-        label="ফ্লোরের কথার সময়"
+        label="রেকর্ডিং-ভিত্তিক সময় (ঐচ্ছিক)"
         value={formatTalkTime(talkSeconds)}
-        hint="সব সিঙ্ক হওয়া রেকর্ডিং মিলিয়ে"
+        hint="সংরক্ষিত সারির সময় · পারফরম্যান্স স্কোরে নয়"
         onOpen={() =>
           onDrill({
             title: "কথা হওয়া কল",

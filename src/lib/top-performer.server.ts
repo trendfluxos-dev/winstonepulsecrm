@@ -8,6 +8,7 @@
  */
 import { dhakaInstant, dhakaParts } from "@/lib/shift.server";
 import { performanceDate } from "@/lib/performance-history";
+import { operationalScore, uniqueRows } from "@/lib/performance-audit";
 
 /** Pure ranking used by the daily board: highest displayed score ranks first. */
 export function rankPerformers(lines: PerformerLine[]): PerformerLine[] {
@@ -17,9 +18,9 @@ export function rankPerformers(lines: PerformerLine[]): PerformerLine[] {
       b.score - a.score ||
       // Fixed tie-breakers for equal scores: calls → reports → talk minutes,
       // then agent id so the order never flips between refreshes.
+      b.completed - a.completed ||
       b.called - a.called ||
       b.reports - a.reports ||
-      b.talkMinutes - a.talkMinutes ||
       (a.agentId < b.agentId ? -1 : a.agentId > b.agentId ? 1 : 0),
   );
 }
@@ -120,25 +121,26 @@ export type TopPerformerBoard = {
  * on the homepage can be read straight off the numbers.
  */
 export function scoreOf(
-  line: Pick<PerformerLine, "connected" | "reports" | "followUps" | "talkMinutes">,
+  line: Pick<PerformerLine, "connected" | "reports" | "followUps" | "talkMinutes"> & Partial<Pick<PerformerLine, "called" | "completed">>,
 ): number {
-  return line.connected * 4 + line.reports * 2 + line.followUps * 1.5 + line.talkMinutes * 0.4;
+  return operationalScore({ ...line, calls: line.called ?? 0, completed: line.completed ?? 0 });
 }
 
 export type ScorePart = { label: string; count: number; weight: number; points: number };
 
 /** How the displayed score was built — same weights as scoreOf, rounded per line. */
 export function scoreBreakdown(
-  line: Pick<PerformerLine, "connected" | "reports" | "followUps" | "talkMinutes">,
+  line: Pick<PerformerLine, "connected" | "reports" | "followUps" | "talkMinutes"> & Partial<Pick<PerformerLine, "called" | "completed">>,
 ): ScorePart[] {
   const part = (label: string, count: number, weight: number) => ({
     label, count, weight, points: Math.round(count * weight * 10) / 10,
   });
   return [
+    part("সম্পন্ন অ্যাসাইন কাজ", line.completed ?? 0, 2),
+    part("কলের চেষ্টা", line.called ?? 0, 1),
     part("সংযোগ", line.connected, 4),
     part("রিপোর্ট", line.reports, 2),
     part("ফলো-আপ", line.followUps, 1.5),
-    part("কথার মিনিট", line.talkMinutes, 0.4),
   ];
 }
 
@@ -160,11 +162,11 @@ export function performerInsight(line: PerformerLine): Pick<RankedPerformer, "re
         ? quotaLine
         : "আজ এখনো যাচাইকৃত কল কার্যক্রম নেই";
 
-  if (!line.called) {
+  if (!line.called && !line.reports && !line.completed) {
     return {
       reason,
-      gap: "আজকের কল শুরু হয়নি",
-      advice: "আগামীকাল প্রথম শিফটেই নির্ধারিত কিউ থেকে কল শুরু করুন",
+      gap: "সংরক্ষিত কাজের হিসাব নেই; সিঙ্ক অবস্থা অজানা",
+      advice: "রিপোর্ট ও কলের তথ্য মিলিয়ে দেখুন; অডিও না থাকা কাজ না করার প্রমাণ নয়",
     };
   }
   if (line.targetQuota > 0 && line.completionPercent < 100) {
@@ -193,13 +195,6 @@ export function performerInsight(line: PerformerLine): Pick<RankedPerformer, "re
       reason,
       gap: `ফলো-আপ মাত্র ${line.followUps}টি`,
       advice: "আগ্রহী কথোপকথন থেকে অন্তত ৫টি ফলো-আপ ঠিক করুন",
-    };
-  }
-  if (line.connected > 0 && averageTalk < 2) {
-    return {
-      reason,
-      gap: `গড় কথা ${averageTalk.toFixed(1)} মিনিট`,
-      advice: "প্রয়োজন বুঝতে প্রতিটি সংযোগে আরও একটি প্রশ্ন করুন",
     };
   }
   return {
@@ -301,8 +296,8 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
     .order("id").range(from, to));
   if (leadsError) throw new Error("Performance allocation unavailable");
 
-  const reports = reportsRes.data ?? [];
-  const follows = followRes.data ?? [];
+  const reports = uniqueRows(reportsRes.data ?? []);
+  const follows = uniqueRows(followRes.data ?? []).filter(f => (f as { status?: string }).status === "done");
 
   const lines: PerformerLine[] = (agentsRes.data ?? []).map((agent) => {
     const mine = reports.filter((r) => r.agent_id === agent.id);
@@ -311,12 +306,12 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
     const talkMinutes = Math.round(
       scored.reduce((sum, r) => sum + (r.duration_seconds ?? 0), 0) / 60,
     );
-    const myLeads = (todayLeads ?? []).filter((row) => row.assigned_to === agent.id);
+    const myLeads = uniqueRows(todayLeads ?? []).filter((row) => row.assigned_to === agent.id);
     const quota = quotaFor(agent.employee_id, floorQuota);
     const targetQuota = effectiveQuota(quota, extraToday[agent.id] ?? 0);
     // A lead counts as worked once it is completed OR has a call report today.
     const reportedIds = new Set(mine.map((r) => r.lead_id).filter(Boolean));
-    const completed = myLeads.filter((row) => row.work_state === "completed" || reportedIds.has(row.id)).length;
+    const completed = myLeads.filter((row) => row.work_state === "completed").length;
     const base = {
       agentId: agent.id,
       name: agent.name,

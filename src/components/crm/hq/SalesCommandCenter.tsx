@@ -30,6 +30,8 @@ import { ExecutiveKpiBoard } from "./ExecutiveKpiBoard";
 import { Button } from "@/components/ui/button";
 import type { WhatsappMessage } from "@/lib/crm-data";
 import { useAdminToken } from "@/lib/local-session";
+import { rangeError } from "@/lib/performance-audit";
+import { PerformanceCountAudit } from "./PerformanceCountAudit";
 
 type Preset = "7d" | "30d" | "month" | "custom";
 const tip = { background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
@@ -94,6 +96,7 @@ export function SalesCommandCenter({
 
   const range = preset === "custom" ? custom : presetRange(preset, new Date());
   const filters: CcFilters = { ...range, agentId, source, project };
+  const invalidRange = rangeError(range.fromDay, range.toDay);
 
   const cc = useMemo(
     () =>
@@ -103,12 +106,12 @@ export function SalesCommandCenter({
         reports: feed.data?.reports ?? [],
         followUps: feed.data?.followUps ?? [],
         agents,
-        filters,
+        filters: invalidRange ? { ...filters, ...presetRange("7d", new Date()) } : filters,
         now: new Date(),
         dailyLeadQuota: DEFAULT_DAILY_QUOTA,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [leads, calls, feed.data, agents, range.fromDay, range.toDay, agentId, source, project],
+    [leads, calls, feed.data, agents, range.fromDay, range.toDay, agentId, source, project, invalidRange],
   );
 
   const leadById = useMemo(() => new Map(leads.map((l) => [l.id, l])), [leads]);
@@ -144,15 +147,14 @@ export function SalesCommandCenter({
 
   return (
     <div className="space-y-5">
-      <p className="text-xs text-muted-foreground">{t({ bn: "রিপোর্ট ও ফলো-আপ সর্বশেষ পড়া", en: "Reports and follow-ups read as of" })}: {feed.data?.freshness?.generatedAt ? new Date(feed.data.freshness.generatedAt).toLocaleString("en-GB", { timeZone: "Asia/Dhaka" }) : "—"} · Asia/Dhaka · {t({ bn: "কলের তথ্য ও অডিও আপলোড আলাদা; অডিও রেফারেন্স ফাইল যাচাই নয়।", en: "Call evidence and audio uploads are separate; audio references are not verified files." })}</p>
       {/* Global filters */}
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-muted/30 p-2.5">
         <div className="flex rounded-lg border border-border bg-background p-0.5" role="group" aria-label="সময়সীমা">
           {(["7d", "30d", "month", "custom"] as Preset[]).map((p) => (
-            <button key={p} type="button" onClick={() => setPreset(p)} aria-pressed={preset === p}
+            <Button key={p} type="button" variant="ghost" onClick={() => setPreset(p)} aria-pressed={preset === p}
               className={`rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors ${preset === p ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
               {p === "7d" ? "7D" : p === "30d" ? "30D" : p === "month" ? "এই মাস" : "কাস্টম"}
-            </button>
+            </Button>
           ))}
         </div>
         {preset === "custom" && (
@@ -175,6 +177,9 @@ export function SalesCommandCenter({
         </select>
         <span className="ml-auto text-[11px] text-muted-foreground">{range.fromDay} – {range.toDay} · Asia/Dhaka</span>
       </div>
+      {invalidRange ? <p role="alert" className="text-sm text-destructive">{invalidRange} No performance totals are shown for this invalid range.</p> : feed.error ? <div role="alert"><p className="text-sm text-destructive">The latest read failed. Performance totals are unavailable; cached numbers are not shown as fresh.</p><Button variant="outline" onClick={() => void feed.refetch()}>Try again</Button></div> : <>
+      <PerformanceCountAudit audit={cc.audit} period={`${range.fromDay} – ${range.toDay}`} freshness={feed.data?.freshness.generatedAt} refreshing={feed.isFetching} onRefresh={() => void feed.refetch()} onAgent={onSelectAgent} onLeads={drill} />
+      <details><summary className="cursor-pointer text-sm font-medium">Sales context · current-state funnel / today-only legacy summaries (not the operational score)</summary><div className="mt-4 space-y-5">
       {feed.error && <p className="text-xs text-destructive">রিপোর্ট ডেটা লোড হয়নি — সাইট ভিজিট/বুকিং/ফলো-আপ সংখ্যা অসম্পূর্ণ।</p>}
 
       {feed.error ? <Button variant="outline" onClick={() => void feed.refetch()}>আবার চেষ্টা করুন</Button> : <>
@@ -380,6 +385,8 @@ export function SalesCommandCenter({
       <SiteVisitsPanel leads={leads} fromDay={range.fromDay} toDay={range.toDay} agentId={agentId} />
 
       <BookingsPanel leads={leads} fromDay={range.fromDay} toDay={range.toDay} agentId={agentId} />
+      </div></details>
+      </>}
     </div>
   );
 }

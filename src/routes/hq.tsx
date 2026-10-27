@@ -34,7 +34,6 @@ import { HqTalkChart } from "@/components/crm/hq/HqTalkChart";
 import { HqRecentSummaries } from "@/components/crm/hq/HqRecentSummaries";
 import { FloorLockAdminPanel } from "@/components/crm/hq/FloorLockAdminPanel";
 
-import { TopPerformerBoard } from "@/components/crm/hq/TopPerformerBoard";
 import { MarketNewsFeed } from "@/components/crm/news/MarketNewsFeed";
 import { FactsBoard } from "@/components/crm/sales-intel/SalesIntelPanels";
 import { AccountabilityReviewPanel } from "@/components/crm/AccountabilityReviewPanel";
@@ -61,7 +60,7 @@ export const Route = createFileRoute("/hq")({
       {
         property: "og:description",
         content:
-          "Track live calls, talk time, verified recordings and AI call summaries in one command center.",
+          "Audit submitted reports, call attempts and completed assigned work, with optional recording and sync diagnostics.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -251,13 +250,13 @@ function ControlBoard() {
                 <SystemManualCard />
                 <SmartInsightStrip scope="floor" />
                 <ExecutiveBrief />
-                <HqStatTiles calls={calls} leads={leads} messages={messages} onDrill={setDrill} />
+                <details><summary className="cursor-pointer text-sm font-medium">Optional recording evidence · not agent performance</summary><div className="mt-4"><HqStatTiles calls={calls} leads={leads} messages={messages} onDrill={setDrill} /></div></details>
               </div>
             )}
 
             {tab === "performance" && (
               <div className="space-y-8">
-                <TopPerformerBoard stats={stats} onSelectAgent={setOpenAgentId} />
+                <SalesCommandCenter profiles={profiles} leads={leads} calls={calls} messages={messages} loading={isPending} onDrill={setDrill} onSelectAgent={setOpenAgentId} />
                 <ExecutiveOverview
                   profiles={profiles}
                   leads={leads}
