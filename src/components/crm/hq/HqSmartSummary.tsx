@@ -1,5 +1,6 @@
+import { commandCenterFeedQuery } from "@/lib/crm-data";
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AlertTriangle, Inbox, PhoneCall } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,8 @@ export function HqSmartSummary({ profiles, leads, calls, loading, onSelectAgent 
   const adminToken = useAdminToken();
   const fetchFeed = useServerFn(getCommandCenterFeed);
   // Shares the exact query/cache with SalesCommandCenter, not a second reader.
-  const feed = useQuery({ queryKey: ["command-center-feed", adminToken], queryFn: () => fetchFeed({ data: { adminToken } }), refetchInterval: 30_000 });
+  const queryClient = useQueryClient();
+  const feed = useQuery(commandCenterFeedQuery(queryClient, adminToken, fetchFeed));
   const summary = useMemo(() => computeHqSmartSummary({
     agents: profiles.filter(p => (p.role === "agent" || p.role === "team_leader") && p.is_active && p.approval_status === "approved").map(p => ({ id: p.id, name: p.name })),
     leads, calls, reports: feed.data?.reports ?? [], followUps: feed.data?.followUps ?? [], now: new Date(), dailyLeadQuota: DEFAULT_DAILY_QUOTA,

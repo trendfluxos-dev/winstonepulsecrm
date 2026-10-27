@@ -1,5 +1,6 @@
+import { commandCenterFeedQuery } from "@/lib/crm-data";
 import { useT } from "@/lib/i18n";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Bar,
@@ -68,11 +69,8 @@ export function SalesCommandCenter({
   const t = useT();
   const adminToken = useAdminToken();
   const fetchFeed = useServerFn(getCommandCenterFeed);
-  const feed = useQuery({
-    queryKey: ["command-center-feed", adminToken],
-    queryFn: () => fetchFeed({ data: { adminToken } }),
-    refetchInterval: 30_000,
-  });
+  const queryClient = useQueryClient();
+  const feed = useQuery(commandCenterFeedQuery(queryClient, adminToken, fetchFeed));
 
   const [preset, setPreset] = useState<Preset>("7d");
   const [custom, setCustom] = useState(() => presetRange("30d", new Date()));
@@ -136,7 +134,7 @@ export function SalesCommandCenter({
   const kpis = [
     { icon: Users, label: "মোট লিড", value: cc.kpi.totalLeads, hint: `এই সময়ে নতুন ${cc.kpi.newLeadsInRange}`, onClick: () => drill("মোট লিড", cc.funnel[0]!.leadIds) },
     { icon: PhoneCall, label: "কাজ হয়েছে এমন লিড", value: cc.funnel[1]!.count, hint: `${fmt(cc.funnel[1]!.fromPrev)} · বর্তমান অবস্থা pending নয়`, onClick: () => drill("যোগাযোগ হওয়া লিড", cc.funnel[1]!.leadIds) },
-    { icon: CalendarCheck, label: "খোলা ফলো-আপ", value: cc.kpi.openFollowUps, hint: `${cc.followUpHealth.overdue.count} মেয়াদোত্তীর্ণ`, onClick: () => drill("মেয়াদোত্তীর্ণ ফলো-আপ", cc.followUpHealth.overdue.leadIds) },
+    { icon: CalendarCheck, label: "বাকি ফলো-আপ", value: cc.kpi.openFollowUps, hint: `এর মধ্যে ${cc.followUpHealth.overdue.count}টির সময় পার হয়ে গেছে`, onClick: () => drill("সময় পার হওয়া ফলো-আপ", cc.followUpHealth.overdue.leadIds) },
     { icon: MapPin, label: "সাইট ভিজিট", value: cc.kpi.siteVisits, hint: "রিপোর্টে সংরক্ষিত সিগন্যাল", onClick: () => drill("সাইট ভিজিট লিড", cc.funnel[3]!.leadIds) },
     { icon: Handshake, label: "বুকিং সিগন্যাল", value: cc.kpi.bookings, hint: "নির্বাচিত সময়ের closed-converted রিপোর্ট", onClick: () => drill("বুকিং লিড", cc.funnel[4]!.leadIds) },
     { icon: Wallet, label: "রেভিনিউ", value: null, hint: "CRM-এ ডিল মূল্য রেকর্ড হয় না", onClick: undefined },
@@ -242,7 +240,7 @@ export function SalesCommandCenter({
         <Panel title="ফলো-আপ হেলথ" question="কোন ফলো-আপ এখনই ধরতে হবে?" className="lg:col-span-3">
           <ul className="space-y-1.5">
             {([
-              ["overdue", "মেয়াদোত্তীর্ণ", "bg-destructive", "text-destructive"],
+              ["overdue", "সময় পার হয়ে গেছে", "bg-destructive", "text-destructive"],
               ["dueToday", "আজ নির্ধারিত", "bg-warning", "text-warning"],
               ["upcoming", "আসন্ন", "bg-chart-2", "text-chart-2"],
               ["completed", "সম্পন্ন (সময়সীমায়)", "bg-success", "text-success"],
@@ -256,7 +254,7 @@ export function SalesCommandCenter({
             ))}
           </ul>
           {cc.followUpHealth.overdue.count > 0 && (
-            <button type="button" onClick={() => drill("মেয়াদোত্তীর্ণ ফলো-আপ", cc.followUpHealth.overdue.leadIds)}
+            <button type="button" onClick={() => drill("সময় পার হওয়া ফলো-আপ", cc.followUpHealth.overdue.leadIds)}
               className="mt-3 w-full rounded-lg bg-destructive px-3 py-2 text-xs font-semibold text-destructive-foreground hover:opacity-90">
               {cc.followUpHealth.overdue.count}টি ফলো-আপ রিভিউ করুন →
             </button>

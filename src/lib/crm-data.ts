@@ -8,6 +8,33 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { getCrmSnapshot } from "@/lib/crm.functions";
 import { useAdminToken } from "@/lib/local-session";
+import type { getCommandCenterFeed } from "@/lib/command-center.functions";
+import { byCreatedAsc, byUpdatedDesc, deltaCursor, mergeDelta } from "@/lib/delta-merge";
+
+type Feed = Awaited<ReturnType<typeof getCommandCenterFeed>>;
+
+/** Shared HQ reports/follow-ups query: later refreshes fetch changed reports only. */
+export function commandCenterFeedQuery(
+  queryClient: ReturnType<typeof useQueryClient>,
+  adminToken: string | null,
+  fetchFeed: (args: { data: { adminToken: string | null; reportsSince?: string | null } }) => Promise<Feed>,
+) {
+  const queryKey = ["command-center-feed", adminToken];
+  return {
+    queryKey,
+    refetchInterval: 30_000,
+    queryFn: async (): Promise<Feed> => {
+      const prev = queryClient.getQueryData<Feed>(queryKey);
+      if (prev?.reportsMode && prev.freshness?.generatedAt) {
+        const next = await fetchFeed({ data: { adminToken, reportsSince: deltaCursor(prev.freshness.generatedAt) } });
+        if (next.reportsMode !== "delta") return next;
+        const merged = mergeDelta(prev.reports, next.reports, next.reportCount, byCreatedAsc);
+        if (merged) return { ...next, reports: merged };
+      }
+      return fetchFeed({ data: { adminToken } });
+    },
+  };
+}
 import type { SafeProfile } from "@/lib/profile-columns";
 import { useMyAccount } from "@/lib/session";
 
@@ -125,9 +152,24 @@ export function useSnapshot() {
   const pathname = useLocation({ select: (location) => location.pathname });
   const view = pathname === "/desk" ? "agent" as const : "default" as const;
   const { scope, isPending: accountPending } = useMyAccount();
+  const queryClient = useQueryClient();
+  const queryKey = ["crm-snapshot", token ? "authority" : "session", scope, view];
   const query = useQuery({
     ...snapshotQueryFor({ token, view }),
-    queryKey: ["crm-snapshot", token ? "authority" : "session", scope, view],
+    queryKey,
+    // Refreshes re-read only leads changed since the last load; the total
+    // check falls back to a full reload whenever the merge can't be proven.
+    queryFn: async () => {
+      const prev = queryClient.getQueryData<CrmSnapshot>(queryKey);
+      if (prev && prev.leadsMode && prev.serverTime && view !== "agent") {
+        const next = await getCrmSnapshot({ data: { token, view, leadsSince: deltaCursor(prev.serverTime) } });
+        if (next.leadsMode === "delta") {
+          const merged = mergeDelta(prev.leads, next.leads, next.leadCount, byUpdatedDesc);
+          if (merged) return { ...next, leads: merged };
+        } else return next;
+      }
+      return getCrmSnapshot({ data: { token, view } });
+    },
     enabled: !accountPending && scope !== "none",
   });
   useLiveCrmRefresh();
