@@ -1,7 +1,10 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { Suspense } from "react";
-import { Trophy } from "lucide-react";
-import { topPerformerToday } from "@/lib/top-performer.functions";
+import { Suspense, useState } from "react";
+import { ChevronLeft, ChevronRight, Trophy } from "lucide-react";
+import { topPerformerToday, topPerformerOnDate } from "@/lib/top-performer.functions";
+import { shiftPerformanceDate } from "@/lib/performance-history";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n";
 import { Bi } from "@/components/crm/Bi";
 
@@ -33,14 +36,50 @@ export function DailyPerformance() {
 function PerformanceResults() {
   const t = useT();
   const { data } = useSuspenseQuery(performanceQuery);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   if (!data) return <p className="mt-6 text-sm text-muted-foreground">{t({ en: "Results are temporarily unavailable.", bn: "ফলাফল এখন দেখা যাচ্ছে না।" })}</p>;
+  const date = selectedDate ?? data.dateKey;
+  return (
+    <div>
+      <div className="mt-6 flex flex-wrap items-end gap-2">
+        <div className="min-w-0 flex-1 sm:max-w-52">
+          <label htmlFor="performance-history-date" className="mb-2 block text-sm font-medium"><Bi en="Results date" bn="ফলাফলের তারিখ" /></label>
+          <Input id="performance-history-date" type="date" value={date} max={data.dateKey} onChange={(event) => { if (event.target.value && event.target.value <= data.dateKey) setSelectedDate(event.target.value); }} />
+        </div>
+        <Button variant="outline" size="icon" aria-label={t({ en: "Previous day", bn: "আগের দিন" })} title={t({ en: "Previous day", bn: "আগের দিন" })} onClick={() => setSelectedDate(shiftPerformanceDate(date, -1))}><ChevronLeft aria-hidden /></Button>
+        <Button variant="outline" size="icon" disabled={date >= data.dateKey} aria-label={t({ en: "Next day", bn: "পরের দিন" })} title={t({ en: "Next day", bn: "পরের দিন" })} onClick={() => setSelectedDate(shiftPerformanceDate(date, 1))}><ChevronRight aria-hidden /></Button>
+        {selectedDate !== null && <Button variant="plate" onClick={() => setSelectedDate(null)}>{t({ en: "Latest", bn: "সর্বশেষ" })}</Button>}
+      </div>
+      {date !== data.dateKey && <p className="mt-3 text-xs text-muted-foreground">{t({ en: "Historical results · calculated from saved activity", bn: "পুরোনো ফলাফল · সংরক্ষিত কাজ থেকে হিসাব করা" })}</p>}
+      <Suspense fallback={<p role="status" className="mt-6 text-sm text-muted-foreground">{t({ en: "Loading results…", bn: "ফলাফল আসছে…" })}</p>}>
+        {date === data.dateKey ? <ResultsBoard data={data} /> : <HistoricalResults key={date} date={date} />}
+      </Suspense>
+    </div>
+  );
+}
+
+function HistoricalResults({ date }: { date: string }) {
+  const { data } = useSuspenseQuery(queryOptions({
+    queryKey: ["public-daily-performance", date],
+    queryFn: async () => { try { return await topPerformerOnDate({ data: { date } }); } catch { return null; } },
+    staleTime: 300_000,
+    retry: 1,
+  }));
+  return <ResultsBoard data={data} />;
+}
+
+type ResultsData = { dateKey: string; revealed: boolean; topThree: { agentId: string; name: string; score: number; completed: number; reports: number; followUps: number }[]; otherAgents: { agentId: string; name: string; score: number; completed: number; reports: number; followUps: number }[] };
+
+function ResultsBoard({ data }: { data: ResultsData | null }) {
+  const t = useT();
+  if (!data) return <p role="status" className="mt-6 text-sm text-muted-foreground">{t({ en: "Results are temporarily unavailable.", bn: "ফলাফল এখন দেখা যাচ্ছে না।" })}</p>;
   if (!data.revealed) return <p className="mt-6 text-sm text-muted-foreground">{t({ en: "Today's results will appear at 5:30 PM.", bn: "আজকের ফলাফল বিকেল ৫:৩০-এ দেখা যাবে।" })}</p>;
   const rows = [...data.topThree, ...data.otherAgents];
   const highlighted = data.topThree.length ? data.topThree : data.otherAgents.filter((agent) => agent.score > 0 || agent.completed > 0).slice(0, 3);
   const highlightedIds = new Set(highlighted.map((agent) => agent.agentId));
   const remaining = rows.filter((agent) => !highlightedIds.has(agent.agentId));
   return (
-    <div className="mt-6">
+    <div className="mt-6" aria-live="polite">
       <p className="text-sm text-muted-foreground">{data.dateKey}</p>
       {highlighted.length > 0 ? (
         <div className="mt-4 grid gap-3 md:grid-cols-3">

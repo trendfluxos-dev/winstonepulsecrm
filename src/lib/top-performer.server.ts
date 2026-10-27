@@ -7,6 +7,7 @@
  * evening shift summary is generated — so the day is actually finished first.
  */
 import { dhakaInstant, dhakaParts } from "@/lib/shift.server";
+import { performanceDate } from "@/lib/performance-history";
 
 /** Pure ranking used by the daily board: highest displayed score ranks first. */
 export function rankPerformers(lines: PerformerLine[]): PerformerLine[] {
@@ -238,8 +239,13 @@ export function topPerformerDate(at: Date = new Date()): TopPerformerDate {
   };
 }
 
-export async function dailyTopPerformer(at: Date = new Date()): Promise<TopPerformerBoard> {
-  const { effectiveDateKey, isPreviousDay, dayLabel, revealed } = topPerformerDate(at);
+export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: string): Promise<TopPerformerBoard> {
+  const today = dhakaParts(at).dateKey;
+  const selected = selectedDate === undefined ? undefined : performanceDate(selectedDate, today);
+  const historical = selected !== undefined && selected < today;
+  const { effectiveDateKey, isPreviousDay, dayLabel, revealed } = selected === undefined
+    ? topPerformerDate(at)
+    : { effectiveDateKey: selected, isPreviousDay: historical, dayLabel: historical ? "গতকের" as const : "আজকের" as const, revealed: historical || dhakaParts(at).minutes >= REVEAL_MINUTES };
   const revealAt = dhakaInstant(effectiveDateKey, REVEAL_MINUTES);
   const startIso = dhakaInstant(effectiveDateKey, 0).toISOString();
   const endIso = isPreviousDay
@@ -247,23 +253,27 @@ export async function dailyTopPerformer(at: Date = new Date()): Promise<TopPerfo
     : at.toISOString();
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const [agentsRes, reportsRes, followRes] = await Promise.all([
-    supabaseAdmin
+  let agentsQuery = supabaseAdmin
       .from("profiles")
       .select("id, name, employee_id, photo_path")
       .eq("approval_status", "approved")
-      .eq("is_active", true)
-      .eq("role", "agent"),
+      .eq("role", "agent");
+  if (!historical) agentsQuery = agentsQuery.eq("is_active", true);
+  const { pageAllParallel } = await import("@/lib/page-all");
+  const [agentsRes, reportsRes, followRes] = await Promise.all([
+    agentsQuery,
+    pageAllParallel((from, to) =>
     supabaseAdmin
       .from("call_reports")
-      .select("agent_id, lead_id, status, connected, duration_seconds, created_at, connection_verified, submitted_at")
+      .select("id, agent_id, lead_id, status, connected, duration_seconds, created_at, connection_verified, submitted_at")
       .gte("created_at", startIso)
-      .lte("created_at", endIso),
+      .lte("created_at", endIso).order("id").range(from, to)),
+    pageAllParallel((from, to) =>
     supabaseAdmin
       .from("follow_up_events")
-      .select("agent_id, created_at")
+      .select("id, agent_id, created_at")
       .gte("created_at", startIso)
-      .lte("created_at", endIso),
+      .lte("created_at", endIso).order("id").range(from, to)),
   ]);
   if (agentsRes.error) throw new Error(agentsRes.error.message);
   if (reportsRes.error) throw new Error(reportsRes.error.message);
@@ -274,15 +284,22 @@ export async function dailyTopPerformer(at: Date = new Date()): Promise<TopPerfo
   );
   const { dailyPlan, extraGrantsToday } = await import("@/lib/lead-pool.server");
   const floorQuota = (await dailyPlan()).perAgent;
-  const extraToday = await extraGrantsToday();
+  let extraToday: Record<string, number>;
+  if (historical) {
+    const grants = await supabaseAdmin.from("lead_extra_grants").select("agent_profile_id, quantity").eq("work_date", effectiveDateKey);
+    if (grants.error) throw new Error("Historical allocation unavailable");
+    extraToday = {};
+    for (const grant of grants.data ?? []) extraToday[grant.agent_profile_id] = (extraToday[grant.agent_profile_id] ?? 0) + grant.quantity;
+  } else extraToday = await extraGrantsToday();
 
   // The scored day's own list per desk: how many leads arrived and how many are finished.
-  const { data: todayLeads } = await supabaseAdmin
+  const { data: todayLeads, error: leadsError } = await pageAllParallel((from, to) => supabaseAdmin
     .from("leads")
     .select("id, assigned_to, work_state")
     .eq("work_date", effectiveDateKey)
     .not("assigned_to", "is", null)
-    .limit(20000);
+    .order("id").range(from, to));
+  if (leadsError) throw new Error("Performance allocation unavailable");
 
   const reports = reportsRes.data ?? [];
   const follows = followRes.data ?? [];
@@ -325,7 +342,7 @@ export async function dailyTopPerformer(at: Date = new Date()): Promise<TopPerfo
     };
   });
 
-  const ranked = rankPerformers(lines);
+  const ranked = rankPerformers(historical ? lines.filter((line) => line.called > 0 || line.followUps > 0 || line.assigned > 0) : lines);
   const isActive = (line: PerformerLine) => line.score > 0 || line.completed > 0;
   const activeRanked = ranked.filter(isActive);
   const leaderScore = activeRanked[0]?.score ?? 0;
