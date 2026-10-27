@@ -5,7 +5,7 @@
 - [x] Invalid/reversed/>400-day ranges hide totals and show errors. 56 focused tests pass; automatic typecheck/build OK, semantic-color and whitespace checks pass. Signed-in HQ read-back, refresh, 223 authorized issue IDs, desktop/mobile and reversed dates verified.
 - [ ] Release blocked pending review of full-suite failures: six integration checks need an agent session (current session is admin); existing route-inventory assertion expects 60 pages, actual 61. This change is NOT published. Historical completion timestamps/phone-unsent queues/fresh audio-file existence are unavailable and labeled, not inferred.
 - [x] Verify requested Info Desk release: live historical results on October 25/26/27 exclude the account; /manual release markers pass.
-- [x] Audit performance/HQ evidence: daily ranking reads reports/follow-ups/assigned work, not audio storage; HQ brief and accountability use saved work evidence. Phone-measured talk time still contributes to the existing score, distinct from audio upload availability. HQ headline tiles still emphasize synced recordings; reprioritizing those tiles and changing scoring weights are not part of the completed Info Desk publication.
+- [x] Earlier inspection found talk-time scoring and recording-heavy HQ tiles; the new preview implementation above supersedes those rules, but the earlier Info Desk publication did not include it.
 
 ## 2026-10-27 — Homepage English only
 - [x] Removed every Bengali line from the homepage (34 lines: header, hero, feature strip, workspace cards, guidance, brand architect, footer) plus the Bengali parts of the search/share descriptions; owner decision "Only ENG". In-app screens keep their own bilingual headings.

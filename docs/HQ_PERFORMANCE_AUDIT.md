@@ -17,7 +17,7 @@ Audio diagnostics are collapsed and optional. Attempt/received/processed/failed 
 Reports/follow-ups and calls/leads show separate last-read timestamps. Refresh reloads both shared readers. Failed reads suppress performance totals rather than presenting cached values as fresh. Dates are strict calendar dates; reversed dates and ranges exceeding 400 days display an error with no totals.
 
 ## Verification and release status
-- Focused regression suite: 56 checks passed (before final canonical-owner normalization).
+- Focused regression suite: 56 checks passed, including final canonical-owner normalization.
 - Automatic typecheck/build succeeded; semantic-color check and whitespace inspection passed.
 - Real signed-in HQ preview: refresh, record-ID expansion, desktop/mobile and reversed date rejection exercised without writes. Observed 229 range reports/attempts; 889 assigned vs 849 active-roster assignments; 101 completed; the 40-owner mismatch is exposed, not edited. These are one read, not permanent business facts.
 - Full suite: 1258 passed / 7 failed. Six read-only integration checks require an agent-scoped session; the available session is admin. One existing inventory assertion expects 60 routes while 61 exist. No new route was introduced.
