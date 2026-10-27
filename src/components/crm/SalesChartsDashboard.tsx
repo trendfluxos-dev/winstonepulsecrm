@@ -2,6 +2,10 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getDeskReports } from "@/lib/desk-work.functions";
+import { getCommandCenterFeed } from "@/lib/command-center.functions";
+import { commandCenterFeedQuery } from "@/lib/crm-data";
+import { useAdminToken } from "@/lib/local-session";
+import { useQueryClient } from "@tanstack/react-query";
 import { leadKpis, ownerOf, rangeError, reportLeadReconciliation, reportKpis, whatsappKpi } from "@/lib/kpi-contract";
 import {
   Area,
@@ -72,6 +76,11 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
   const [preset, setPreset] = useState<Preset>("14");
   const readReports = useServerFn(getDeskReports);
   const reportsQ = useQuery({ queryKey: ["desk-reports-all"], queryFn: () => readReports(), enabled: scope === "agent", staleTime: 60_000 });
+  // HQ official call work = submitted call_reports from the shared, PIN-scoped HQ feed.
+  const queryClient = useQueryClient();
+  const adminToken = useAdminToken();
+  const fetchFeed = useServerFn(getCommandCenterFeed);
+  const hqFeed = useQuery({ ...commandCenterFeedQuery(queryClient, adminToken, fetchFeed), enabled: scope === "hq" });
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
@@ -155,6 +164,7 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
   const lk = me ? leadKpis(leads, me) : null;
   const rk = reportsQ.data ? reportKpis(reportsQ.data.reports, range) : null;
   const wa = whatsappKpi(messages, range);
+  const hk = hqFeed.data ? reportKpis(hqFeed.data.reports, range) : null;
   const rr = reportsQ.data && me
     ? reportLeadReconciliation(reportsQ.data.reports, range, new Set(leads.filter((l) => ownerOf(l) === me).map((l) => l.id)))
     : null;
@@ -170,8 +180,14 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
   ] : [
     { label: scope === "hq" ? t({ bn: "মোট লিড", en: "Total leads" }) : t({ bn: "আমার লিড", en: "My leads" }), value: k.leads, icon: Users, tone: "primary" as const },
     { label: t({ bn: "হট লিড", en: "Hot leads" }), value: k.hot, icon: Flame, tone: "destructive" as const },
-    { label: t({ bn: "মোট কল", en: "Total calls" }), value: k.calls, icon: Phone, tone: "accent" as const },
-    { label: t({ bn: "কথা হওয়া কল", en: "Connected calls" }), value: `${k.connected} (${k.rate}%)`, icon: PhoneCall, tone: "live" as const },
+    ...(scope === "hq" ? [
+      { label: t({ bn: "মোট কল কাজ (জমা রিপোর্ট)", en: "Total call work (submitted reports)" }), value: rangeErr ? "—" : hk ? hk.submitted : na, icon: CheckCircle2, tone: "accent" as const },
+      { label: t({ bn: "কথা হয়েছে (রিপোর্ট অনুযায়ী)", en: "Connected (per reports)" }), value: rangeErr ? "—" : hk ? `${hk.reportedConnected} (${hk.rate}%)` : na, icon: PhoneCall, tone: "live" as const },
+      { label: t({ bn: "ফোন-সিঙ্ক কল (প্রযুক্তিগত, KPI নয়)", en: "Phone-synced calls (technical, not KPI)" }), value: `${k.calls} (${k.connected} >10s)`, icon: Phone, tone: "muted" as const },
+    ] : [
+      { label: t({ bn: "মোট কল", en: "Total calls" }), value: k.calls, icon: Phone, tone: "accent" as const },
+      { label: t({ bn: "কথা হওয়া কল", en: "Connected calls" }), value: `${k.connected} (${k.rate}%)`, icon: PhoneCall, tone: "live" as const },
+    ]),
     { label: t({ bn: "হোয়াটসঅ্যাপ", en: "WhatsApp" }), value: k.whatsapp, icon: MessageCircle, tone: "chart4" as const },
     { label: t({ bn: "বন্ধ লিড", en: "Closed leads" }), value: k.closed, icon: CheckCircle2, tone: "muted" as const },
   ];
@@ -262,6 +278,14 @@ export function SalesChartsDashboard({ scope }: { scope: "hq" | "agent" }) {
             })}
           </p>
         </div>
+      )}
+      {scope === "hq" && (
+        <p className="text-xs text-muted-foreground">
+          {t({
+            bn: "মোট কল কাজ = জমা দেওয়া কল রিপোর্ট (জমার তারিখ, ঢাকা সময়)। কথা হয়েছে = রিপোর্টে এজেন্ট যা চিহ্নিত করেছেন। ফোন-সিঙ্ক কল শুধু অ্যান্ড্রয়েড অ্যাপ যা পাঠাতে পেরেছে — প্রযুক্তিগত তথ্য, পারফরম্যান্স হিসাবে নয়।",
+            en: "Total call work = submitted call reports (by submit date, Dhaka). Connected = marked connected in the report. Phone-synced calls are only what the Android app managed to upload — technical info, never a performance metric.",
+          })}
+        </p>
       )}
       {scope === "agent" && (
         <p className="text-xs text-muted-foreground">
