@@ -1,10 +1,10 @@
 # Roadmap
 
 ## 2026-10-27 — Approved security fixes and release
-- [ ] Block callback lead takeover without adding an assignment path.
-- [ ] Restrict lead-sheet previews to server-approved spreadsheet sources.
-- [ ] Neutralise spreadsheet formulas in audit CSV downloads; verify targeted regressions.
-- [ ] Publish verified fixes and check live release; leave public support AI and category findings unchanged.
+- [x] Block callback/manual lead takeover; canonical intake remains unassigned, LeadHub-only routing and briefing enforced. 20 synthetic handler tests pass.
+- [x] Restrict lead-sheet previews to the existing server-configured report workbooks before provider reads; strict Google URL and tab validation. 9 transport/authority tests pass; inventory/scheduled sync unchanged.
+- [x] Neutralise every audit CSV cell including whitespace/control prefixes; 10 tests pass. Full suite: 1178 passed, one pre-existing copy-only role-terminology test failed; harness build OK. Signed-out auth/audit gate checked with no page errors; authenticated customer writes intentionally not exercised.
+- [ ] Release requested; current fixes require live deployment completion/read-back. Seven latest deep-scan findings remain active, including cross-lead WhatsApp insertion; public support AI/category findings unchanged. No database migrations or customer-record changes performed.
 
 ## HQ screenshot — false no-call/untouched claims
 - [x] Diagnose recording-only counts, omitted submitted reports, browser-local day and unsupported inactivity claims.
