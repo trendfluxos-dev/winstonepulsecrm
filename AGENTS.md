@@ -22,19 +22,19 @@
 - Winstone OS inbound events only via POST /api/public/os/events (HMAC + idempotency in server-only os_event_receipts); mapping never invents entities — why: one verified, replay-safe bridge.
 - Lead neglect: zero-work leads get 2 business-day notices (recall on the 3rd) then recall to the pool via `lead-neglect.server.ts`; recalls are append-only disputes, DB blocks re-assigning to the same agent and call-start refuses them — why: leads must not rot and the rule can't be bypassed from the UI.
 - UI language uses src/lib/i18n.ts (useLang/useT, localStorage, Bengali default); new UI strings add { bn, en } pairs there or inline — why: one switch for both languages.
-- Pin @lovable.dev/vite-tanstack-config to 2.25.2 — why: 2.26.0 emits createRequire(import.meta.url) that crashes every page on the live Worker.
-- Bookings start `approval_status='pending'`; only HQ/IT approval (server-checked authority, decision final via trigger) queues the signed OS relay event — why: HQ gatekeeps what reaches Winstone OS.
-- Knowledge Hub (winstonebd.com) data enters the CRM only as public pages (website_pages), verbatim official RSS news (market_news origin='official') and signed `site_visit.requested` events on /api/public/os/events into server-only website_visit_requests; a request becomes a site_visit only when the agent/HQ confirms it — why: no invented facts, one verified bridge.
+- Pin @lovable.dev/vite-tanstack-config to 2.25.2 — why: 2.26.0 emits createRequire(import.meta.url), crashing every page on the live Worker.
+- Bookings start `approval_status='pending'`; only HQ/IT approval (server-checked, final via trigger) queues the signed OS relay event — why: HQ gatekeeps what reaches Winstone OS.
+- Knowledge Hub (winstonebd.com) data enters the CRM only as public pages (website_pages), verbatim official RSS news (market_news origin='official') and signed `site_visit.requested` events into server-only website_visit_requests; a request becomes a site_visit only when the agent/HQ confirms it — why: no invented facts, one verified bridge.
 - Vite pre-bundles the TanStack router-core/seroval/h3-v2 deps in vite.config optimizeDeps.include — why: late discovery re-optimized on every cold start and broke open tabs.
 - Module recovery: router-caught import failures dispatch the shared recovery event; coalesces failures and times out probes; checked by bun run test:restart — why: no reload loops or blank tabs after restarts.
 - Live tests needing a signed-in staff user use tests/fixtures/staff-session.ts (reuses an existing session, never creates users) — why: preview and live share one database.
 - Board live refresh coalesces realtime changes into one snapshot reload per 8s; hidden tabs only mark it stale — why: per-change full-floor reloads were the top database load.
-- Call UI reuses scoped notes/history and reporting; SIM controls use Android Telecom InCallService with explicit dialer-role consent, never a browser bridge — why: real controls, unchanged CRM gates.
-- Desk uses a non-scrolling section grid; mobile navigation opens from below — why: avoid sideways navigation.
+- Call UI reuses scoped notes/history and reporting; SIM controls use Android Telecom InCallService with dialer-role consent, never a browser bridge — why: real controls, unchanged CRM gates.
+- Desk uses a non-scrolling section grid; mobile nav opens from below — why: avoid sideways navigation.
 - Social moderation: CRM logs work only (append-only social_activity_logs) and makes unassigned leads via intakeLead — why: no Meta API; LeadHub assigns.
 - Wrappers/portals inherit src/styles.css tokens; Buttons separate actions from accents; headers stack phone actions, dialogs reserve close space — why: one palette, phone-safe layouts.
-- WhatsApp reads/summary use Dhaka-filtered bounded feed; CSV exports displayed totals safely — why: scoped, matching exports without formulas.
-- Fonts use public/fonts WOFF2 + CSS @font-face, never Google CSS — why: avoid render-blocking requests.
+- WhatsApp reads/summary use Dhaka-filtered bounded feed; CSV exports displayed totals safely — why: exports match what staff saw.
+- Fonts use public/fonts WOFF2 + @font-face, never Google CSS — why: avoid render-blocking requests.
 - Private AI/bill reads authenticate; support inbox lists only the agent's own assigned conversations and agent escalation requires ownership; project writes reject read-only HQ; scored time needs phone sync — why: requests cannot bypass access or fabricate evidence.
 
 - HQ summaries share report/recording counts and Dhaka days; pending excludes saved attempts; absent evidence never proves inactivity — why: no false blame from audio gaps.
