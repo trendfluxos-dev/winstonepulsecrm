@@ -440,6 +440,33 @@
   box-shadow: var(--shadow-glass);
 }
 
+/* Thin glass edge: 1px translucent gradient hairline that follows the card radius */
+@utility glass-hairline {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      150deg,
+      color-mix(in oklab, white 92%, transparent) 0%,
+      color-mix(in oklab, var(--border) 88%, transparent) 46%,
+      color-mix(in oklab, white 74%, transparent) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
 /* Metric / content card */
 @utility card-elevated {
   border-radius: var(--radius);
