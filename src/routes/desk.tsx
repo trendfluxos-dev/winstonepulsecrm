@@ -63,6 +63,7 @@ import { formatTalkTime } from "@/lib/crm-format";
 import { dhakaDay, plausibleSeconds } from "@/lib/lead-groups";
 import { useMyAccount, useSignOut } from "@/lib/session";
 import { DeskRangeChip, useDeskRange } from "@/lib/desk-range";
+import { deskLeadCounts } from "@/lib/desk-counts";
 
 export const Route = createFileRoute("/desk")({
   validateSearch: sectionSearch,
@@ -90,6 +91,8 @@ export const Route = createFileRoute("/desk")({
 function DeskStats() {
   const t = useT();
   const { leads, calls, messages } = useSnapshot();
+  const { account } = useMyAccount();
+  const me = account?.profile?.id ?? "";
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -106,8 +109,8 @@ function DeskStats() {
     const connectedOf = (rows: typeof calls) =>
       rows.filter((c) => c.duration_seconds > CONNECTED_THRESHOLD_SECONDS).length;
     return {
-      leads: leads.length,
-      pending: leads.filter((l) => l.status === "pending").length,
+      leads: deskLeadCounts(leads, me, { from: today, to: today }).active,
+      pending: deskLeadCounts(leads, me, { from: today, to: today }).activePending,
       calls: todayCalls.length,
       callsDelta: todayCalls.length - yCalls.length,
       connected: connectedOf(todayCalls),
@@ -118,15 +121,15 @@ function DeskStats() {
       talkDelta: Math.round((talk - yTalk) / 60),
       whatsapp: onDay(messages, today).length,
       whatsappDelta: onDay(messages, today).length - onDay(messages, yesterday).length,
-      done: leads.filter((l) => l.work_state === "completed").length,
+      done: deskLeadCounts(leads, me, { from: today, to: today }).rangeCompleted,
       // Quota gauge measures TODAY's assigned workload only — never the
       // all-time list, so closed history cannot inflate completion.
       todayAssigned: leads.filter((l) => l.work_date === today).length,
       todayDone: leads.filter((l) => l.work_date === today && l.work_state === "completed").length,
     };
-  }, [leads, calls, messages]);
+  }, [leads, calls, messages, me]);
 
-  const donePct = stats.leads ? Math.round((stats.done / stats.leads) * 100) : 0;
+  const donePct = stats.todayAssigned ? Math.round((stats.done / stats.todayAssigned) * 100) : 0;
 
   return (
     <div className="grid gap-3 lg:grid-cols-[260px_minmax(0,1fr)]">
@@ -134,11 +137,11 @@ function DeskStats() {
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <Tile
         icon={<Users className="size-4" />}
-        label={t({ bn: "আমার লিড", en: "My leads" })}
+        label={t({ bn: "আমার সক্রিয় লিড", en: "My active assigned leads" })}
         value={String(stats.leads)}
         hint={t({ bn: `${stats.pending}টি এখনো বাকি`, en: `${stats.pending} still pending` })}
         progress={donePct}
-        progressLabel={t({ bn: `${donePct}% কাজ শেষ`, en: `${donePct}% done` })}
+        progressLabel={t({ bn: `${donePct}% কাজ শেষ`, en: `${donePct}% of today's work done` })}
       />
       <Tile
         icon={<PhoneCall className="size-4" />}
