@@ -69,7 +69,7 @@ export function SalesCommandCenter({
   loading: boolean;
   onDrill: (spec: DrillSpec) => void;
   onSelectAgent: (id: string) => void;
-  snapshotTime?: string;
+  snapshotTime?: string | undefined;
   snapshotError?: boolean;
 }) {
   const t = useT();

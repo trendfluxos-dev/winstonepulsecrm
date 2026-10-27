@@ -5,7 +5,7 @@ import { Bi } from "@/components/crm/Bi";
 import { SCORE_FORMULA, type auditPerformance } from "@/lib/performance-audit";
 
 type Audit = ReturnType<typeof auditPerformance>;
-export function PerformanceCountAudit({ audit, period, freshness, snapshotTime, refreshing, onRefresh, onAgent, onLeads }: { audit: Audit; period: string; freshness?: string; snapshotTime?: string; refreshing: boolean; onRefresh: () => void; onAgent: (id: string) => void; onLeads: (title: string, ids: string[]) => void }) {
+export function PerformanceCountAudit({ audit, period, freshness, snapshotTime, refreshing, onRefresh, onAgent, onLeads }: { audit: Audit; period: string; freshness?: string; snapshotTime?: string | undefined; refreshing: boolean; onRefresh: () => void; onAgent: (id: string) => void; onLeads: (title: string, ids: string[]) => void }) {
   const [showAudit, setShowAudit] = useState(false);
   const [diagnostics, setDiagnostics] = useState(false);
   const [issue, setIssue] = useState<number | null>(null);

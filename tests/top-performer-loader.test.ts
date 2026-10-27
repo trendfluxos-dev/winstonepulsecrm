@@ -103,7 +103,7 @@ beforeEach(() => {
 describe("Top Performer loader (dailyTopPerformer)", () => {
   it("counts submitted reports and completed assigned work without requiring audio uploads", async () => {
     state.profiles = [agent("a1", "Agent")];
-    state.call_reports = [{ ...report("a1", true, "lead-1"), connection_verified: true }];
+    state.call_reports = [{ ...report("a1", true, "lead-1"), connection_verified: true, submitted_at: "2026-10-27T06:00:00Z" }];
     state.leads = [
       { id: "lead-1", assigned_to: "a1", work_state: "completed" },
       { id: "lead-2", assigned_to: "a1", work_state: "completed" },
@@ -119,7 +119,7 @@ describe("Top Performer loader (dailyTopPerformer)", () => {
 
   it("reads the selected previous Dhaka day, including its own allocation grants", async () => {
     state.profiles = [agent("a1", "Monisha")];
-    state.call_reports = [report("a1", true)];
+    state.call_reports = [{ ...report("a1", true), submitted_at: "2026-10-26T06:00:00Z" }];
     const board = await dailyTopPerformer(new Date("2026-10-27T04:00:00Z"), "2026-10-26");
     expect(board.dateKey).toBe("2026-10-26");
     expect(board.revealed).toBe(true);
