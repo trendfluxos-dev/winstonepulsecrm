@@ -56,13 +56,6 @@ export const Route = createFileRoute("/")({
   component: EntryHall,
 });
 
-type RoleKey = "hq" | "agent" | "leadhub" | "it";
-const ROLES: { key: RoleKey; label: string; icon: typeof BarChart3 }[] = [
-  { key: "hq", label: "Executive HQ", icon: BarChart3 },
-  { key: "agent", label: "Sales Agent", icon: Headphones },
-  { key: "leadhub", label: "LeadHub Nexus", icon: Database },
-  { key: "it", label: "IT Console", icon: Server },
-];
 
 function EntryHall() {
   const t = useT();
@@ -87,11 +80,6 @@ function EntryHall() {
     document.getElementById("workspace-signin")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const [role, setRole] = useState<RoleKey>("agent");
-  const startRole = () => {
-    if (role === "agent") void navigate({ to: "/auth", search: { role: "agent", mode: "signin" } as never });
-    else openPin(role === "hq" ? "/hq" : role === "leadhub" ? "/leadhub" : "/system");
-  };
 
   return (
     <div className="theme-exec min-h-screen bg-background">
