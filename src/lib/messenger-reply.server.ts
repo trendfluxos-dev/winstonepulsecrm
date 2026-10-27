@@ -7,10 +7,11 @@
  * read — only the HTTP status becomes a generic failure code.
  */
 import { evaluateReplyGate, type ReplyBlockerId, type ReplyGateInput } from "@/lib/messenger-reply-gate";
+import { authorizeReplyTarget, replyActorBlock, type ReplyActor, type ReplyTargetRow } from "@/lib/messenger-reply-auth.server";
 
 export type ReplyStore = {
-  /** Resolve the thread's recipient (PSID); null when the thread is unknown. */
-  getThreadPsid(threadId: string): Promise<string | null>;
+  /** Trusted thread row (recipient, linked lead, assignee, lead owner columns); null when unknown. */
+  getReplyTarget(threadId: string): Promise<ReplyTargetRow | null>;
   /** Insert a pending outbox row; returns its id. */
   insertOutbox(row: { requestId: string; threadId: string; body: string; createdBy: string | null }): Promise<string>;
   markSent(outboxId: string, sentMid: string): Promise<void>;
@@ -20,7 +21,7 @@ export type ReplyStore = {
 export type GuardedReplyResult =
   | { ok: true; sentMid: string }
   | { ok: false; blockers: ReplyBlockerId[] }
-  | { ok: false; code: "THREAD_NOT_FOUND" | "SEND_FAILED" | "OUTBOX_UNAVAILABLE" };
+  | { ok: false; code: "UNAUTHENTICATED" | "FORBIDDEN" | "THREAD_NOT_FOUND" | "SEND_FAILED" | "OUTBOX_UNAVAILABLE" };
 
 /** Presence-only secret flags plus verification/sync state. Fail-closed. */
 export async function gatherReplyGateState(env: Record<string, string | undefined>): Promise<Omit<ReplyGateInput, "staffConfirmed">> {
@@ -64,7 +65,7 @@ export async function gatherReplyGateState(env: Record<string, string | undefine
  * `sendFetch` is injectable so tests never touch the network.
  */
 export async function guardedSendReply(
-  input: { threadId: string; text: string; requestId: string; staffConfirmed: boolean; actorProfileId: string | null },
+  input: { threadId: string; leadId?: string | null; text: string; requestId: string; staffConfirmed: boolean; actor: ReplyActor },
   deps: {
     env: Record<string, string | undefined>;
     store: ReplyStore;
@@ -72,20 +73,31 @@ export async function guardedSendReply(
     sendFetch?: typeof fetch;
   },
 ): Promise<GuardedReplyResult> {
+  // Authorization first: role before any read, then ownership from stored state.
+  const roleBlock = replyActorBlock(input.actor);
+  if (roleBlock) return { ok: false, code: roleBlock };
+  let row: ReplyTargetRow | null = null;
+  try {
+    row = await deps.store.getReplyTarget(input.threadId);
+  } catch {
+    row = null;
+  }
+  const auth = authorizeReplyTarget(input.actor, row, { threadId: input.threadId, leadId: input.leadId });
+  if (!auth.ok) return { ok: false, code: auth.code };
+
   const gateState = deps.gate ?? (await gatherReplyGateState(deps.env));
   const gate = evaluateReplyGate({ ...gateState, staffConfirmed: input.staffConfirmed });
   if (!gate.ok) return { ok: false, blockers: gate.blockers };
 
-  const psid = await deps.store.getThreadPsid(input.threadId);
-  if (!psid) return { ok: false, code: "THREAD_NOT_FOUND" };
+  const psid = auth.psid;
 
   let outboxId: string;
   try {
     outboxId = await deps.store.insertOutbox({
       requestId: input.requestId,
-      threadId: input.threadId,
+      threadId: auth.threadId,
       body: input.text,
-      createdBy: input.actorProfileId,
+      createdBy: input.actor.profileId,
     });
   } catch {
     return { ok: false, code: "OUTBOX_UNAVAILABLE" };
@@ -122,14 +134,27 @@ export async function guardedSendReply(
 /** Live store backed by the durable Messenger tables. */
 export function supabaseReplyStore(): ReplyStore {
   return {
-    async getThreadPsid(threadId) {
+    async getReplyTarget(threadId) {
+      if (!/^[0-9a-f-]{36}$/i.test(threadId)) return null;
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data } = await supabaseAdmin
+      const { data, error } = await supabaseAdmin
         .from("messenger_threads" as never)
-        .select("psid")
+        .select("id, psid, lead_id, assigned_agent_id")
         .eq("id", threadId)
         .maybeSingle();
-      return ((data as { psid?: string } | null)?.psid as string) ?? null;
+      if (error || !data) return null;
+      const t = data as { id: string; psid: string | null; lead_id: string | null; assigned_agent_id: string | null };
+      let lead: ReplyTargetRow["lead"] = null;
+      if (t.lead_id) {
+        const { data: l, error: le } = await supabaseAdmin
+          .from("leads")
+          .select("assigned_to, assigned_agent_id")
+          .eq("id", t.lead_id)
+          .maybeSingle();
+        if (le) return null;
+        lead = (l as ReplyTargetRow["lead"]) ?? null;
+      }
+      return { id: t.id, psid: t.psid, leadId: t.lead_id, assignedAgentId: t.assigned_agent_id, lead };
     },
     async insertOutbox(row) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
