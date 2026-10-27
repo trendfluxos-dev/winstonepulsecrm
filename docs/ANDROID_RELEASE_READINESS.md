@@ -58,6 +58,24 @@ What never goes in this file, chat or screenshots: keystore files, store/key pas
 - Backup location of canonical key: ________
 - `android/SIGN-AND-DISTRIBUTE.md` must be updated to match the chosen method.
 
+### Tradeoffs: old key vs new key
+
+| | **A. Keep old key** (`android/winstone-release.jks`, signed v2.3) | **B. Switch to new key** (created 2026-10-27, GitHub secrets only) |
+|---|---|---|
+| Agent update | Installs over v2.3 in place; no uninstall | Every agent phone must uninstall v2.3 once, then install |
+| Data on phone during switch | Kept (sign-in, queued recordings, pending reports) | Uninstall wipes app data: **queued unsynced recordings/reports on that phone are lost** unless synced first |
+| Key exposure history | File has been committed in this project's source; anyone with project/code access may have a copy. Its passwords' storage history is unknown | Generated fresh, never committed; exists only encrypted in GitHub secrets (plus any backup the owner makes) |
+| Work required | Move key + passwords into GitHub secrets, delete the file from the project, update `SIGN-AND-DISTRIBUTE.md`. Old copies in history remain | None in code; plan a coordinated uninstall/reinstall day and confirm every phone shows 0 pending before uninstall |
+| Risk if key leaked | Someone could sign a fake "Winstone Pulse" update that agents' phones accept | Same risk, but much lower likelihood today |
+| Backup/loss risk | Owner must confirm passwords are still known; lost password = cannot sign updates | No backup exists yet; if GitHub secrets are lost, updates break — owner backup needed |
+| Reversibility | Can still switch to B later (same one-time uninstall) | Final for this package; cannot return to A without another uninstall |
+
+**Safe switch procedure (B):** 1) In the CRM, confirm each agent phone has no pending/failed recordings or reports. 2) Uninstall v2.3. 3) Install new release, sign in, accept briefing. 4) Make one test call and confirm Synced. 5) Record phone + date below.
+
+**If A is chosen:** treat the committed key as possibly exposed — only acceptable if the project code has never been shared outside the owner/IT; otherwise prefer B.
+
+Owner decision: ☐ A ☐ B — by ________ date ________ reason ________
+
 ## 4. Device results — Proton HyperX, Android 16
 
 Run `android/DEVICE_TEST_CHECKLIST.md`, plus:
