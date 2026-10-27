@@ -986,7 +986,7 @@ export function DeskCommandCenter({
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <MiniStat label={t({ bn: "আজ যোগ হওয়া লিড", en: "New today" })} value={bn(stats.newToday, lang)} />
-                <MiniStat label={t({ bn: "কথার সময়", en: "Talk time" })} value={formatTalkTime(stats.talk)} />
+                <MiniStat label={t({ bn: "আজ জমা রিপোর্ট", en: "Reports today" })} value={bn(stats.reports, lang)} />
               </div>
               {onJumpTab && (
                 <div className="mt-3 flex flex-wrap gap-2">
