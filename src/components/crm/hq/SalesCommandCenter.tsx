@@ -1,5 +1,6 @@
+import { commandCenterFeedQuery } from "@/lib/crm-data";
 import { useT } from "@/lib/i18n";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Bar,
@@ -68,11 +69,8 @@ export function SalesCommandCenter({
   const t = useT();
   const adminToken = useAdminToken();
   const fetchFeed = useServerFn(getCommandCenterFeed);
-  const feed = useQuery({
-    queryKey: ["command-center-feed", adminToken],
-    queryFn: () => fetchFeed({ data: { adminToken } }),
-    refetchInterval: 30_000,
-  });
+  const queryClient = useQueryClient();
+  const feed = useQuery(commandCenterFeedQuery(queryClient, adminToken, fetchFeed));
 
   const [preset, setPreset] = useState<Preset>("7d");
   const [custom, setCustom] = useState(() => presetRange("30d", new Date()));
