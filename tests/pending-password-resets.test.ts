@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysWaiting, latestResets, pendingResets } from "./pending-password-resets";
+import { daysWaiting, latestResets, pendingResets } from "@/lib/pending-password-resets";
 
 describe("pending password resets", () => {
   it("only lists accounts that still must set a new password", () => {
