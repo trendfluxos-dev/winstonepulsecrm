@@ -71,7 +71,7 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
     const caller = await (data.view === "agent" ? resolveWorkCaller(data.token) : resolveCaller(data.token));
 
     if (caller.scope === "none")
-      return { profiles: [], leads: [], calls: [], messages: [], events: [] };
+      return { profiles: [], leads: [], calls: [], messages: [], events: [], leadsMode: "full" as "delta" | "full", leadCount: 0 as number | null, serverTime: new Date().toISOString() };
 
     // Agents: query only their own rows at the source, so their numbers are
     // never cut short by a floor-wide limit or mixed with other agents' work.
@@ -106,6 +106,9 @@ export const getCrmSnapshot = createServerFn({ method: "POST" })
         calls: filterAssignedActivity(dedupe(calls.data ?? []), ownIds),
         messages: filterAssignedActivity(dedupe(messages.data ?? []), ownIds),
         events: filterAssignedActivity(dedupe(events.data ?? []), ownIds),
+        leadsMode: "full" as "delta" | "full",
+        leadCount: myLeads.length as number | null,
+        serverTime: new Date().toISOString(),
       };
     }
 
