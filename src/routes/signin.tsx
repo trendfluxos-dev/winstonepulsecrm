@@ -90,14 +90,14 @@ function WorkspaceSigninPage() {
             title={t({ bn: "সেলস এজেন্ট", en: "Sales Agent" })}
             description={t({ bn: "আপনার নিজের লিড, কল, ফলো-আপ আর এআই কোচিং — সব এক জায়গায়।", en: "Your own leads, calls, follow-ups and AI coaching — all in one place." })}
             primary={
-              <Button asChild className="btn-enter flex-1">
+              <Button asChild variant="plate" className="flex-1">
                 <Link to="/auth" search={{ role: "agent", mode: "signin" }}>
                   {t({ bn: "প্রবেশ করুন", en: "Sign in" })}
                 </Link>
               </Button>
             }
             secondary={
-              <Button asChild variant="secondary" className="flex-1">
+              <Button asChild variant="plate" className="flex-1">
                 <Link to="/auth" search={{ role: "agent", mode: "signup" }}>
                   {t({ bn: "নতুন অ্যাকাউন্ট", en: "Create account" })}
                 </Link>
@@ -110,7 +110,7 @@ function WorkspaceSigninPage() {
             title={t({ bn: "লিডহাব নেক্সাস", en: "LeadHub Nexus" })}
             description={t({ bn: "নতুন লিড যোগ ও এজেন্টদের মাঝে ভাগ করার মূল ঘর।", en: "The main home for adding new leads and sharing them with agents." })}
             primary={
-              <Button className="btn-enter flex-1" onClick={() => openPin("/leadhub")}>
+              <Button variant="plate" className="flex-1" onClick={() => openPin("/leadhub")}>
                 <Lock className="size-4" /> {t({ bn: "পিন দিয়ে খুলুন", en: "Unlock PIN" })}
               </Button>
             }
@@ -121,7 +121,7 @@ function WorkspaceSigninPage() {
             title={t({ bn: "এক্সিকিউটিভ এইচকিউ", en: "Executive Headquarters (HQ)" })}
             description={t({ bn: "পুরো টিমের ফলাফল, রিপোর্ট আর ব্যবসার সংখ্যা — সব এক নজরে।", en: "Team performance, reports and business numbers — all at a glance." })}
             primary={
-              <Button className="btn-enter flex-1" onClick={() => openPin("/hq")}>
+              <Button variant="plate" className="flex-1" onClick={() => openPin("/hq")}>
                 <Lock className="size-4" /> {t({ bn: "পিন দিয়ে খুলুন", en: "Unlock PIN" })}
               </Button>
             }
@@ -132,7 +132,7 @@ function WorkspaceSigninPage() {
             title={t({ bn: "আইটি কনসোল", en: "IT Console" })}
             description={t({ bn: "অ্যাকাউন্ট, সেটিংস আর সংযোগ — টেকনিক্যাল কাজ এখানে হয়।", en: "Accounts, settings and connections — the technical home." })}
             primary={
-              <Button className="btn-enter flex-1" onClick={() => openPin("/system")}>
+              <Button variant="plate" className="flex-1" onClick={() => openPin("/system")}>
                 <Lock className="size-4" /> {t({ bn: "পিন দিয়ে খুলুন", en: "Unlock PIN" })}
               </Button>
             }

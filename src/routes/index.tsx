@@ -113,7 +113,7 @@ function EntryHall() {
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
               {t({ bn: "লিড, কল, ফলো-আপ আর টিমের ফলাফল — আপনার সেলস টিমের সব কাজ এক জায়গায়।", en: "Leads, calls, follow-ups and team performance. One connected workspace for your sales floor." })}
             </p>
-            <Button asChild variant="outline" className="mt-5"><Link to="/walkthrough"><BookOpen />{t({ bn: "CRM walkthrough দেখুন", en: "Explore the CRM walkthrough" })}</Link></Button>
+            <Button asChild variant="plate" className="mt-5"><Link to="/walkthrough"><BookOpen />{t({ bn: "CRM walkthrough দেখুন", en: "Explore the CRM walkthrough" })}</Link></Button>
             <figure className="mt-8 overflow-hidden rounded-xl border border-border/70 bg-card shadow-soft sm:mt-10">
               <img
                 src={teamHeroAsset.url}
@@ -189,7 +189,7 @@ function EntryHall() {
         </p>
 
         <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
-          <Button asChild size="lg" className="btn-enter w-full rounded-md text-base font-bold">
+          <Button asChild variant="plate" size="lg" className="w-full rounded-md text-base font-bold">
             <Link to="/signin" resetScroll={false}>
               {t({ bn: "শুরু করুন", en: "Get started" })} <ChevronRight className="size-5" />
             </Link>

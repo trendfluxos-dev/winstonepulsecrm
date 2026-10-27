@@ -10,6 +10,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-charcoal text-button-foreground hover:bg-button-hover",
+        plate:
+          "border border-gold/70 bg-charcoal text-card transition-[background-color,border-color,transform] duration-100 ease-out hover:border-gold hover:bg-plate-ink active:translate-y-[1px] active:scale-[0.99] active:border-gold-hover active:bg-plate-ink focus-visible:ring-[3px] focus-visible:ring-charcoal focus-visible:ring-offset-2 focus-visible:ring-offset-card",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:
           "border border-gold/50 bg-secondary text-secondary-foreground hover:border-gold-hover hover:bg-accent",
