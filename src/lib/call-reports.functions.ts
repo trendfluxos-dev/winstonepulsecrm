@@ -30,8 +30,8 @@ async function agentOf(adminToken: string | null) {
 export const myPendingReport = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Base.parse(input))
   .handler(async ({ data }) => {
-    const { resolveCaller } = await import("@/lib/access.server");
-    const caller = await resolveCaller(data.adminToken ?? null);
+    const { resolveWorkCaller } = await import("@/lib/access.server");
+    const caller = await resolveWorkCaller(data.adminToken ?? null);
     if (caller.scope === "none" || !caller.profile) return null;
     const { loadPendingReportDetail } = await import("@/lib/call-reports.server");
     return loadPendingReportDetail(caller.profile.id);

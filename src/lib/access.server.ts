@@ -178,7 +178,10 @@ export function requireWrite(caller: Caller) {
 
 /** Own-work endpoints retain original agent rights; PIN sessions never impersonate staff. */
 export async function resolveWorkCaller(adminToken?: string | null): Promise<Caller> {
-  const caller = await resolveCaller(adminToken);
+  // Own work belongs to the verified session, never to a cached workspace PIN.
+  // Keep rejected/inactive identities denied rather than falling back to a PIN.
+  const sessionCaller = await resolveCaller(null);
+  const caller = sessionCaller.userId ? sessionCaller : await resolveCaller(adminToken);
   if (caller.scope === "authority" && caller.readOnly && caller.userId && caller.profile?.role === "agent") {
     return { ...caller, scope: "agent", readOnly: false };
   }
