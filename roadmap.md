@@ -1,10 +1,10 @@
 # Roadmap
 
 ## 2026-10-28 — Live KPI dashboard and 14-day pool warning
-- [ ] Build an authorized per-agent KPI dashboard using the shared report/lead contract; no phone-sync performance metrics.
-- [ ] Use per-agent daily targets for a 14-day pool coverage warning; verify without creating shortage records.
-- [ ] Run focused/full tests and inspect automatic build/typecheck results.
-- [ ] Publish after security checks and verify signed-in live agent values, date range and report/lead breakdown against read-only database counts.
+- [x] Build an authorized per-agent KPI dashboard using the shared report/lead contract; no phone-sync performance metrics.
+- [x] Use per-agent daily targets for a 14-day pool coverage warning; verify without creating shortage records.
+- [x] Run focused/full tests and inspect automatic build/typecheck results.
+- [x] Published (release check DEPLOYED); Monisha live 360/90/179, 863 reports/379 leads, no Phone-synced card. Other 7 agents' live sign-in not yet done. Publish after security checks and verify signed-in live agent values, date range and report/lead breakdown against read-only database counts.
 - [ ] Verify HQ warning through a genuine HQ PIN session; blocked until that session is available.
 
 ## 2026-10-28 — My Desk scope fix (agent saw company-wide numbers)
