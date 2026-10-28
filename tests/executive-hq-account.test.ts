@@ -1,7 +1,7 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({ granted: true, role: 'agent', active: true, signedIn: true, approval: 'approved', locked: false, pinScope: null as 'hq' | 'full' | null }));
 vi.mock('@tanstack/react-start/server', () => ({ getRequest: () => new Request('http://localhost', { headers: mocks.signedIn ? { authorization: 'Bearer x.y.z' } : {} }) }));
-vi.mock('@/lib/admin-gate.server', () => ({ adminTokenScope: () => mocks.pinScope }));
+vi.mock('@/lib/admin-gate.server', () => ({ adminTokenScope: (token: string | null) => token ? mocks.pinScope : null }));
 vi.mock('@supabase/supabase-js', () => ({ createClient: () => ({
   auth: { getClaims: async () => ({ data: { claims: { sub: 'user-1' } } }) },
   from: () => { const q = { select: () => q, eq: () => q, maybeSingle: async () => ({ data: mocks.granted ? { role: 'executive_hq' } : null }) }; return q; },
