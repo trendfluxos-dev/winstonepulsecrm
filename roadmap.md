@@ -1,5 +1,8 @@
 # Roadmap
 
+## 2026-10-29 — First Winstone Pulse CRM ad campaign
+- [ ] Prepare a registration campaign for Bangladesh real estate teams; verify public-customer suitability before account setup, choose research/type and creative with the user, confirm budget before any spend. No ads or tracking activated.
+
 ## 2026-10-29 — Publish phone checklist and rejection reports
 - [x] Current publication verified: live /manual 1.6.0, $35.29 and 50-lead markers PASS; served JavaScript contains real-call checklist and new outcome-correction report code. 19 focused report/checklist/endpoint tests pass; no customer writes. Native Android updates still require a rebuilt, installed APK; website publication cannot update installed APKs. Genuine staff handset execution remains unverified.
 
