@@ -2,6 +2,7 @@ import { HubSyncStatusPanel } from "@/components/crm/HubAlerts";
 import { DistributionFailurePanel } from "@/components/crm/DistributionFailurePanel";
 import { SystemManualCard } from "@/components/crm/SystemManualCard";
 import { DeploymentStatusPanel } from "@/components/crm/DeploymentStatusPanel";
+import { GitRepositoryStatusPanel } from "@/components/crm/GitRepositoryStatusPanel";
 import { PAGE_SECTIONS, sectionSearch, useSection } from "@/lib/page-sections";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Coins, Database, KeyRound, Lock, Radio, Receipt } from "lucide-react";
@@ -159,6 +160,7 @@ function SystemBoard() {
       {sec === "health" && (
         <div className="space-y-6">
           <DeploymentStatusPanel />
+          <GitRepositoryStatusPanel />
           <SystemManualCard />
           <SystemUpdateReport />
           <BackendHealthPanel />
