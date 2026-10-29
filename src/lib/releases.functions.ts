@@ -72,6 +72,10 @@ export const publishAppRelease = createServerFn({ method: "POST" })
     requireAuthority(caller);
     requireWrite(caller);
 
+    // New phone distribution waits for the owner price/payer and Architect payment gate.
+    const { assertPhoneUpgradeReady } = await import("@/lib/phone-upgrade");
+    assertPhoneUpgradeReady();
+
     const versionCode = Math.trunc(Number(data.versionCode));
     const versionName = data.versionName.trim();
     if (!Number.isFinite(versionCode) || versionCode < 1) throw new Error("Version code invalid");
