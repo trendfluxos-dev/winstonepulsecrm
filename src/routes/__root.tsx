@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -183,6 +184,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const sandboxOnly = useRouterState({ select: state => state.location.pathname === "/call-sandbox" });
 
   // The app booted — clear the one-time deployment reload flag so the next
   // deployment can recover normally again.
@@ -231,12 +233,12 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       {/* The floor notice must cover every signed-in route, including the home page. */}
-      <MustChangePasswordGate />
-      <FloorLockGate />
+      {!sandboxOnly && <MustChangePasswordGate />}
+      {!sandboxOnly && <FloorLockGate />}
       {/* Monthly maintenance banner / lock screen — the server enforces the lock itself. */}
-      <MaintenanceGate />
+      {!sandboxOnly && <MaintenanceGate />}
       {/* Temporary IT closure covers home, agent, coordinator, HQ and IT surfaces. */}
-      <TemporaryClosureNotice />
+      {!sandboxOnly && <TemporaryClosureNotice />}
       <Toaster position="top-right" />
     </QueryClientProvider>
   );
