@@ -354,7 +354,8 @@ function EntryHall() {
           </DialogHeader>
           <div className="space-y-3 py-1">
             <h2 className="flex items-center gap-2 font-semibold"><Globe className="size-5 text-gold" />Previous version · Preview</h2>
-            <p className="text-sm text-muted-foreground">Continue using the existing CRM. No new phone-upgrade payment is required; monthly maintenance remains unchanged.</p>
+            <p className="text-sm font-medium">No new phone-upgrade payment required.</p>
+            <p className="text-sm text-muted-foreground">Pre-midnight release record: 2.13</p>
             <Button asChild className="h-auto w-full whitespace-normal py-3"><Link to="/signin">Continue with previous version<ChevronRight className="size-4 shrink-0" /></Link></Button>
           </div>
           <div className="space-y-3 border-t border-border pt-4">
