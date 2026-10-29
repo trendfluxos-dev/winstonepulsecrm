@@ -1497,6 +1497,63 @@ export type Database = {
         }
         Relationships: []
       }
+      device_call_tests: {
+        Row: {
+          android_version: string
+          app_version: string | null
+          call_detected: string
+          call_type: string
+          created_at: string
+          id: string
+          network: string
+          notes: string | null
+          perm_call_log: string
+          perm_microphone: string
+          perm_notifications: string
+          perm_phone: string
+          phone_model: string
+          profile_id: string
+          recording: string
+          summary: string
+        }
+        Insert: {
+          android_version: string
+          app_version?: string | null
+          call_detected: string
+          call_type: string
+          created_at?: string
+          id?: string
+          network: string
+          notes?: string | null
+          perm_call_log: string
+          perm_microphone: string
+          perm_notifications: string
+          perm_phone: string
+          phone_model: string
+          profile_id: string
+          recording: string
+          summary: string
+        }
+        Update: {
+          android_version?: string
+          app_version?: string | null
+          call_detected?: string
+          call_type?: string
+          created_at?: string
+          id?: string
+          network?: string
+          notes?: string | null
+          perm_call_log?: string
+          perm_microphone?: string
+          perm_notifications?: string
+          perm_phone?: string
+          phone_model?: string
+          profile_id?: string
+          recording?: string
+          summary?: string
+        }
+        Relationships: []
+      }
       do_not_contact: {
         Row: {
           added_by: string | null
