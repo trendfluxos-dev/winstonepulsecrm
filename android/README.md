@@ -1,6 +1,17 @@
 
 ## Building this project
 
+### Automatic-call checks — 2026-10-29
+
+- Uploaded CRM archive matches all 75 current Android source files; no replacement/import was needed.
+- Carrier call-log detection now runs locally without a network requirement. Existing periodic work is updated; uploads retain their own network requirement.
+- Granting call-log permission retries reconciliation. Signed-out scans cannot advance the saved cursor.
+- The recording analysis schedule is present and active every 15 minutes. Delivery to the callback and successful real-audio summaries still require verification; schedule presence is not proof.
+- Interrupted analysis older than 15 minutes can be reclaimed by the existing atomic claim; completed recordings are not analyzed again.
+- APK workflow now runs Gradle inside `android/` and collects artifacts from the matching paths. No APK was compiled here (JDK/Android SDK unavailable).
+- Phone-recorder pickup still depends on the observed call-end broadcast. Recovery when Android kills the process mid-call needs persisted call identity before it can safely be added without duplicate uploads. This is not yet verified/fixed.
+- Real-device checks remain required: carrier outgoing/incoming/missed calls, offline detection then one upload after reconnect, app-killed recovery, actual audible recording and transcript-grounded summary. WhatsApp VoIP detection/audio is not guaranteed by the carrier call-log path.
+
 ```bash
 cp local.properties.example local.properties   # set sdk.dir
 ./gradlew testDebugUnitTest                    # JVM tests (call state + number rules)
