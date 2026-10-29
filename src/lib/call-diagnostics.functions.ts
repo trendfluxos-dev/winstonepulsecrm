@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { recordingEvidence, summaryEvidence } from "@/lib/call-diagnostics";
 export const getMyCallDiagnostics = createServerFn({ method: "GET" }).handler(async () => {
   const { resolveCaller } = await import("@/lib/access.server");
@@ -22,3 +23,21 @@ export const getMyCallDiagnostics = createServerFn({ method: "GET" }).handler(as
     })),
   };
 });
+/** HQ/IT only: fleet compatibility by phone model + Android version, last 30 days, aggregates only. */
+export const getDeviceCompatibilityReport = createServerFn({ method: "GET" })
+  .inputValidator((i: unknown) => z.object({ adminToken: z.string().nullable().optional() }).parse(i ?? {}))
+  .handler(async ({ data }) => {
+    const { resolveCaller, requireAuthority } = await import("@/lib/access.server");
+    requireAuthority(await resolveCaller(data.adminToken ?? null));
+    const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
+    const LIMIT = 5000;
+    const [devices, calls] = await Promise.all([
+      db.from("agent_devices").select("id, manufacturer, model, android_version, recording_capable, recording_tested").eq("platform", "android").limit(LIMIT),
+      db.from("call_recordings").select("device_id, storage_path, upload_status, file_size_bytes, analysis_status, ai_summary").not("device_id", "is", null).gte("created_at", since).limit(LIMIT),
+    ]);
+    if (devices.error || calls.error) throw new Error("Compatibility report unavailable; try again later");
+    const { buildCompatibilityReport } = await import("@/lib/call-diagnostics");
+    return { checkedAt: new Date().toISOString(), since, truncated: (calls.data?.length ?? 0) >= LIMIT || (devices.data?.length ?? 0) >= LIMIT,
+      rows: buildCompatibilityReport(devices.data ?? [], calls.data ?? []) };
+  });
