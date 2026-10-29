@@ -183,9 +183,18 @@ export async function resolveWorkCaller(adminToken?: string | null): Promise<Cal
   const sessionCaller = await resolveCaller(null);
   const caller = sessionCaller.userId ? sessionCaller : await resolveCaller(adminToken);
   if (caller.scope === "authority" && caller.readOnly && caller.userId && caller.profile?.role === "agent") {
-    return { ...caller, scope: "agent", readOnly: false };
+    const ownCaller = { ...caller, scope: "agent" as const, readOnly: false };
+    await requireMorningFeedback(ownCaller);
+    return ownCaller;
   }
+  await requireMorningFeedback(caller);
   return caller;
+}
+
+async function requireMorningFeedback(caller: Caller) {
+  if (!caller.userId || caller.profile?.role !== "agent" || caller.approval !== "approved") return;
+  const { feedbackRequired } = await import("@/lib/agent-feedback.server");
+  if (await feedbackRequired(caller.profile.id)) throw new Error("আজকের সিস্টেম সমস্যা ও চাহিদার ফর্ম জমা দিন — সকাল ৯:৩০ ঢাকা পর্যন্ত বাধ্যতামূলক");
 }
 
 /** Genuine HQ PIN booking review is an existing exception, unlike supplemental oversight. */
