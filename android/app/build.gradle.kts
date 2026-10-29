@@ -14,6 +14,8 @@ val localProps = Properties().apply {
 android {
     namespace = "com.winstone.connect"
     compileSdk = 35
+    // UI tests target only the offline, separately packaged sandbox.
+    testBuildType = "sandbox"
 
     defaultConfig {
         applicationId = "com.winstone.connect"
@@ -21,6 +23,7 @@ android {
         targetSdk = 35
         versionCode = 28
         versionName = "2.17"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val crmUrl = (localProps.getProperty("CRM_BASE_URL") ?: "https://crm.winstonebd.com").trimEnd('/')
         buildConfigField("String", "CRM_BASE_URL", "\"$crmUrl\"")
     }
@@ -98,4 +101,9 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.10.01"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    add("sandboxImplementation", "androidx.compose.ui:ui-test-manifest")
 }

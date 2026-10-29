@@ -152,7 +152,12 @@ fun LiveCallScreen(phase: CallPhase) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
+fun ReportSheet(
+    notes: String,
+    onSubmitted: () -> Unit = {},
+    // Offline UI tests supply synthetic call facts without reading CRM reports.
+    loadPendingReport: suspend () -> org.json.JSONObject = { WinstoneApi.pendingReport() },
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -186,7 +191,7 @@ fun ReportSheet(notes: String, onSubmitted: () -> Unit = {}) {
     // Wait for the server-side report (opened by the sync worker when the call ended).
     LaunchedEffect(Unit) {
         while (reportId == null) {
-            runCatching { WinstoneApi.pendingReport() }.getOrNull()?.let { body ->
+            runCatching { loadPendingReport() }.getOrNull()?.let { body ->
                 body.optJSONObject("pending")?.let { pending ->
                     reportId = pending.optString("id").takeIf { it.isNotBlank() }
                     talkSeconds = pending.optLong("duration_seconds", 0L)

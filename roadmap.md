@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-29 — Android short-rejection UI regression
+- [x] Add four native Compose UI scenarios using the actual ReportSheet and an injected synthetic three-second connected report; offline sandbox only, never submit or create calls.
+- [ ] Execute on an emulator/handset; requires JDK 17, Android SDK 35 and a connected test device. Native rejection questions/reasons still render and Fake is absent; this test-only task records the unmet expectations, not a fix or readiness claim.
+
 ## 2026-10-29 — Fast disqualification
 - [x] Shorten explicit rejection reports with shared server normalization; outcome-derived Cold/D, no fabricated evaluation answers, no requirements/actions/follow-up; preserve call facts, ownership and no-answer cadence.
 - [x] 60 focused / 1,426 full-suite tests passed; automatic build OK. Isolated mobile form verifies all three outcomes ready at 3s and qualification restored on switching back; no customer writes or publishing.

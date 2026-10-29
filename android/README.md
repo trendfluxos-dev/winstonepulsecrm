@@ -94,6 +94,30 @@ last error. No phone numbers, audio paths, transcripts or tokens are written to 
 
 ## Mandatory real-handset UAT checklist
 
+### Offline short-rejection UI regression
+
+`app/src/androidTest/java/com/winstone/connect/ui/ShortRejectionReportUiTest.kt`
+opens the actual native `ReportSheet` with a synthetic connected three-second call.
+It tests Not Interested, Wrong Number, Fake and switching back to Interested.
+It requires absent qualification/grade/redundant-reason/date controls and an enabled
+submit button without fabricated sales facts. It never presses Submit.
+
+Run on a connected emulator or test handset from `android/`:
+
+```sh
+./gradlew :app:connectedSandboxAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.winstone.connect.ui.ShortRejectionReportUiTest
+```
+
+Tests target only the sandbox package: no INTERNET permission, production startup,
+call services or CRM polling. The form receives an injected synthetic pending-report
+reader; ordinary app callers retain the existing reader and all submission gates.
+
+**Known unmet expectations, not a readiness claim:** the current native form still
+renders six qualification questions for connected rejections, requires additional
+reason/follow-up fields, and does not offer Fake. These tests intentionally expose
+that gap; no Android UI behavior has been changed by this test-only task. Compilation
+and execution require JDK 17, Android SDK 35 and an emulator/device.
+
 Recording support must NOT be treated as production-ready until this passes on the actual
 company-owned handsets, one row per device:
 
