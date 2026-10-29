@@ -2,7 +2,7 @@
 
 ## Homepage version choice
 - [x] Get started opens previous Preview versus updated phone popup; updated choice opens /versions with honest feature details and inactive pricing.
-- [ ] Verify popup navigation and phone layout; do not publish or activate billing.
+- [x] Verified both choices at 360px, no overflow/page errors; 13 upgrade tests passed and automatic build OK. No publication or billing activation.
 
 ## Call diagnostics
 - [x] Add own-account call-log permission evidence, recording upload and summary states to /diagnostics, linked from Recorder; no AI calls or writes.
