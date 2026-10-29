@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS leads_assigned_agent_updated_id_idx ON public.leads USING btree (assigned_agent_id, updated_at DESC, id);
+CREATE INDEX IF NOT EXISTS leads_assigned_to_updated_id_idx ON public.leads USING btree (assigned_to, updated_at DESC, id);
