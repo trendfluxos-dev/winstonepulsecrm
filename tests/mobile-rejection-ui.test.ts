@@ -27,11 +27,11 @@ beforeEach(() => {
 afterEach(() => { cleanup(); client.clear(); });
 async function open() {
   render(React.createElement(QueryClientProvider, { client }, React.createElement(PostCallReportGate)));
-  await screen.findByLabelText("Lead Category");
+  await screen.findByLabelText(/^Lead Category/);
 }
-function choose(category: string) { fireEvent.change(screen.getByLabelText("Lead Category"), { target: { value: category } }); }
+function choose(category: string) { fireEvent.change(screen.getByLabelText(/^Lead Category/), { target: { value: category } }); }
 function absentSalesInputs() {
-  for (const label of ["Requirement", "Next Action", "Customer Interest", "Customer Response", "Grade"]) expect(screen.queryByLabelText(label)).toBeNull();
+  for (const label of ["Requirement", "Next Action", "Customer Interest", "Customer Response", "Grade"]) expect(screen.queryByLabelText(new RegExp(`^${label}`))).toBeNull();
   expect(screen.queryByText("4 Bedroom")).toBeNull();
   expect(screen.queryByText("Send Price")).toBeNull();
   expect(screen.queryByText("Send Details")).toBeNull();
@@ -49,7 +49,7 @@ describe("actual mobile report interactions with isolated server fixtures", () =
   });
   it("normal Interested still requires property/action selections and all six answers", async () => {
     await open(); choose("interested");
-    for (const label of ["Requirement", "Next Action", "Customer Interest", "Customer Response", "Grade"]) expect(screen.getByLabelText(label)).toBeTruthy();
+    for (const label of ["Requirement", "Next Action", "Customer Interest", "Customer Response", "Grade"]) expect(screen.getByLabelText(new RegExp(`^${label}`))).toBeTruthy();
     expect(screen.getAllByRole("button", { name: "Yes", exact: true })).toHaveLength(6);
     expect((screen.getByRole("button", { name: "Confirm & Submit" }) as HTMLButtonElement).disabled).toBe(true);
   });
@@ -64,8 +64,8 @@ describe("actual mobile report interactions with isolated server fixtures", () =
   });
   it("stale sales choices cannot survive a rejection payload", async () => {
     await open(); choose("interested");
-    fireEvent.change(screen.getByLabelText("Requirement"), { target: { value: "4 Bedroom" } });
-    fireEvent.change(screen.getByLabelText("Next Action"), { target: { value: "send_price" } });
+    fireEvent.change(screen.getByLabelText(/^Requirement/), { target: { value: "4 Bedroom" } });
+    fireEvent.change(screen.getByLabelText(/^Next Action/), { target: { value: "send_price" } });
     choose("fake"); absentSalesInputs();
     fireEvent.click(screen.getByRole("button", { name: "Confirm & Submit" }));
     await waitFor(() => expect(fixture.submit).toHaveBeenCalled());

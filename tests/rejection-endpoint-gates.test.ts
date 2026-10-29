@@ -3,7 +3,7 @@ const state = vi.hoisted(() => ({ kind: "device", blocked: false, submit: vi.fn(
 vi.mock("@tanstack/react-router", () => ({ createFileRoute: () => (v: unknown) => v }));
 vi.mock("@/lib/device-auth.server", () => ({ resolveApiCaller: async () => ({ kind: state.kind, profile: { id: "verified-agent" }, device: { id: "device-a" } }) }));
 vi.mock("@/lib/agent-briefing.server", () => ({ requireAgentBriefing: async () => state.blocked ? { reason: "Briefing acknowledgement required", briefing: {} } : null }));
-vi.mock("@/lib/call-reports.server", () => ({ submitCallReport: (input: unknown) => state.submit(input) }));
+vi.mock("@/lib/call-reports.server", () => ({ openCallReport: vi.fn(), submitCallReport: (input: unknown) => state.submit(input) }));
 vi.mock("@/lib/version-ledger.server", () => ({ recordVersionData: (input: unknown) => state.ledger(input) }));
 import { Route } from "@/routes/api/public/agent/report";
 const route = Route as unknown as { server: { handlers: { POST: (input: { request: Request }) => Promise<Response> } } };
