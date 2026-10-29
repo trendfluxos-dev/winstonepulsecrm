@@ -1,5 +1,8 @@
 # Roadmap
 
+## 2026-10-29 — Google Search Console setup
+- [ ] Check project-linked Google access and verified published-site property; complete verification and submit valid same-origin sitemap. Request approval for any required publication.
+
 ## 2026-10-29 — Lovable Database enablement
 - [x] Existing Lovable Cloud database verified reachable and healthy; no enablement needed, no production data/settings changed and nothing published.
 
