@@ -167,13 +167,19 @@ describe("report submission verifies only phone-measured duration", () => {
   const input = { reportId: "report-a", agentId: "agent-a", category: "interested", summary: "Requested details", temperature: "warm", grade: "A", evaluationAnswers: { project_interest: true, asked_price: true, wanted_info: false, visit_interest: false, decision_30d: false, wants_follow_up: false }, direction: "outgoing", callStatus: "connected", durationSeconds: 9000, followUpNeeded: false, noFollowUpReason: "info_completed" };
   for (const category of ["not_interested", "wrong_number", "fake"]) it(`${category} ignores forged sales scoring and follow-up fields`, async () => {
     state.savedGrade = null;
-    await expect(submitCallReport({ ...input, category, evaluationAnswers: undefined, durationSeconds: 3, requirement: "4 Bed", nextAction: "site_visit", followUpAt: "2099-01-01T00:00:00Z", grade: "A", temperature: "hot" })).rejects.toThrow("captured submission");
-    expect(state.writes[0]?.patch).toMatchObject({ temperature: "cold", grade: "D", evaluation_answers: null, evaluation_score: null, requirement: null, next_action: "no_action", follow_up_at: null, connection_verified: false });
+    await expect(submitCallReport({ ...input, category, evaluationAnswers: input.evaluationAnswers, durationSeconds: 3, requirement: "4 Bed", interest: "high", customerResponse: "site_visit", nextAction: "site_visit", followUpAt: "2099-01-01T00:00:00Z", followUpNeeded: true, followUpReason: "site_visit", followUpReasonNote: "Forged", followUpNote: "Forged", noFollowUpReason: "info_completed", smartReasons: { grade: "A: invented" }, aiDecision: "accepted", retryPlan: { mode: "plus2", slot: "morning" }, grade: "A", temperature: "hot" })).rejects.toThrow("captured submission");
+    expect(state.writes[0]?.patch).toMatchObject({ category: category === "not_interested" ? "not_interested" : "wrong_number", temperature: "cold", grade: "D", evaluation_answers: null, evaluation_score: null, requirement: null, next_action: "no_action", follow_up_at: null, connection_verified: false, interest: category === "fake" ? "fake" : "low", customer_response: category === "not_interested" ? "not_interested" : "other", no_follow_up_reason: category === "fake" ? "other" : category, no_follow_up_note: category === "not_interested" ? "Customer Not Interested" : category === "fake" ? "Fake / Invalid contact" : "Wrong Number", smart_reasons: null, ai_decision: null });
   });
-  it("unanswered calls cannot masquerade as confirmed rejection", async () => {
-    await expect(submitCallReport({ ...input, category: "not_interested", callStatus: "no_answer" })).rejects.toThrow("NO ANSWER");
+  for (const category of ["not_interested", "wrong_number", "fake"]) {
+  for (const callStatus of ["no_answer", "busy", "failed"]) it(`${category} cannot masquerade as confirmed rejection after ${callStatus}`, async () => {
+    await expect(submitCallReport({ ...input, category, callStatus })).rejects.toThrow("NO ANSWER");
     expect(state.writes).toEqual([]);
   });
+  it(`${category} cannot submit another agent's report`, async () => {
+    await expect(submitCallReport({ ...input, category, agentId: "agent-b" })).rejects.toThrow("আপনার নয়");
+    expect(state.writes).toEqual([]);
+  });
+  }
   it("missing or partial answers cannot persist a chosen score", async () => {
     for (const evaluationAnswers of [undefined, { project_interest: true }]) {
       await expect(submitCallReport({ ...input, evaluationAnswers })).rejects.toThrow("ছয়টি");

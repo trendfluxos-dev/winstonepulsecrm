@@ -7,3 +7,4 @@
 - An Android release counts as ready only when docs/ANDROID_RELEASE_READINESS.md records signature/ID/version and device evidence for every gate row — why: a green CI build is not handset proof.
 - The sandbox variant has a separate package, no INTERNET permission, production startup/receivers/services removed, and local synthetic JSON export only; summary states are simulations — why: test activity cannot reach live CRM or claim real AI processing.
 - Native report UI instrumentation targets only sandbox, injects synthetic pending reports and never presses Submit — why: actual Compose coverage must not poll or mutate shared production CRM data.
+- Native concise rejection mode uses ShortRejectionReport outcome defaults and omits sales/evaluation payloads; outcome corrections require confirmation and a new selection — why: no invented qualification or silent return to sales, while canonical server gates stay authoritative.
