@@ -7,8 +7,6 @@ import { toast } from "sonner";
 import { MyPhoneLine } from "@/components/crm/MyPhoneSetup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { logMyWhatsappMessage } from "@/lib/agent-desk.functions";
 import { getWhatsappIntegrationStatus, sendWhatsappMessage } from "@/lib/whatsapp.functions";
 import { WHATSAPP_TEMPLATES, findWhatsAppTemplate } from "@/lib/whatsapp-templates";
 import type { Lead, WhatsappMessage } from "@/lib/crm-data";
@@ -34,7 +32,6 @@ export function WhatsappInbox() {
   const { leads, messages, isPending } = useSnapshot();
   const adminToken = useAdminToken();
   const queryClient = useQueryClient();
-  const send = useServerFn(logMyWhatsappMessage);
   const sendApi = useServerFn(sendWhatsappMessage);
   const { data: integration } = useQuery({
     queryKey: ["whatsapp-integration-status"],
@@ -44,7 +41,6 @@ export function WhatsappInbox() {
   const integrationStatus = integration?.status ?? "not_configured";
   const [search, setSearch] = useState("");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
-  const [draft, setDraft] = useState("");
   const [templateId, setTemplateId] = useState<string>(WHATSAPP_TEMPLATES[0]?.id ?? "");
   const [templateVars, setTemplateVars] = useState<string[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
@@ -91,13 +87,14 @@ export function WhatsappInbox() {
   }, [active?.messages.length, active?.lead.id]);
 
   const mutation = useMutation({
-    mutationFn: async (text: string) => {
+    mutationFn: async () => {
+      if (!active) throw new Error("একটি লিড বেছে নিন");
       if (integrationStatus === "configured") {
         if (!activeTemplate) throw new Error("একটি অনুমোদিত টেমপ্লেট বেছে নিন");
         const result = await sendApi({
           data: {
             adminToken,
-            leadId: active!.lead.id,
+            leadId: active.lead.id,
             template: activeTemplate.id,
             variables: activeTemplate.variables.map((_, i) => (templateVars[i] ?? "").trim()),
           },
@@ -105,12 +102,9 @@ export function WhatsappInbox() {
         if (!result.ok) throw new Error(result.error);
         return result;
       }
-      return send({
-        data: { adminToken, leadId: active!.lead.id, senderType: "agent", messageContent: text },
-      });
+      throw new Error("WhatsApp Business API সংযুক্ত নয় — টেমপ্লেট পাঠানো বন্ধ");
     },
     onSuccess: () => {
-      setDraft("");
       setTemplateVars([]);
       if (integrationStatus === "configured") toast.success("WhatsApp মেসেজ পাঠানো হয়েছে");
       void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
@@ -287,7 +281,7 @@ export function WhatsappInbox() {
                     <Button
                       className="w-full"
                       disabled={!templateReady || mutation.isPending}
-                      onClick={() => mutation.mutate("")}
+                      onClick={() => mutation.mutate()}
                     >
                       {mutation.isPending ? (
                         <Loader2 className="size-4 animate-spin" />
@@ -298,33 +292,7 @@ export function WhatsappInbox() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex items-end gap-2">
-                    <Textarea
-                      value={draft}
-                      onChange={(e) => setDraft(e.target.value)}
-                      rows={2}
-                      className="resize-none"
-                      placeholder="যে মেসেজটি পাঠিয়েছেন তা এখানে লিখে রাখুন"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          if (draft.trim() && !mutation.isPending) mutation.mutate(draft.trim());
-                        }
-                      }}
-                    />
-                    <Button
-                      size="icon"
-                      disabled={!draft.trim() || mutation.isPending}
-                      onClick={() => mutation.mutate(draft.trim())}
-                      aria-label="মেসেজ সংরক্ষণ"
-                    >
-                      {mutation.isPending ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <Send className="size-4" />
-                      )}
-                    </Button>
-                  </div>
+                  <p className="text-sm text-muted-foreground">WhatsApp Business API সংযুক্ত নয় — অনুমোদিত টেমপ্লেট পাঠানো বন্ধ। ফোন থেকে আসা ইতিহাস অপরিবর্তিত।</p>
                 )}
               </div>
             </div>

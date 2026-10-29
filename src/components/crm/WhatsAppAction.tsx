@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 type Props = {
   phone: string | null | undefined;
   leadId?: string | null;
-  text?: string | null;
   label?: string;
   size?: "sm" | "default" | "lg";
   variant?: "default" | "secondary" | "ghost" | "outline";
@@ -33,7 +32,6 @@ type Props = {
 export function WhatsAppAction({
   phone,
   leadId,
-  text,
   label = "হোয়াটসঅ্যাপ",
   size = "sm",
   variant = "secondary",
@@ -41,7 +39,10 @@ export function WhatsAppAction({
   ariaLabel,
 }: Props) {
   const handleClick = () => {
-    const result = openWhatsApp(phone, text);
+    // External chat composers cannot enforce CRM template restrictions.
+    toast.info("অনুমোদিত টেমপ্লেট পাঠাতে My Desk-এর WhatsApp ইনবক্স ব্যবহার করুন");
+    return;
+    const result = openWhatsApp(phone, null);
     if (!result.ok) {
       toast.error(
         result.reason === "invalid_number"
@@ -101,7 +102,7 @@ export function WhatsAppAction({
           <Phone className="size-4" /> WhatsApp কল (রিপোর্ট লাগবে)
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={handleClick}>
-          <MessageCircle className="size-4" /> মেসেজ
+          <MessageCircle className="size-4" /> অনুমোদিত টেমপ্লেট
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
