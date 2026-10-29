@@ -6,3 +6,4 @@
 - android/whisper is GPL-3.0 code copied from NotelyVoice (owner decision 2026-10-24); any APK linking it must ship with its full source offered, and the module stays unlinked from :app until minSdk 26, model delivery and 16 kHz PCM conversion are decided — why: license obligation and app-size impact.
 - An Android release counts as ready only when docs/ANDROID_RELEASE_READINESS.md records signature/ID/version and device evidence for every gate row — why: a green CI build is not handset proof.
 - The sandbox variant has a separate package, no INTERNET permission, production startup/receivers/services removed, and local synthetic JSON export only; summary states are simulations — why: test activity cannot reach live CRM or claim real AI processing.
+- Native report UI instrumentation targets only sandbox, injects synthetic pending reports and never presses Submit — why: actual Compose coverage must not poll or mutate shared production CRM data.
