@@ -275,7 +275,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {scope !== "none" && <Suspense fallback={null}><PostCallReportGate /></Suspense>}
       {scope === "agent" && <Suspense fallback={null}><AgentBriefingGate /></Suspense>}
       {scope === "agent" && <Suspense fallback={null}><AgentContributionGate /></Suspense>}
-      {scope !== "none" && <Suspense fallback={null}><AgentFeedbackGate /></Suspense>}
+      {account?.profile?.role === "agent" && <Suspense fallback={null}><AgentFeedbackGate /></Suspense>}
 
       {scope === "authority" && <Suspense fallback={null}><RuntimeAlertWatcher /></Suspense>}
       <AdminPinDialog open={pinOpen} onOpenChange={setPinOpen} />

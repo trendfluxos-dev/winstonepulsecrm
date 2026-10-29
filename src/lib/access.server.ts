@@ -192,7 +192,7 @@ export async function resolveWorkCaller(adminToken?: string | null): Promise<Cal
 }
 
 async function requireMorningFeedback(caller: Caller) {
-  if (!caller.userId || caller.profile?.role !== "agent" || caller.approval !== "approved") return;
+  if (!caller.userId || caller.scope === "none" || caller.profile?.role !== "agent" || !caller.profile.is_active || caller.approval !== "approved") return;
   const { feedbackRequired } = await import("@/lib/agent-feedback.server");
   if (await feedbackRequired(caller.profile.id)) throw new Error("আজকের সিস্টেম সমস্যা ও চাহিদার ফর্ম জমা দিন — সকাল ৯:৩০ ঢাকা পর্যন্ত বাধ্যতামূলক");
 }

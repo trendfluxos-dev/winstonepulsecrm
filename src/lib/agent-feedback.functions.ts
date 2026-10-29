@@ -15,7 +15,7 @@ export const submitAgentFeedback = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => agentFeedbackSchema.parse(input))
   .handler(async ({ data }) => {
     const me = await agent();
-    if (!feedbackWindow()) return { required: false, expiresAt: FEEDBACK_END };
+    if (!feedbackWindow()) throw new Error("আজকের মতামত জমার সময় শেষ হয়েছে — সকাল ৯:৩০ ঢাকা");
     const { feedbackRequired } = await import("@/lib/agent-feedback.server");
     if (await feedbackRequired(me.id)) {
       const { createSupportTicket } = await import("@/lib/team-support.server");

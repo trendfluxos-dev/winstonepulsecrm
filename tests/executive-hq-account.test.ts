@@ -10,6 +10,7 @@ vi.mock('@/integrations/supabase/client.server', () => ({ supabaseAdmin: { from:
   const q = { select: () => q, eq: () => q, maybeSingle: async () => ({ data: { id: 'profile-1', user_id: 'user-1', role: mocks.role, approval_status: mocks.approval, is_active: mocks.active } }) }; return q;
 } } }));
 vi.mock('@/lib/maintenance.server', () => ({ isLockedForOrdinaryUsers: async () => mocks.locked, LOCKED_MESSAGE: 'maintenance locked' }));
+vi.mock('@/lib/agent-feedback.server', () => ({ feedbackRequired: async () => false }));
 vi.mock('@tanstack/react-start', () => ({ createServerFn: () => {
   const chain = { inputValidator: () => chain, handler: (fn: unknown) => fn }; return chain;
 } }));
