@@ -2,7 +2,7 @@
 
 ## Isolated phone sandbox
 - [x] Built separate offline Android sandbox with synthetic identity, user-triggered real call-log checks, local recording inspection and JSON export. APK signature/isolation verified; 42 Android tests passed.
-- [x] Browser-local simulation/import/rejection verified at 360px; 6 focused tests passed, automatic build OK. Existing root lock/status requests remain; sandbox adds no server writes or AI calls. No publication.
+- [x] Browser-local simulation/import/rejection verified at 360px; 6 focused tests passed, automatic build OK. Sandbox alone excludes root account gates to avoid floor-lock handover side effects; other routes retain every gate. No publication.
 - [ ] Real handset call/audio evidence requires the user's phone; simulated summaries must never claim AI success.
 
 ## Homepage version choice
