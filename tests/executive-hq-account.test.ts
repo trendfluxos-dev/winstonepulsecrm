@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-const mocks = vi.hoisted(() => ({ granted: true, role: 'agent', active: true, signedIn: true, approval: 'approved', locked: false, pinScope: null as 'hq' | 'full' | null }));
+const mocks = vi.hoisted(() => ({ granted: true, role: 'agent', active: true, signedIn: true, approval: 'approved', locked: false, feedback: false, pinScope: null as 'hq' | 'full' | null }));
 vi.mock('@tanstack/react-start/server', () => ({ getRequest: () => new Request('http://localhost', { headers: mocks.signedIn ? { authorization: 'Bearer x.y.z' } : {} }) }));
 vi.mock('@/lib/admin-gate.server', () => ({ adminTokenScope: (token: string | null) => token ? mocks.pinScope : null }));
 vi.mock('@supabase/supabase-js', () => ({ createClient: () => ({
@@ -10,14 +10,19 @@ vi.mock('@/integrations/supabase/client.server', () => ({ supabaseAdmin: { from:
   const q = { select: () => q, eq: () => q, maybeSingle: async () => ({ data: { id: 'profile-1', user_id: 'user-1', role: mocks.role, approval_status: mocks.approval, is_active: mocks.active } }) }; return q;
 } } }));
 vi.mock('@/lib/maintenance.server', () => ({ isLockedForOrdinaryUsers: async () => mocks.locked, LOCKED_MESSAGE: 'maintenance locked' }));
-vi.mock('@/lib/agent-feedback.server', () => ({ feedbackRequired: async () => false }));
+vi.mock('@/lib/agent-feedback.server', () => ({ feedbackRequired: async () => mocks.feedback }));
 vi.mock('@tanstack/react-start', () => ({ createServerFn: () => {
   const chain = { inputValidator: () => chain, handler: (fn: unknown) => fn }; return chain;
 } }));
 vi.mock('@/lib/agent-briefing.server', () => ({ requireAgentBriefing: async (agentId: string) => ({ blocked: true, reason: 'briefing required', agentId }) }));
 import { resolveCaller, resolveWorkCaller, requireBookingReviewer, requireWrite, canDispatch } from '@/lib/access.server';
 import { startMyCall } from '@/lib/call-reports.functions';
-beforeEach(() => { mocks.granted = true; mocks.role = 'agent'; mocks.active = true; mocks.signedIn = true; mocks.approval = 'approved'; mocks.locked = false; mocks.pinScope = null; vi.stubEnv('SUPABASE_URL', 'https://example.invalid'); vi.stubEnv('SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_test'); });
+beforeEach(() => { mocks.granted = true; mocks.role = 'agent'; mocks.active = true; mocks.signedIn = true; mocks.approval = 'approved'; mocks.locked = false; mocks.feedback = false; mocks.pinScope = null; vi.stubEnv('SUPABASE_URL', 'https://example.invalid'); vi.stubEnv('SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_test'); });
+it('HQ-granted agent with a cached IT PIN must submit morning feedback for own work', async () => {
+  mocks.feedback = true; mocks.pinScope = 'full';
+  await expect(resolveWorkCaller('token')).rejects.toThrow('সিস্টেম সমস্যা');
+  expect((await resolveCaller('token')).scope).toBe('authority');
+});
 it('granted Sales Agent receives HQ oversight but no write or dispatch authority', async () => {
   const c = await resolveCaller(null, { skipMaintenance: true });
   expect(c.scope).toBe('authority'); expect(c.readOnly).toBe(true);
