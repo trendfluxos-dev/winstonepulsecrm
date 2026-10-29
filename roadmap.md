@@ -1,5 +1,10 @@
 # Roadmap
 
+## Repository check history
+- [x] Persist safe success/failure evidence and display latest 50 checks under the existing full IT PIN gate; no historic backfill.
+- [x] 11 focused tests and 1,344 full-suite tests passed (9 session-dependent skipped); automatic build OK.
+- [ ] Real saved-check/read-back and visual verification require full IT PIN; not published.
+
 ## 2026-10-29 — Mandatory morning agent feedback
 - [x] Add detailed problem/impact/improvement popup for signed-in active approved agents until 09:30 Dhaka today; submissions use existing team support inbox.
 - [x] Enforce session-based own-work gate, preserve responses and expire automatically; 1,341 tests passed / 9 session-dependent skipped; automatic build OK.

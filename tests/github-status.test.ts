@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 const scope = vi.hoisted(() => vi.fn());
+const storage = vi.hoisted(() => ({ insert: vi.fn(async (_row: unknown) => ({ error: null as null | { message: string } })) }));
+vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: { from: () => ({ insert: storage.insert }) } }));
 vi.mock("@/lib/admin-gate.server", () => ({ adminTokenScope: scope }));
 vi.mock("@tanstack/react-start", () => ({ createServerFn: () => ({
   inputValidator: (validate: (input: unknown) => unknown) => ({
@@ -38,6 +40,7 @@ describe("GitHub repository status authorization and evidence", () => {
     const result = await invoke(input);
     expect(result).toMatchObject({ repository: "example/private-crm", private: true, branch: "main", protected: true, canRead: true, canWrite: false, connectedRepository: null, syncedBranch: null, pendingChanges: null, syncErrors: null });
     expect(result.runs[0]?.conclusion).toBe("failure");
+    expect(storage.insert).toHaveBeenCalledWith(expect.objectContaining({ action: "github_repository_status_checked", metadata: expect.objectContaining({ outcome: "success", repository: "example/private-crm", canWrite: false }) }));
     expect(JSON.stringify(result)).not.toContain("synthetic-connection");
     expect(transport).toHaveBeenCalledTimes(3);
     for (const [url, options] of transport.mock.calls as unknown as [string, RequestInit][]) {
@@ -53,12 +56,18 @@ describe("GitHub repository status authorization and evidence", () => {
   });
   it("missing connection fails without network traffic", async () => {
     const transport = prepare(); vi.stubEnv("GITHUB_API_KEY", "");
-    await expect(invoke(input)).rejects.toThrow("not configured"); expect(transport).not.toHaveBeenCalled();
+    await expect(invoke(input)).rejects.toThrow("CONNECTION_NOT_CONFIGURED"); expect(transport).not.toHaveBeenCalled();
   });
   it("provider failures are unavailable, not an empty healthy history", async () => {
     prepare(); const log = vi.spyOn(console, "error").mockImplementation(() => {});
     vi.stubGlobal("fetch", vi.fn(async () => new Response("sensitive upstream detail", { status: 403 })));
-    await expect(invoke(input)).rejects.toThrow("HTTP 403");
+    await expect(invoke(input)).rejects.toThrow("HTTP_403");
+    expect(storage.insert).toHaveBeenCalledWith(expect.objectContaining({ metadata: expect.objectContaining({ outcome: "failed", errorCode: "HTTP_403" }) }));
+    expect(JSON.stringify(storage.insert.mock.calls)).not.toContain("sensitive upstream detail");
     expect(log).toHaveBeenCalledWith("GitHub status read failed [403]"); log.mockRestore();
+  });
+  it("reports a failed history write without hiding a successful check", async () => {
+    prepare(); storage.insert.mockResolvedValueOnce({ error: { message: "unavailable" } });
+    expect(await invoke(input)).toMatchObject({ historyRecorded: false, canWrite: false });
   });
 });
