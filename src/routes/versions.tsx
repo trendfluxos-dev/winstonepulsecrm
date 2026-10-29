@@ -37,6 +37,12 @@ function VersionChoices() {
       </section>
       <section className="space-y-4 rounded-lg border border-border bg-card p-5">
         <Smartphone className="size-6 text-primary" /><h2 className="text-lg font-semibold">{t({ en: "Updated phone version", bn: "আপডেট করা ফোন সংস্করণ" })}</h2>
+        <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+          <li>{t({ en: "Carrier call-log detection queues offline and retries after permission is granted.", bn: "SIM কলের লগ অফলাইনে জমা থাকে এবং অনুমতি দেওয়ার পর আবার শনাক্ত করার চেষ্টা হয়।" })}</li>
+          <li>{t({ en: "Recording pickup uses matching files from your phone’s own recorder; two-sided audio is not guaranteed.", bn: "ফোনের নিজস্ব রেকর্ডারের মিল পাওয়া ফাইল নেওয়া হয়; দুই পাশের অডিও নিশ্চিত নয়।" })}</li>
+          <li>{t({ en: "Audio summaries require a real uploaded recording and successful processing. Call diagnostics separates saved, processing, failed and unavailable evidence.", bn: "অডিও সারাংশের জন্য আসল রেকর্ডিং আপলোড ও সফল প্রক্রিয়াকরণ প্রয়োজন। কল ডায়াগনস্টিক্স সংরক্ষিত, প্রক্রিয়াধীন, ব্যর্থ ও অনুপলব্ধ তথ্য আলাদা দেখায়।" })}</li>
+          <li>{t({ en: "Real-phone verification is pending. WhatsApp call recording is not guaranteed.", bn: "আসল ফোনে যাচাই বাকি। WhatsApp কল রেকর্ডিং নিশ্চিত নয়।" })}</li>
+        </ul>
         <p className="text-sm font-medium text-warning">{t({ en: "Price awaiting owner confirmation", bn: "মূল্য মালিকের নিশ্চিতকরণের অপেক্ষায়" })}</p>
         <p className="flex items-start gap-2 text-sm"><LockKeyhole className="mt-0.5 size-4 shrink-0" />{t({ en: "Payment must be verified by the Architect before unlock.", bn: "আনলকের আগে Architect-কে পেমেন্ট যাচাই করতে হবে।" })}</p>
         <Button variant="outline" className="w-full" onClick={() => bill.mutate()} disabled={bill.isPending}>{t({ en: "Upgrade bill status", bn: "আপডেট বিলের অবস্থা" })}</Button>
