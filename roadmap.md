@@ -691,3 +691,6 @@
 - [x] Release check + publish + live verify
 
 - [x] Connect GitHub API in the new workspace (fresh connection)
+
+## 2026-10-29 — Android UI tests in CI
+- [x] Added .github/workflows/android-ui-tests.yml (JDK 17, Android SDK, emulator API 34, sandbox build). First run awaits GitHub sync.
