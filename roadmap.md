@@ -1,8 +1,8 @@
 # Roadmap
 
 ## 2026-10-29 — WhatsApp template-only messaging
-- [ ] Remove CRM free-text messaging/handoff bypasses while preserving actual phone conversation sync.
-- [ ] Enforce strict template requests and bounded typed placeholders; test rejected custom text and access rules.
+- [x] Remove CRM free-text messaging/handoff bypasses while preserving actual phone conversation sync.
+- [x] Enforce strict template requests and bounded typed placeholders; 31 focused template/access/device tests pass.
 - [ ] Run focused/full tests and inspect automatic checks; no provider activation, customer writes or publishing.
 
 ## 2026-10-29 — Lead grade permissions
