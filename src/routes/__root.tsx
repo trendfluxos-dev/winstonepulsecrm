@@ -161,6 +161,8 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        {/* Keep both account tags: router metadata deduplicates matching names. */}
+        <meta name="google-site-verification" content="tU1YnZ0DLOJD9UE-0F2T0SsLpryTRQddNltnpVWANvQ" />
         {/* Recover from stale/failed script downloads after a new deployment:
             up to three automatic reloads per tab, then a friendly fallback screen
             with a manual Refresh button. The flag clears once the app boots. */}

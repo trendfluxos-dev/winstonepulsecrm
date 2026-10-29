@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-29 — Google Search Console setup
+- [x] Project-linked TrendFlux Google access verified; CRM property not yet present. Existing same-origin five-page sitemap valid, no lastmod fallbacks and indexing restrictions unchanged. Added account META tag alongside prior tag; preview server-rendered head verified and automatic build OK.
+- [ ] Publishing requested; confirm live tag, then Google verification, property addition, fresh property list and sitemap submission. Deployment not yet verified.
+
 ## 2026-10-29 — Lovable Database enablement
 - [x] Existing Lovable Cloud database verified reachable and healthy; no enablement needed, no production data/settings changed and nothing published.
 
