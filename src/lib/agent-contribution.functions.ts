@@ -178,6 +178,8 @@ export const reviewContributionReport = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const caller = await authority(data.adminToken);
+    // Executive HQ is view-only: review notes need IT/admin write access.
+    if (caller.readOnly) throw new Error("Executive HQ is view-only; review notes need IT access.");
     const reviewer = caller.profile?.name ?? caller.label ?? (caller.readOnly ? "Executive HQ" : "IT Console");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("agent_contribution_reviews").insert({

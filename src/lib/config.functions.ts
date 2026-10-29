@@ -13,6 +13,10 @@ export const getAppConfig = createServerFn({ method: "GET" })
     z.object({ adminToken: z.string().nullable().optional() }).parse(input ?? {}),
   )
   .handler(async ({ data }) => {
+    // Private settings: only approved staff (session) or a valid PIN may read them.
+    const { resolveCaller } = await import("@/lib/access.server");
+    const caller = await resolveCaller(data.adminToken ?? null);
+    if (caller.scope === "none") throw new Error("Sign in required");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("app_config")
