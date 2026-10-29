@@ -62,9 +62,9 @@ export function allowedActions(caller: Caller): CommandActionType[] {
         "retry_failed_recordings",
       ];
     case "coordinator":
-      return ["classify_lead", "generate_shift_summary", "acknowledge_alert"];
+      return ["generate_shift_summary", "acknowledge_alert"];
     case "agent":
-      return ["classify_lead"];
+      return [];
     default:
       return [];
   }

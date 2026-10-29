@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 const src = (p: string) => readFileSync(p, "utf8");
 describe("Oct 29 access fixes", () => {
-  it("record audit limits names for non-authority callers", () => {
-    expect(src("src/lib/crm-backup.functions.ts")).toMatch(/c\.scope !== "authority"\) \{\s*const ids/);
+  it("record audit limits account names to returned actors for every caller", () => {
+    expect(src("src/lib/crm-backup.functions.ts")).toContain('(rows ?? []).map((r) => r.actor_id)');
   });
   it("agents may only move work dates on leads they own", () => {
     expect(src("src/lib/workday.functions.ts")).toContain("owner !== me.id");
