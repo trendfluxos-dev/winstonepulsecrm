@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-29 — Phone upgrade billing preparation
+- [x] Record older Preview no new upgrade fee; updated phone requires verified payment, final amount requested before go-live.
+- [x] Restrict upgrade payment approval/unlock to the verified Architect profile; HQ/IT may not approve it.
+- [ ] Present the revised plan for approval before implementation; no financial records or publication yet.
+- [ ] Activate only after owner supplies amount/currency/payer and the final release is confirmed.
+
 ## 2026-10-29 — Automatic Android calls and summaries
 - [x] Inspect uploaded archive without running it: 75 Android source files identical; keep current project, data and identities.
 - [x] Verify existing analysis schedule metadata: active every 15 minutes; actual callback delivery/audio summary not yet proven.
