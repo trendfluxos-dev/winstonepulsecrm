@@ -1,8 +1,9 @@
 # Roadmap
 
 ## 2026-10-29 — Fast disqualification
-- [ ] Shorten explicit rejection reports with shared server normalization, preserving call facts, ownership and no-answer cadence.
-- [ ] Test rejected outcomes, forged scoring/next-action fields and short calls; verify the form without customer writes. Do not publish.
+- [x] Shorten explicit rejection reports with shared server normalization; outcome-derived Cold/D, no fabricated evaluation answers, no requirements/actions/follow-up; preserve call facts, ownership and no-answer cadence.
+- [x] 60 focused / 1,426 full-suite tests passed; automatic build OK. Isolated mobile form verifies all three outcomes ready at 3s and qualification restored on switching back; no customer writes or publishing.
+- [ ] Genuine agent report save/read-back and Android handset UI remain unverified; need a real authorized call and updated APK. No live success claimed.
 
 ## 2026-10-29 — WhatsApp template-only messaging
 - [x] Remove CRM free-text messaging/handoff bypasses while preserving actual phone conversation sync.
