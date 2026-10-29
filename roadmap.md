@@ -2,8 +2,9 @@
 
 ## 2026-10-29 — Android short-rejection UI regression
 - [x] Add four native Compose UI scenarios using the actual ReportSheet and an injected synthetic three-second connected report; offline sandbox only, never submit or create calls.
-- [ ] Fix native outcome-driven concise mode, safe normal-flow return, normalized offline payload and normal-flow regression coverage without production actions.
-- [ ] Run focused/full isolated tests and inspect automatic typecheck/build; check only related report security warnings.
+- [x] Fix native/mobile-web outcome-driven concise mode, confirmation before correction/new selection, normalized offline payload and normal-flow regressions; rejection server normalization also clears forged AI provenance.
+- [x] 82 focused tests pass; full isolated suite 1,440 pass / 13 skip (207 files pass / 2 skip), with live credentials omitted. Automatic checks report build OK; content-route metadata inspected. Related voice-note file validation remains in the separate Recorder upload, not this report's text dictation; no broader changes.
+- [x] Browser 390x844 checks all three rejection forms, correction and restored six normal questions with zero page errors; synthetic pending facts, all server writes blocked, no submit. Added eight native UI scenarios and four native default-rule tests, not executed here.
 - [ ] Execute native UI tests on an emulator/handset; requires JDK 17, Android SDK 35 and a connected test device. No handset readiness or publication claimed.
 
 ## 2026-10-29 — Fast disqualification
