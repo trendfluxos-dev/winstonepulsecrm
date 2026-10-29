@@ -17,18 +17,23 @@ vi.mock('@tanstack/react-start', () => ({
   },
 }));
 
-vi.mock('@/lib/access.server', () => ({
-  resolveCaller: async () => ({
+vi.mock('@/lib/access.server', () => {
+  const caller = async () => ({
     scope: state.scope,
     readOnly: state.readOnly,
     userId: 'user-a',
     approval: null,
     profile: { id: 'profile-a', name: 'Executive HQ', role: 'admin' },
-  }),
-  requireWrite: (c: { readOnly: boolean }) => {
-    if (c.readOnly) throw new Error('view-only');
-  },
-}));
+  });
+  return {
+    resolveCaller: caller,
+    resolveWorkCaller: caller,
+    canDispatch: (c: { scope: string; readOnly: boolean }) => c.scope === 'authority' && !c.readOnly,
+    requireWrite: (c: { readOnly: boolean }) => {
+      if (c.readOnly) throw new Error('view-only');
+    },
+  };
+});
 
 vi.mock('@/lib/lead-access.server', () => ({
   leadHeldByOther: () => false,
