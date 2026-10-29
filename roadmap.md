@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-29 — Publish, stale-PIN live check, support AI limits, Gemini
+- [x] WhatsApp inbound now refuses messages when no signing secret is set; published.
+- [x] Mehedi's live desk loads with a stale admin PIN saved; Call now shown and enabled. No call placed.
+- [x] Guest support AI: 5 replies per conversation, 200 AI replies per 24h, then human team; 3 tests pass. Not yet published.
+- [ ] Gemini call summary: summaries already exist (OpenAI); waiting for owner to choose switching via the shared AI setting.
+
 ## 2026-10-29 — Database performance and running-cost optimization
 - [x] Measured 2026-10-16→10-29 09:13 UTC: 139.92 requested credits, 137.90 build; runtime 2.02 (database 0.90 for 5.46 medium instance-hours, AI 1.08). Health snapshot: memory 18%, disk 5%, connections 40/120, no exhaustion alerts. Top query (agent history) already uses its matching index (12 ms per 1,000 rows); no missing index found, so no schema change made.
 - [x] Reduce instance-hours: owner chose to keep the three 15-minute jobs (2026-10-29); no smaller instance without a multi-day load review.
