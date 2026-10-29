@@ -1,5 +1,8 @@
 # Roadmap
 
+## 2026-10-29 — Database performance and running-cost optimization
+- [ ] Measure current recorded usage, database health, slow queries, plans and indexes; fix the largest supported database drivers additively without changing data, freshness or access rules.
+
 ## 2026-10-29 — First Winstone Pulse CRM ad campaign
 - [ ] Prepare a registration campaign for Bangladesh real estate teams; verify public-customer suitability before account setup, choose research/type and creative with the user, confirm budget before any spend. No ads or tracking activated.
 
