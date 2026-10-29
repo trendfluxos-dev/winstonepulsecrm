@@ -3,7 +3,7 @@
 ## 2026-10-29 — Lead grade permissions
 - [x] Block agent/coordinator direct classification; retain writable IT/admin correction and HQ read-only restrictions.
 - [x] Remove caller-grade fallback in submission and preserve saved grade during edits.
-- [x] 81 focused permission/report tests passed; automatic build OK. No customer writes or publication.
+- [x] 82 focused permission/report tests passed; automatic build OK. No customer writes or publication.
 
 ## Isolated phone sandbox
 - [x] Built separate offline Android sandbox with synthetic identity, user-triggered real call-log checks, local recording inspection and JSON export. APK signature/isolation verified; 42 Android tests passed.
