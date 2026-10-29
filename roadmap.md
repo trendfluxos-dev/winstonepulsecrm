@@ -1,5 +1,12 @@
 # Roadmap
 
+## 2026-10-29 — Measured database optimization
+- [x] Measure current-workspace usage, database health, slow queries, indexes and schedule metadata; database billing quantities were not returned.
+- [x] Apply additive owner-read indexes; same representative 571-row query improved from 6.032 ms / 500 shared hits to 2.966 ms / 284 shared hits + 6 reads. All 4,865 leads retained; ownership-column disagreement remains zero.
+- [x] Keep existing access boundaries, refresh timing, schedules and instance size unchanged; no cash or credit savings claimed.
+- [ ] Verify focused regression tests and automatic build results.
+- [ ] Measure database active hours and running-credit savings; blocked by absent database usage quantities in the new workspace baseline.
+
 ## 2026-10-29 — Publish session-first call fix
 - [x] 65 focused tests and 1,314 full-suite tests passed; basic security scan found no issues; publication requested and live /manual markers passed.
 - [x] Signed in as Mehedi on live /desk with a synthetic expired admin token; actual call-start handler returned blocked=false and phone/name, with no approved-account error. One append-only call_started event was recorded; no report submitted or telephone connection verified.
