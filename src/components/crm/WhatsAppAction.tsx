@@ -11,7 +11,6 @@ import {
 import { startMyWhatsappCall } from "@/lib/call-reports.functions";
 import { getAdminToken } from "@/lib/local-session";
 import { openWhatsApp } from "@/lib/whatsapp";
-import { logWhatsappHandoff } from "@/lib/whatsapp.functions";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -41,22 +40,6 @@ export function WhatsAppAction({
   const handleClick = () => {
     // External chat composers cannot enforce CRM template restrictions.
     toast.info("অনুমোদিত টেমপ্লেট পাঠাতে My Desk-এর WhatsApp ইনবক্স ব্যবহার করুন");
-    return;
-    const result = openWhatsApp(phone, null);
-    if (!result.ok) {
-      toast.error(
-        result.reason === "invalid_number"
-          ? "নম্বরটি সঠিক নয় — হোয়াটসঅ্যাপ খোলা যায়নি"
-          : "ব্রাউজার নতুন উইন্ডো আটকে দিয়েছে — পপ-আপ অনুমোদন করুন",
-      );
-      return;
-    }
-    if (!leadId) return;
-    void logWhatsappHandoff({
-      data: { adminToken: getAdminToken(), leadId, phone: result.msisdn },
-    }).catch((error: Error) => {
-      console.error("[whatsapp] handoff log failed", error);
-    });
   };
 
   // WhatsApp call: the server opens the mandatory report first (same gate as a
