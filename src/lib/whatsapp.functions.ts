@@ -86,17 +86,25 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: lead } = await supabaseAdmin
+    const { data: lead, error: leadError } = await supabaseAdmin
       .from("leads")
-      .select("id, assigned_to, assigned_agent_id, phone_number")
+      .select("id, name, assigned_to, assigned_agent_id, phone_number")
       .eq("id", data.leadId)
       .maybeSingle();
+    if (leadError) throw new Error("লিডের তথ্য যাচাই করা যায়নি");
     if (!lead) throw new Error("লিড পাওয়া যায়নি");
     // Only the lead's owner (either owner column) may message it; HQ authority
     // may message any lead. Coordinators are treated like agents here.
-    const owner = lead.assigned_to ?? lead.assigned_agent_id;
+    const { leadOwnerId } = await import("@/lib/lead-access.server");
+    const owner = leadOwnerId(lead);
     if (caller.scope !== "authority" && owner !== caller.profile.id) {
       throw new Error("এই লিড আপনার তালিকায় নেই");
+    }
+    // Names are saved CRM facts, never a free-text message placeholder.
+    for (const [i, label] of template.variables.entries()) {
+      if (label === "ক্রেতার নাম" && data.variables[i] !== lead.name.trim()) {
+        throw new Error("টেমপ্লেটে লিডের সংরক্ষিত নাম ব্যবহার করুন");
+      }
     }
 
     const { assertContactable } = await import("@/lib/comms-guard.server");
