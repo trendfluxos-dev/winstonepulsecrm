@@ -24,7 +24,7 @@ import {
 import { type LoadRecord, readLoads } from "@/lib/load-perf";
 import { CallDiagnosticsPanel } from "@/components/crm/CallDiagnosticsPanel";
 import { DeviceCompatibilityReport } from "@/components/crm/DeviceCompatibilityReport";
-import { useMyAccount } from "@/lib/use-my-account";
+import { useMyAccount } from "@/lib/session";
 
 export const Route = createFileRoute("/diagnostics")({
   head: () => ({
