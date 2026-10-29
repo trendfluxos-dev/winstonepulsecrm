@@ -1,5 +1,9 @@
 # Roadmap
 
+## Repository check history
+- [ ] Persist safe success/failure evidence and display latest 50 checks under the existing full IT PIN gate; no historic backfill.
+- [ ] Test authorization, sanitized failures and saved outcomes; live IT verification needs full IT PIN.
+
 ## 2026-10-29 — Mandatory morning agent feedback
 - [x] Add detailed problem/impact/improvement popup for signed-in active approved agents until 09:30 Dhaka today; submissions use existing team support inbox.
 - [x] Enforce session-based own-work gate, preserve responses and expire automatically; 1,341 tests passed / 9 session-dependent skipped; automatic build OK.
