@@ -161,6 +161,16 @@ class MainActivity : ComponentActivity() {
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 9001) {
+            val logIndex = permissions.indexOf(Manifest.permission.READ_CALL_LOG)
+            if (logIndex >= 0 && grantResults.getOrNull(logIndex) == PackageManager.PERMISSION_GRANTED) {
+                lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                    if (AgentSession.employeeIdNow(applicationContext) != null) {
+                        runCatching { com.winstone.connect.telephony.CallLogSweeper.sweep(applicationContext) }
+                    }
+                }
+            }
+        }
         if (requestCode == LiveCallLauncher.REQ_CALL && grantResults.isNotEmpty()
             && grantResults[0] == PackageManager.PERMISSION_GRANTED
         ) {

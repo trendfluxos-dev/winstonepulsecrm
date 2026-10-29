@@ -14,14 +14,19 @@ export type AnalysisState = "pending" | "processing" | "completed" | "failed" | 
 
 export async function analyzePending(limit = 3) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const expiredBefore = new Date(Date.now() - 15 * 60_000).toISOString();
 
-  const { data: rows } = await supabaseAdmin
+  const { data: rows, error } = await supabaseAdmin
     .from("call_recordings")
     .select("id, analysis_status, analysis_attempts, lead_id, agent_id")
-    .in("analysis_status", ["pending", "failed"])
+    // An interrupted worker must not leave a recording processing forever.
+    // analyzeOne still performs the unchanged timestamp/status atomic claim.
+    .or(`analysis_status.in.(pending,failed),and(analysis_status.eq.processing,updated_at.lt.${expiredBefore})`)
     .lt("analysis_attempts", MAX_ATTEMPTS)
     .order("created_at", { ascending: true })
     .limit(limit);
+
+  if (error) throw new Error("Recording analysis queue could not be read");
 
   const results: { id: string; status: AnalysisState }[] = [];
   for (const row of rows ?? []) {

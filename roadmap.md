@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-29 — Automatic Android calls and summaries
+- [x] Inspect uploaded archive without running it: 75 Android source files identical; keep current project, data and identities.
+- [x] Verify existing analysis schedule metadata: active every 15 minutes; actual callback delivery/audio summary not yet proven.
+- [ ] Repair offline call-log detection, permission-grant reconciliation and stale analysis recovery; add focused tests.
+- [ ] APK compilation and handset recording/upload/summary proof require Android SDK and an authorized real phone; no recording success claimed from source.
+
 ## 2026-10-29 — GitHub repository status
 - [x] Link the new workspace GitHub connection and verify read-only app credentials.
 - [x] Add manual full-IT-PIN repository/branch/access and recent Actions inspection; actual Lovable sync fields explicitly unavailable.

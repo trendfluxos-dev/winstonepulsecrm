@@ -1,10 +1,8 @@
 package com.winstone.connect.data.sync
 
 import android.content.Context
-import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -14,8 +12,9 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Runs the call-log reconciliation in the background every 15 minutes, so a call
- * the agent made from WhatsApp or the phone dialer while the app was closed still
- * turns into a lead update and a mandatory report within the same shift.
+ * from the phone dialer while the app was closed can be reconciled. WhatsApp
+ * VoIP calls are not guaranteed to appear in Android's carrier call log.
+ * Detection is local/offline; the separate upload queue waits for connectivity.
  */
 class CallLogSweepWorker(context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
@@ -32,13 +31,10 @@ class CallLogSweepWorker(context: Context, params: WorkerParameters) :
 
         fun schedule(context: Context) {
             val request = PeriodicWorkRequestBuilder<CallLogSweepWorker>(15, TimeUnit.MINUTES)
-                .setConstraints(
-                    Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build(),
-                )
                 .build()
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 UNIQUE,
-                ExistingPeriodicWorkPolicy.KEEP,
+                ExistingPeriodicWorkPolicy.UPDATE,
                 request,
             )
         }
