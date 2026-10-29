@@ -2,7 +2,7 @@
 
 ## 2026-10-29 — Database performance and running-cost optimization
 - [x] Measured 2026-10-16→10-29 09:13 UTC: 139.92 requested credits, 137.90 build; runtime 2.02 (database 0.90 for 5.46 medium instance-hours, AI 1.08). Health snapshot: memory 18%, disk 5%, connections 40/120, no exhaustion alerts. Top query (agent history) already uses its matching index (12 ms per 1,000 rows); no missing index found, so no schema change made.
-- [ ] Reduce instance-hours: needs user decision on three 15-minute jobs (call analysis, reminders, deploy health; 288 starts/day) and a representative load review before any smaller instance. Faster queries alone are not claimed as credit savings.
+- [x] Reduce instance-hours: owner chose to keep the three 15-minute jobs (2026-10-29); no smaller instance without a multi-day load review.
 
 ## 2026-10-29 — First Winstone Pulse CRM ad campaign
 - [ ] Prepare a registration campaign for Bangladesh real estate teams; verify public-customer suitability before account setup, choose research/type and creative with the user, confirm budget before any spend. No ads or tracking activated.
