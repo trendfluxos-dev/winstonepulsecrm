@@ -1,4 +1,5 @@
 import { EVALUATION_QUESTIONS, EVALUATION_QUESTIONS_LABEL_EN, categoryForScore, type EvaluationKey } from "@/lib/lead-evaluation";
+import { fastDisqualification } from "@/lib/fast-disqualification";
 import { CONTACT_CLOSE_REASONS, contactCloseReasonLabelFor } from "@/lib/contact-close-reasons";
 import { FOLLOW_UP_REASONS, FOLLOW_UP_REASONS_EN, type FollowUpReasonCode } from "@/lib/follow-up-reasons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -45,6 +46,7 @@ function categoriesFor(lang: Lang): Opt[] {
         { value: "not_interested", label: "অনাগ্রহী" },
         { value: "no_answer", label: "কল ধরেনি" },
         { value: "wrong_number", label: "ভুল নম্বর" },
+        { value: "fake", label: "ভুয়া / অবৈধ" },
         { value: "closed_converted", label: "বন্ধ / কনভার্টেড" },
       ]
     : [
@@ -55,6 +57,7 @@ function categoriesFor(lang: Lang): Opt[] {
         { value: "not_interested", label: "NOT INTERESTED" },
         { value: "no_answer", label: "NO ANSWER" },
         { value: "wrong_number", label: "WRONG NUMBER" },
+        { value: "fake", label: "FAKE / INVALID" },
         { value: "closed_converted", label: "CLOSED / CONVERTED" },
       ];
 }
@@ -508,6 +511,8 @@ export function PostCallReportGate() {
   ]);
 
   const connected = callState === "connected";
+  const rejection = connected ? fastDisqualification(category) : null;
+  const qualifying = connected && !rejection;
   const suggestion = (detail?.suggestion ?? null) as Suggestion;
   const recs = useMemo(
     () => buildRecs(connected, suggestion, inventoryOpts.map((o) => o.value), lang),
@@ -542,29 +547,29 @@ export function PostCallReportGate() {
           ? t({ bn: "Lead Category বাছাই করুন (Confirm বা Change)", en: "Select Lead Category (Confirm or Change)" })
           : connected && category === "no_answer"
             ? t({ bn: "কথা হওয়া কলে NO ANSWER দেওয়া যাবে না", en: "A connected call cannot be marked NO ANSWER" })
-            : connected && !interest
+            : qualifying && !interest
               ? t({ bn: "Customer Interest বাছাই করুন", en: "Select Customer Interest" })
-              : connected && !requirement
+              : qualifying && !requirement
                 ? t({ bn: "Requirement বাছাই করুন", en: "Select Requirement" })
-                : connected && !response
+                : qualifying && !response
                   ? t({ bn: "Customer Response বাছাই করুন", en: "Select Customer Response" })
-                  : connected && response === "other" && responseNote.trim().length < 2
+                  : qualifying && response === "other" && responseNote.trim().length < 2
                     ? t({ bn: "Customer Response-এ Other হলে ছোট নোট দিন", en: "Add a short note when Customer Response is Other" })
-                    : connected && !nextAction
+                    : qualifying && !nextAction
                       ? t({ bn: "Next Action বাছাই করুন", en: "Select Next Action" })
-                      : connected && nextAction === "other" && nextActionNote.trim().length < 2
+                      : qualifying && nextAction === "other" && nextActionNote.trim().length < 2
                         ? t({ bn: "Next Action-এ Other হলে ছোট নোট দিন", en: "Add a short note when Next Action is Other" })
-                        : connected && !answeredAll
+                        : qualifying && !answeredAll
                           ? t({ bn: "ছয়টি প্রশ্নের সবগুলোর হ্যাঁ / না দিন", en: "Answer Yes / No for all six questions" })
-                          : connected && !grade
+                          : qualifying && !grade
                             ? t({ bn: "Grade (A / B / C / D) বাছাই করুন", en: "Select Grade (A / B / C / D)" })
-                            : connected && followMode === "set" && !when
+                            : qualifying && followMode === "set" && !when
                               ? t({ bn: "Follow-up সময় দিন, নয়তো 'No Follow-up Required' বাছাই করুন", en: "Set a follow-up time, or select 'No Follow-up Required'" })
-                              : connected && followMode === "none" && !noFuReason
+                              : qualifying && followMode === "none" && !noFuReason
                                 ? t({ bn: "Follow-up না লাগার কারণ বাছাই করুন", en: "Select why no follow-up is needed" })
-                                : connected && noFuReason === "other" && noFuNote.trim().length < 2
+                                : qualifying && noFuReason === "other" && noFuNote.trim().length < 2
                                   ? t({ bn: "কারণ Other হলে ছোট নোট দিন", en: "Add a short note when the reason is Other" })
-                                  : NEEDS_REASON.has(category) && !reasonText
+                                  : !rejection && NEEDS_REASON.has(category) && !reasonText
                                     ? t({ bn: "NOT INTERESTED / WRONG NUMBER-এ 'No Follow-up Required' বেছে কারণ দিন", en: "For NOT INTERESTED / WRONG NUMBER, select 'No Follow-up Required' and give a reason" })
                                     : null;
 
@@ -590,7 +595,7 @@ export function PostCallReportGate() {
       ]
         .filter(Boolean)
         .join(" — ");
-    const followUpAt = connected && followMode === "set" && when ? new Date(when).toISOString() : null;
+    const followUpAt = qualifying && followMode === "set" && when ? new Date(when).toISOString() : null;
     const smartReasons: Record<string, string> = {};
     for (const [key, rec] of Object.entries(recs)) if (rec) smartReasons[key] = `${rec.value}: ${rec.reason}`;
     return {
@@ -632,6 +637,7 @@ export function PostCallReportGate() {
               customAt: retryPick.mode === "custom" && retryPick.customAt ? new Date(retryPick.customAt).toISOString() : null,
             }
           : null,
+      ...(rejection ? { ...rejection, category, note: voiceNote.trim() || null, smartReasons: null, aiDecision: null } : {}),
     };
   };
 
@@ -646,7 +652,7 @@ export function PostCallReportGate() {
       submit={submit}
       queryClient={queryClient}
     >
-      <div className="space-y-2 rounded-xl border border-primary/25 bg-primary/5 p-3">
+      {!rejection ? <div className="space-y-2 rounded-xl border border-primary/25 bg-primary/5 p-3">
         <p className="flex items-center gap-1.5 text-xs font-bold text-primary">
           <Bot className="size-3.5" /> AI Analysis
         </p>
@@ -657,7 +663,7 @@ export function PostCallReportGate() {
               ? t({ bn: "এই কলের AI বিশ্লেষণ এখনো নেই — প্রতিটি ঘর নিজে বাছাই করুন।", en: "No AI analysis yet for this call — pick each field yourself." })
               : t({ bn: "কথা হয়নি — শুধু ক্যাটাগরি নিশ্চিত করুন।", en: "No answer — just confirm the category." })}
         </p>
-      </div>
+      </div> : null}
 
       <div className="grid gap-2 sm:grid-cols-2">
         <SmartRow id="sr-direction" label={t({ bn: "কলের দিক", en: "Call direction" })} required options={DIRECTIONS} value={direction} onChange={setDirection} />
@@ -698,7 +704,14 @@ export function PostCallReportGate() {
         onSkip={skip("category")}
       />
 
-      {connected ? (
+      {rejection ? (
+        <dl className="grid grid-cols-2 gap-2 border-y border-border py-3 text-xs">
+          <dt className="text-muted-foreground">{t({ bn: "চাহিদা", en: "Requirement" })}</dt><dd>{t({ bn: "প্রযোজ্য নয়", en: "Not applicable" })}</dd>
+          <dt className="text-muted-foreground">{t({ bn: "পরের কাজ", en: "Next action" })}</dt><dd>{t({ bn: "কোনো কাজ নেই", en: "No Action" })}</dd>
+          <dt className="text-muted-foreground">Follow-up</dt><dd>{t({ bn: "দরকার নেই", en: "Not required" })} · {labelOf(CATEGORIES, category)}</dd>
+        </dl>
+      ) : null}
+      {qualifying ? (
         <>
           <SmartRow id="sr-interest" label="Customer Interest" required options={INTEREST} value={interest} onChange={setInterest} rec={recs.interest} skipped={skipped["interest"]} onSkip={skip("interest")} />
           <SmartRow
@@ -756,7 +769,7 @@ export function PostCallReportGate() {
                       <span className="flex items-center gap-1 font-semibold text-success"><Check className="size-3.5" /> {t({ bn: "নিশ্চিত", en: "Confirmed" })}</span>
                     ) : (
                       <>
-                        <Button type="button" size="sm" className="h-7 px-2 text-[11px]" onClick={() => setWhen(recs.followUp!.value)}>
+                        <Button type="button" size="sm" className="h-7 px-2 text-[11px]" onClick={() => { if (recs.followUp) setWhen(recs.followUp.value); }}>
                           <Check className="size-3" /> {t({ bn: "Accept", en: "Accept" })}
                         </Button>
                         <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-[11px]" onClick={skip("followUp")}>

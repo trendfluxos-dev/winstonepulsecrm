@@ -64,6 +64,7 @@
 - Command Agent work reviews reuse its existing OpenAI Responses path with aggregate-only sampled evidence and empty action allowlists; current canonical ownership gates agent facts — why: no customer payloads, fabricated totals or automatic CRM changes.
 - Callback/manual call logging never assigns leads; new numbers enter canonical intake unassigned and require LeadHub ownership before reporting — why: calls cannot bypass routing or take another agent's lead.
 - Lead-import sheet previews use only existing server-configured report workbooks; inventory keeps its separate read scope, and audit exports neutralise every spreadsheet cell — why: workspace credentials and trusted exports cannot widen access or execute staff-supplied formulas.
-- Multi-page server reads use src/lib/page-all.ts (parallel 1,000-row pages, id-dedupe, fail on any page error); homepage device images are small WebP CDN assets and identical font files are referenced by one URL — why: sequential paging and duplicate downloads were the main load delays.
+- Reads use page-all.ts (parallel 1,000-row pages, id-dedupe, fail on errors); homepage uses WebP CDN/shared fonts — why: avoid serial reads/downloads.
 - Agent KPIs (My Desk, Analytics and HQ roster dashboard) come only from kpi-contract.ts; agent-kpi-board.ts groups authorized rows, never phone-sync metrics — why: one definition per number.
-- HQ forecasts never allocate; IT GitHub can't prove sync; version choices grant no access; call-sandbox is local — why: facts aren't authority.
+- Fast rejection defaults use fast-disqualification.ts in web/server; fake uses wrong-number closure — why: one safe outcome path.
+- HQ forecasts never allocate; IT GitHub cannot prove sync; version choices grant no access; call-sandbox is local — why: facts are not authority.
