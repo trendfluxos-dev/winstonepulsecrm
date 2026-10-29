@@ -12,12 +12,12 @@
 - Preserve existing users, leads, reports, recordings, invoices and monthly maintenance access; choosing Preview does not bypass existing security checks.
 
 ## Technical details
-- Use a separate upgrade entitlement and immutable bill/payment records, not the monthly maintenance invoice. Reuse the existing restricted payment-verification authority; submitting a reference or accepting a bill is not payment.
+- Use a separate upgrade entitlement and immutable bill/payment records, not the monthly maintenance invoice. Only the verified Architect profile may approve payment and unlock the upgrade, using the existing protected Architect checks. HQ/IT cannot approve or unlock it; submitting a reference or accepting a bill is not verified payment.
 - Enforce access on the server for protected downloads and updated-phone requests; browser selection alone never unlocks anything. Keep recovery and queued old-version sync reachable without granting new-version work access.
 - Preserve versioned APK storage rather than overwriting the old file. Reconcile the current publish/download filename mismatch as part of the versioned download path.
 - Fail closed for unknown release, missing price and unverified payment. No live financial records or release changes during preparation.
 
 ## Verification
-- Test old-version exemption from the new fee, exact Dhaka cutoff, missing-price refusal, payment-versus-approval distinction and user/release isolation.
+- Test old-version exemption from the new fee, exact Dhaka cutoff, missing-price refusal, payment-versus-approval distinction, Architect-only approval (HQ/IT refused), and user/release isolation.
 - Run relevant tests and full regressions; inspect automatic application checks. Verify Preview selection and the pending-price screen without creating bills.
 - Paid unlock and Android handset verification remain pending until pricing, payer scope and the final APK are confirmed. Do not publish during this preparation.
