@@ -72,6 +72,10 @@ export const publishAppRelease = createServerFn({ method: "POST" })
     requireAuthority(caller);
     requireWrite(caller);
 
+    // New phone distribution waits for the owner price/payer and Architect payment gate.
+    const { assertPhoneUpgradeReady } = await import("@/lib/phone-upgrade");
+    assertPhoneUpgradeReady();
+
     const versionCode = Math.trunc(Number(data.versionCode));
     const versionName = data.versionName.trim();
     if (!Number.isFinite(versionCode) || versionCode < 1) throw new Error("Version code invalid");
@@ -92,12 +96,13 @@ export const publishAppRelease = createServerFn({ method: "POST" })
       .maybeSingle();
     if (existing) throw new Error(`Version code ${versionCode} আগেই প্রকাশিত হয়েছে`);
 
-    const storagePath = "winstone-connect.apk";
+    // Release-specific paths preserve all earlier APK bytes.
+    const storagePath = `releases/${versionCode}/winstone-pulse.apk`;
     const { error: uploadError } = await supabaseAdmin.storage
       .from("app-downloads")
       .upload(storagePath, bytes, {
         contentType: "application/vnd.android.package-archive",
-        upsert: true,
+        upsert: false,
         cacheControl: "no-cache",
       });
     if (uploadError) throw new Error(`আপলোড ব্যর্থ: ${uploadError.message}`);

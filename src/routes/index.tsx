@@ -252,6 +252,7 @@ function EntryHall() {
 
 
         <section className="mt-10 rounded-xl border border-border bg-card p-5 sm:p-6">
+          <Button asChild variant="outline" className="mb-4"><Link to="/versions">Preview &amp; phone upgrade options</Link></Button>
           <h2 className="text-lg font-bold tracking-tight">
             <span lang="en" className="block">Are you a Winstone sales agent?</span>
           </h2>

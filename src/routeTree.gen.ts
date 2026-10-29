@@ -65,6 +65,7 @@ import { Route as TechRouteImport } from './routes/tech'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TicketsRouteImport } from './routes/tickets'
 import { Route as UnitBoardRouteImport } from './routes/unit-board'
+import { Route as VersionsRouteImport } from './routes/versions'
 import { Route as VoiceTranscriptionRouteImport } from './routes/voice-transcription'
 import { Route as WalkthroughRouteImport } from './routes/walkthrough'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -407,6 +408,11 @@ const TicketsRoute = TicketsRouteImport.update({
 const UnitBoardRoute = UnitBoardRouteImport.update({
   id: '/unit-board',
   path: '/unit-board',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VersionsRoute = VersionsRouteImport.update({
+  id: '/versions',
+  path: '/versions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VoiceTranscriptionRoute = VoiceTranscriptionRouteImport.update({
@@ -807,6 +813,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/tickets': typeof TicketsRoute
   '/unit-board': typeof UnitBoardRoute
+  '/versions': typeof VersionsRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
   '/walkthrough': typeof WalkthroughRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -928,6 +935,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/tickets': typeof TicketsRoute
   '/unit-board': typeof UnitBoardRoute
+  '/versions': typeof VersionsRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
   '/walkthrough': typeof WalkthroughRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -1050,6 +1058,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/tickets': typeof TicketsRoute
   '/unit-board': typeof UnitBoardRoute
+  '/versions': typeof VersionsRoute
   '/voice-transcription': typeof VoiceTranscriptionRoute
   '/walkthrough': typeof WalkthroughRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -1173,6 +1182,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tickets'
     | '/unit-board'
+    | '/versions'
     | '/voice-transcription'
     | '/walkthrough'
     | '/.well-known/oauth-protected-resource'
@@ -1294,6 +1304,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tickets'
     | '/unit-board'
+    | '/versions'
     | '/voice-transcription'
     | '/walkthrough'
     | '/.well-known/oauth-protected-resource'
@@ -1415,6 +1426,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tickets'
     | '/unit-board'
+    | '/versions'
     | '/voice-transcription'
     | '/walkthrough'
     | '/.well-known/oauth-protected-resource'
@@ -1537,6 +1549,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TicketsRoute: typeof TicketsRoute
   UnitBoardRoute: typeof UnitBoardRoute
+  VersionsRoute: typeof VersionsRoute
   VoiceTranscriptionRoute: typeof VoiceTranscriptionRoute
   WalkthroughRoute: typeof WalkthroughRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -1994,6 +2007,13 @@ declare module '@tanstack/react-router' {
       path: '/unit-board'
       fullPath: '/unit-board'
       preLoaderRoute: typeof UnitBoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/versions': {
+      id: '/versions'
+      path: '/versions'
+      fullPath: '/versions'
+      preLoaderRoute: typeof VersionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/voice-transcription': {
@@ -2497,6 +2517,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TicketsRoute: TicketsRoute,
   UnitBoardRoute: UnitBoardRoute,
+  VersionsRoute: VersionsRoute,
   VoiceTranscriptionRoute: VoiceTranscriptionRoute,
   WalkthroughRoute: WalkthroughRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:

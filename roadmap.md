@@ -3,8 +3,9 @@
 ## 2026-10-29 — Phone upgrade billing preparation
 - [x] Record older Preview no new upgrade fee; updated phone requires verified payment, final amount requested before go-live.
 - [x] Restrict upgrade payment approval/unlock to the verified Architect profile; HQ/IT may not approve it.
-- [ ] Present the revised plan for approval before implementation; no financial records or publication yet.
-- [ ] Activate only after owner supplies amount/currency/payer and the final release is confirmed.
+- [x] Approved plan: added /versions and IT preparation; missing-price bill returns issued=false; release publishing blocked server-side pending activation; future APK paths are versioned/non-overwriting. No financial records, schema changes or publication.
+- [x] 38 focused / 1,342 total tests passed; automatic typecheck/build OK. Preview bill status and Continue → /signin verified, no page errors; pre-midnight release record 2.13 found, archived APK not verified.
+- [ ] Final bill/entitlement storage, paid download/API enforcement and Architect payment UI stay inactive/unimplemented until owner confirms amount/currency/payer/tax and final release; ask at go-live. No working paid-unlock claim.
 
 ## 2026-10-29 — Automatic Android calls and summaries
 - [x] Inspect uploaded archive without running it: 75 Android source files identical; keep current project, data and identities.
