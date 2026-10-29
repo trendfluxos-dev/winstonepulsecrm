@@ -52,6 +52,13 @@ android {
             applicationIdSuffix = ".test"
             versionNameSuffix = "-test"
         }
+        create("sandbox") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".sandbox"
+            versionNameSuffix = "-sandbox"
+            matchingFallbacks += listOf("debug")
+            buildConfigField("String", "CRM_BASE_URL", "\"https://invalid.invalid\"")
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
