@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-29 — GitHub repository status
+- [x] Link the new workspace GitHub connection and verify read-only app credentials.
+- [x] Add manual full-IT-PIN repository/branch/access and recent Actions inspection; actual Lovable sync fields explicitly unavailable.
+- [ ] Run status transport and authorization tests; verify preview rendering and automatic build.
+- [ ] Genuine IT-panel read-back requires an available full IT PIN session; no publishing requested.
+
 ## 2026-10-29 — Measured database optimization
 - [x] Measure current-workspace usage, database health, slow queries, indexes and schedule metadata; database billing quantities were not returned.
 - [x] Apply additive owner-read indexes; same representative 571-row query improved from 6.032 ms / 500 shared hits to 2.966 ms / 284 shared hits + 6 reads. All 4,865 leads retained; ownership-column disagreement remains zero.
