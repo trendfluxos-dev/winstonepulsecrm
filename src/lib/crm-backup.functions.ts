@@ -91,7 +91,13 @@ export const listRecordAudit = createServerFn({ method: "POST" })
     if (data.recordId) q = q.eq("record_id", data.recordId);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    const { data: people } = await supabaseAdmin.from("profiles").select("user_id,name");
+    // Non-authority callers only get names for actors on their own rows.
+    let peopleQ = supabaseAdmin.from("profiles").select("user_id,name");
+    if (c.scope !== "authority") {
+      const ids = [...new Set((rows ?? []).map((r) => r.actor_id).filter(Boolean))] as string[];
+      peopleQ = peopleQ.in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
+    }
+    const { data: people } = await peopleQ;
     const names: Record<string, string> = {};
     for (const p of people ?? []) if (p.user_id) names[p.user_id] = p.name ?? "";
     return { rows: rows ?? [], names, full: c.scope === "authority" };

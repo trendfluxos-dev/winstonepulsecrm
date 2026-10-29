@@ -68,6 +68,11 @@ export const recordMessengerSyncDecision = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { resolveCaller } = await import("@/lib/access.server");
+    // Sync decisions need the full IT PIN; a session or HQ PIN is never enough.
+    const gate = await import("@/lib/admin-gate.server");
+    if (gate.adminTokenScope(data.adminToken ?? null) !== "full") {
+      return { ok: false as const, code: "FORBIDDEN" as const };
+    }
     const caller = await resolveCaller(data.adminToken ?? null);
     const { messengerView } = await import("@/lib/messenger-shared");
     const view = messengerView(caller);
