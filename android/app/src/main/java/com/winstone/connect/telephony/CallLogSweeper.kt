@@ -16,9 +16,9 @@ import java.util.TimeZone
  * The safety net that makes "every call becomes a report" true in practice.
  *
  * The live receivers catch calls while the app process is alive. They cannot
- * catch a call placed from WhatsApp or another dialer app while the app was
- * force-stopped, or a broadcast an OEM swallowed. Android still writes all of
- * those into the system call log, so on every app start (and every 15 minutes)
+ * catch a carrier call while the app was force-stopped or a broadcast an OEM
+ * swallowed. Carrier calls can remain in the system call log; WhatsApp VoIP
+ * calls are not guaranteed to be there. On app start (and periodically)
  * we read the log forward from a saved cursor and push anything unseen to the
  * CRM, which resolves the number to its existing lead — even a lead last called
  * fifty days ago — or creates one, and opens the mandatory report.
@@ -39,6 +39,8 @@ object CallLogSweeper {
 
     @Synchronized
     fun sweep(context: Context): Int {
+        // Do not advance the phone's cursor before there is an agent to attribute work to.
+        if (com.winstone.connect.data.AgentSession.employeeIdNow(context) == null) return 0
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALL_LOG)
             != PackageManager.PERMISSION_GRANTED
         ) return 0
@@ -109,8 +111,7 @@ object CallLogSweeper {
         if (newest > cursor || (newest == cursor && newestId > cursorId)) {
             prefs.edit().putLong(KEY_CURSOR, newest).putLong(KEY_CURSOR_ID, newestId).apply()
         }
-        // A call found afterwards (app was closed, call placed from WhatsApp or
-        // the phone dialer) also owes a report: prompt for it on the phone.
+        // A carrier call found afterwards also owes a report: prompt on the phone.
         if (queued > 0) PendingReportWorker.prompt(context, delaySeconds = 10)
         return queued
     }
