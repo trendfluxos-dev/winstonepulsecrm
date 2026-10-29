@@ -12,6 +12,9 @@ describe("isolated call sandbox", () => {
     expect(sandboxResultSchema.safeParse({ ...result, liveWrites: 1 }).success).toBe(false);
     expect(sandboxResultSchema.safeParse({ ...result, calls: [{ leadId: "production-id", at: 1, type: 1, durationSeconds: 3 }] }).success).toBe(false);
   });
-  it("rejects raw numbers and extra credential fields", () => { expect(sandboxResultSchema.safeParse({ ...simulateSandbox("test", 1234), token: "not-allowed" }).success).toBe(false); });
+  it("rejects raw numbers and extra credential fields", () => {
+    expect(sandboxResultSchema.safeParse({ ...simulateSandbox("test", 1234), token: "not-allowed" }).success).toBe(false);
+    expect(sandboxResultSchema.safeParse({ ...simulateSandbox("test", 1234), calls: [{ leadId: "synthetic-001", at: 1, type: 1, durationSeconds: 3, phone: "12345678" }] }).success).toBe(false);
+  });
   it("bounds imported call rows", () => { expect(sandboxResultSchema.safeParse({ ...simulateSandbox("test", 1234), calls: Array(21).fill({ leadId: "synthetic-001", at: 1, type: 1, durationSeconds: 3 }) }).success).toBe(false); });
 });
