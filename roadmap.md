@@ -1,7 +1,7 @@
 # Roadmap
 
 ## 2026-10-29 — Lovable Database enablement
-- [ ] Verify the existing Lovable Cloud database is ready; do not replace it or change production data/settings.
+- [x] Existing Lovable Cloud database verified reachable and healthy; no enablement needed, no production data/settings changed and nothing published.
 
 ## 2026-10-29 — Android short-rejection UI regression
 - [x] Add four native Compose UI scenarios using the actual ReportSheet and an injected synthetic three-second connected report; offline sandbox only, never submit or create calls.
