@@ -637,7 +637,7 @@ export function PostCallReportGate() {
               customAt: retryPick.mode === "custom" && retryPick.customAt ? new Date(retryPick.customAt).toISOString() : null,
             }
           : null,
-      ...(rejection ? { ...rejection, note: voiceNote.trim() || null, smartReasons: null, aiDecision: null } : {}),
+      ...(rejection ? { ...rejection, category, note: voiceNote.trim() || null, smartReasons: null, aiDecision: null } : {}),
     };
   };
 
