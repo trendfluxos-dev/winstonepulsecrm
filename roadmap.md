@@ -2,7 +2,8 @@
 
 ## Call diagnostics
 - [x] Add own-account call-log permission evidence, recording upload and summary states to /diagnostics, linked from Recorder; no AI calls or writes.
-- [ ] Validate technical states and access; real agent visual/read-back requires an authorized session.
+- [x] 12 focused recording/diagnostics tests passed; automatic build OK.
+- [ ] Real agent visual/read-back requires an authorized session; not published.
 - [ ] Lovable Git settings screenshot must be supplied by user; editor settings cannot be captured from app preview.
 
 ## Repository check history
