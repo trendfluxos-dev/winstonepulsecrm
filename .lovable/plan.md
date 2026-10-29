@@ -1,18 +1,23 @@
-# Live agent KPI dashboard and release verification
+# Older Preview and paid phone upgrade
 
-## Build
-- Add a dedicated **Agent KPI dashboard** section inside Executive HQ, preserving existing HQ access. Show each active approved agent as a dashboard card, with owned/active/closed/hot leads, completed owned work, submitted reports, connected reports, distinct reported leads, and current follow-up/overdue counts.
-- Reuse the shared KPI definitions and existing authorized snapshot/report feeds. Report totals show the selected Dhaka date range; current lead states stay explicitly labelled “now.” Phone-sync rows never contribute to these KPIs.
-- Change the HQ pool warning to compare usable pool with the next **14 calendar days** of per-agent targets, excluding Friday and configured holidays. Show daily targets, eligible allocation days, total need and shortfall. This does not change assignment schedules or records.
+## Version choices
+- **Older Preview:** version from before October 29, 2026, 00:00 Dhaka; no new upgrade fee. Existing monthly maintenance rules remain unchanged.
+- **Updated phone version:** today's development; selecting it opens its separate upgrade bill, and access unlocks only after authorized payment verification.
+- Keep the exact older APK and release record intact. Identify the actual release/artifact before labelling it the pre-midnight version; timestamps alone must not invent an archived build.
 
-## Verify and release
-- Add tests for per-agent isolation, reports versus unique leads, and the 14-day warning threshold/target cap.
-- Run the test suite and inspect automatic production build/typecheck results.
-- Request permission to test each existing agent session; verify live Owned/Active/Closed values and report-range/breakdown against read-only database aggregates.
-- Publish after a fresh security scan, then check release markers and the changed live dashboard.
-- HQ PIN viewing requires a genuine unlock session. Never extract or bypass the PIN, and never manufacture a shortage by changing live data. If unavailable, clearly report that live HQ visual verification remains blocked.
+## Build now, activate later
+- Add a version-choice screen and an IT release preparation section showing the updated phone upgrade as **Price awaiting owner confirmation**.
+- Keep new charging, payable invoice creation and paid upgrade distribution inactive while the amount is unset. Never display an invented price or treat the missing amount as zero.
+- At the next go-live request, ask the owner for the final amount and currency, who pays (company or each user), and whether tax is included. Confirm the release attached to that bill before activating it.
+- Preserve existing users, leads, reports, recordings, invoices and monthly maintenance access; choosing Preview does not bypass existing security checks.
 
-## Technical approach
-- Add a small pure roster KPI aggregator that delegates to `kpi-contract.ts`, and a dashboard component mounted under `/hq?s=kpis`.
-- Keep the existing server-authorized HQ snapshot and shared report cache; no new customer tables, migrations or business writes.
-- Put the 14-day coverage calculation in a pure tested helper consumed by the existing read-only pool-notice function.
+## Technical details
+- Use a separate upgrade entitlement and immutable bill/payment records, not the monthly maintenance invoice. Reuse the existing restricted payment-verification authority; submitting a reference or accepting a bill is not payment.
+- Enforce access on the server for protected downloads and updated-phone requests; browser selection alone never unlocks anything. Keep recovery and queued old-version sync reachable without granting new-version work access.
+- Preserve versioned APK storage rather than overwriting the old file. Reconcile the current publish/download filename mismatch as part of the versioned download path.
+- Fail closed for unknown release, missing price and unverified payment. No live financial records or release changes during preparation.
+
+## Verification
+- Test old-version exemption from the new fee, exact Dhaka cutoff, missing-price refusal, payment-versus-approval distinction and user/release isolation.
+- Run relevant tests and full regressions; inspect automatic application checks. Verify Preview selection and the pending-price screen without creating bills.
+- Paid unlock and Android handset verification remain pending until pricing, payer scope and the final APK are confirmed. Do not publish during this preparation.
