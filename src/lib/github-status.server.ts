@@ -5,9 +5,10 @@ export async function readGithubStatus(repository: string, branch: string | unde
   const key = process.env["GITHUB_API_KEY"];
   const lovableKey = process.env["LOVABLE_API_KEY"];
   if (!key || !lovableKey) throw new Error("GitHub connection is not configured");
+  const headers = { Accept: "application/vnd.github+json", Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": key };
   async function read(path: string): Promise<unknown> {
     const response = await fetch(`${GATEWAY_URL}${path}`, {
-      headers: { Accept: "application/vnd.github+json", Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": key },
+      headers,
       signal: AbortSignal.timeout(10000), redirect: "error",
     });
     if (!response.ok) {
