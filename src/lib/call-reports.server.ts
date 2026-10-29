@@ -1,4 +1,5 @@
 import { isContactCloseReason } from "@/lib/contact-close-reasons";
+import { fastDisqualification } from "@/lib/fast-disqualification";
 /**
  * The mandatory post-call workflow.
  *
@@ -386,7 +387,6 @@ export async function submitCallReport(input: {
 }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   // Friday only pauses lead distribution; a follow-up picked for Friday is kept as-is.
-  const category = input.category as CallCategory;
 
   const { data: report, error: readError } = await supabaseAdmin
     .from("call_reports")
@@ -418,15 +418,20 @@ export async function submitCallReport(input: {
     ? input.callStatus === "connected"
     : report.connected !== false;
 
+  const rejection = fastDisqualification(input.category);
+  if (rejection && !received) throw new Error("অনাগ্রহী / ভুল / ভুয়া নম্বর নিশ্চিত করতে কলের সঠিক অবস্থা দিন; কথা না হলে NO ANSWER ব্যবহার করুন।");
+  if (rejection) input = { ...input, ...rejection };
+  const category = input.category as CallCategory;
+
   // A missing answer set must not reopen the caller-selected legacy score path.
   const { parseAnswers, evaluate, EVALUATION_MODEL } = await import("@/lib/lead-evaluation");
-  const answers = received ? parseAnswers(input.evaluationAnswers) : null;
-  if (received && !answers) throw new Error("কথা হওয়া কলের ছয়টি প্রশ্নের উত্তর দিন। পুরোনো অ্যাপ হলে আপডেট করুন।");
+  const answers = received && !rejection ? parseAnswers(input.evaluationAnswers) : null;
+  if (received && !rejection && !answers) throw new Error("কথা হওয়া কলের ছয়টি প্রশ্নের উত্তর দিন। পুরোনো অ্যাপ হলে আপডেট করুন।");
   const evaluation = answers ? evaluate(answers, Boolean(input.followUpAt)) : null;
-  const effectiveTemperature = evaluation?.category ?? null;
+  const effectiveTemperature = rejection?.temperature ?? evaluation?.category ?? null;
   // Grade must come from saved classification or matched recording analysis.
   // A caller-selected grade never supplies missing classification evidence.
-  let trustedGrade = LEAD_GRADES.includes(report.grade as LeadGrade) ? report.grade : null;
+  let trustedGrade = rejection?.grade ?? (LEAD_GRADES.includes(report.grade as LeadGrade) ? report.grade : null);
   if (received && !trustedGrade && report.recording_id) {
     const { data: gradedRecording } = await supabaseAdmin.from("call_recordings")
       .select("ai_grade, analysis_status, agent_id, lead_id").eq("id", report.recording_id).maybeSingle();
@@ -544,7 +549,7 @@ export async function submitCallReport(input: {
       evaluation_score: evaluation?.score ?? null,
       evaluation_model: evaluation ? EVALUATION_MODEL : null,
       follow_up_priority: evaluation?.priority ?? null,
-      next_best_action: evaluation?.nextAction ?? null,
+      next_best_action: rejection ? "no_action" : evaluation?.nextAction ?? null,
       submitted_at: new Date().toISOString(),
     })
     .eq("id", input.reportId)
