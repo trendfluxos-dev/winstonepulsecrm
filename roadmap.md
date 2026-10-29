@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Repository check history
+- [x] Add single manual retry, default-branch recovery, clear-result and history reload; no provider writes or automatic retry loops.
+- [ ] Verify recovery tests; real IT panel interaction needs full IT PIN.
 - [x] Persist safe success/failure evidence and display latest 50 checks under the existing full IT PIN gate; no historic backfill.
 - [x] 11 focused tests and 1,344 full-suite tests passed (9 session-dependent skipped); automatic build OK.
 - [ ] Real saved-check/read-back and visual verification require full IT PIN; not published.
