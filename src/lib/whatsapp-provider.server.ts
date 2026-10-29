@@ -345,7 +345,9 @@ class MetaWhatsApp implements WhatsAppProvider {
 
   async processWebhook(input: { rawBody: string; signature: string | null }) {
     const appSecret = process.env["WHATSAPP_APP_SECRET"] ?? whatsAppCredentials().webhookSecret;
-    if (appSecret) {
+    // Fail closed: without a signing secret no inbound body is trusted.
+    if (!appSecret) return { ok: false, reason: "signing secret not configured" };
+    {
       if (!input.signature) return { ok: false, reason: "missing signature" };
       const { createHmac, timingSafeEqual } = await import("crypto");
       const expected = `sha256=${createHmac("sha256", appSecret).update(input.rawBody).digest("hex")}`;

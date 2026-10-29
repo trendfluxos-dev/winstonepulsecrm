@@ -164,7 +164,13 @@ export const startSupportConversation = createServerFn({ method: "POST" })
       attachments: data.attachments ?? [],
     });
 
-    await runAiTurn(conversation.id, customer.name);
+    await replyWithinBudget(
+      conversation.id,
+      customer.name,
+      null,
+      data.message.slice(0, 120),
+      data.message,
+    );
     return { token: conversation.access_token, thread: await buildThread(conversation.id) };
   });
 
@@ -217,30 +223,83 @@ export const sendSupportMessage = createServerFn({ method: "POST" })
       attachments: data.attachments ?? [],
     });
 
-    // The paid AI assistant only answers verified signed-in users. Guests'
-    // messages are saved and routed to the human support team instead.
-    const { getRequest } = await import("@tanstack/react-start/server");
-    const auth = getRequest()?.headers?.get("authorization") ?? "";
-    const bearer = auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : "";
-    let signedIn = false;
-    if (bearer) {
-      const { data: userData } = await supabaseAdmin.auth.getUser(bearer);
-      signedIn = Boolean(userData?.user);
-    }
-    if (signedIn) {
-      await runAiTurn(conversation.id, customer?.name ?? null);
-    } else if (!conversation.escalated_at) {
-      const { escalateConversation } = await import("@/lib/support.server");
-      await escalateConversation({
-        conversationId: conversation.id,
-        reason: "Guest message — AI assistant requires sign-in",
-        title: (conversation.subject ?? data.body).slice(0, 120),
-        description: data.body,
-        createdByKind: "customer",
-      });
-    }
+    await replyWithinBudget(
+      conversation.id,
+      customer?.name ?? null,
+      conversation.escalated_at,
+      (conversation.subject ?? data.body).slice(0, 120),
+      data.body,
+    );
     return buildThread(conversation.id);
   });
+
+async function callerIsSignedIn(): Promise<boolean> {
+  const { getRequest } = await import("@tanstack/react-start/server");
+  const auth = getRequest()?.headers?.get("authorization") ?? "";
+  const bearer = auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : "";
+  if (!bearer) return false;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin.auth.getUser(bearer);
+  return Boolean(data?.user);
+}
+
+/**
+ * Guests get a few AI replies per conversation under a shared daily cap;
+ * past either limit the message goes to the human team, never silently dropped.
+ */
+async function replyWithinBudget(
+  conversationId: string,
+  customerName: string | null,
+  escalatedAt: string | null,
+  title: string,
+  body: string,
+) {
+  const { decideGuestAiReply } = await import("@/lib/support-ai-budget");
+  const signedIn = await callerIsSignedIn();
+  let decision = decideGuestAiReply({ signedIn, conversationAiReplies: 0, guestAiRepliesLast24h: 0 });
+  if (!signedIn) {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const [conv, day] = await Promise.all([
+      supabaseAdmin
+        .from("support_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("conversation_id", conversationId)
+        .eq("author_kind", "ai"),
+      supabaseAdmin
+        .from("support_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("author_kind", "ai")
+        .gte("created_at", since),
+    ]);
+    // Fail closed: if usage cannot be counted, hand over to people.
+    decision =
+      conv.error || day.error || conv.count == null || day.count == null
+        ? { allow: false, reason: "daily_limit" }
+        : decideGuestAiReply({
+            signedIn,
+            conversationAiReplies: conv.count,
+            guestAiRepliesLast24h: day.count,
+          });
+  }
+  if (decision.allow) {
+    await runAiTurn(conversationId, customerName);
+    return;
+  }
+  if (!escalatedAt) {
+    const { escalateConversation } = await import("@/lib/support.server");
+    await escalateConversation({
+      conversationId,
+      reason:
+        decision.reason === "conversation_limit"
+          ? "Guest reached the AI reply limit for this conversation"
+          : "Daily guest AI reply limit reached",
+      title,
+      description: body,
+      createdByKind: "customer",
+    });
+  }
+}
 
 export const requestHumanSupport = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => tokenInput.parse(input))
