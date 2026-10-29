@@ -12,3 +12,11 @@ describe("Oct 29 access fixes", () => {
     expect(src("src/lib/messenger-sync-decisions.functions.ts")).toContain('adminTokenScope(data.adminToken ?? null) !== "full"');
   });
 });
+describe("Oct 29 access fixes, round 2", () => {
+  it("app settings require a signed-in staff caller or PIN", () => {
+    expect(src("src/lib/config.functions.ts")).toContain('caller.scope === "none") throw new Error("Sign in required")');
+  });
+  it("Executive HQ view-only access cannot save review notes", () => {
+    expect(src("src/lib/agent-contribution.functions.ts")).toContain("if (caller.readOnly) throw");
+  });
+});
