@@ -1,5 +1,9 @@
 # Roadmap
 
+## Homepage version choice
+- [x] Get started opens previous Preview versus updated phone popup; updated choice opens /versions with honest feature details and inactive pricing.
+- [ ] Verify popup navigation and phone layout; do not publish or activate billing.
+
 ## Call diagnostics
 - [x] Add own-account call-log permission evidence, recording upload and summary states to /diagnostics, linked from Recorder; no AI calls or writes.
 - [x] 12 focused recording/diagnostics tests passed; automatic build OK.
