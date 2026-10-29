@@ -22,14 +22,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { type LoadRecord, readLoads } from "@/lib/load-perf";
+import { CallDiagnosticsPanel } from "@/components/crm/CallDiagnosticsPanel";
 
 export const Route = createFileRoute("/diagnostics")({
   head: () => ({
     meta: [
-      { title: "Page-load diagnostics — Winstone Pulse" },
-      { name: "description", content: "Staff-only review of failed page loads and automatic reloads on this device." },
-      { property: "og:title", content: "Page-load diagnostics — Winstone Pulse" },
-      { property: "og:description", content: "Failed page loads and automatic reload records for staff." },
+      { title: "Call & page diagnostics — Winstone Pulse" },
+      { name: "description", content: "Staff call-log permission evidence, recording upload and summary status alongside page-load diagnostics." },
+      { property: "og:title", content: "Call & page diagnostics — Winstone Pulse" },
+      { property: "og:description", content: "Account-scoped recording and summary processing evidence with page-load diagnostics." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -163,7 +164,7 @@ function DiagnosticsPage() {
         title="পেজ-লোড ডায়াগনস্টিক্স"
         description="শুধু স্টাফদের জন্য — সাইন ইন করুন।"
       >
-        <Board />
+        <div className="mx-auto max-w-5xl space-y-6"><CallDiagnosticsPanel /><Board /></div>
       </RoleGate>
     </AppShell>
   );

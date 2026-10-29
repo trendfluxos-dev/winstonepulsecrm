@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Mic, Phone, PhoneIncoming, Play, RotateCw, Sparkles, Square } from "lucide-react";
@@ -60,6 +60,7 @@ function RecorderPage() {
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-3xl space-y-4 px-3 py-5 sm:px-5">
+        <Button variant="outline" asChild><Link to="/diagnostics">{t({ en: "Call diagnostics", bn: "কল ডায়াগনস্টিক্স" })}</Link></Button>
         <header className="flex min-w-0 items-center gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><Mic className="size-5" /></span>
           <div className="min-w-0">

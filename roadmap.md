@@ -1,5 +1,10 @@
 # Roadmap
 
+## Call diagnostics
+- [x] Add own-account call-log permission evidence, recording upload and summary states to /diagnostics, linked from Recorder; no AI calls or writes.
+- [ ] Validate technical states and access; real agent visual/read-back requires an authorized session.
+- [ ] Lovable Git settings screenshot must be supplied by user; editor settings cannot be captured from app preview.
+
 ## Repository check history
 - [x] Add single manual retry, default-branch recovery, clear-result and history reload; no provider writes or automatic retry loops.
 - [x] 19 focused recovery/history/access tests passed; automatic build OK. Real IT panel interaction still needs full IT PIN.
