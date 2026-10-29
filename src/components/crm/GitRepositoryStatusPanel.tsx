@@ -8,11 +8,13 @@ import { getAdminToken, useAdminToken } from "@/lib/local-session";
 import { getGithubRepositoryStatus, getGithubCheckHistory } from "@/lib/github-status.functions";
 import { githubCheckInput } from "@/lib/github-status-shared";
 import { useT } from "@/lib/i18n";
+import { githubRecovery } from "@/lib/github-recovery";
 
 export function GitRepositoryStatusPanel() {
   const t = useT();
   const [repository, setRepository] = useState("Winstone-BD/winstone-pulse-crm");
   const [branch, setBranch] = useState("");
+  const [retryUsed, setRetryUsed] = useState(false);
   const load = useServerFn(getGithubRepositoryStatus);
   const historyLoad = useServerFn(getGithubCheckHistory);
   const adminToken = useAdminToken();
@@ -24,16 +26,25 @@ export function GitRepositoryStatusPanel() {
   const check = useMutation({ mutationFn: () => load({ data: githubCheckInput.parse({ adminToken: getAdminToken(), repository: repository.trim(), ...(branch.trim() ? { branch: branch.trim() } : {}) }) }),
     onSettled: () => void qc.invalidateQueries({ queryKey: ["github-check-history"] }) });
   const result = !check.isPending && !check.isError ? check.data : undefined;
+  const recovery = githubRecovery(check.error?.message ?? "");
   const unknown = t({ en: "Unavailable — check Project settings → Git", bn: "অনুপলব্ধ — Project settings → Git-এ দেখুন" });
   return (
     <section className="space-y-4 border-t border-border py-4" aria-label="GitHub repository status">
       <h2 className="flex items-center gap-2 font-semibold"><Github className="size-4 text-primary" />{t({ en: "GitHub repository status", bn: "GitHub রিপোজিটরির অবস্থা" })}</h2>
-      <form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={e => { e.preventDefault(); check.mutate(); }}>
+      <form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={e => { e.preventDefault(); setRetryUsed(false); check.mutate(); }}>
         <label className="min-w-0 flex-1 space-y-1 text-sm">{t({ en: "Repository to inspect", bn: "যে রিপোজিটরি যাচাই করবেন" })}<Input value={repository} maxLength={200} pattern="[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+" onChange={e => { setRepository(e.target.value); check.reset(); }} placeholder="owner/repository" required /></label>
         <label className="space-y-1 text-sm sm:w-48">{t({ en: "Branch (default if blank)", bn: "ব্রাঞ্চ (খালি হলে ডিফল্ট)" })}<Input value={branch} maxLength={200} onChange={e => { setBranch(e.target.value); check.reset(); }} /></label>
         <Button type="submit" variant="outline" disabled={check.isPending}><RefreshCw className={`size-4 ${check.isPending ? "animate-spin" : ""}`} />{t({ en: "Check GitHub", bn: "GitHub যাচাই" })}</Button>
       </form>
       {check.isError && <p role="alert" className="text-sm text-destructive">{check.error.message}</p>}
+      {check.isError && <div className="space-y-2 text-sm">
+        <p className="text-muted-foreground">{recovery.kind === "access" ? t({ en: "Unlock IT Console with the full IT PIN, then check again.", bn: "পূর্ণ IT PIN দিয়ে IT Console খুলে আবার যাচাই করুন।" }) : recovery.kind === "connection" ? t({ en: "Check GitHub connection and repository access in Lovable connector settings before retrying.", bn: "আবার চেষ্টা করার আগে Lovable connector settings-এ GitHub সংযোগ ও অনুমতি দেখুন।" }) : recovery.kind === "repository" ? t({ en: "Verify the repository and branch, or check the default branch.", bn: "রিপোজিটরি ও ব্রাঞ্চ যাচাই করুন, অথবা ডিফল্ট ব্রাঞ্চ দেখুন।" }) : t({ en: "The read failed. Retry once; no repository changes will be made.", bn: "তথ্য পড়া যায়নি। একবার আবার চেষ্টা করুন; রিপোজিটরি বদলাবে না।" })}</p>
+        <div className="flex flex-wrap gap-2">
+          {recovery.retry && <Button variant="outline" disabled={retryUsed || check.isPending} onClick={() => { setRetryUsed(true); check.mutate(); }}><RefreshCw className="size-4" />{t({ en: "Retry once", bn: "একবার আবার চেষ্টা" })}</Button>}
+          {branch.trim() && <Button variant="outline" disabled={check.isPending} onClick={() => { setBranch(""); setRetryUsed(false); check.reset(); }}>{t({ en: "Use default branch", bn: "ডিফল্ট ব্রাঞ্চ ব্যবহার" })}</Button>}
+          <Button variant="outline" onClick={() => { check.reset(); setRetryUsed(false); }}>{t({ en: "Clear failed result", bn: "ব্যর্থ ফলাফল সরান" })}</Button>
+        </div>
+      </div>}
       {check.isPending && <p role="status" className="text-sm text-muted-foreground">{t({ en: "Checking…", bn: "যাচাই হচ্ছে…" })}</p>}
       {result && <div className="space-y-3 text-sm">
         <div className="flex flex-wrap items-center gap-2"><Github className="size-4" /><a className="break-all underline" href={`https://github.com/${result.repository}`} target="_blank" rel="noreferrer">{result.repository}</a><span className="text-muted-foreground">{result.private ? "Private" : "Public"}</span></div>
@@ -48,6 +59,7 @@ export function GitRepositoryStatusPanel() {
         <h3 className="font-medium">{t({ en: "Repository check history (latest 50)", bn: "রিপোজিটরি যাচাইয়ের ইতিহাস (শেষ ৫০টি)" })}</h3>
         {history.isLoading && <p role="status">{t({ en: "Loading history…", bn: "ইতিহাস আসছে…" })}</p>}
         {history.isError && <p role="alert" className="text-destructive">{history.error.message}</p>}
+        {history.isError && <Button variant="outline" disabled={history.isFetching} onClick={() => void history.refetch()}><RefreshCw className="size-4" />{t({ en: "Reload saved history", bn: "সংরক্ষিত ইতিহাস আবার দেখুন" })}</Button>}
         {history.data?.length === 0 && <p className="text-muted-foreground">{t({ en: "No saved checks for this repository yet. Earlier chat checks were not recorded here.", bn: "এখনো এই রিপোজিটরির যাচাই সংরক্ষিত নেই। আগের চ্যাটের যাচাই এখানে রেকর্ড হয়নি।" })}</p>}
         <ol className="divide-y divide-border">{history.data?.map(entry => <li key={entry.id} className="space-y-2 py-3">
           <div className="flex flex-wrap justify-between gap-2"><time dateTime={entry.checkedAt}>{new Date(entry.checkedAt).toLocaleString("en-GB", { timeZone: "Asia/Dhaka" })} Dhaka</time><strong className={entry.outcome === "failed" ? "text-destructive" : "text-foreground"}>{entry.outcome === "success" ? "Success" : "Failed"}</strong></div>
