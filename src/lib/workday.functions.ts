@@ -43,7 +43,9 @@ export const setLeadWorkDate = createServerFn({ method: "POST" })
     if (!lead) throw new Error("লিড পাওয়া যায়নি");
 
     const coordinator = caller.scope !== "agent";
-    if (!coordinator && leadHeldByOther(lead, me.id)) throw new Error(LEAD_NOT_YOURS);
+    // Agents may only move leads they currently own (never pool or others' leads).
+    const owner = lead.assigned_agent_id ?? lead.assigned_to;
+    if (!coordinator && (owner !== me.id || leadHeldByOther(lead, me.id))) throw new Error(LEAD_NOT_YOURS);
 
     const { error } = await supabaseAdmin
       .from("leads")
