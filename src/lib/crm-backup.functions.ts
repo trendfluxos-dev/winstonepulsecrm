@@ -91,12 +91,10 @@ export const listRecordAudit = createServerFn({ method: "POST" })
     if (data.recordId) q = q.eq("record_id", data.recordId);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    // Non-authority callers only get names for actors on their own rows.
-    let peopleQ = supabaseAdmin.from("profiles").select("user_id,name");
-    if (c.scope !== "authority") {
-      const ids = [...new Set((rows ?? []).map((r) => r.actor_id).filter(Boolean))] as string[];
-      peopleQ = peopleQ.in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
-    }
+    // Names only for actors on the returned rows (plus a filtered actor) — never the whole staff list.
+    const ids = [...new Set([...(rows ?? []).map((r) => r.actor_id), c.scope === "authority" ? data.actorId : null].filter(Boolean))] as string[];
+    const peopleQ = supabaseAdmin.from("profiles").select("user_id,name")
+      .in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
     const { data: people } = await peopleQ;
     const names: Record<string, string> = {};
     for (const p of people ?? []) if (p.user_id) names[p.user_id] = p.name ?? "";
