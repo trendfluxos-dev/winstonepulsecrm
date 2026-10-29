@@ -13,8 +13,11 @@ export const getPhoneUpgradePreparation = createServerFn({ method: "GET" }).hand
   // Metadata alone never proves the APK bytes still exist.
   let archived = false;
   if (data?.storage_path && data.storage_path.startsWith("releases/")) {
-    const result = await supabaseAdmin.storage.from("app-downloads").list(data.storage_path.substring(0, data.storage_path.lastIndexOf("/")), { search: data.storage_path.split("/").pop(), limit: 1 });
-    archived = !result.error && Boolean(result.data?.some(file => file.name === data.storage_path.split("/").pop()));
+    const filename = data.storage_path.split("/").pop();
+    if (filename) {
+      const result = await supabaseAdmin.storage.from("app-downloads").list(data.storage_path.substring(0, data.storage_path.lastIndexOf("/")), { search: filename, limit: 1 });
+      archived = !result.error && Boolean(result.data?.some(file => file.name === filename));
+    }
   }
   return {
     ...PHONE_UPGRADE_PREPARATION,
