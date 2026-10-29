@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-29 — Publish session-first call fix
+- [x] 65 focused tests and 1,314 full-suite tests passed; basic security scan found no issues; publication requested and live /manual markers passed.
+- [x] Signed in as Mehedi on live /desk with a synthetic expired admin token; actual call-start handler returned blocked=false and phone/name, with no approved-account error. One append-only call_started event was recorded; no report submitted or telephone connection verified.
+- [ ] Repeat with a genuine retained HQ/IT token; blocked because that browser token/PIN session is unavailable. Synthetic stale-token live evidence and mocked genuine-scope tests are not equivalent to this check.
+
 ## 2026-10-28 — Live KPI dashboard and 14-day pool warning
 - [x] Build an authorized per-agent KPI dashboard using the shared report/lead contract; no phone-sync performance metrics.
 - [x] Use per-agent daily targets for a 14-day pool coverage warning; verify without creating shortage records.
