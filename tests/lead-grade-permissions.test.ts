@@ -14,6 +14,7 @@ vi.mock("@/lib/access.server", () => ({
   resolveCaller: async () => state.caller,
   requireWrite: (c: Caller) => { if (c.readOnly) throw new Error("HQ view-only"); },
   requireAuthority: (c: Caller) => { if (c.scope !== "authority") throw new Error("Authority required"); },
+  requireDispatch: vi.fn(),
 }));
 vi.mock("@/lib/audit.server", () => ({ logAudit: vi.fn() }));
 vi.mock("@/lib/lead-events.server", () => ({ logLeadEvent: vi.fn() }));
