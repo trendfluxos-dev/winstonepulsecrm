@@ -29,7 +29,7 @@ export const getPhoneUpgradePreparation = createServerFn({ method: "GET" }).hand
 /** An ordinary user cannot manufacture a bill/unlock through browser state. */
 export const requestPhoneUpgradeBill = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({}).strict().parse(input))
-  .handler(async () => assertPhoneUpgradeReady());
+  .handler(async () => ({ issued: false as const, phase: PHONE_UPGRADE_PREPARATION.phase }));
 
 /** Same verified Google identity AND protected Architect session as /tech. */
 export const approvePhoneUpgrade = createServerFn({ method: "POST" })

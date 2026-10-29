@@ -40,7 +40,7 @@ function VersionChoices() {
         <p className="text-sm font-medium text-warning">{t({ en: "Price awaiting owner confirmation", bn: "মূল্য মালিকের নিশ্চিতকরণের অপেক্ষায়" })}</p>
         <p className="flex items-start gap-2 text-sm"><LockKeyhole className="mt-0.5 size-4 shrink-0" />{t({ en: "Payment must be verified by the Architect before unlock.", bn: "আনলকের আগে Architect-কে পেমেন্ট যাচাই করতে হবে।" })}</p>
         <Button variant="outline" className="w-full" onClick={() => bill.mutate()} disabled={bill.isPending}>{t({ en: "Upgrade bill status", bn: "আপডেট বিলের অবস্থা" })}</Button>
-        {bill.isError && <p role="alert" className="text-sm text-warning">{t({ en: "No payable bill yet. Owner pricing, payer and final release confirmation are required before activation.", bn: "এখনো পরিশোধযোগ্য বিল নেই। চালুর আগে মালিকের মূল্য, প্রদানকারী ও চূড়ান্ত সংস্করণের নিশ্চিতকরণ লাগবে।" })}</p>}
+        {(bill.data?.issued === false || bill.isError) && <p role="alert" className="text-sm text-warning">{t({ en: "No payable bill yet. Owner pricing, payer and final release confirmation are required before activation.", bn: "এখনো পরিশোধযোগ্য বিল নেই। চালুর আগে মালিকের মূল্য, প্রদানকারী ও চূড়ান্ত সংস্করণের নিশ্চিতকরণ লাগবে।" })}</p>}
       </section>
     </div>
   </main>;

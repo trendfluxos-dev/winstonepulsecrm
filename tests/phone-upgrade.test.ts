@@ -51,6 +51,6 @@ describe("phone upgrade preparation", () => {
     identity.architectFromRequest.mockResolvedValue({ userId: "architect" });
     identity.architectSessionValid.mockReturnValue(true);
     await expect(approve({ session: "valid-architect-session" })).rejects.toThrow("owner confirmation");
-    await expect(request({})).rejects.toThrow("owner confirmation");
+    await expect(request({})).resolves.toEqual({ issued: false, phase: "awaiting_owner_price" });
   });
 });
