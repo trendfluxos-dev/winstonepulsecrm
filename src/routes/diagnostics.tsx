@@ -24,6 +24,7 @@ import {
 import { type LoadRecord, readLoads } from "@/lib/load-perf";
 import { CallDiagnosticsPanel } from "@/components/crm/CallDiagnosticsPanel";
 import { DeviceCallTestChecklist } from "@/components/crm/DeviceCallTestChecklist";
+import { SandboxResultsReport } from "@/components/crm/SandboxResultsReport";
 import { DeviceCompatibilityReport } from "@/components/crm/DeviceCompatibilityReport";
 import { useMyAccount } from "@/lib/session";
 
@@ -172,7 +173,7 @@ function DiagnosticsPage() {
         title="পেজ-লোড ডায়াগনস্টিক্স"
         description="শুধু স্টাফদের জন্য — সাইন ইন করুন।"
       >
-        <div className="mx-auto max-w-5xl space-y-6"><CallDiagnosticsPanel /><DeviceCallTestChecklist /><AuthorityCompat /><Board /></div>
+        <div className="mx-auto max-w-5xl space-y-6"><CallDiagnosticsPanel /><DeviceCallTestChecklist /><SandboxResultsReport /><AuthorityCompat /><Board /></div>
       </RoleGate>
     </AppShell>
   );
