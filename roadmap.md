@@ -3,8 +3,9 @@
 ## 2026-10-29 — Automatic Android calls and summaries
 - [x] Inspect uploaded archive without running it: 75 Android source files identical; keep current project, data and identities.
 - [x] Verify existing analysis schedule metadata: active every 15 minutes; actual callback delivery/audio summary not yet proven.
-- [ ] Repair offline call-log detection, permission-grant reconciliation and stale analysis recovery; add focused tests.
+- [x] Repair offline call-log detection, permission-grant reconciliation, signed-out cursor consumption and stale analysis recovery; fix Android CI paths. 25 focused / 1,329 total tests passed; automatic typecheck/build OK.
 - [ ] APK compilation and handset recording/upload/summary proof require Android SDK and an authorized real phone; no recording success claimed from source.
+- [ ] Missed call-end recording pickup remains unverified; requires a handset trace to reconcile persisted receiver/log identity without duplicate recordings. No real audio, production rows or deployment changed.
 
 ## 2026-10-29 — GitHub repository status
 - [x] Link the new workspace GitHub connection and verify read-only app credentials.
