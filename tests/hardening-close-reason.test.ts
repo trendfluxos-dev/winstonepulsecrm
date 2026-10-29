@@ -59,7 +59,10 @@ describe("9:05 gate", () => {
     const desk = readFileSync("src/lib/agent-desk.functions.ts", "utf8");
     const calls = readFileSync("src/lib/call-reports.functions.ts", "utf8");
     const api = readFileSync("src/routes/api/public/agent/report.ts", "utf8");
-    expect(desk.match(/assertBriefingForCaller/g)?.length).toBeGreaterThanOrEqual(3);
+    // Manual WhatsApp text logging is retired; its gated replacement is the template sender.
+    const whatsapp = readFileSync("src/lib/whatsapp.functions.ts", "utf8");
+    expect(desk.match(/assertBriefingForCaller/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(whatsapp).toContain("assertBriefingForCaller(caller)");
     expect(calls.match(/assertAgentBriefing|assertBriefingForCaller/g)?.length).toBeGreaterThanOrEqual(3);
     expect(api).toContain("requireAgentBriefing");
   });

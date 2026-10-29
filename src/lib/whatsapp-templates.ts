@@ -1,10 +1,12 @@
 /**
- * Approved WhatsApp Business templates (browser-safe shared rules).
+ * CRM-authorized WhatsApp template identifiers (browser-safe shared rules).
  *
- * Staff may only send one of these pre-approved templates through the Meta
+ * Staff may only request one of these templates through the Meta
  * Cloud API — never free-form text. The `name` must match the template
- * approved in Meta Business Manager; variables are positional ({{1}}, {{2}}…).
+ * approved by Meta before use; this list does not prove provider approval.
+ * Variables are positional ({{1}}, {{2}}…).
  */
+import { z } from "zod";
 export type WhatsAppTemplate = {
   /** Internal id used in the CRM. */
   id: string;
@@ -46,3 +48,30 @@ export const WHATSAPP_TEMPLATES: readonly WhatsAppTemplate[] = [
 export function findWhatsAppTemplate(id: string): WhatsAppTemplate | null {
   return WHATSAPP_TEMPLATES.find((t) => t.id === id) ?? null;
 }
+
+/** Reject body/text overrides and free prose disguised as template parameters. */
+export const WhatsappTemplateInput = z.object({
+  adminToken: z.string().nullable().optional(),
+  leadId: z.string().uuid(),
+  template: z.string().trim().min(1).max(80),
+  variables: z.array(z.string().trim().min(1).max(80)).max(10).default([]),
+}).strict().superRefine((data, ctx) => {
+  const template = findWhatsAppTemplate(data.template);
+  if (!template) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["template"], message: "শুধু অনুমোদিত টেমপ্লেট পাঠানো যায়" });
+    return;
+  }
+  if (data.variables.length !== template.variables.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["variables"], message: "টেমপ্লেটের সব তথ্য পূরণ করুন" });
+    return;
+  }
+  data.variables.forEach((value, i) => {
+    const label = template.variables[i];
+    const valid = label === "ভিজিটের তারিখ"
+      ? /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value
+      : label === "বকেয়া পরিমাণ"
+        ? /^\d{1,10}(\.\d{1,2})?$/.test(value) && Number(value) > 0
+        : value.length <= 60 && /^[\p{L}\p{M}]+(?:[ .'-][\p{L}\p{M}]+)*$/u.test(value);
+    if (!valid) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["variables", i], message: `${label}: সঠিক তথ্য দিন (নাম / YYYY-MM-DD / পরিমাণ)` });
+  });
+});

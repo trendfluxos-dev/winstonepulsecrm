@@ -34,7 +34,6 @@ import {
   SI_DOC_VERSION,
   objectionLabel,
   pitchHistoryCsv,
-  whatsappUrl,
   type FactCategory,
   type ObjectionCode,
   type PitchAction,
@@ -222,13 +221,7 @@ function LeadPitchbook({ leadId }: { leadId: string }) {
             </div>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={async () => { await navigator.clipboard.writeText(text); const r = await record(edited ? "edited" : "copied"); if (r) toast.success("কপি হয়েছে ও ইতিহাসে লেখা হয়েছে"); }}><Copy className="size-4" /> Copy Pitch</Button>
-              <Button size="sm" variant="outline" onClick={async () => {
-                const url = whatsappUrl(rec.data!.lead.phone, text);
-                if (!url) { toast.error("ফোন নম্বর WhatsApp-এর জন্য বৈধ নয়"); return; }
-                window.open(url, "_blank", "noopener");
-                const r = await record("whatsapp_opened");
-                if (r) toast.success("WhatsApp খোলা হয়েছে / বার্তা প্রস্তুত — পাঠানো নিশ্চিত নয়");
-              }}><MessageCircle className="size-4" /> WhatsApp</Button>
+              <Button size="sm" variant="outline" onClick={() => toast.info("অনুমোদিত টেমপ্লেট পাঠাতে My Desk-এর WhatsApp ইনবক্স ব্যবহার করুন")}><MessageCircle className="size-4" /> WhatsApp · টেমপ্লেট</Button>
               <Button size="sm" variant="outline" onClick={async () => { const r = await record("saved"); if (r) toast.success(r.duplicate ? "আগেই সংরক্ষিত" : "লিড ইতিহাসে সংরক্ষিত"); }}><Save className="size-4" /> Save to Lead History</Button>
               <Button size="sm" variant="ghost" onClick={() => rec.mutate({ o: objection, lang: language })}><RefreshCw className="size-4" /> Edit / Regenerate</Button>
             </div>

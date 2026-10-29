@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-29 — WhatsApp template-only messaging
+- [x] Remove CRM free-text messaging/handoff bypasses while preserving actual phone conversation sync.
+- [x] Enforce strict template requests and bounded typed placeholders; 31 focused template/access/device tests pass.
+- [x] 1,416 full-suite tests passed; automatic typecheck/build OK. No provider activation, customer writes or publishing.
+- [x] Monisha's signed-in WhatsApp preview renders without errors and without a custom composer; inbox is empty and integration inactive. No genuine provider send attempted or delivery claimed.
+
 ## 2026-10-29 — Lead grade permissions
 - [x] Block agent/coordinator direct classification; retain writable IT/admin correction and HQ read-only restrictions.
 - [x] Remove caller-grade fallback in submission and preserve saved grade during edits.

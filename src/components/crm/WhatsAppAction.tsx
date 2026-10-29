@@ -11,13 +11,11 @@ import {
 import { startMyWhatsappCall } from "@/lib/call-reports.functions";
 import { getAdminToken } from "@/lib/local-session";
 import { openWhatsApp } from "@/lib/whatsapp";
-import { logWhatsappHandoff } from "@/lib/whatsapp.functions";
 import { cn } from "@/lib/utils";
 
 type Props = {
   phone: string | null | undefined;
   leadId?: string | null;
-  text?: string | null;
   label?: string;
   size?: "sm" | "default" | "lg";
   variant?: "default" | "secondary" | "ghost" | "outline";
@@ -33,7 +31,6 @@ type Props = {
 export function WhatsAppAction({
   phone,
   leadId,
-  text,
   label = "হোয়াটসঅ্যাপ",
   size = "sm",
   variant = "secondary",
@@ -41,21 +38,8 @@ export function WhatsAppAction({
   ariaLabel,
 }: Props) {
   const handleClick = () => {
-    const result = openWhatsApp(phone, text);
-    if (!result.ok) {
-      toast.error(
-        result.reason === "invalid_number"
-          ? "নম্বরটি সঠিক নয় — হোয়াটসঅ্যাপ খোলা যায়নি"
-          : "ব্রাউজার নতুন উইন্ডো আটকে দিয়েছে — পপ-আপ অনুমোদন করুন",
-      );
-      return;
-    }
-    if (!leadId) return;
-    void logWhatsappHandoff({
-      data: { adminToken: getAdminToken(), leadId, phone: result.msisdn },
-    }).catch((error: Error) => {
-      console.error("[whatsapp] handoff log failed", error);
-    });
+    // External chat composers cannot enforce CRM template restrictions.
+    toast.info("অনুমোদিত টেমপ্লেট পাঠাতে My Desk-এর WhatsApp ইনবক্স ব্যবহার করুন");
   };
 
   // WhatsApp call: the server opens the mandatory report first (same gate as a
@@ -101,7 +85,7 @@ export function WhatsAppAction({
           <Phone className="size-4" /> WhatsApp কল (রিপোর্ট লাগবে)
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={handleClick}>
-          <MessageCircle className="size-4" /> মেসেজ
+          <MessageCircle className="size-4" /> অনুমোদিত টেমপ্লেট
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

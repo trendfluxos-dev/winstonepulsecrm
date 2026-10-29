@@ -124,7 +124,7 @@ const MyMessageInput = z.object({
   messageContent: z.string().trim().min(1).max(4000),
 });
 
-/** Log one WhatsApp message in the agent's own lead thread. */
+/** Retired manual text path; actual phone history is ingested by device sync. */
 export const logMyWhatsappMessage = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => MyMessageInput.parse(input))
   .handler(async ({ data }) => {
@@ -132,30 +132,7 @@ export const logMyWhatsappMessage = createServerFn({ method: "POST" })
     const caller = await resolveWorkCaller(data.adminToken ?? null);
     requireWrite(caller);
     if (caller.scope === "none") throw new Error("অনুমোদিত অ্যাকাউন্ট দিয়ে সাইন ইন করুন");
-    await (await import("@/lib/agent-briefing.server")).assertBriefingForCaller(caller);
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    if (caller.scope === "agent" && caller.profile) {
-      const { data: lead } = await supabaseAdmin
-        .from("leads")
-        .select("id, assigned_to")
-        .eq("id", data.leadId)
-        .maybeSingle();
-      if (!lead || lead.assigned_to !== caller.profile.id) {
-        throw new Error("এই লিড আপনার তালিকায় নেই");
-      }
-    }
-
-    const { error } = await supabaseAdmin.from("whatsapp_interactions").insert({
-      lead_id: data.leadId,
-      agent_id: caller.profile?.id ?? null,
-      sender_type: data.senderType,
-      message_type: "text",
-      message_content: data.messageContent,
-    });
-    if (error) throw new Error(error.message);
-    return { ok: true };
+    throw new Error("শুধু অনুমোদিত টেমপ্লেট পাঠানো যায় — নিজে মেসেজ লেখা বন্ধ");
   });
 
 const TriageInput = z.object({

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { WhatsappTemplateInput } from "@/lib/whatsapp-templates";
 
 /** Is the official Meta WhatsApp Business API actually connected? */
 export const getWhatsappIntegrationStatus = createServerFn({ method: "GET" }).handler(async () => {
@@ -48,14 +49,6 @@ export const logWhatsappHandoff = createServerFn({ method: "POST" })
     return { ok: true as const, logged: true };
   });
 
-const SendInput = z.object({
-  adminToken: z.string().nullable().optional(),
-  leadId: z.string().uuid(),
-  /** Only a pre-approved template id — free-form text is never accepted. */
-  template: z.string().trim().min(1).max(80),
-  variables: z.array(z.string().trim().min(1).max(200)).max(10).default([]),
-});
-
 /**
  * Sends a WhatsApp message through the official Meta Cloud API and logs it in
  * the lead thread. Only templates from the approved allow-list may be sent —
@@ -63,15 +56,18 @@ const SendInput = z.object({
  * is not configured.
  */
 export const sendWhatsappMessage = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => SendInput.parse(input))
+  .inputValidator((input: unknown) => WhatsappTemplateInput.parse(input))
   .handler(async ({ data }) => {
-    const { resolveCaller, requireWrite } = await import("@/lib/access.server");
-    const caller = await resolveCaller(data.adminToken ?? null);
+    const { resolveWorkCaller, requireWrite } = await import("@/lib/access.server");
+    const caller = await resolveWorkCaller(data.adminToken ?? null);
     if (caller.scope === "none" || !caller.profile) {
       throw new Error("অনুমোদিত অ্যাকাউন্ট দিয়ে সাইন ইন করুন");
     }
     requireWrite(caller);
+    await (await import("@/lib/agent-briefing.server")).assertBriefingForCaller(caller);
 
+    // Revalidate in the handler as well as at the request boundary.
+    WhatsappTemplateInput.parse(data);
     const { findWhatsAppTemplate } = await import("@/lib/whatsapp-templates");
     const template = findWhatsAppTemplate(data.template);
     if (!template) throw new Error("শুধু অনুমোদিত টেমপ্লেট পাঠানো যায়");
@@ -90,17 +86,25 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: lead } = await supabaseAdmin
+    const { data: lead, error: leadError } = await supabaseAdmin
       .from("leads")
-      .select("id, assigned_to, assigned_agent_id, phone_number")
+      .select("id, name, assigned_to, assigned_agent_id, phone_number")
       .eq("id", data.leadId)
       .maybeSingle();
+    if (leadError) throw new Error("লিডের তথ্য যাচাই করা যায়নি");
     if (!lead) throw new Error("লিড পাওয়া যায়নি");
     // Only the lead's owner (either owner column) may message it; HQ authority
     // may message any lead. Coordinators are treated like agents here.
-    const owner = lead.assigned_to ?? lead.assigned_agent_id;
+    const { leadOwnerId } = await import("@/lib/lead-access.server");
+    const owner = leadOwnerId(lead);
     if (caller.scope !== "authority" && owner !== caller.profile.id) {
       throw new Error("এই লিড আপনার তালিকায় নেই");
+    }
+    // Names are saved CRM facts, never a free-text message placeholder.
+    for (const [i, label] of template.variables.entries()) {
+      if (label === "ক্রেতার নাম" && data.variables[i] !== lead.name.trim()) {
+        throw new Error("টেমপ্লেটে লিডের সংরক্ষিত নাম ব্যবহার করুন");
+      }
     }
 
     const { assertContactable } = await import("@/lib/comms-guard.server");
@@ -123,7 +127,7 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
     if (!to) throw new Error("নম্বরটি সঠিক নয়");
 
     const variables = Object.fromEntries(
-      template.variables.map((label, i) => [label, data.variables[i]!]),
+      template.variables.map((label, i) => [label, data.variables[i] ?? ""]),
     );
     const result = await provider.sendTemplate({ to, template: template.name, variables });
     if (!result.ok) return { ok: false as const, status: "failed" as const, error: result.error };
