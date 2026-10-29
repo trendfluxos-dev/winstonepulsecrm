@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-29 — Fast disqualification
+- [ ] Shorten explicit rejection reports with shared server normalization, preserving call facts, ownership and no-answer cadence.
+- [ ] Test rejected outcomes, forged scoring/next-action fields and short calls; verify the form without customer writes. Do not publish.
+
 ## 2026-10-29 — WhatsApp template-only messaging
 - [x] Remove CRM free-text messaging/handoff bypasses while preserving actual phone conversation sync.
 - [x] Enforce strict template requests and bounded typed placeholders; 31 focused template/access/device tests pass.
