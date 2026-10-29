@@ -4,7 +4,7 @@
 - [x] Measure current-workspace usage, database health, slow queries, indexes and schedule metadata; database billing quantities were not returned.
 - [x] Apply additive owner-read indexes; same representative 571-row query improved from 6.032 ms / 500 shared hits to 2.966 ms / 284 shared hits + 6 reads. All 4,865 leads retained; ownership-column disagreement remains zero.
 - [x] Keep existing access boundaries, refresh timing, schedules and instance size unchanged; no cash or credit savings claimed.
-- [ ] Verify focused regression tests and automatic build results.
+- [x] 43 focused regression tests passed across eight files; automatic build OK at 02:12:55 UTC.
 - [ ] Measure database active hours and running-credit savings; blocked by absent database usage quantities in the new workspace baseline.
 
 ## 2026-10-29 — Publish session-first call fix
