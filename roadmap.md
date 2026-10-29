@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Isolated phone sandbox
-- [ ] Build separate offline Android sandbox with synthetic leads, real call-log checks, local recording inspection and exported results.
-- [ ] Add browser-local sandbox results/import screen, no CRM writes or AI requests; verify isolation and rebuild APK.
+- [x] Built separate offline Android sandbox with synthetic identity, user-triggered real call-log checks, local recording inspection and JSON export. APK signature/isolation verified; 42 Android tests passed.
+- [x] Browser-local simulation/import/rejection verified at 360px; 6 focused tests passed, automatic build OK. Existing root lock/status requests remain; sandbox adds no server writes or AI calls. No publication.
 - [ ] Real handset call/audio evidence requires the user's phone; simulated summaries must never claim AI success.
 
 ## Homepage version choice

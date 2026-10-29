@@ -24,7 +24,7 @@ function CallSandbox() {
     <section className="space-y-4 border-y border-border py-5">
       <h2 className="font-semibold">Android test results</h2>
       <p className="text-sm text-muted-foreground">Import the offline sandbox APK’s exported JSON. Audio and contact numbers stay on the phone. Imported results are user-supplied evidence, not independently verified.</p>
-      <label className="flex items-center gap-2 text-sm font-medium"><Upload className="size-4" />Import sandbox JSON
+      <label className="flex flex-col items-start gap-2 text-sm font-medium"><span className="flex items-center gap-2"><Upload className="size-4" />Import sandbox JSON</span>
         <input aria-label="Import sandbox JSON" type="file" accept="application/json,.json" className="min-w-0 max-w-full text-sm" onChange={async event => {
           const file = event.target.files?.[0]; if (!file) return;
           setError("");
