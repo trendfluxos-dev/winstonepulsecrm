@@ -420,7 +420,7 @@ export async function submitCallReport(input: {
 
   const rejection = fastDisqualification(input.category);
   if (rejection && !received) throw new Error("অনাগ্রহী / ভুল / ভুয়া নম্বর নিশ্চিত করতে কলের সঠিক অবস্থা দিন; কথা না হলে NO ANSWER ব্যবহার করুন।");
-  if (rejection) input = { ...input, ...rejection };
+  if (rejection) input = { ...input, ...rejection, smartReasons: null, aiDecision: null };
   const category = input.category as CallCategory;
 
   // A missing answer set must not reopen the caller-selected legacy score path.

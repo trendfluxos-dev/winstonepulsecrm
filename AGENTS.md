@@ -66,5 +66,5 @@
 - Lead-import sheet previews use only existing server-configured report workbooks; inventory keeps its separate read scope, and audit exports neutralise every spreadsheet cell — why: workspace credentials and trusted exports cannot widen access or execute staff-supplied formulas.
 - Reads use page-all.ts (parallel 1,000-row pages, id-dedupe, fail on errors); homepage uses WebP CDN/shared fonts — why: avoid serial reads/downloads.
 - Agent KPIs (My Desk, Analytics and HQ roster dashboard) come only from kpi-contract.ts; agent-kpi-board.ts groups authorized rows, never phone-sync metrics — why: one definition per number.
-- Fast rejection defaults use fast-disqualification.ts in web/server; fake uses wrong-number closure — why: one safe outcome path.
+- Rejections use shared defaults; mobile UI tests mock all writes — why: no invented facts or live test data.
 - HQ forecasts never allocate; IT GitHub cannot prove sync; version choices grant no access; call-sandbox is local — why: facts are not authority.

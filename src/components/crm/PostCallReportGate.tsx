@@ -15,6 +15,7 @@ import { Bi } from "@/components/crm/Bi";
 import { DictateButton } from "@/components/crm/DictateButton";
 import { DEFAULT_RETRY_PICK, NoAnswerRetryPicker, type RetryPick } from "@/components/crm/NoAnswerRetryPicker";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -390,6 +391,7 @@ export function PostCallReportGate() {
   const [callState, setCallState] = useState("");
   const [duration, setDuration] = useState("");
   const [category, setCategory] = useState("");
+  const [changingOutcome, setChangingOutcome] = useState(false);
   const [interest, setInterest] = useState("");
   const [requirement, setRequirement] = useState("");
   const [response, setResponse] = useState("");
@@ -430,6 +432,7 @@ export function PostCallReportGate() {
   useEffect(() => {
     draftReadyRef.current = null;
     setCategory("");
+    setChangingOutcome(false);
     setInterest("");
     setRequirement("");
     setResponse("");
@@ -511,8 +514,8 @@ export function PostCallReportGate() {
   ]);
 
   const connected = callState === "connected";
-  const rejection = connected ? fastDisqualification(category) : null;
-  const qualifying = connected && !rejection;
+  const rejection = fastDisqualification(category);
+  const qualifying = connected && Boolean(category) && !rejection;
   const suggestion = (detail?.suggestion ?? null) as Suggestion;
   const recs = useMemo(
     () => buildRecs(connected, suggestion, inventoryOpts.map((o) => o.value), lang),
@@ -541,6 +544,8 @@ export function PostCallReportGate() {
       ? t({ bn: "Call Status বাছাই করুন", en: "Select Call Status" })
       : connected && seconds < 1
         ? t({ bn: "কথা হওয়া কলের সময়কাল (সেকেন্ড) দিন", en: "Enter the connected call's duration (seconds)" })
+        : rejection && !connected
+          ? t({ bn: "ফলাফল নিশ্চিত করতে কলের সঠিক অবস্থা দিন; কথা না হলে NO ANSWER বাছাই করুন", en: "Confirm the correct call status; use NO ANSWER if no conversation occurred" })
         : !connected && retryPick.mode === "custom" && (!retryPick.customAt || Date.parse(retryPick.customAt) <= Date.now())
           ? t({ bn: "ভবিষ্যতের তারিখ ও সময় বাছাই করুন", en: "Pick a future date and time" })
         : !category
@@ -692,7 +697,7 @@ export function PostCallReportGate() {
         </div>
       ) : null}
 
-      <SmartRow
+      {!rejection ? <SmartRow
         id="sr-category"
         label="Lead Category"
         required
@@ -702,7 +707,22 @@ export function PostCallReportGate() {
         rec={recs.category}
         skipped={skipped["category"]}
         onSkip={skip("category")}
-      />
+      /> : <>
+        <p className="text-sm font-semibold">{labelOf(CATEGORIES, category)}</p>
+        <Button type="button" variant="outline" size="sm" onClick={() => setChangingOutcome(true)}>
+          {t({ bn: "ভুল ফলাফল বেছে থাকলে সংশোধন", en: "Correct an incorrectly selected outcome" })}
+        </Button>
+        <AlertDialog open={changingOutcome} onOpenChange={setChangingOutcome}>
+          <AlertDialogContent>
+            <AlertDialogTitle>{t({ bn: "গ্রাহকের ফলাফল সংশোধন করবেন?", en: "Correct the customer outcome?" })}</AlertDialogTitle>
+            <AlertDialogDescription>{t({ bn: "শুধু ভুল ফলাফল বেছে থাকলে পরিবর্তন করুন। নতুন সঠিক ফলাফল বাছাই না করা পর্যন্ত জমা হবে না।", en: "Change this only if the selected outcome was incorrect. Select the correct outcome before submitting." })}</AlertDialogDescription>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t({ bn: "বর্তমান ফলাফল রাখুন", en: "Keep current outcome" })}</AlertDialogCancel>
+              <AlertDialogAction onClick={() => setCategory("")}>{t({ bn: "সঠিক ফলাফল বাছাই", en: "Select correct outcome" })}</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>}
 
       {rejection ? (
         <dl className="grid grid-cols-2 gap-2 border-y border-border py-3 text-xs">
