@@ -224,6 +224,8 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
     }
 
     if (type === "classify_lead") {
+      // Direct classification is an authority-only correction, not agent work.
+      requireAuthority(caller);
       const leadId = str(params, "lead_id");
       const temperature = Temperature.safeParse(str(params, "temperature")?.toLowerCase());
       const grade = Grade.safeParse(str(params, "grade")?.toUpperCase());
@@ -232,7 +234,7 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
         throw new Error("Hot / Warm / Cold এবং A–D গ্রেড দুটোই দিন");
       }
 
-      const { LEAD_OWNER_COLUMNS, leadHeldByOther, LEAD_NOT_YOURS } =
+      const { LEAD_OWNER_COLUMNS } =
         await import("@/lib/lead-access.server");
       const { data: lead } = await supabaseAdmin
         .from("leads")
@@ -240,18 +242,8 @@ export const runCommandAgentAction = createServerFn({ method: "POST" })
         .eq("id", leadId)
         .maybeSingle();
       if (!lead) throw new Error("লিড পাওয়া যায়নি");
-      // An agent may only classify a lead that is actually theirs.
-      if (caller.scope === "agent" && leadHeldByOther(lead, caller.profile?.id ?? "")) {
-        throw new Error(LEAD_NOT_YOURS);
-      }
-
       const note = str(params, "note");
-      const source =
-        caller.scope === "agent"
-          ? "manual"
-          : caller.scope === "coordinator"
-            ? "coordinator"
-            : "authority";
+      const source = "authority";
       const now = new Date().toISOString();
 
       const { error: leadError } = await supabaseAdmin

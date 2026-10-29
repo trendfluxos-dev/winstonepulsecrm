@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-29 — Lead grade permissions
+- [x] Block agent/coordinator direct classification; retain writable IT/admin correction and HQ read-only restrictions.
+- [x] Remove caller-grade fallback in submission and preserve saved grade during edits.
+- [ ] Run permission and report regression tests; inspect automatic build results. No customer writes or publication.
+
 ## Isolated phone sandbox
 - [x] Built separate offline Android sandbox with synthetic identity, user-triggered real call-log checks, local recording inspection and JSON export. APK signature/isolation verified; 42 Android tests passed.
 - [x] Browser-local simulation/import/rejection verified at 360px; 6 focused tests passed, automatic build OK. Sandbox alone excludes root account gates to avoid floor-lock handover side effects; other routes retain every gate. No publication.
