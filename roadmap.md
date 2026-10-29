@@ -3,8 +3,8 @@
 ## 2026-10-29 — GitHub repository status
 - [x] Link the new workspace GitHub connection and verify read-only app credentials.
 - [x] Add manual full-IT-PIN repository/branch/access and recent Actions inspection; actual Lovable sync fields explicitly unavailable.
-- [ ] Run status transport and authorization tests; verify preview rendering and automatic build.
-- [ ] Genuine IT-panel read-back requires an available full IT PIN session; no publishing requested.
+- [x] 38 focused and 1,322 full-suite tests passed; automatic typecheck/build OK. App credential read HTTP 200: supplied repository public, main, read/no write. No repository changes or publishing.
+- [ ] Genuine IT-panel visual/read-back verification blocked by unavailable full IT PIN session; browser attempt remained on the loading screen with no page errors, not a verified panel.
 
 ## 2026-10-29 — Measured database optimization
 - [x] Measure current-workspace usage, database health, slow queries, indexes and schedule metadata; database billing quantities were not returned.
