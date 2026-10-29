@@ -1,11 +1,11 @@
 # Roadmap
 
 ## 2026-10-29 — Publish phone checklist and rejection reports
-- [ ] Verify current publication includes phone-web checklist/rejection reports using live release markers; distinguish Android native APK installation from website publication.
+- [x] Current publication verified: live /manual 1.6.0, $35.29 and 50-lead markers PASS; served JavaScript contains real-call checklist and new outcome-correction report code. 19 focused report/checklist/endpoint tests pass; no customer writes. Native Android updates still require a rebuilt, installed APK; website publication cannot update installed APKs. Genuine staff handset execution remains unverified.
 
 ## 2026-10-29 — Google Search Console setup
 - [x] Project-linked TrendFlux Google access verified; CRM property not yet present. Existing same-origin five-page sitemap valid, no lastmod fallbacks and indexing restrictions unchanged. Added account META tag alongside prior tag; preview server-rendered head verified and automatic build OK.
-- [ ] Publishing requested; confirm live tag, then Google verification, property addition, fresh property list and sitemap submission. Deployment not yet verified.
+- [x] New META tag confirmed live; Google verification succeeded, property added and freshly listed as siteOwner. Sitemap submitted and Google downloaded it: five URLs, zero errors/warnings. This does not establish page indexing.
 
 ## 2026-10-29 — Lovable Database enablement
 - [x] Existing Lovable Cloud database verified reachable and healthy; no enablement needed, no production data/settings changed and nothing published.
