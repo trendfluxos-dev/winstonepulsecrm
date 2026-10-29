@@ -1,5 +1,8 @@
 # Roadmap
 
+## 2026-10-29 — Publish phone checklist and rejection reports
+- [ ] Verify current publication includes phone-web checklist/rejection reports using live release markers; distinguish Android native APK installation from website publication.
+
 ## 2026-10-29 — Google Search Console setup
 - [x] Project-linked TrendFlux Google access verified; CRM property not yet present. Existing same-origin five-page sitemap valid, no lastmod fallbacks and indexing restrictions unchanged. Added account META tag alongside prior tag; preview server-rendered head verified and automatic build OK.
 - [ ] Publishing requested; confirm live tag, then Google verification, property addition, fresh property list and sitemap submission. Deployment not yet verified.
