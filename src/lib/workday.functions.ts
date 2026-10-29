@@ -28,10 +28,12 @@ export const setLeadWorkDate = createServerFn({ method: "POST" })
     Base.extend({ leadId: z.string().uuid(), workDate: DATE }).parse(input),
   )
   .handler(async ({ data }) => {
-    const caller = await callerOf(data.adminToken ?? null);
-    const { requireWrite } = await import("@/lib/access.server");
+    // Own work uses the verified session (never a cached PIN); only writable IT/admin may move others' leads.
+    const { resolveWorkCaller, requireWrite, canDispatch } = await import("@/lib/access.server");
+    const caller = await resolveWorkCaller(data.adminToken ?? null);
+    if (caller.scope === "none" || !caller.profile) throw new Error("অনুমোদিত অ্যাকাউন্ট দিয়ে সাইন ইন করুন");
     requireWrite(caller);
-    const me = caller.profile!;
+    const me = caller.profile;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { leadHeldByOther, LEAD_NOT_YOURS } = await import("@/lib/lead-access.server");
 
@@ -42,7 +44,7 @@ export const setLeadWorkDate = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!lead) throw new Error("লিড পাওয়া যায়নি");
 
-    const coordinator = caller.scope !== "agent";
+    const coordinator = canDispatch(caller);
     // Agents may only move leads they currently own (never pool or others' leads).
     const owner = lead.assigned_agent_id ?? lead.assigned_to;
     if (!coordinator && (owner !== me.id || leadHeldByOther(lead, me.id))) throw new Error(LEAD_NOT_YOURS);
