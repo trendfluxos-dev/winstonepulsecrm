@@ -28,6 +28,7 @@ const AnyNumberCallDialog = lazy(() => import("@/components/crm/AnyNumberCallDia
 const PostCallReportGate = lazy(() => import("@/components/crm/PostCallReportGate").then((m) => ({ default: m.PostCallReportGate })));
 const AgentBriefingGate = lazy(() => import("@/components/crm/AgentBriefingGate").then((m) => ({ default: m.AgentBriefingGate })));
 const AgentContributionGate = lazy(() => import("@/components/crm/AgentContributionGate").then((m) => ({ default: m.AgentContributionGate })));
+const AgentFeedbackGate = lazy(() => import("@/components/crm/AgentFeedbackGate").then((m) => ({ default: m.AgentFeedbackGate })));
 const CopilotDrawer = lazy(() => import("@/components/crm/CopilotDrawer").then((m) => ({ default: m.CopilotDrawer })));
 const RuntimeAlertWatcher = lazy(() => import("@/components/crm/RuntimeAlertWatcher").then((m) => ({ default: m.RuntimeAlertWatcher })));
 
@@ -274,6 +275,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {scope !== "none" && <Suspense fallback={null}><PostCallReportGate /></Suspense>}
       {scope === "agent" && <Suspense fallback={null}><AgentBriefingGate /></Suspense>}
       {scope === "agent" && <Suspense fallback={null}><AgentContributionGate /></Suspense>}
+      {account?.profile?.role === "agent" && <Suspense fallback={null}><AgentFeedbackGate /></Suspense>}
 
       {scope === "authority" && <Suspense fallback={null}><RuntimeAlertWatcher /></Suspense>}
       <AdminPinDialog open={pinOpen} onOpenChange={setPinOpen} />

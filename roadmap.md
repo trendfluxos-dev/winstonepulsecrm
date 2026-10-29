@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-29 — Mandatory morning agent feedback
+- [x] Add detailed problem/impact/improvement popup for signed-in active approved agents until 09:30 Dhaka today; submissions use existing team support inbox.
+- [x] Enforce session-based own-work gate, preserve responses and expire automatically; 1,341 tests passed / 9 session-dependent skipped; automatic build OK.
+- [ ] Real agent submission/read-back requires an authorized agent session; requester session was admin, browser navigation aborted, no response created.
+- [ ] Live visibility requires explicit publication request and read-back; not published.
+
 ## 2026-10-29 — Phone upgrade billing preparation
 - [x] Record older Preview no new upgrade fee; updated phone requires verified payment, final amount requested before go-live.
 - [x] Restrict upgrade payment approval/unlock to the verified Architect profile; HQ/IT may not approve it.

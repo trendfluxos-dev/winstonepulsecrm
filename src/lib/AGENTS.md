@@ -2,6 +2,7 @@
 - Sales Intelligence writes only via sales-intel.server.ts (session actor, append-only pitch_events + correlation_key, validateGrounding) — why: grounded, auditable path.
 - Market News writes only via market-news.server.ts; auto items keep source_url + retrieved_excerpt and pass groundedAgainst; rows unpublished, never deleted — why: AI must never invent news.
 - Automatic recording analysis reclaims only expired processing leases through analyzeOne's atomic timestamp/status claim, and queue-read errors fail — why: interrupted workers must recover without duplicate AI spend or false empty success.
+- One-day morning feedback uses existing team_support_tickets and session-first own-work checks; exact server expiry ends the gate and responses remain saved — why: no new customer data store or recurring lock.
 - Phone-upgrade billing remains preparation-only until owner pricing/payer/release confirmation; only existing verified Architect identity plus its session may approve, never HQ/IT; monthly maintenance is separate — why: unknown pricing cannot create payable bills or paid distribution.
 - site_visits is server-only (site-visits.functions.ts via siCaller); never deleted, lead link immutable, cancel via status — why: visit history must stay trustworthy.
 - Sales Copilot reads/builds in sales-intel.server.ts (copilotResponse); pure rules live in sales-copilot.rules.ts; AI numbers must come from cited facts or lead context (parseCopilotAi) — why: no invented prices, one grounded path.
