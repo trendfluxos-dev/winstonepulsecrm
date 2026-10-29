@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -46,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.winstone.connect.data.remote.WinstoneApi
 import com.winstone.connect.data.LeadEvaluation
+import com.winstone.connect.data.ShortRejectionReport
 import com.winstone.connect.data.sync.CallSyncQueue
 import com.winstone.connect.telephony.CallPhase
 import com.winstone.connect.telephony.LiveCallLauncher
@@ -165,6 +168,7 @@ fun ReportSheet(
     var reportId by remember { mutableStateOf<String?>(null) }
     var leadLabel by remember { mutableStateOf<String?>(null) }
     var category by remember { mutableStateOf("") }
+    var changingOutcome by remember { mutableStateOf(false) }
     var summary by remember { mutableStateOf("") }
     var note by remember { mutableStateOf(notes) }
     var reason by remember { mutableStateOf("") }
@@ -223,7 +227,7 @@ fun ReportSheet(
     }
 
     // প্রতিটি কলে: কলের দিক + অবস্থা + সময়কাল + ক্যাটাগরি + সারাংশ + নোট + ফলো-আপ — সবই বাধ্যতামূলক
-    val needsReason = category == "not_interested" || category == "wrong_number"
+    val rejection = ShortRejectionReport.forCategory(category)
     val seconds = duration.trim().toIntOrNull() ?: -1
     val received = callState == "connected"
     val evaluationComplete = LeadEvaluation.isComplete(evaluationAnswers)
@@ -231,11 +235,28 @@ fun ReportSheet(
     val temperature = if (evaluationComplete) LeadEvaluation.category(evaluationScore) else null
     val ready = category.isNotBlank() &&
         seconds >= 0 && (!received || seconds >= 1) &&
-        summary.trim().length > 1 &&
-        note.trim().length > 1 &&
-        (if (noFollowUp) (if (received) ContactCloseReasons.isValid(noFollowUpReason, noFollowUpNote) else true) else (date.length == 10 && time.length == 5)) &&
-        (!received || (evaluationComplete && grade != null)) &&
-        (!needsReason || reason.trim().length > 1)
+        (if (rejection != null) received else
+            summary.trim().length > 1 && note.trim().length > 1 &&
+            (if (noFollowUp) (if (received) ContactCloseReasons.isValid(noFollowUpReason, noFollowUpNote) else true) else (date.length == 10 && time.length == 5)) &&
+            (!received || (evaluationComplete && grade != null)))
+
+    // Changing a confirmed rejection is deliberate, never an automatic sales upsell.
+    if (changingOutcome) {
+        AlertDialog(
+            onDismissRequest = { changingOutcome = false },
+            title = { Text("গ্রাহকের ফলাফল সংশোধন করবেন?") },
+            text = { Text("শুধু ভুল ফলাফল বেছে থাকলে পরিবর্তন করুন। নতুন সঠিক ফলাফল বাছাই না করা পর্যন্ত রিপোর্ট জমা হবে না।") },
+            confirmButton = {
+                Button(onClick = {
+                    category = ""
+                    changingOutcome = false
+                }, modifier = Modifier.testTag("confirm-outcome-change")) { Text("সঠিক ফলাফল বাছাই") }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { changingOutcome = false }) { Text("বর্তমান ফলাফল রাখুন") }
+            },
+        )
+    }
 
     if (dismissed) {
         Column(Modifier.padding(20.dp).fillMaxWidth()) {
@@ -315,7 +336,23 @@ fun ReportSheet(
                 label = { Text("সময়কাল — সেকেন্ড (বাধ্যতামূলক)") },
                 modifier = Modifier.fillMaxWidth(),
             )
-            if (received) {
+            // Choose the customer outcome before rendering any sales questions.
+            Spacer(Modifier.height(12.dp))
+            if (rejection == null) {
+                CATEGORIES.forEach { (value, label) ->
+                    OutlinedButton(
+                        onClick = { category = value },
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp).testTag("outcome-$value"),
+                    ) { Text(if (category == value) "✓ $label" else label) }
+                }
+            } else {
+                Text(CATEGORIES.firstOrNull { it.first == category }?.second.orEmpty(), fontWeight = FontWeight.Bold)
+                Text("চাহিদা: প্রযোজ্য নয় · পরের কাজ: কোনো কাজ নেই · ফলো-আপ: দরকার নেই", fontSize = 13.sp)
+                OutlinedButton(onClick = { changingOutcome = true }, modifier = Modifier.fillMaxWidth().testTag("change-outcome")) {
+                    Text("ভুল ফলাফল বেছে থাকলে সংশোধন")
+                }
+            }
+            if (received && category.isNotBlank() && rejection == null) {
                 Spacer(Modifier.height(8.dp))
                 Text("লিড মূল্যায়ন — সব প্রশ্নের হ্যাঁ / না দিন", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(4.dp))
@@ -351,14 +388,7 @@ fun ReportSheet(
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
-            CATEGORIES.forEach { (value, label) ->
-                OutlinedButton(
-                    onClick = { category = value },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                ) { Text(if (category == value) "✓ $label" else label) }
-            }
-
+            if (rejection == null) {
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = summary,
@@ -401,20 +431,12 @@ fun ReportSheet(
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-            if (needsReason) {
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = reason,
-                    onValueChange = { reason = it },
-                    label = { Text("কারণ (বাধ্যতামূলক)") },
-                    modifier = Modifier.fillMaxWidth(),
-                )
             }
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
-                label = { Text("নোট (বাধ্যতামূলক)") },
+                label = { Text(if (rejection != null) "নোট (ঐচ্ছিক)" else "নোট (বাধ্যতামূলক)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
             )
@@ -431,24 +453,24 @@ fun ReportSheet(
                     val id = reportId ?: return@Button
                     busy = true; error = null
                     scope.launch {
-                        val followUp = if (noFollowUp) null else "${date}T${time}:00+06:00"
+                        val followUp = if (rejection != null || noFollowUp) null else "${date}T${time}:00+06:00"
                         val payload = WinstoneApi.reportPayload(
                             reportId = id,
                             category = category,
-                            summary = summary,
+                            summary = rejection?.summary ?: summary,
                             note = note,
-                            reason = reason,
+                            reason = rejection?.summary ?: reason,
                             followUpAtIso = followUp,
                             aiDecision = if (aiCategory != null && aiCategory == category) "accepted" else "edited",
                             direction = direction,
                             callStatus = callState,
                             durationSeconds = seconds,
-                            followUpNeeded = !noFollowUp,
-                            followUpNote = if (noFollowUp) noFollowUpNote else null,
-                            temperature = temperature,
-                            grade = grade,
-                            evaluationAnswers = if (received) evaluationAnswers else null,
-                            noFollowUpReason = if (!noFollowUp) null else if (received) noFollowUpReason else "not_connected",
+                            followUpNeeded = rejection == null && !noFollowUp,
+                            followUpNote = rejection?.summary ?: if (noFollowUp) noFollowUpNote else null,
+                            temperature = if (rejection != null) null else temperature,
+                            grade = if (rejection != null) null else grade,
+                            evaluationAnswers = if (received && rejection == null) evaluationAnswers else null,
+                            noFollowUpReason = rejection?.noFollowUpReason ?: if (!noFollowUp) null else if (received) noFollowUpReason else "not_connected",
                         )
                         val result = runCatching { WinstoneApi.submitReportRaw(payload) }
                         busy = false
@@ -502,6 +524,7 @@ private val CATEGORIES = listOf(
     "callback" to "CALLBACK — কলব্যাক চেয়েছেন",
     "no_answer" to "NO ANSWER — ধরেনি",
     "wrong_number" to "WRONG NUMBER — ভুল নম্বর",
+    "fake" to "FAKE LEAD — ভুয়া / অবৈধ লিড",
     "closed_converted" to "CLOSED / CONVERTED — বিক্রি হয়েছে",
 )
 
