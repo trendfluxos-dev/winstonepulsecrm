@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/select";
 import { type LoadRecord, readLoads } from "@/lib/load-perf";
 import { CallDiagnosticsPanel } from "@/components/crm/CallDiagnosticsPanel";
+import { DeviceCompatibilityReport } from "@/components/crm/DeviceCompatibilityReport";
+import { useMyAccount } from "@/lib/session";
 
 export const Route = createFileRoute("/diagnostics")({
   head: () => ({
@@ -155,6 +157,11 @@ function downloadCsv(filename: string, csv: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+function AuthorityCompat() {
+  const { scope } = useMyAccount();
+  return scope === "authority" ? <DeviceCompatibilityReport /> : null;
+}
+
 function DiagnosticsPage() {
   return (
     <AppShell>
@@ -164,7 +171,7 @@ function DiagnosticsPage() {
         title="পেজ-লোড ডায়াগনস্টিক্স"
         description="শুধু স্টাফদের জন্য — সাইন ইন করুন।"
       >
-        <div className="mx-auto max-w-5xl space-y-6"><CallDiagnosticsPanel /><Board /></div>
+        <div className="mx-auto max-w-5xl space-y-6"><CallDiagnosticsPanel /><AuthorityCompat /><Board /></div>
       </RoleGate>
     </AppShell>
   );
