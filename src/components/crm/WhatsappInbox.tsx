@@ -96,7 +96,7 @@ export function WhatsappInbox() {
             adminToken,
             leadId: active.lead.id,
             template: activeTemplate.id,
-            variables: activeTemplate.variables.map((_, i) => (templateVars[i] ?? "").trim()),
+            variables: activeTemplate.variables.map((label, i) => label === "ক্রেতার নাম" ? active.lead.name.trim() : (templateVars[i] ?? "").trim()),
           },
         });
         if (!result.ok) throw new Error(result.error);
@@ -114,7 +114,7 @@ export function WhatsappInbox() {
 
   const templateReady =
     activeTemplate !== null &&
-    activeTemplate.variables.every((_, i) => (templateVars[i] ?? "").trim().length > 0);
+    activeTemplate.variables.every((label, i) => label === "ক্রেতার নাম" ? Boolean(active?.lead.name.trim()) : (templateVars[i] ?? "").trim().length > 0);
 
   return (
     <section className="space-y-3">
@@ -267,7 +267,11 @@ export function WhatsappInbox() {
                     {activeTemplate?.variables.map((label, i) => (
                       <Input
                         key={label}
-                        value={templateVars[i] ?? ""}
+                        value={label === "ক্রেতার নাম" ? active.lead.name : templateVars[i] ?? ""}
+                        readOnly={label === "ক্রেতার নাম"}
+                        type={label === "ভিজিটের তারিখ" ? "date" : label === "বকেয়া পরিমাণ" ? "number" : "text"}
+                        min={label === "বকেয়া পরিমাণ" ? "0.01" : undefined}
+                        step={label === "বকেয়া পরিমাণ" ? "0.01" : undefined}
                         onChange={(e) =>
                           setTemplateVars((prev) => {
                             const next = [...prev];
