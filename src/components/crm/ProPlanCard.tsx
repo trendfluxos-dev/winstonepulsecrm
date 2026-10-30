@@ -39,10 +39,14 @@ export function ProPlanCard({ compact = false }: { compact?: boolean }) {
   const isSandbox = getPaddleEnvironment() === "sandbox";
 
   const startCheckout = async () => {
+    if (!adminToken) {
+      toast.error("Master PIN required to start checkout");
+      return;
+    }
     setBusy(true);
     try {
       await initializePaddle();
-      const priceId = await getPaddlePriceId(PRO_PRICE_ID);
+      const priceId = await getPaddlePriceId(PRO_PRICE_ID, adminToken);
       window.Paddle.Checkout.open({
         items: [{ priceId, quantity: seats }],
         settings: { displayMode: "overlay", theme: "light" },
