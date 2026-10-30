@@ -23,7 +23,6 @@ import brandArchitectAsset from "@/assets/brand-architect.jpeg.asset.json";
 import { scrollToTopAdaptive } from "@/lib/motion";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useMyAccount } from "@/lib/session";
 
 export const Route = createFileRoute("/")({
