@@ -35,7 +35,7 @@ describe("inbound lead intake", () => {
     const src = readFileSync("src/routes/api/public/ingest/lead.ts", "utf8");
     expect(src).not.toMatch(/Round-robin/);
     expect(src).toMatch(/caller\.kind !== "device"/);
-    expect(src).toMatch(/const requestedAgentId = caller\.profile\.id;/);
+    expect(src).toMatch(/ownerId: null,/);
   });
 });
 
