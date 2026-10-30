@@ -24,7 +24,7 @@
 - UI: i18n English default, saved choice wins, Bi headings; sign-in reuses topPerformerToday reveal/ranking, aggregates only — why: one score, no customer disclosure.
 - Pin @lovable.dev/vite-tanstack-config to 2.25.2 — why: 2.26.0 emits createRequire(import.meta.url), crashing every page on the live Worker.
 - Bookings start `approval_status='pending'`; only HQ/IT approval (server-checked, final via trigger) queues the signed OS relay event — why: HQ gatekeeps what reaches Winstone OS.
-- Knowledge Hub (winstonebd.com) data enters the CRM only as public pages (website_pages), verbatim official RSS news (market_news origin='official') and signed `site_visit.requested` events into server-only website_visit_requests; a request becomes a site_visit only when the agent/HQ confirms it — why: no invented facts, one verified bridge.
+- Knowledge Hub (winstonebd.com) data enters only as website_pages, official RSS market_news and signed site_visit.requested events (website_visit_requests); a site_visit needs agent/HQ confirmation — why: no invented facts.
 - Vite pre-bundles the TanStack router-core/seroval/h3-v2 deps in vite.config optimizeDeps.include — why: late discovery re-optimized on every cold start and broke open tabs.
 - Module recovery: router-caught import failures dispatch the shared recovery event; coalesces failures and times out probes; checked by bun run test:restart — why: no reload loops or blank tabs after restarts.
 - Live tests needing a signed-in staff user use tests/fixtures/staff-session.ts (reuses an existing session, never creates users) — why: preview and live share one database.
@@ -37,7 +37,7 @@
 - Fonts use public/fonts WOFF2 + @font-face, never Google CSS — why: avoid render-blocking requests.
 - Private AI/bill reads authenticate; support inbox lists only the agent's own assigned conversations and agent escalation requires ownership; project writes reject read-only HQ; scored time needs phone sync — why: requests cannot bypass access or fabricate evidence.
 
-- HQ operational audit uses performance-audit.ts over authorized rows with exact-ID/call-identity dedupe and strict Dhaka ranges; recordings stay optional diagnostics and never score, completion uses saved work_date/current state — why: auditable work counts without blaming audio gaps or inventing historical completion.
+- HQ audit uses performance-audit.ts over authorized rows, exact-ID dedupe, strict Dhaka ranges; recordings never score — why: auditable counts without blaming audio gaps.
 - Winstone AI copilot is read-only and IT Console (full PIN) only; it never assigns leads — why: LeadHub Nexus is the one assignment path.
 - Release counts as deployed only when scripts/check-live-release.ts sees /manual version, $35.29 and 50-lead markers live — why: publish requests are not proof.
 - The operations manual's only source is docs/CRM_OPERATIONS_MANUAL.md (parsed by src/lib/manual-source.ts for /manual); rebuild the PDF with npm run manual:pdf; manual:check fails on hash/version drift — why: page and PDF can never disagree.
@@ -49,7 +49,7 @@
 - /inbox mounts Support Desk and shared Messenger separately by selected tab; demo lead review stays disabled until verified stored-message ownership and canonical intake are implemented — why: queues retain their access boundaries and samples cannot become customer records.
 - Credential file redaction runs only in browser memory and downloads only sanitized text; never upload originals, display matches or persist raw file contents — why: sensitive documents must not enter CRM telemetry or storage.
 - Combined Messenger/Windsor progress uses public preparation state only, never secret inventory or provider health claims; Android phone sync stays independent of Meta — why: preparation and configured secrets do not prove consent or delivery.
-- Meta diagnostics and credential replacement need full IT PIN, bounded GETs and handler-only env access; statuses are allowlisted, storage checks expose presence only, and App Review/messaging grants or revocation are never inferred — why: read access cannot authorize activation, and secret replacement is not revocation or deployment evidence.
+- Meta diagnostics/credential replacement need full IT PIN, bounded GETs, handler-only env; presence-only checks, never inferred grants — why: read access is not activation.
 - Lead provenance displays saved source only; legacy Messenger arrival and connection verification remain unknown, never inferred from created_at or is_verified — why: lead creation/quality are not signed message receipt evidence.
 - Windsor reporting remains fail-closed without a reviewed official API contract; manual configuration-presence inspection uses the existing full IT PIN verifier and handler-only env access, never DB/provider calls — why: secret presence does not prove account scope or authorize activation.
 - The public `/integrations` checklist uses browser-safe preparation evidence only; no live probes, secret inventory or persisted health claims, and linked diagnostics retain their existing gates — why: a status page cannot establish delivery or widen access.
