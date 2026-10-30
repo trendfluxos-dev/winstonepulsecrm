@@ -15,12 +15,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { CalendarClock, ChevronDown, Clock, Flame, MessageSquareQuote, Users } from "lucide-react";
+import { CalendarClock, ChevronDown, Clock, Flame, MessageSquareQuote, Sparkles, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { executiveBrief } from "@/lib/hq-brief.functions";
+import { claudeHqBriefing, executiveBrief } from "@/lib/hq-brief.functions";
+import { Button } from "@/components/ui/button";
 import type { BriefAgent, BriefBlock } from "@/lib/hq-brief.server";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 
@@ -99,9 +100,48 @@ export function ExecutiveBrief() {
         </div>
       </section>
 
+      <ClaudeBriefingCard />
       <BriefBlockView block={data.main} />
       {data.liveAddon ? <BriefBlockView block={data.liveAddon} accent /> : null}
     </div>
+  );
+}
+
+function ClaudeBriefingCard() {
+  const run = useServerFn(claudeHqBriefing);
+  const [state, setState] = useState<
+    { kind: "idle" } | { kind: "loading" } | { kind: "done"; text: string; at: string } | { kind: "error"; message: string }
+  >({ kind: "idle" });
+  const generate = async () => {
+    setState({ kind: "loading" });
+    try {
+      const res = await run({ data: { adminToken: getAdminToken() } });
+      setState(res.ok ? { kind: "done", text: res.text, at: res.generatedAtLabel } : { kind: "error", message: res.error });
+    } catch {
+      setState({ kind: "error", message: "Claude could not write the briefing right now." });
+    }
+  };
+  return (
+    <section className="card-elevated p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-primary">
+            <Sparkles className="size-3.5" /> Claude দৈনিক ব্রিফিং
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">শুধু মোট সংখ্যা থেকে লেখা — গ্রাহকের নাম বা নম্বর পাঠানো হয় না।</p>
+        </div>
+        <Button onClick={generate} disabled={state.kind === "loading"}>
+          {state.kind === "loading" ? "লেখা হচ্ছে…" : state.kind === "done" ? "আবার লিখুন" : "ব্রিফিং লিখুন"}
+        </Button>
+      </div>
+      {state.kind === "done" ? (
+        <div className="mt-4 space-y-1 whitespace-pre-line text-sm leading-relaxed">
+          {state.text}
+          <p className="pt-2 text-[11px] text-muted-foreground">তথ্যের সময়: {state.at}</p>
+        </div>
+      ) : null}
+      {state.kind === "error" ? <p className="mt-3 text-sm text-destructive">{state.message}</p> : null}
+    </section>
   );
 }
 
