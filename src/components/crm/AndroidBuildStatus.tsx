@@ -117,6 +117,32 @@ function ArtifactFacts({ a, version }: { a: { name: string; sizeBytes: number; s
       <span className="block truncate text-sm font-medium">{a.name}</span>
       <span className="block text-muted-foreground">{t({ en: "Version", bn: "ভার্সন" })}: {version ?? t({ en: "unknown", bn: "অজানা" })} · {a.sizeMb} MB ({a.sizeBytes.toLocaleString()} bytes)</span>
       <span className="block break-all font-mono text-muted-foreground">{t({ en: "Download ZIP SHA-256", bn: "ডাউনলোড ZIP SHA-256" })}: {a.sha256 ?? t({ en: "not provided by GitHub", bn: "GitHub দেয়নি" })}</span>
+      {a.sha256 && <ChecksumVerifier expected={a.sha256} />}
+    </span>
+  );
+}
+
+/** Hashes a downloaded file locally in the browser (never uploaded) and compares it with GitHub's SHA-256. */
+function ChecksumVerifier({ expected }: { expected: string }) {
+  const t = useT();
+  const [state, setState] = useState<"idle" | "checking" | "match" | "mismatch" | "error">("idle");
+  async function onFile(file: File | undefined) {
+    if (!file) return;
+    setState("checking");
+    try {
+      const { sha256Hex, checksumMatches } = await import("@/lib/checksum");
+      setState(checksumMatches(await sha256Hex(await file.arrayBuffer()), expected) ? "match" : "mismatch");
+    } catch { setState("error"); }
+  }
+  const label = { idle: t({ en: "Not verified yet", bn: "এখনও যাচাই হয়নি" }), checking: t({ en: "Checking…", bn: "যাচাই চলছে…" }), match: t({ en: "✓ Checksum matches — file is genuine", bn: "✓ চেকসাম মিলেছে — ফাইল আসল" }), mismatch: t({ en: "✗ Checksum does NOT match — do not install", bn: "✗ চেকসাম মেলেনি — ইনস্টল করবেন না" }), error: t({ en: "Could not read file", bn: "ফাইল পড়া যায়নি" }) }[state];
+  const variant = state === "match" ? "default" : state === "mismatch" || state === "error" ? "destructive" : "outline";
+  return (
+    <span className="flex flex-wrap items-center gap-2 pt-1">
+      <label className="cursor-pointer text-primary underline">
+        {t({ en: "Verify downloaded ZIP", bn: "ডাউনলোড করা ZIP যাচাই" })}
+        <input type="file" accept=".zip,application/zip" className="sr-only" onChange={(e) => onFile(e.target.files?.[0])} />
+      </label>
+      <Badge variant={variant}>{label}</Badge>
     </span>
   );
 }
