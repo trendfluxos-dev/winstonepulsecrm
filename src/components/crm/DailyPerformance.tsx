@@ -150,7 +150,7 @@ function Board({ data, fetchedAt, live = false }: { data: ResultsData; fetchedAt
       ) : (
         <ol className="mt-3 grid gap-3 md:grid-cols-3">
           {data.topThree.map((a, i) => {
-            const tone = ["border-gold text-gold-ink", "border-silver text-silver", "border-bronze text-bronze"][i];
+            const tone = ["border-gold text-gold-ink", "border-silver text-silver", "border-bronze text-bronze"][i] ?? "border-border text-muted-foreground";
             return (
               <li key={a.agentId} className={`md:order-none ${i === 0 ? "md:order-2" : i === 1 ? "md:order-1" : "md:order-3"}`}>
                 <button type="button" onClick={() => setOpen(a)} className={`w-full rounded-xl border-t-2 border border-border bg-card p-4 text-left transition-colors hover:bg-muted/40 ${tone.split(" ")[0]} ${i === 0 ? "md:-mt-2 md:pb-6" : "md:mt-4"}`}>
