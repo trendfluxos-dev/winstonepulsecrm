@@ -12,7 +12,7 @@ import { githubRecovery } from "@/lib/github-recovery";
 
 export function GitRepositoryStatusPanel() {
   const t = useT();
-  const [repository, setRepository] = useState("Winstone-BD/winstone-pulse-crm");
+  const [repository, setRepository] = useState("trendfluxos-dev/winstone-pulse-crm");
   const [branch, setBranch] = useState("");
   const [retryUsed, setRetryUsed] = useState(false);
   const load = useServerFn(getGithubRepositoryStatus);

@@ -19,7 +19,7 @@ function when(iso: string | null) {
 export function GitHubActivityDashboard() {
   const t = useT();
   const adminToken = useAdminToken();
-  const [repository, setRepository] = useState("Winstone-BD/winstone-pulse-crm");
+  const [repository, setRepository] = useState("trendfluxos-dev/winstone-pulse-crm");
   const load = useServerFn(getGithubActivity);
   const run = useMutation({ mutationFn: () => load({ data: { adminToken: getAdminToken(), repository: repository.trim() } }) });
   const data = run.data;

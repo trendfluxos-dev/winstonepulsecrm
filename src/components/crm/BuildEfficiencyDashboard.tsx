@@ -18,7 +18,7 @@ const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", { timeZone: "
 export function BuildEfficiencyDashboard() {
   const t = useT();
   const adminToken = useAdminToken();
-  const [repository, setRepository] = useState("Winstone-BD/winstone-pulse-crm");
+  const [repository, setRepository] = useState("trendfluxos-dev/winstone-pulse-crm");
   const [on, setOn] = useState(false);
   const load = useServerFn(getAndroidBuilds);
   const valid = REPO_RE.test(repository.trim());

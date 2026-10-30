@@ -17,7 +17,7 @@ const when = (iso: string | null) => iso ? new Date(iso).toLocaleString("en-GB",
 export function AndroidBuildStatus() {
   const t = useT();
   const adminToken = useAdminToken();
-  const [repository, setRepository] = useState("Winstone-BD/winstone-pulse-crm");
+  const [repository, setRepository] = useState("trendfluxos-dev/winstone-pulse-crm");
   const [watching, setWatching] = useState(false);
   const load = useServerFn(getAndroidBuilds);
   const valid = REPO_RE.test(repository.trim());
