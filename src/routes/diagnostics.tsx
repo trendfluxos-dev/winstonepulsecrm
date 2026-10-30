@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { type LoadRecord, readLoads } from "@/lib/load-perf";
 import { CallDiagnosticsPanel } from "@/components/crm/CallDiagnosticsPanel";
+import { AndroidApkInstallGuide } from "@/components/crm/AndroidApkInstallGuide";
 import { DeviceCallTestChecklist } from "@/components/crm/DeviceCallTestChecklist";
 import { SandboxResultsReport } from "@/components/crm/SandboxResultsReport";
 import { DeviceCompatibilityReport } from "@/components/crm/DeviceCompatibilityReport";
