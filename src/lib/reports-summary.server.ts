@@ -13,6 +13,7 @@ import { z } from "zod";
 import type { CallRecording, Lead, Profile, WhatsappMessage } from "@/lib/crm-data";
 import { buildReport, defaultFilters, isoDay, type ReportResult } from "@/lib/crm-reports";
 import type { ApiCaller } from "@/lib/device-auth.server";
+import { leadOwner } from "@/lib/lead-owner";
 
 export const MAX_RANGE_DAYS = 92;
 const AGENT_ROLES = new Set(["agent", "team_leader"]);
@@ -109,18 +110,32 @@ export async function handleReportsSummary(
   });
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+type QueryClient = { from: (table: string) => any };
+
 /** Production loader: owner-scoped reads only, never company-wide tables. */
-export async function loadOwnReportData(agentId: string, fromIso: string): Promise<OwnReportData> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+export async function loadOwnReportData(
+  agentId: string,
+  fromIso: string,
+  client?: QueryClient,
+): Promise<OwnReportData> {
+  // agentId comes from the server-resolved profile; still refuse anything that
+  // is not a UUID before it is placed inside the PostgREST or() filter.
+  if (!UUID.test(agentId)) throw new Error("invalid agent id");
+  const db: QueryClient = client ?? (await import("@/integrations/supabase/client.server")).supabaseAdmin;
   const [leadsRes, callsRes, messagesRes] = await Promise.all([
-    supabaseAdmin.from("leads").select("*").or(`assigned_to.eq.${agentId},assigned_agent_id.eq.${agentId}`),
-    supabaseAdmin.from("call_recordings").select("*").eq("agent_id", agentId).gte("created_at", fromIso),
-    supabaseAdmin.from("whatsapp_interactions").select("*").eq("agent_id", agentId).gte("created_at", fromIso),
+    db.from("leads").select("*").or(`assigned_to.eq.${agentId},assigned_agent_id.eq.${agentId}`),
+    db.from("call_recordings").select("*").eq("agent_id", agentId).gte("created_at", fromIso),
+    db.from("whatsapp_interactions").select("*").eq("agent_id", agentId).gte("created_at", fromIso),
   ]);
-  const failed = [leadsRes, callsRes, messagesRes].find((r) => r.error);
+  const failed = [leadsRes, callsRes, messagesRes].find((r: { error?: unknown }) => r.error);
   if (failed?.error) throw new Error("report read failed");
-  // buildReport attributes leads by assigned_to; align the canonical owner.
-  const leads = ((leadsRes.data ?? []) as Lead[]).map((l) => ({ ...l, assigned_to: agentId }));
+  // Canonical owner precedence (assigned_to, then assigned_agent_id): a row
+  // matched only through a stale secondary column never counts as ours.
+  const leads = ((leadsRes.data ?? []) as Lead[])
+    .filter((l) => leadOwner(l) === agentId)
+    .map((l) => ({ ...l, assigned_to: agentId }));
   return {
     leads,
     calls: (callsRes.data ?? []) as CallRecording[],
