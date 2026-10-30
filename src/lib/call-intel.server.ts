@@ -124,47 +124,6 @@ export async function analyzeTranscript(
   return parsed;
 }
 
-async function readSseText(res: Response): Promise<string> {
-  const body = res.body;
-  if (!body) throw new Error("Empty analysis response");
-
-  const reader = body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let text = "";
-
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (!line.startsWith("data:")) continue;
-      const payload = line.slice(5).trim();
-      if (!payload || payload === "[DONE]") continue;
-      try {
-        const event = JSON.parse(payload) as {
-          type?: string;
-          delta?: string;
-          response?: { output_text?: string };
-        };
-        if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
-          text += event.delta;
-        } else if (event.type === "response.completed" && event.response?.output_text) {
-          if (!text) text = event.response.output_text;
-        }
-      } catch {
-        // ignore keep-alive / partial frames
-      }
-    }
-  }
-
-  if (!text) throw new Error("Analysis returned no content");
-  return text;
-}
-
 /** Transcribes + analyses a stored recording and writes the intelligence back to the row. */
 export async function processRecording(recordingId: string): Promise<"done" | "empty"> {
   const { data: recording, error } = await supabaseAdmin
