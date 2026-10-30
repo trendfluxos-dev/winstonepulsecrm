@@ -105,7 +105,6 @@ function AuthPage() {
       await ensureRegistered();
     },
     onSuccess: () => {
-      if (!lovableSignIn.isPending) return;
       toast.success("Signed in");
       void navigate({ to: "/desk" });
     },
