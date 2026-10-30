@@ -70,3 +70,4 @@
 - HQ forecasts never allocate; IT GitHub cannot prove sync; version choices grant no access; call-sandbox is local — why: facts are not authority.
 - Extra Google tags use RootShell head; keep original — why: router dedupes.
 - HQ Claude briefing: on-demand, HQ/IT-gated, aggregate-only, native /v1/messages streamed server-side — why: no customer data or background AI cost.
+- GitHub access watch runs hourly via /api/public/jobs/github-access-watch (managed cron auth), diffs against system_settings github_access_watch and writes system_alerts; failed checks never count as revocation — why: no false alarms, read-only on GitHub.

@@ -712,3 +712,4 @@
 - [ ] P2 items: handset tests, real call, Meta approvals, CI run, backup check — need devices/owner/provider.
 
 - [x] GitHub access panel: per-account last-verified time
+- GitHub access watch: hourly job alerts HQ/IT via system_alerts; failed checks never count as revocation (done)

@@ -117,6 +117,7 @@ import { Route as ApiPublicIngestOutcomeRouteImport } from './routes/api/public/
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
 import { Route as ApiPublicIngestReprocessRouteImport } from './routes/api/public/ingest/reprocess'
 import { Route as ApiPublicIntegrationsStatusRouteImport } from './routes/api/public/integrations/status'
+import { Route as ApiPublicJobsGithubAccessWatchRouteImport } from './routes/api/public/jobs/github-access-watch'
 import { Route as ApiPublicJobsInventorySheetRouteImport } from './routes/api/public/jobs/inventory-sheet'
 import { Route as ApiPublicJobsLeadReportSheetRouteImport } from './routes/api/public/jobs/lead-report-sheet'
 import { Route as ApiPublicJobsMessengerRetentionRouteImport } from './routes/api/public/jobs/messenger-retention'
@@ -690,6 +691,12 @@ const ApiPublicIntegrationsStatusRoute =
     path: '/api/public/integrations/status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsGithubAccessWatchRoute =
+  ApiPublicJobsGithubAccessWatchRouteImport.update({
+    id: '/api/public/jobs/github-access-watch',
+    path: '/api/public/jobs/github-access-watch',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsInventorySheetRoute =
   ApiPublicJobsInventorySheetRouteImport.update({
     id: '/api/public/jobs/inventory-sheet',
@@ -871,6 +878,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/github-access-watch': typeof ApiPublicJobsGithubAccessWatchRoute
   '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
   '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
   '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
@@ -994,6 +1002,7 @@ export interface FileRoutesByTo {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/github-access-watch': typeof ApiPublicJobsGithubAccessWatchRoute
   '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
   '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
   '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
@@ -1118,6 +1127,7 @@ export interface FileRoutesById {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/github-access-watch': typeof ApiPublicJobsGithubAccessWatchRoute
   '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
   '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
   '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
@@ -1243,6 +1253,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/github-access-watch'
     | '/api/public/jobs/inventory-sheet'
     | '/api/public/jobs/lead-report-sheet'
     | '/api/public/jobs/messenger-retention'
@@ -1366,6 +1377,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/github-access-watch'
     | '/api/public/jobs/inventory-sheet'
     | '/api/public/jobs/lead-report-sheet'
     | '/api/public/jobs/messenger-retention'
@@ -1489,6 +1501,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/github-access-watch'
     | '/api/public/jobs/inventory-sheet'
     | '/api/public/jobs/lead-report-sheet'
     | '/api/public/jobs/messenger-retention'
@@ -1613,6 +1626,7 @@ export interface RootRouteChildren {
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
   ApiPublicIngestReprocessRoute: typeof ApiPublicIngestReprocessRoute
   ApiPublicIntegrationsStatusRoute: typeof ApiPublicIntegrationsStatusRoute
+  ApiPublicJobsGithubAccessWatchRoute: typeof ApiPublicJobsGithubAccessWatchRoute
   ApiPublicJobsInventorySheetRoute: typeof ApiPublicJobsInventorySheetRoute
   ApiPublicJobsLeadReportSheetRoute: typeof ApiPublicJobsLeadReportSheetRoute
   ApiPublicJobsMessengerRetentionRoute: typeof ApiPublicJobsMessengerRetentionRoute
@@ -2386,6 +2400,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIntegrationsStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/github-access-watch': {
+      id: '/api/public/jobs/github-access-watch'
+      path: '/api/public/jobs/github-access-watch'
+      fullPath: '/api/public/jobs/github-access-watch'
+      preLoaderRoute: typeof ApiPublicJobsGithubAccessWatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/inventory-sheet': {
       id: '/api/public/jobs/inventory-sheet'
       path: '/api/public/jobs/inventory-sheet'
@@ -2590,6 +2611,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
   ApiPublicIngestReprocessRoute: ApiPublicIngestReprocessRoute,
   ApiPublicIntegrationsStatusRoute: ApiPublicIntegrationsStatusRoute,
+  ApiPublicJobsGithubAccessWatchRoute: ApiPublicJobsGithubAccessWatchRoute,
   ApiPublicJobsInventorySheetRoute: ApiPublicJobsInventorySheetRoute,
   ApiPublicJobsLeadReportSheetRoute: ApiPublicJobsLeadReportSheetRoute,
   ApiPublicJobsMessengerRetentionRoute: ApiPublicJobsMessengerRetentionRoute,
