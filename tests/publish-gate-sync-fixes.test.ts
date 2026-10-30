@@ -224,7 +224,7 @@ describe("P2-4 sign-out revokes only this phone's token", () => {
     expect(a).toContain("SessionRules.isSignedIn(employeeId, deviceToken)");
     expect(
       src("android/app/src/main/java/com/winstone/connect/data/SecureTokenStore.kt"),
-    ).toContain("EncryptedSharedPreferences.create(");
+    ).toContain("MasterKeys.AES256_GCM_SPEC");
     expect(src("android/app/src/main/java/com/winstone/connect/ui/DeskViewModel.kt")).toMatch(
       /WinstoneApi\.logout\(it\)[\s\S]*AgentSession\.clear\(app\)/,
     );
