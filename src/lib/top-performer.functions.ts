@@ -22,8 +22,9 @@ export const topPerformerOnDate = createServerFn({ method: "GET" })
     const { dailyTopPerformer } = await import("@/lib/top-performer.server");
     const board = await dailyTopPerformer(new Date(), data.date);
     const project = (agent: (typeof board.otherAgents)[number]) => ({
-      agentId: agent.agentId, name: agent.name, score: agent.score,
+      agentId: agent.agentId, name: agent.name, score: agent.score, rank: agent.rank,
       completed: agent.completed, reports: agent.reports, followUps: agent.followUps,
+      called: agent.called, connected: agent.connected,
     });
-    return { dateKey: board.dateKey, revealed: board.revealed, topThree: board.revealed ? board.topThree.map(project) : [], otherAgents: board.revealed ? board.otherAgents.map(project) : [] };
+    return { dateKey: board.dateKey, generatedAt: board.generatedAt, revealAt: board.revealAt, revealed: board.revealed, topThree: board.revealed ? board.topThree.map(project) : [], otherAgents: board.revealed ? board.otherAgents.map(project) : [] };
   });

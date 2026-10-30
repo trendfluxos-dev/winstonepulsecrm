@@ -92,6 +92,8 @@ export type TopPerformerSources = {
 
 export type TopPerformerBoard = {
   dateKey: string;
+  /** When this board was computed from saved records (last data refresh). */
+  generatedAt: string;
   /** When the board next changes: the 5:30 pm reveal, or the 9:05 am rollover. */
   nextUpdateAt: string;
   /** What happens at nextUpdateAt. */
@@ -476,6 +478,7 @@ export async function dailyTopPerformer(at: Date = new Date(), selectedDate?: st
 
   return {
     dateKey: effectiveDateKey,
+    generatedAt: at.toISOString(),
     nextUpdateAt: nextUpdate.at.toISOString(),
     nextUpdateKind: nextUpdate.kind,
     sources,
