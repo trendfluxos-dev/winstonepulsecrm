@@ -35,11 +35,14 @@ export async function initializePaddle() {
   });
 }
 
-export async function getPaddlePriceId(priceId: string): Promise<string> {
-  return resolvePaddlePrice({ data: { priceId, environment: getPaddleEnvironment() } });
-}
-
 /** The single seat-based plan sold in the app. */
 export const PRO_PRICE_ID = "pro_monthly";
+
+export async function getPaddlePriceId(
+  plan: typeof PRO_PRICE_ID,
+  adminToken: string,
+): Promise<string> {
+  return resolvePaddlePrice({ data: { plan, environment: getPaddleEnvironment(), adminToken } });
+}
 export const PRO_PRICE_LABEL = "$29";
 export const PRO_PRICE_SUFFIX = "per agent seat / month";

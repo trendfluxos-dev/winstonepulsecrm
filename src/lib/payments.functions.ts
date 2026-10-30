@@ -3,25 +3,44 @@ import { z } from "zod";
 
 const EnvSchema = z.enum(["sandbox", "live"]);
 
-/** Turns a human-readable price id (pro_monthly) into the Paddle price id. */
-export const resolvePaddlePrice = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) =>
-    z.object({ priceId: z.string().min(1), environment: EnvSchema }).parse(input),
-  )
-  .handler(async ({ data }) => {
+/**
+ * Server-side allowlist: the only plans the app sells, mapped to the Paddle
+ * external_id configured for each. Callers pick a plan key, never a Paddle id.
+ */
+const PLAN_EXTERNAL_IDS = { pro_monthly: "pro_monthly" } as const;
+const PriceLookupSchema = z
+  .object({
+    plan: z.enum(Object.keys(PLAN_EXTERNAL_IDS) as [keyof typeof PLAN_EXTERNAL_IDS]),
+    environment: EnvSchema,
+    adminToken: z.string().min(1),
+  })
+  .strict();
+
+/**
+ * Turns an allowlisted plan (pro_monthly) into the Paddle price id.
+ * Full IT/admin PIN only — same authority as the billing portal — and checked
+ * before any request is sent to Paddle.
+ */
+export const resolvePaddlePrice = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => PriceLookupSchema.parse(input))
+  .handler(async ({ data: raw }) => {
+    const data = PriceLookupSchema.parse(raw);
+    const { requireAdminToken } = await import("@/lib/admin-gate.server");
+    requireAdminToken(data.adminToken);
+
     const { gatewayFetch } = await import("@/lib/paddle.server");
     const res = await gatewayFetch(
       data.environment,
-      `/prices?external_id=${encodeURIComponent(data.priceId)}`,
+      `/prices?external_id=${encodeURIComponent(PLAN_EXTERNAL_IDS[data.plan])}`,
     );
     if (!res.ok) {
-      const detail = await res.text();
-      console.error("paddle price lookup failed", res.status, detail);
+      console.error("paddle price lookup failed", res.status);
       throw new Error(`Price lookup failed [${res.status}]`);
     }
     const result = (await res.json()) as { data?: { id: string }[] };
-    if (!result.data?.length) throw new Error("Price not found");
-    return result.data[0]!.id;
+    const id = result.data?.[0]?.id;
+    if (!id || !/^pri_[a-z0-9]+$/i.test(id)) throw new Error("Price not found");
+    return id;
   });
 
 export type LicenseStatus = {
