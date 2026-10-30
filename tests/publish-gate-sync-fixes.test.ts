@@ -174,3 +174,11 @@ describe("P1-1 report finalization is one transaction", () => {
     expect(sql).toContain("REVOKE ALL ON FUNCTION public.finalize_call_report_v2(uuid,uuid,jsonb,jsonb,jsonb,text,text,boolean,text,text,jsonb) FROM PUBLIC, anon, authenticated");
   });
 });
+
+describe("P1-4 briefing gate never blocks report completion or recording upload", () => {
+  it("report submit and recording ingest are ungated; new work is gated", () => {
+    expect(src("src/routes/api/public/agent/report.ts")).not.toContain("requireAgentBriefing");
+    expect(src("src/routes/api/public/ingest/recording.ts")).not.toContain("requireAgentBriefing");
+    for (const f of ["src/routes/api/public/agent/call-start.ts", "src/routes/api/public/ingest/lead.ts", "src/routes/api/public/ingest/outcome.ts"]) expect(src(f)).toContain("requireAgentBriefing(caller.profile.id)");
+  });
+});
