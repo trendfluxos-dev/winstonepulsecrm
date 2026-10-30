@@ -74,7 +74,21 @@ export async function readGithubActivity(repository: string) {
 }
 
 type GhRun = { id: number; status: string; conclusion: string | null; html_url: string; head_sha: string; head_branch: string; created_at: string; updated_at: string; run_started_at?: string };
-type GhArtifact = { id: number; name: string; size_in_bytes: number; expired: boolean; expires_at: string | null };
+type GhArtifact = { id: number; name: string; size_in_bytes: number; expired: boolean; expires_at: string | null; digest?: string | null };
+
+/** Pure: read versionName/versionCode from build.gradle.kts text; null when absent. */
+export function parseApkVersion(gradle: string | null): string | null {
+  if (!gradle) return null;
+  const name = /versionName\s*=\s*"([^"]{1,40})"/.exec(gradle)?.[1];
+  const code = /versionCode\s*=\s*(\d{1,9})/.exec(gradle)?.[1];
+  return name ? (code ? `${name} (${code})` : name) : null;
+}
+
+/** Pure: GitHub artifact digest "sha256:<hex>" → hex, else null. */
+export function parseSha256(digest: string | null | undefined): string | null {
+  const m = /^sha256:([a-f0-9]{64})$/i.exec(digest ?? "");
+  return m ? m[1]!.toLowerCase() : null;
+}
 
 /** Read-only: latest runs of the Android APK workflow and artifacts of the newest one. Never triggers builds. */
 export async function readAndroidBuilds(repository: string) {
@@ -94,15 +108,27 @@ export async function readAndroidBuilds(repository: string) {
   const runs = await read<{ workflow_runs: GhRun[] }>(`/repos/${repository}/actions/workflows/android-apk.yml/runs?per_page=10`);
   const list = runs?.workflow_runs ?? [];
   const latest = list[0];
-  const mapArt = (runId: number, a: GhArtifact) => ({ id: a.id, name: a.name.slice(0, 120), sizeMb: Math.round(a.size_in_bytes / 104857.6) / 10, expired: a.expired, expiresAt: a.expires_at, url: `https://github.com/${repository}/actions/runs/${runId}/artifacts/${a.id}` });
+  const versions = new Map<string, string | null>();
+  async function versionAt(sha: string) {
+    if (versions.has(sha)) return versions.get(sha)!;
+    let v: string | null = null;
+    try {
+      const res = await fetch(`${GATEWAY_URL}/repos/${repository}/contents/android/app/build.gradle.kts?ref=${sha}`, { headers: { ...headers, Accept: "application/vnd.github.raw" }, signal: AbortSignal.timeout(10000), redirect: "error" });
+      if (res.ok) v = parseApkVersion((await res.text()).slice(0, 20000));
+    } catch { v = null; }
+    versions.set(sha, v);
+    return v;
+  }
+  const mapArt = (runId: number, a: GhArtifact) => ({ id: a.id, name: a.name.slice(0, 120), sizeBytes: a.size_in_bytes, sha256: parseSha256(a.digest), sizeMb: Math.round(a.size_in_bytes / 104857.6) / 10, expired: a.expired, expiresAt: a.expires_at, url: `https://github.com/${repository}/actions/runs/${runId}/artifacts/${a.id}` });
   const artsByRun = await Promise.all(list.map(async (r) => r.status === "completed"
     ? ((await read<{ artifacts: GhArtifact[] }>(`/repos/${repository}/actions/runs/${r.id}/artifacts?per_page=20`))?.artifacts ?? []).map((a) => mapArt(r.id, a))
     : []));
+  const runVersions = await Promise.all(list.map((r, i) => (artsByRun[i]?.length ? versionAt(r.head_sha) : Promise.resolve(null))));
   return {
     repository,
     workflowFound: runs !== null,
     checkedAt: new Date().toISOString(),
-    runs: list.map((r, i) => ({ id: r.id, status: r.status, conclusion: r.conclusion, url: r.html_url, sha: r.head_sha.slice(0, 7), branch: r.head_branch, startedAt: r.run_started_at ?? r.created_at, updatedAt: r.updated_at, artifacts: artsByRun[i] ?? [] })),
+    runs: list.map((r, i) => ({ id: r.id, status: r.status, conclusion: r.conclusion, url: r.html_url, sha: r.head_sha.slice(0, 7), branch: r.head_branch, startedAt: r.run_started_at ?? r.created_at, updatedAt: r.updated_at, version: runVersions[i] ?? null, artifacts: artsByRun[i] ?? [] })),
     artifacts: artsByRun[0] ?? [],
   };
 }

@@ -73,7 +73,7 @@ export function AndroidBuildStatus() {
             <ul className="space-y-2">
               {q.data!.artifacts.map((a) => (
                 <li key={a.id} className="flex items-center justify-between gap-2 rounded-md border p-2 text-sm">
-                  <span className="min-w-0 truncate">{a.name} · {a.sizeMb} MB</span>
+                  <ArtifactFacts a={a} version={latest.version} />
                   {a.expired ? <Badge variant="outline">{t({ en: "Expired", bn: "মেয়াদোত্তীর্ণ" })}</Badge> : (
                     <Button asChild size="sm"><a href={a.url} target="_blank" rel="noreferrer"><Download className="size-4" />{t({ en: "Download", bn: "ডাউনলোড" })}</a></Button>
                   )}
@@ -95,7 +95,7 @@ export function AndroidBuildStatus() {
                       <a className="text-primary underline" href={r.url} target="_blank" rel="noreferrer">GitHub</a>
                       <span className="ml-auto flex flex-wrap gap-1">
                         {live.length === 0 ? <span className="text-xs text-muted-foreground">{r.artifacts.length ? t({ en: "Downloads expired", bn: "ডাউনলোড মেয়াদোত্তীর্ণ" }) : t({ en: "No downloads", bn: "ডাউনলোড নেই" })}</span>
-                          : live.map((a) => <Button key={a.id} asChild size="sm" variant="outline"><a href={a.url} target="_blank" rel="noreferrer"><Download className="size-3" />{a.name}</a></Button>)}
+                          : <span className="flex w-full flex-col gap-1">{live.map((a) => <span key={a.id} className="flex items-center justify-between gap-2 rounded-md border p-2"><ArtifactFacts a={a} version={r.version} /><Button asChild size="sm" variant="outline"><a href={a.url} target="_blank" rel="noreferrer"><Download className="size-3" />{t({ en: "Download", bn: "ডাউনলোড" })}</a></Button></span>)}</span>}
                       </span>
                     </li>
                   );
@@ -107,5 +107,16 @@ export function AndroidBuildStatus() {
         </div>
       )}
     </section>
+  );
+}
+
+function ArtifactFacts({ a, version }: { a: { name: string; sizeBytes: number; sizeMb: number; sha256: string | null }; version: string | null }) {
+  const { t } = useI18n();
+  return (
+    <span className="min-w-0 space-y-0.5 text-xs">
+      <span className="block truncate text-sm font-medium">{a.name}</span>
+      <span className="block text-muted-foreground">{t({ en: "Version", bn: "ভার্সন" })}: {version ?? t({ en: "unknown", bn: "অজানা" })} · {a.sizeMb} MB ({a.sizeBytes.toLocaleString()} bytes)</span>
+      <span className="block break-all font-mono text-muted-foreground">{t({ en: "Download ZIP SHA-256", bn: "ডাউনলোড ZIP SHA-256" })}: {a.sha256 ?? t({ en: "not provided by GitHub", bn: "GitHub দেয়নি" })}</span>
+    </span>
   );
 }
