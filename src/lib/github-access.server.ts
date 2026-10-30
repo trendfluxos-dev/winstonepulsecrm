@@ -40,6 +40,7 @@ export async function readGithubAccess(repository: string) {
       usedByApp: name === "GITHUB_API_KEY",
       login, visibility, repoPrivate, canPush, invites,
       verdict: classifyAccess(visibility, invites.length > 0),
+      checkedAt: new Date().toISOString(),
     };
   }));
   return { repository, checkedAt: new Date().toISOString(), connections };

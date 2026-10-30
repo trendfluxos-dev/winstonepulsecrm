@@ -710,3 +710,5 @@
 - [ ] P1-6/7/8 Messenger decisions, staff photos, release details: confirm via fresh security scan (owner runs from Security tab).
 - [ ] Publish (needs owner approval), then rescan and live marker check.
 - [ ] P2 items: handset tests, real call, Meta approvals, CI run, backup check — need devices/owner/provider.
+
+- [x] GitHub access panel: per-account last-verified time
