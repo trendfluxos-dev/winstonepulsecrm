@@ -11,8 +11,9 @@ const Payload = z.object({
   company: z.string().trim().max(120).nullable().optional(),
   notes: z.string().trim().max(2000).nullable().optional(),
   source: z.string().trim().max(40).default("webhook"),
-  assign: z.boolean().default(true),
-  /** Profile id of the agent adding their own lead from the phone app. */
+  /** Legacy field from older phone apps; ignored — captures never self-assign. */
+  assign: z.boolean().optional(),
+  /** Legacy hint; ignored. The capturing agent comes from the device token. */
   agent_id: z.string().uuid().nullable().optional(),
   /** App version that captured the lead, for the version data ledger. */
   app_version: z.string().trim().max(40).nullable().optional(),
@@ -54,26 +55,14 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        // An agent adding their own lead keeps it — no approval, no round-robin.
-        let assignedTo: string | null = null;
-        let ownerName: string | null = null;
-        // Only an authenticated device may self-own its capture. Any other
-        // inbound record lands unassigned: LeadHub Nexus is the only
-        // assignment path (no round-robin, no browser-supplied agent_id).
-        const requestedAgentId = caller.profile.id;
-        if (requestedAgentId) {
-          const { data: agent } = await supabaseAdmin
-            .from("profiles")
-            .select("id, name")
-            .eq("id", requestedAgentId)
-            .eq("is_active", true)
-            .in("role", ["agent", "team_leader"])
-            .maybeSingle();
-          if (agent) {
-            assignedTo = agent.id;
-            ownerName = agent.name;
-          }
-        }
+        // Phone-captured leads always land UNASSIGNED: LeadHub Nexus is the only
+        // assignment authority (50/day cap, eligibility, briefing). Legacy
+        // `assign` / `agent_id` fields are ignored. Capture is still attributed
+        // to the signed-in agent through reference_by, the audit actor and the
+        // version ledger.
+        const { data: capturer } = await supabaseAdmin
+          .from("profiles").select("id, name").eq("id", caller.profile.id).maybeSingle();
+        const capturerName = capturer?.name ?? null;
 
         // Shared intake with the web desk: identical result either way.
         const { intakeLead } = await import("@/lib/lead-intake.server");
@@ -83,9 +72,11 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
             phoneNumber: body.phone_number,
             company: body.company ?? null,
             notes: body.notes ?? null,
-            ownerId: assignedTo,
-            ownerName,
-            source: body.source,
+            ownerId: null,
+            source: "agent_app",
+            referenceBy: capturerName,
+            actorProfileId: caller.profile.id,
+            actorLabel: capturerName ?? "Android capture",
           });
           // Version data guarantee: remember which app version captured this
           // lead (and whether it was written offline), so the data can be
@@ -114,7 +105,7 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
           if (result.duplicate) {
             return json({ ok: true, duplicate: true, lead_id: result.leadId }, 200);
           }
-          return json({ ok: true, lead_id: result.leadId, assigned_to: result.assignedTo }, 201);
+          return json({ ok: true, lead_id: result.leadId, assigned_to: null, routing: "leadhub_nexus" }, 201);
         } catch (err) {
           const { InvalidLeadPhoneError } = await import("@/lib/lead-intake.server");
           if (err instanceof InvalidLeadPhoneError)
