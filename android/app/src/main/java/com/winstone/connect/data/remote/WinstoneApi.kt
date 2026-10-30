@@ -194,6 +194,16 @@ object WinstoneApi {
         post("/api/public/agent/presence", payload)
     }
 
+    /** Revokes ONLY this phone's token on the server (other devices unaffected). */
+    suspend fun logout(token: String): Boolean = withContext(Dispatchers.IO) {
+        val req = Request.Builder()
+            .url("$BASE_URL/api/public/agent/logout")
+            .header("x-device-token", token)
+            .post("{}".toRequestBody(JSON))
+            .build()
+        runCatching { client.newCall(req).execute().use { it.isSuccessful } }.getOrDefault(false)
+    }
+
     /** Post-call outcome from the live call screen: stage + in-call notes. */
     suspend fun postCallOutcome(
         leadId: String,
@@ -201,6 +211,7 @@ object WinstoneApi {
         outcome: String,                       // interested | follow_up | not_interested | wrong_number | no_answer
         notes: String,
         connected: Boolean,
+        callUid: String? = null,
     ): JSONObject = withContext(Dispatchers.IO) {
         val payload = JSONObject().apply {
             put("lead_id", leadId)
@@ -208,6 +219,7 @@ object WinstoneApi {
             put("outcome", outcome)
             if (notes.isNotBlank()) put("notes", notes)
             put("connected", connected)
+            callUid?.let { put("call_uid", it) }
         }
         post("/api/public/ingest/outcome", payload)
     }

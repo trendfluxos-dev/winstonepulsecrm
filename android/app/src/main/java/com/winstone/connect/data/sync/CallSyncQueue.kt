@@ -145,12 +145,19 @@ object CallSyncQueue {
     }
 
 
-    fun queueOutcome(context: Context, leadId: String, outcome: String, notes: String, connected: Boolean) {
+    /**
+     * Queues the post-call outcome. [callUid] is generated ONCE per call (or
+     * here, once per outcome when the caller has none) and travels with every
+     * WorkManager retry, so the server's agent+call_uid receipt dedupes replays.
+     */
+    fun queueOutcome(context: Context, leadId: String, outcome: String, notes: String, connected: Boolean, callUid: String? = null) {
+        val uid = OutcomeCallUid.resolve(callUid)
         enqueue(
             context,
-            unique = "out_${leadId}_${System.currentTimeMillis()}",
+            unique = "out_$uid",
             data = Data.Builder()
                 .putString(KEY_KIND, KIND_OUTCOME)
+                .putString(KEY_CALL_UID, uid)
                 .putString(KEY_LEAD, leadId)
                 .putString(KEY_TEXT, notes)
                 .putString(KEY_OUTCOME, outcome)
@@ -276,9 +283,14 @@ object CallSyncQueue {
     }
 
     private fun enqueue(context: Context, unique: String, data: Data, policy: ExistingWorkPolicy = ExistingWorkPolicy.KEEP, tags: List<String> = emptyList()) {
+        // Stamp the signed-in account so a queued job can never be sent under
+        // a different agent's token after an account switch.
+        val owned = Data.Builder().putAll(data)
+            .putString(KEY_OWNER, AgentSession.employeeIdNow(context))
+            .build()
         val request = OneTimeWorkRequestBuilder<CrmSyncWorker>()
             .apply { tags.forEach { addTag(it) } }
-            .setInputData(data)
+            .setInputData(owned)
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
             .build()
@@ -297,6 +309,7 @@ object CallSyncQueue {
     const val KEY_REC_NOTE = "recording_note"
     const val KIND_CALL_STATE = "call_state"
     const val KEY_KIND = "kind"
+    const val KEY_OWNER = "owner_employee_id"
     const val KEY_LEAD = "lead_id"
     const val KEY_PHONE = "phone"
     const val KEY_FILE = "file"
@@ -336,6 +349,11 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
 
     private suspend fun doSyncWork(): Result {
         val employeeId = AgentSession.employeeIdNow(applicationContext) ?: return Result.retry()
+        when (QueueOwnership.decide(inputData.getString(CallSyncQueue.KEY_OWNER), employeeId, AgentSession.deviceTokenNow(applicationContext))) {
+            QueueOwnership.Decision.HOLD -> return Result.retry()
+            QueueOwnership.Decision.DROP -> return Result.failure()
+            QueueOwnership.Decision.SEND -> Unit
+        }
         val leadId = inputData.getString(CallSyncQueue.KEY_LEAD)
         val kind = inputData.getString(CallSyncQueue.KEY_KIND)
 
@@ -396,6 +414,7 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                         outcome = inputData.getString(CallSyncQueue.KEY_OUTCOME).orEmpty(),
                         notes = inputData.getString(CallSyncQueue.KEY_TEXT).orEmpty(),
                         connected = inputData.getBoolean(CallSyncQueue.KEY_CONNECTED, false),
+                        callUid = inputData.getString(CallSyncQueue.KEY_CALL_UID),
                     )
                     Result.success()
                 }

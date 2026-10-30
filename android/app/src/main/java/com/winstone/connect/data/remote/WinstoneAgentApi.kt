@@ -107,9 +107,8 @@ object WinstoneAgentApi {
         if (!company.isNullOrBlank()) put("company", company)
         if (!notes.isNullOrBlank()) put("notes", notes)
         put("source", "agent_app")
-        put("assign", true)
-        // Keep the lead with the agent who added it — no approval needed.
-        if (!agentId.isNullOrBlank()) put("agent_id", agentId)
+        // Phone captures land unassigned; LeadHub Nexus routes them. The server
+        // attributes the capture to this agent from the device token.
         put("client_ref", clientRef)
         put("captured_offline", capturedOffline)
         put("captured_at", com.winstone.connect.data.IsoTime.now())
