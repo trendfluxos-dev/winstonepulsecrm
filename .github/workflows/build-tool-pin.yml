@@ -16,9 +16,20 @@ jobs:
       - name: Verify pinned build tool version
         run: node scripts/check-build-tool-pin.mjs
       - name: Run pin regression test
+        # Isolated, pinned Vitest: installing into the repo would apply package.json
+        # overrides against the direct devDependency and fail with EOVERRIDE.
+        # The test only reads package.json, so it runs from a temp copy with no repo config.
+        env:
+          VITEST_VERSION: "5.0.3"
         run: |
-          npm install --no-save vitest
-          npx vitest run tests/build-config-pin.test.ts
+          set -euo pipefail
+          TOOL="$RUNNER_TEMP/pin-vitest"; RUN="$RUNNER_TEMP/pin-run"
+          mkdir -p "$TOOL" "$RUN/tests"
+          (cd "$TOOL" && npm init -y >/dev/null && npm install --no-audit --no-fund --ignore-scripts "vitest@$VITEST_VERSION")
+          cp package.json "$RUN/package.json"
+          cp tests/build-config-pin.test.ts "$RUN/tests/"
+          ln -s "$TOOL/node_modules" "$RUN/node_modules"
+          cd "$RUN" && ./node_modules/.bin/vitest run tests/build-config-pin.test.ts
 
   dashboard-colors:
     runs-on: ubuntu-latest
