@@ -732,4 +732,4 @@
 
 ## 2026-10-30 — Shared ingest secret retired (code)
 - [x] Phone endpoints device-token only; reprocess retired (410); resolver, notices and checks cleaned; tests added.
-- [ ] Delete INGEST_SECRET in Project Settings → Secrets and republish — waits on owner approval.
+- [x] Delete INGEST_SECRET in Project Settings → Secrets and republish (done 2026-10-31).
