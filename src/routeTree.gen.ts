@@ -85,6 +85,7 @@ import { Route as ApiPublicAgentDashboardMetricsRouteImport } from './routes/api
 import { Route as ApiPublicAgentDeviceCapabilityRouteImport } from './routes/api/public/agent/device-capability'
 import { Route as ApiPublicAgentIncomingCallRouteImport } from './routes/api/public/agent/incoming-call'
 import { Route as ApiPublicAgentLoginRouteImport } from './routes/api/public/agent/login'
+import { Route as ApiPublicAgentLogoutRouteImport } from './routes/api/public/agent/logout'
 import { Route as ApiPublicAgentNoticesRouteImport } from './routes/api/public/agent/notices'
 import { Route as ApiPublicAgentPresenceRouteImport } from './routes/api/public/agent/presence'
 import { Route as ApiPublicAgentRecorderRouteImport } from './routes/api/public/agent/recorder'
@@ -516,6 +517,11 @@ const ApiPublicAgentLoginRoute = ApiPublicAgentLoginRouteImport.update({
   path: '/api/public/agent/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentLogoutRoute = ApiPublicAgentLogoutRouteImport.update({
+  id: '/api/public/agent/logout',
+  path: '/api/public/agent/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAgentNoticesRoute = ApiPublicAgentNoticesRouteImport.update({
   id: '/api/public/agent/notices',
   path: '/api/public/agent/notices',
@@ -846,6 +852,7 @@ export interface FileRoutesByFullPath {
   '/api/public/agent/device-capability': typeof ApiPublicAgentDeviceCapabilityRoute
   '/api/public/agent/incoming-call': typeof ApiPublicAgentIncomingCallRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
+  '/api/public/agent/logout': typeof ApiPublicAgentLogoutRoute
   '/api/public/agent/notices': typeof ApiPublicAgentNoticesRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/recorder': typeof ApiPublicAgentRecorderRoute
@@ -970,6 +977,7 @@ export interface FileRoutesByTo {
   '/api/public/agent/device-capability': typeof ApiPublicAgentDeviceCapabilityRoute
   '/api/public/agent/incoming-call': typeof ApiPublicAgentIncomingCallRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
+  '/api/public/agent/logout': typeof ApiPublicAgentLogoutRoute
   '/api/public/agent/notices': typeof ApiPublicAgentNoticesRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/recorder': typeof ApiPublicAgentRecorderRoute
@@ -1095,6 +1103,7 @@ export interface FileRoutesById {
   '/api/public/agent/device-capability': typeof ApiPublicAgentDeviceCapabilityRoute
   '/api/public/agent/incoming-call': typeof ApiPublicAgentIncomingCallRoute
   '/api/public/agent/login': typeof ApiPublicAgentLoginRoute
+  '/api/public/agent/logout': typeof ApiPublicAgentLogoutRoute
   '/api/public/agent/notices': typeof ApiPublicAgentNoticesRoute
   '/api/public/agent/presence': typeof ApiPublicAgentPresenceRoute
   '/api/public/agent/recorder': typeof ApiPublicAgentRecorderRoute
@@ -1221,6 +1230,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/device-capability'
     | '/api/public/agent/incoming-call'
     | '/api/public/agent/login'
+    | '/api/public/agent/logout'
     | '/api/public/agent/notices'
     | '/api/public/agent/presence'
     | '/api/public/agent/recorder'
@@ -1345,6 +1355,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/device-capability'
     | '/api/public/agent/incoming-call'
     | '/api/public/agent/login'
+    | '/api/public/agent/logout'
     | '/api/public/agent/notices'
     | '/api/public/agent/presence'
     | '/api/public/agent/recorder'
@@ -1469,6 +1480,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/device-capability'
     | '/api/public/agent/incoming-call'
     | '/api/public/agent/login'
+    | '/api/public/agent/logout'
     | '/api/public/agent/notices'
     | '/api/public/agent/presence'
     | '/api/public/agent/recorder'
@@ -1594,6 +1606,7 @@ export interface RootRouteChildren {
   ApiPublicAgentDeviceCapabilityRoute: typeof ApiPublicAgentDeviceCapabilityRoute
   ApiPublicAgentIncomingCallRoute: typeof ApiPublicAgentIncomingCallRoute
   ApiPublicAgentLoginRoute: typeof ApiPublicAgentLoginRoute
+  ApiPublicAgentLogoutRoute: typeof ApiPublicAgentLogoutRoute
   ApiPublicAgentNoticesRoute: typeof ApiPublicAgentNoticesRoute
   ApiPublicAgentPresenceRoute: typeof ApiPublicAgentPresenceRoute
   ApiPublicAgentRecorderRoute: typeof ApiPublicAgentRecorderRoute
@@ -2176,6 +2189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent/logout': {
+      id: '/api/public/agent/logout'
+      path: '/api/public/agent/logout'
+      fullPath: '/api/public/agent/logout'
+      preLoaderRoute: typeof ApiPublicAgentLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/agent/notices': {
       id: '/api/public/agent/notices'
       path: '/api/public/agent/notices'
@@ -2579,6 +2599,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAgentDeviceCapabilityRoute: ApiPublicAgentDeviceCapabilityRoute,
   ApiPublicAgentIncomingCallRoute: ApiPublicAgentIncomingCallRoute,
   ApiPublicAgentLoginRoute: ApiPublicAgentLoginRoute,
+  ApiPublicAgentLogoutRoute: ApiPublicAgentLogoutRoute,
   ApiPublicAgentNoticesRoute: ApiPublicAgentNoticesRoute,
   ApiPublicAgentPresenceRoute: ApiPublicAgentPresenceRoute,
   ApiPublicAgentRecorderRoute: ApiPublicAgentRecorderRoute,
