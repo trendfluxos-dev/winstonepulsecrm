@@ -24,6 +24,8 @@ import {
 import { type LoadRecord, readLoads } from "@/lib/load-perf";
 import { CallDiagnosticsPanel } from "@/components/crm/CallDiagnosticsPanel";
 import { AndroidApkInstallGuide } from "@/components/crm/AndroidApkInstallGuide";
+import { ApkPreInstallChecklist } from "@/components/crm/ApkPreInstallChecklist";
+import { PhoneTestResultsForm } from "@/components/crm/PhoneTestResultsForm";
 import { DeviceCallTestChecklist } from "@/components/crm/DeviceCallTestChecklist";
 import { SandboxResultsReport } from "@/components/crm/SandboxResultsReport";
 import { DeviceCompatibilityReport } from "@/components/crm/DeviceCompatibilityReport";
@@ -174,7 +176,7 @@ function DiagnosticsPage() {
         title="পেজ-লোড ডায়াগনস্টিক্স"
         description="শুধু স্টাফদের জন্য — সাইন ইন করুন।"
       >
-        <div className="mx-auto max-w-5xl space-y-6"><AndroidApkInstallGuide /><CallDiagnosticsPanel /><DeviceCallTestChecklist /><SandboxResultsReport /><AuthorityCompat /><Board /></div>
+        <div className="mx-auto max-w-5xl space-y-6"><ApkPreInstallChecklist /><AndroidApkInstallGuide /><CallDiagnosticsPanel /><DeviceCallTestChecklist /><PhoneTestResultsForm /><SandboxResultsReport /><AuthorityCompat /><Board /></div>
       </RoleGate>
     </AppShell>
   );
