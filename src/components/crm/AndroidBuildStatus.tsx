@@ -111,7 +111,7 @@ export function AndroidBuildStatus() {
 }
 
 function ArtifactFacts({ a, version }: { a: { name: string; sizeBytes: number; sizeMb: number; sha256: string | null }; version: string | null }) {
-  const { t } = useI18n();
+  const t = useT();
   return (
     <span className="min-w-0 space-y-0.5 text-xs">
       <span className="block truncate text-sm font-medium">{a.name}</span>
