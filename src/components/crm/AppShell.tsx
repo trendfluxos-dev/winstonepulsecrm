@@ -31,6 +31,7 @@ const AgentContributionGate = lazy(() => import("@/components/crm/AgentContribut
 const AgentFeedbackGate = lazy(() => import("@/components/crm/AgentFeedbackGate").then((m) => ({ default: m.AgentFeedbackGate })));
 const CopilotDrawer = lazy(() => import("@/components/crm/CopilotDrawer").then((m) => ({ default: m.CopilotDrawer })));
 const RuntimeAlertWatcher = lazy(() => import("@/components/crm/RuntimeAlertWatcher").then((m) => ({ default: m.RuntimeAlertWatcher })));
+const BuildStatusWidget = lazy(() => import("@/components/crm/BuildStatusWidget").then((m) => ({ default: m.BuildStatusWidget })));
 
 // Latest build is streamed from the backend; the bundled asset stays as a fallback.
 const APK_URL = "/api/public/download/apk";
@@ -278,6 +279,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {account?.profile?.role === "agent" && <Suspense fallback={null}><AgentFeedbackGate /></Suspense>}
 
       {scope === "authority" && <Suspense fallback={null}><RuntimeAlertWatcher /></Suspense>}
+      {scope === "authority" && adminToken && <Suspense fallback={null}><BuildStatusWidget /></Suspense>}
       <AdminPinDialog open={pinOpen} onOpenChange={setPinOpen} />
     </div>
   );
