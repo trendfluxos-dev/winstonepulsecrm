@@ -960,6 +960,13 @@
       "when": 1793388507147,
       "tag": "0136_daily_cap_counts_either_owner",
       "breakpoints": true
+    },
+    {
+      "idx": 137,
+      "version": "7",
+      "when": 1793389045050,
+      "tag": "0137_atomic_report_finalize_and_outcome_receipts",
+      "breakpoints": true
     }
   ]
 }
