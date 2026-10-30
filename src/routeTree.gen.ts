@@ -101,6 +101,7 @@ import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/co
 import { Route as ApiPublicDownloadApkRouteImport } from './routes/api/public/download/apk'
 import { Route as ApiPublicHooksDeployHealthRouteImport } from './routes/api/public/hooks/deploy-health'
 import { Route as ApiPublicHooksDriveBackupRouteImport } from './routes/api/public/hooks/drive-backup'
+import { Route as ApiPublicHooksGithubAccessWatchRouteImport } from './routes/api/public/hooks/github-access-watch'
 import { Route as ApiPublicHooksLeadDistributionRouteImport } from './routes/api/public/hooks/lead-distribution'
 import { Route as ApiPublicHooksLeadNeglectRouteImport } from './routes/api/public/hooks/lead-neglect'
 import { Route as ApiPublicHooksMarketNewsRouteImport } from './routes/api/public/hooks/market-news'
@@ -599,6 +600,12 @@ const ApiPublicHooksDriveBackupRoute =
     path: '/api/public/hooks/drive-backup',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksGithubAccessWatchRoute =
+  ApiPublicHooksGithubAccessWatchRouteImport.update({
+    id: '/api/public/hooks/github-access-watch',
+    path: '/api/public/hooks/github-access-watch',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksLeadDistributionRoute =
   ApiPublicHooksLeadDistributionRouteImport.update({
     id: '/api/public/hooks/lead-distribution',
@@ -855,6 +862,7 @@ export interface FileRoutesByFullPath {
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/hooks/deploy-health': typeof ApiPublicHooksDeployHealthRoute
   '/api/public/hooks/drive-backup': typeof ApiPublicHooksDriveBackupRoute
+  '/api/public/hooks/github-access-watch': typeof ApiPublicHooksGithubAccessWatchRoute
   '/api/public/hooks/lead-distribution': typeof ApiPublicHooksLeadDistributionRoute
   '/api/public/hooks/lead-neglect': typeof ApiPublicHooksLeadNeglectRoute
   '/api/public/hooks/market-news': typeof ApiPublicHooksMarketNewsRoute
@@ -978,6 +986,7 @@ export interface FileRoutesByTo {
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/hooks/deploy-health': typeof ApiPublicHooksDeployHealthRoute
   '/api/public/hooks/drive-backup': typeof ApiPublicHooksDriveBackupRoute
+  '/api/public/hooks/github-access-watch': typeof ApiPublicHooksGithubAccessWatchRoute
   '/api/public/hooks/lead-distribution': typeof ApiPublicHooksLeadDistributionRoute
   '/api/public/hooks/lead-neglect': typeof ApiPublicHooksLeadNeglectRoute
   '/api/public/hooks/market-news': typeof ApiPublicHooksMarketNewsRoute
@@ -1102,6 +1111,7 @@ export interface FileRoutesById {
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/hooks/deploy-health': typeof ApiPublicHooksDeployHealthRoute
   '/api/public/hooks/drive-backup': typeof ApiPublicHooksDriveBackupRoute
+  '/api/public/hooks/github-access-watch': typeof ApiPublicHooksGithubAccessWatchRoute
   '/api/public/hooks/lead-distribution': typeof ApiPublicHooksLeadDistributionRoute
   '/api/public/hooks/lead-neglect': typeof ApiPublicHooksLeadNeglectRoute
   '/api/public/hooks/market-news': typeof ApiPublicHooksMarketNewsRoute
@@ -1227,6 +1237,7 @@ export interface FileRouteTypes {
     | '/api/public/download/apk'
     | '/api/public/hooks/deploy-health'
     | '/api/public/hooks/drive-backup'
+    | '/api/public/hooks/github-access-watch'
     | '/api/public/hooks/lead-distribution'
     | '/api/public/hooks/lead-neglect'
     | '/api/public/hooks/market-news'
@@ -1350,6 +1361,7 @@ export interface FileRouteTypes {
     | '/api/public/download/apk'
     | '/api/public/hooks/deploy-health'
     | '/api/public/hooks/drive-backup'
+    | '/api/public/hooks/github-access-watch'
     | '/api/public/hooks/lead-distribution'
     | '/api/public/hooks/lead-neglect'
     | '/api/public/hooks/market-news'
@@ -1473,6 +1485,7 @@ export interface FileRouteTypes {
     | '/api/public/download/apk'
     | '/api/public/hooks/deploy-health'
     | '/api/public/hooks/drive-backup'
+    | '/api/public/hooks/github-access-watch'
     | '/api/public/hooks/lead-distribution'
     | '/api/public/hooks/lead-neglect'
     | '/api/public/hooks/market-news'
@@ -1597,6 +1610,7 @@ export interface RootRouteChildren {
   ApiPublicDownloadApkRoute: typeof ApiPublicDownloadApkRoute
   ApiPublicHooksDeployHealthRoute: typeof ApiPublicHooksDeployHealthRoute
   ApiPublicHooksDriveBackupRoute: typeof ApiPublicHooksDriveBackupRoute
+  ApiPublicHooksGithubAccessWatchRoute: typeof ApiPublicHooksGithubAccessWatchRoute
   ApiPublicHooksLeadDistributionRoute: typeof ApiPublicHooksLeadDistributionRoute
   ApiPublicHooksLeadNeglectRoute: typeof ApiPublicHooksLeadNeglectRoute
   ApiPublicHooksMarketNewsRoute: typeof ApiPublicHooksMarketNewsRoute
@@ -2274,6 +2288,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksDriveBackupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/github-access-watch': {
+      id: '/api/public/hooks/github-access-watch'
+      path: '/api/public/hooks/github-access-watch'
+      fullPath: '/api/public/hooks/github-access-watch'
+      preLoaderRoute: typeof ApiPublicHooksGithubAccessWatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/lead-distribution': {
       id: '/api/public/hooks/lead-distribution'
       path: '/api/public/hooks/lead-distribution'
@@ -2574,6 +2595,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDownloadApkRoute: ApiPublicDownloadApkRoute,
   ApiPublicHooksDeployHealthRoute: ApiPublicHooksDeployHealthRoute,
   ApiPublicHooksDriveBackupRoute: ApiPublicHooksDriveBackupRoute,
+  ApiPublicHooksGithubAccessWatchRoute: ApiPublicHooksGithubAccessWatchRoute,
   ApiPublicHooksLeadDistributionRoute: ApiPublicHooksLeadDistributionRoute,
   ApiPublicHooksLeadNeglectRoute: ApiPublicHooksLeadNeglectRoute,
   ApiPublicHooksMarketNewsRoute: ApiPublicHooksMarketNewsRoute,
