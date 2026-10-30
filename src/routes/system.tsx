@@ -332,7 +332,7 @@ function SystemBoard() {
             <Radio className="size-4 text-primary" /> ডেটা আসার ঠিকানা
           </h2>
           <p className="mt-2 text-xs text-muted-foreground">
-            অ্যান্ড্রয়েড অ্যাপ <code>x-ingest-secret</code> হেডার দিয়ে তথ্য পাঠায়।
+            অ্যান্ড্রয়েড অ্যাপ প্রতিটি agent-এর নিজস্ব <code>x-device-token</code> হেডার দিয়ে তথ্য পাঠায়।
           </p>
           <ul className="mt-3 space-y-2 text-sm">
             {ENDPOINTS.map((e) => (
