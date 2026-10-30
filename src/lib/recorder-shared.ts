@@ -77,7 +77,7 @@ export function looksLikeAudio(bytes: Uint8Array): boolean {
   if (ascii(4, 4) === "ftyp") return true; // MP4 / M4A / 3GP
   if (ascii(0, 4) === "RIFF" && ascii(8, 4) === "WAVE") return true;
   if (ascii(0, 3) === "ID3") return true;
-  if (bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0) return true; // MP3 / AAC frame sync
+  if (bytes[0] === 0xff && ((bytes[1] ?? 0) & 0xe0) === 0xe0) return true; // MP3 / AAC frame sync
   if (ascii(0, 5) === "#!AMR") return true;
   return false;
 }
