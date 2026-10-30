@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/public/agent/version")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: latest } = await supabaseAdmin
           .from("app_releases")
-          .select("version_code, version_name, release_notes, is_mandatory, released_at")
+          .select("version_code, version_name, is_mandatory")
           .order("version_code", { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -36,7 +36,8 @@ export const Route = createFileRoute("/api/public/agent/version")({
           update_available: latest.version_code > current,
           mandatory: latest.version_code > current && latest.is_mandatory,
           download_url: "/api/public/download/apk",
-          latest,
+          // Public check: only version numbers, never internal release notes.
+          latest: { version_code: latest.version_code, version_name: latest.version_name },
         });
       },
     },
