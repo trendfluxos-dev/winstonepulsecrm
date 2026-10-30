@@ -69,3 +69,4 @@
 - Rejections use shared defaults; mobile UI tests mock all writes — why: no invented facts or live test data.
 - HQ forecasts never allocate; IT GitHub cannot prove sync; version choices grant no access; call-sandbox is local — why: facts are not authority.
 - Extra Google tags use RootShell head; keep original — why: router dedupes.
+- HQ Claude briefing (claude-briefing*.ts) is on-demand, HQ/IT-gated, aggregate-only via native /v1/messages streamed server-side — why: no customer data to the model, no background AI cost.

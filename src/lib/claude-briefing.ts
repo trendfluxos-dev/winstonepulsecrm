@@ -40,4 +40,5 @@ export const BRIEFING_SYSTEM = [
   "Cover: overall activity, connection rate, hot/warm interest, follow-ups due, standout agents and one gentle point to watch.",
   "Do not give operational instructions or assign leads; HQ only observes.",
   "If there are zero calls, say so plainly in one bullet.",
+  "Plain text only: no markdown, no bold, no headings; start each bullet with •.",
 ].join(" ");
