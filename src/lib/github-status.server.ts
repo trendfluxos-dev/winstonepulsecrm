@@ -91,15 +91,19 @@ export async function readAndroidBuilds(repository: string) {
     }
     return response.json() as Promise<T>;
   }
-  const runs = await read<{ workflow_runs: GhRun[] }>(`/repos/${repository}/actions/workflows/android-apk.yml/runs?per_page=5`);
+  const runs = await read<{ workflow_runs: GhRun[] }>(`/repos/${repository}/actions/workflows/android-apk.yml/runs?per_page=10`);
   const list = runs?.workflow_runs ?? [];
   const latest = list[0];
-  const arts = latest ? await read<{ artifacts: GhArtifact[] }>(`/repos/${repository}/actions/runs/${latest.id}/artifacts?per_page=20`) : null;
+  const mapArt = (runId: number, a: GhArtifact) => ({ id: a.id, name: a.name.slice(0, 120), sizeMb: Math.round(a.size_in_bytes / 104857.6) / 10, expired: a.expired, expiresAt: a.expires_at, url: `https://github.com/${repository}/actions/runs/${runId}/artifacts/${a.id}` });
+  const artsByRun = await Promise.all(list.map(async (r) => r.status === "completed"
+    ? ((await read<{ artifacts: GhArtifact[] }>(`/repos/${repository}/actions/runs/${r.id}/artifacts?per_page=20`))?.artifacts ?? []).map((a) => mapArt(r.id, a))
+    : []));
   return {
     repository,
     workflowFound: runs !== null,
     checkedAt: new Date().toISOString(),
-    runs: list.map((r) => ({ id: r.id, status: r.status, conclusion: r.conclusion, url: r.html_url, sha: r.head_sha.slice(0, 7), branch: r.head_branch, startedAt: r.run_started_at ?? r.created_at, updatedAt: r.updated_at })),
-    artifacts: (arts?.artifacts ?? []).map((a) => ({ id: a.id, name: a.name.slice(0, 120), sizeMb: Math.round(a.size_in_bytes / 104857.6) / 10, expired: a.expired, expiresAt: a.expires_at, url: latest ? `https://github.com/${repository}/actions/runs/${latest.id}/artifacts/${a.id}` : "" })),
+    runs: list.map((r, i) => ({ id: r.id, status: r.status, conclusion: r.conclusion, url: r.html_url, sha: r.head_sha.slice(0, 7), branch: r.head_branch, startedAt: r.run_started_at ?? r.created_at, updatedAt: r.updated_at, artifacts: artsByRun[i] })),
+    artifacts: latest ? artsByRun[0] : [],
   };
 }
+
