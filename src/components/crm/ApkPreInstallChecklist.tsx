@@ -21,7 +21,7 @@ export function ApkPreInstallChecklist() {
     <h2 className="flex items-center gap-2 font-semibold"><ShieldCheck className="size-4 text-primary" />{t({ en: "Before you install — safety check", bn: "ইনস্টলের আগে — নিরাপত্তা যাচাই" })}</h2>
     <ul className="space-y-2">{ITEMS.map((it, i) => <li key={i}>
       <label className="flex gap-3 rounded-md border p-3 text-sm">
-        <Checkbox className="mt-0.5" checked={done[i]} onCheckedChange={(v) => setDone((p) => p.map((x, j) => (j === i ? v === true : x)))} />
+        <Checkbox className="mt-0.5" checked={done[i] === true} onCheckedChange={(v) => setDone((p) => p.map((x, j) => (j === i ? v === true : x)))} />
         <span><span className="font-medium">{t(it.title)}</span><span className="block text-xs text-muted-foreground">{t(it.hint)}</span></span>
       </label></li>)}</ul>
     <p className={all ? "text-sm font-medium text-primary" : "text-xs text-muted-foreground"}>

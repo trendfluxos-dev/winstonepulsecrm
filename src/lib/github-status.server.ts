@@ -102,8 +102,8 @@ export async function readAndroidBuilds(repository: string) {
     repository,
     workflowFound: runs !== null,
     checkedAt: new Date().toISOString(),
-    runs: list.map((r, i) => ({ id: r.id, status: r.status, conclusion: r.conclusion, url: r.html_url, sha: r.head_sha.slice(0, 7), branch: r.head_branch, startedAt: r.run_started_at ?? r.created_at, updatedAt: r.updated_at, artifacts: artsByRun[i] })),
-    artifacts: latest ? artsByRun[0] : [],
+    runs: list.map((r, i) => ({ id: r.id, status: r.status, conclusion: r.conclusion, url: r.html_url, sha: r.head_sha.slice(0, 7), branch: r.head_branch, startedAt: r.run_started_at ?? r.created_at, updatedAt: r.updated_at, artifacts: artsByRun[i] ?? [] })),
+    artifacts: artsByRun[0] ?? [],
   };
 }
 
