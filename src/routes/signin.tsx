@@ -175,15 +175,18 @@ function EntryCard({
   secondary?: ReactNode;
 }) {
   return (
-    <section className="group relative flex flex-col gap-3 rounded-xl border border-border bg-card p-5 transition-colors hover:border-gold focus-within:border-gold focus-within:ring-2 focus-within:ring-gold/30">
-      <span className="grid size-12 place-items-center rounded-full bg-gold/10 text-gold ring-1 ring-gold/40">
-        {icon}
-      </span>
-      <div>
-        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+    <section className="group relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-soft transition-colors hover:border-gold/70 focus-within:border-gold focus-within:ring-2 focus-within:ring-gold/30">
+      <span aria-hidden className="absolute inset-x-0 top-0 h-0.5 bg-gold/60" />
+      <div className="flex items-start gap-4">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gold/10 text-gold ring-1 ring-gold/30">
+          {icon}
+        </span>
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold tracking-tight sm:text-lg">{title}</h2>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
+        </div>
       </div>
-      <div className="mt-auto flex flex-wrap gap-2 pt-2">
+      <div className="mt-auto flex flex-wrap gap-2">
         {primary}
         {secondary}
       </div>

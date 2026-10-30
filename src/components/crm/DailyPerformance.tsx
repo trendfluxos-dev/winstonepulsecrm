@@ -22,12 +22,17 @@ const performanceQuery = queryOptions({
 
 export function DailyPerformance() {
   return (
-    <section className="mt-12 border-t border-border pt-9 sm:mt-16 sm:pt-12" aria-labelledby="daily-performance-title">
-      <h2 id="daily-performance-title" className="font-hand text-4xl font-semibold sm:text-5xl">
-        <Bi en="Daily Task Performance" bn="প্রতিদিনের কাজের ফলাফল" />
-      </h2>
-      <p className="mt-3 text-sm text-muted-foreground">5:30 PM · Asia/Dhaka</p>
-      <p className="mt-3 text-xs text-muted-foreground">Score = {SCORE_FORMULA}. Audio and sync delays contribute no points or penalties. Historical results are recalculated from saved activity and current assignment state, not locked snapshots.</p>
+    <section className="mt-12 rounded-2xl border border-border bg-card p-5 shadow-soft sm:mt-16 sm:p-8" aria-labelledby="daily-performance-title">
+      <div className="flex items-start justify-between gap-3">
+        <h2 id="daily-performance-title" className="font-hand text-3xl font-semibold sm:text-5xl">
+          <Bi en="Daily Task Performance" bn="প্রতিদিনের কাজের ফলাফল" />
+        </h2>
+        <span className="mt-1 shrink-0 rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1 text-[11px] font-semibold text-gold">5:30 PM · Dhaka</span>
+      </div>
+      <details className="mt-4 rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+        <summary className="cursor-pointer font-medium text-foreground">How the score works</summary>
+        <p className="mt-2 leading-relaxed">Score = {SCORE_FORMULA}. Audio and sync delays contribute no points or penalties. Historical results are recalculated from saved activity and current assignment state, not locked snapshots.</p>
+      </details>
       <Suspense fallback={<p className="mt-6 text-sm text-muted-foreground">Loading…</p>}>
         <PerformanceResults />
       </Suspense>
@@ -101,11 +106,12 @@ function ResultsBoard({ data }: { data: ResultsData | null }) {
       {remaining.length > 0 && (
         <div className="mt-8">
           <h3 className="text-base font-semibold"><Bi en="Other agents" bn="অন্যান্য এজেন্ট" /></h3>
-          <ul className="mt-3 divide-y divide-border">
-            {remaining.map((agent) => (
-              <li key={agent.agentId} className="flex items-center justify-between gap-4 py-4">
-                <div className="min-w-0"><p className="break-words text-sm font-semibold">{agent.name}</p><p className="mt-1 text-xs text-muted-foreground">{t({ en: "Completed", bn: "শেষ হয়েছে" })}: {agent.completed}</p></div>
-                <span className="shrink-0 text-right text-lg font-semibold tabular-nums">{agent.score}<span className="block text-xs font-normal text-muted-foreground">{t({ en: "points", bn: "পয়েন্ট" })}</span></span>
+          <ul className="mt-3 overflow-hidden rounded-xl border border-border divide-y divide-border">
+            {remaining.map((agent, index) => (
+              <li key={agent.agentId} className="flex items-center gap-3 bg-background/40 px-3 py-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted text-xs font-semibold text-muted-foreground tabular-nums">{highlighted.length + index + 1}</span>
+                <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{agent.name}</p><p className="mt-0.5 text-xs text-muted-foreground">{t({ en: "Completed", bn: "শেষ হয়েছে" })}: {agent.completed}</p></div>
+                <span className="shrink-0 rounded-lg bg-muted px-2.5 py-1 text-right text-base font-semibold tabular-nums">{agent.score}<span className="ml-1 text-[10px] font-normal text-muted-foreground">{t({ en: "pts", bn: "পয়েন্ট" })}</span></span>
               </li>
             ))}
           </ul>
