@@ -38,12 +38,12 @@ export const getItPhoneTestReports = createServerFn({ method: "POST" })
     if (adminTokenScope(data.adminToken) !== "full") throw new Error("Full IT PIN required");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin.from("phone_test_reports")
-      .select("id, created_at, phone_model, app_version, results, failed_count, issue, profiles(full_name)")
+      .select("id, created_at, phone_model, app_version, results, failed_count, issue, profiles(name)")
       .eq("sent_to_it", true).order("created_at", { ascending: false }).limit(50);
     if (error) throw new Error("IT reports unavailable");
     return (rows ?? []).map((r) => ({
       id: r.id, createdAt: r.created_at, phoneModel: r.phone_model, appVersion: r.app_version,
       results: r.results as Record<string, string>, failedCount: r.failed_count, issue: r.issue,
-      agent: (r.profiles as { full_name?: string } | null)?.full_name ?? "—",
+      agent: (r.profiles as { name?: string } | null)?.name ?? "—",
     }));
   });
