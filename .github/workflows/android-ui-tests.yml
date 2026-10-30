@@ -105,6 +105,9 @@ jobs:
           script: ./gradlew --no-daemon connectedSandboxAndroidTest
 
       - name: Upload test reports
+        # GitHub artifact storage is shared workspace-wide; when the quota is
+        # hit the upload fails but that must not fail the tests themselves.
+        continue-on-error: true
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
