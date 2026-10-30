@@ -40,7 +40,7 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
         }
         const { resolveApiCaller } = await import("@/lib/device-auth.server");
         const caller = await resolveApiCaller(request);
-        if (caller.kind === "none") return json({ error: "Unauthorized" }, 401);
+        if (caller.kind !== "device") return json({ error: "Unauthorized" }, 401);
 
         const parsed = Payload.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return json({ error: "Invalid payload" }, 400);
@@ -54,7 +54,7 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
         // Only an authenticated device may self-own its capture. Any other
         // inbound record lands unassigned: LeadHub Nexus is the only
         // assignment path (no round-robin, no browser-supplied agent_id).
-        const requestedAgentId = caller.kind === "device" ? caller.profile.id : null;
+        const requestedAgentId = caller.profile.id;
         if (requestedAgentId) {
           const { data: agent } = await supabaseAdmin
             .from("profiles")
@@ -84,7 +84,7 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
           // Version data guarantee: remember which app version captured this
           // lead (and whether it was written offline), so the data can be
           // handed back if that version is replaced or reinstalled.
-          if (result.leadId && caller.kind === "device") {
+          if (result.leadId) {
             const { recordVersionData } = await import("@/lib/version-ledger.server");
             await recordVersionData({
               entityType: "lead",

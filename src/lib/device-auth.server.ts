@@ -1,16 +1,15 @@
 /**
  * Per-device authentication for the Winstone Connect Android app.
  *
- * The distributed APK no longer carries the privileged shared INGEST_SECRET.
+ * The distributed APK no longer carries any privileged shared secret.
  * Instead the phone signs in once with the agent's CRM email + password and
  * receives a long random device token, bound to that agent profile and stored
  * only as a SHA-256 hash in `agent_devices`. Every later phone request carries
  * `x-device-token`; the server resolves the agent from the token, so a phone can
  * never act as another agent.
  *
- * INGEST_SECRET still authenticates trusted server-to-server callers (website
- * lead webhooks, cron sweeps, the ingest tester) — it is simply not shipped to
- * end-user devices any more.
+ * There is no shared-secret / trusted-server path: the CRM receives no data
+ * from external systems, so every public phone endpoint is device-token only.
  */
 import type { Database } from "@/integrations/supabase/types";
 import type { SafeProfile } from "@/lib/profile-columns";
@@ -19,28 +18,13 @@ export type Profile = SafeProfile;
 export type AgentDevice = Database["public"]["Tables"]["agent_devices"]["Row"];
 
 export type ApiCaller =
-  { kind: "device"; device: AgentDevice; profile: Profile } | { kind: "server" } | { kind: "none" };
+  { kind: "device"; device: AgentDevice; profile: Profile } | { kind: "none" };
 
 export function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
-}
-
-function constantTimeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i += 1) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
-
-/** Trusted server-to-server secret (never shipped inside the APK). */
-export function serverSecretValid(request: Request): boolean {
-  const secret = process.env["INGEST_SECRET"];
-  const provided = request.headers.get("x-ingest-secret") ?? "";
-  if (!secret) return false;
-  return constantTimeEqual(secret, provided);
 }
 
 export async function hashToken(token: string): Promise<string> {
@@ -129,10 +113,7 @@ export async function issueDeviceToken(input: {
   return { token, deviceId: data.id };
 }
 
-/**
- * Resolves the caller of a public phone endpoint. Device tokens win; the
- * server secret is accepted for trusted back-office callers only.
- */
+/** Resolves the caller of a public phone endpoint: a valid device token, or none. */
 export async function resolveApiCaller(request: Request): Promise<ApiCaller> {
   const token = request.headers.get("x-device-token")?.trim();
   if (token && token.length >= 32) {
@@ -163,7 +144,6 @@ export async function resolveApiCaller(request: Request): Promise<ApiCaller> {
     return { kind: "none" };
   }
 
-  if (serverSecretValid(request)) return { kind: "server" };
   return { kind: "none" };
 }
 

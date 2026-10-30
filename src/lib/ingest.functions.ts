@@ -85,12 +85,10 @@ export const runIngestDiagnostics = createServerFn({ method: "POST" })
     return {
       checks: [
         {
-          key: "ingest_secret",
-          label: "Ingest secret configured",
-          ok: Boolean(process.env["INGEST_SECRET"]),
-          detail: process.env["INGEST_SECRET"]
-            ? "Phones must send the x-ingest-secret header"
-            : "Set the ingest secret before the phones go live",
+          key: "device_auth",
+          label: "Phone sign-in",
+          ok: true,
+          detail: "Phones authenticate with each agent's own device token; no shared secret is used",
         },
         {
           key: "ai_key",

@@ -173,16 +173,6 @@ export async function buildSystemNotices(): Promise<{
     });
   }
 
-  if (!process.env["INGEST_SECRET"]) {
-    notices.push({
-      id: "ingest-secret",
-      level: "critical",
-      title: "ইনজেস্ট সিক্রেট সেট করা নেই",
-      detail: "অ্যান্ড্রয়েড অ্যাপ থেকে কল, রেকর্ডিং ও WhatsApp লগ সার্ভারে ঢুকতে পারবে না।",
-      action: "Ingest Check থেকে পরীক্ষা করুন",
-    });
-  }
-
   if (notices.length === 0) {
     notices.push({
       id: "all-clear",

@@ -27,23 +27,17 @@ export const Route = createFileRoute("/api/public/ingest/message")({
       POST: async ({ request }) => {
         const { resolveApiCaller } = await import("@/lib/device-auth.server");
         const caller = await resolveApiCaller(request);
-        if (caller.kind === "none") return json({ error: "Unauthorized" }, 401);
+        if (caller.kind !== "device") return json({ error: "Unauthorized" }, 401);
 
         const parsed = Payload.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return json({ error: "Invalid payload" }, 400);
         const body = parsed.data;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { resolveAgent, resolveLeadId } = await import("@/lib/ingest-resolve.server");
+        const { resolveLeadId } = await import("@/lib/ingest-resolve.server");
 
         // A phone always logs as its own agent — the body cannot spoof another.
-        const agent =
-          caller.kind === "device"
-            ? { id: caller.profile.id }
-            : await resolveAgent({
-                agentId: body.agent_id ?? null,
-                employeeId: body.employee_id ?? null,
-              });
+        const agent = { id: caller.profile.id };
 
         const { leadId, created, invalidPhone } = await resolveLeadId({
           leadId: body.lead_id ?? null,

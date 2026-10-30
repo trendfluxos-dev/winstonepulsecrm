@@ -14,7 +14,6 @@ const loginLimiter = createFailureLimiter(10, 5 * 60_000);
  * Sign-in for the Winstone Connect Android app.
  *
  * POST /api/public/agent/login  { email, password }
- * Header: x-ingest-secret
  *
  * Same credentials as the web CRM: the agent types the email + password of
  * their Winstone Connect account, the server verifies it with Auth and returns

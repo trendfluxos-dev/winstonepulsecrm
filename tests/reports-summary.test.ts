@@ -31,12 +31,6 @@ describe("reports summary handler (mocked resolver result)", () => {
     expect((await call("", { kind: "none" }).res).status).toBe(401);
   });
 
-  it("refuses the shared server secret path", async () => {
-    const { res, loadOwnData } = call("", { kind: "server" });
-    expect((await res).status).toBe(401);
-    expect(loadOwnData).not.toHaveBeenCalled();
-  });
-
   it("forbids asking for another agent by id or employee id", async () => {
     expect((await call(`?agent_id=${OTHER_ID}`, deviceCaller()).res).status).toBe(403);
     expect((await call("?employee_id=WIN2699", deviceCaller()).res).status).toBe(403);

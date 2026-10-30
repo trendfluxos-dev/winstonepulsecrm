@@ -34,7 +34,8 @@ describe("inbound lead intake", () => {
   it("never auto-assigns or trusts a payload agent_id", () => {
     const src = readFileSync("src/routes/api/public/ingest/lead.ts", "utf8");
     expect(src).not.toMatch(/Round-robin/);
-    expect(src).toMatch(/caller\.kind === "device" \? caller\.profile\.id : null/);
+    expect(src).toMatch(/caller\.kind !== "device"/);
+    expect(src).toMatch(/const requestedAgentId = caller\.profile\.id;/);
   });
 });
 

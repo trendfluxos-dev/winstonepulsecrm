@@ -5,8 +5,8 @@ import { createFileRoute } from "@tanstack/react-router";
  *
  * Safe to call repeatedly: each recording carries its own state and attempt
  * count, so a sweep only picks up rows that are still pending or retryable.
- * Callable by the IT Console, by the upload route, or by a scheduler with the
- * server INGEST_SECRET / LOVABLE_CRON_SECRET.
+ * Callable only by the managed scheduler with x-cron-secret
+ * (LOVABLE_CRON_SECRET / SHIFT_CRON_SECRET / stored schedule secret).
  */
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -19,8 +19,6 @@ export const Route = createFileRoute("/api/public/ingest/analyze")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const { resolveApiCaller } = await import("@/lib/device-auth.server");
-        const caller = await resolveApiCaller(request);
         const cronHeader = request.headers.get("x-cron-secret") ?? "";
 
         // The database scheduler signs with the shared secret stored in
