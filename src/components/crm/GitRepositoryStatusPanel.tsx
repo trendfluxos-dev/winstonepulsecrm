@@ -15,6 +15,7 @@ export function GitRepositoryStatusPanel() {
   const [repository, setRepository] = useState("trendfluxos-dev/winstone-pulse-crm");
   const [branch, setBranch] = useState("");
   const [retryUsed, setRetryUsed] = useState(false);
+  const [finishedAt, setFinishedAt] = useState<string | null>(null);
   const load = useServerFn(getGithubRepositoryStatus);
   const historyLoad = useServerFn(getGithubCheckHistory);
   const adminToken = useAdminToken();
@@ -24,7 +25,8 @@ export function GitRepositoryStatusPanel() {
     enabled: Boolean(adminToken) && githubCheckInput.safeParse({ adminToken, repository: repository.trim() }).success,
     retry: false, staleTime: 60_000 });
   const check = useMutation({ mutationFn: () => load({ data: githubCheckInput.parse({ adminToken: getAdminToken(), repository: repository.trim(), ...(branch.trim() ? { branch: branch.trim() } : {}) }) }),
-    onSettled: () => void qc.invalidateQueries({ queryKey: ["github-check-history"] }) });
+    onMutate: () => setFinishedAt(null),
+    onSettled: () => { setFinishedAt(new Date().toISOString()); void qc.invalidateQueries({ queryKey: ["github-check-history"] }); } });
   const result = !check.isPending && !check.isError ? check.data : undefined;
   const recovery = githubRecovery(check.error?.message ?? "");
   const unknown = t({ en: "Unavailable — check Project settings → Git", bn: "অনুপলব্ধ — Project settings → Git-এ দেখুন" });
@@ -32,10 +34,16 @@ export function GitRepositoryStatusPanel() {
     <section className="space-y-4 border-t border-border py-4" aria-label="GitHub repository status">
       <h2 className="flex items-center gap-2 font-semibold"><Github className="size-4 text-primary" />{t({ en: "GitHub repository status", bn: "GitHub রিপোজিটরির অবস্থা" })}</h2>
       <form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={e => { e.preventDefault(); setRetryUsed(false); check.mutate(); }}>
-        <label className="min-w-0 flex-1 space-y-1 text-sm">{t({ en: "Repository to inspect", bn: "যে রিপোজিটরি যাচাই করবেন" })}<Input value={repository} maxLength={200} pattern="[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+" onChange={e => { setRepository(e.target.value); check.reset(); }} placeholder="owner/repository" required /></label>
-        <label className="space-y-1 text-sm sm:w-48">{t({ en: "Branch (default if blank)", bn: "ব্রাঞ্চ (খালি হলে ডিফল্ট)" })}<Input value={branch} maxLength={200} onChange={e => { setBranch(e.target.value); check.reset(); }} /></label>
-        <Button type="submit" variant="outline" disabled={check.isPending}><RefreshCw className={`size-4 ${check.isPending ? "animate-spin" : ""}`} />{t({ en: "Check GitHub", bn: "GitHub যাচাই" })}</Button>
+        <label className="min-w-0 flex-1 space-y-1 text-sm">{t({ en: "Repository to inspect", bn: "যে রিপোজিটরি যাচাই করবেন" })}<Input disabled={check.isPending} value={repository} maxLength={200} pattern="[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+" onChange={e => { setRepository(e.target.value); check.reset(); }} placeholder="owner/repository" required /></label>
+        <label className="space-y-1 text-sm sm:w-48">{t({ en: "Branch (default if blank)", bn: "ব্রাঞ্চ (খালি হলে ডিফল্ট)" })}<Input disabled={check.isPending} value={branch} maxLength={200} onChange={e => { setBranch(e.target.value); check.reset(); }} /></label>
+        <Button type="submit" variant="outline" disabled={check.isPending}><RefreshCw className={`size-4 ${check.isPending ? "animate-spin motion-reduce:animate-none" : ""}`} />{check.isPending ? t({ en: "Checking…", bn: "যাচাই হচ্ছে…" }) : t({ en: "Re-check GitHub", bn: "GitHub পুনরায় যাচাই" })}</Button>
       </form>
+      <div aria-live="polite" aria-atomic="true" className="space-y-1 text-sm">
+        {(check.isSuccess || check.isError) && <>
+          <p className={check.isError ? "font-medium text-destructive" : "font-medium text-foreground"}>{t({ en: "Latest GitHub check", bn: "সর্বশেষ GitHub যাচাই" })}: {check.isError ? t({ en: "Failed", bn: "ব্যর্থ" }) : t({ en: "Successful", bn: "সফল" })}</p>
+          {(check.isSuccess ? check.data.checkedAt : finishedAt) && <p className="text-xs text-muted-foreground">{check.isError ? t({ en: "Attempt finished (this device)", bn: "চেষ্টা শেষ হয়েছে (এই ডিভাইসের সময়)" }) : t({ en: "Verified at", bn: "যাচাইয়ের সময়" })}: <time dateTime={check.isSuccess ? check.data.checkedAt : finishedAt ?? undefined}>{new Date(check.isSuccess ? check.data.checkedAt : finishedAt ?? "").toLocaleString("en-GB", { timeZone: "Asia/Dhaka" })} Dhaka</time></p>}
+        </>}
+      </div>
       {check.isError && <p role="alert" className="text-sm text-destructive">{check.error.message}</p>}
       {check.isError && <div className="space-y-2 text-sm">
         <p className="text-muted-foreground">{recovery.kind === "access" ? t({ en: "Unlock IT Console with the full IT PIN, then check again.", bn: "পূর্ণ IT PIN দিয়ে IT Console খুলে আবার যাচাই করুন।" }) : recovery.kind === "connection" ? t({ en: "Check GitHub connection and repository access in Lovable connector settings before retrying.", bn: "আবার চেষ্টা করার আগে Lovable connector settings-এ GitHub সংযোগ ও অনুমতি দেখুন।" }) : recovery.kind === "repository" ? t({ en: "Verify the repository and branch, or check the default branch.", bn: "রিপোজিটরি ও ব্রাঞ্চ যাচাই করুন, অথবা ডিফল্ট ব্রাঞ্চ দেখুন।" }) : t({ en: "The read failed. Retry once; no repository changes will be made.", bn: "তথ্য পড়া যায়নি। একবার আবার চেষ্টা করুন; রিপোজিটরি বদলাবে না।" })}</p>
