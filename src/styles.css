@@ -215,6 +215,8 @@
   --color-button-hover: var(--button-hover);
   --color-gold-hover: var(--gold-hover);
   --color-gold-ink: var(--gold-ink);
+  --color-silver: var(--silver);
+  --color-bronze: var(--bronze);
   --font-display: "Inter", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
@@ -274,6 +276,8 @@
   --gold-hover: oklch(from #AD8744 l c h);
   --gold-strong: var(--gold-hover);
   --gold-ink: oklch(0.46 0.08 80);
+  --silver: oklch(0.68 0.01 260);
+  --bronze: oklch(0.58 0.09 55);
   --charcoal: var(--foreground);
   --plate-ink: oklch(0 0 0);
   --button-foreground: var(--card);
