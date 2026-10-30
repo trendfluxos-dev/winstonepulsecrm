@@ -6,7 +6,7 @@ import { z } from "zod";
  *
  * POST /api/public/ingest/outcome
  * Header: x-device-token (per-agent; the agent comes from the token)
- * Body: { lead_id, agent_id?, outcome, notes?, connected? }
+ * Body: { lead_id, outcome, notes?, connected?, call_uid? } (agent_id ignored)
  *
  * Moves the lead to the right stage, appends the agent's in-call notes and
  * bumps the attempt counter so the web queue matches the phone instantly.
@@ -25,6 +25,8 @@ const Body = z.object({
   outcome: z.enum(["interested", "follow_up", "not_interested", "wrong_number", "no_answer"]),
   notes: z.string().max(4000).optional(),
   connected: z.boolean().optional(),
+  /** Stable id generated once per call on the phone and reused on every retry. */
+  call_uid: z.string().trim().min(8).max(80).regex(/^[A-Za-z0-9._:-]+$/).optional(),
 });
 
 function json(body: unknown, status = 200): Response {
@@ -52,7 +54,7 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
         if (!parsed.success) {
           return json({ error: "Invalid payload", issues: parsed.error.issues }, 400);
         }
-        const { lead_id, outcome, notes, connected } = parsed.data;
+        const { lead_id, outcome, notes, connected, call_uid } = parsed.data;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { leadNotAssignedTo, LEAD_NOT_YOURS } = await import("@/lib/lead-access.server");
@@ -71,6 +73,23 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
           return json({ error: LEAD_NOT_YOURS }, 403);
         }
 
+        if (call_uid) {
+          // Idempotent per agent + call_uid: retries return the first result and
+          // never append notes, attempts or timeline events twice.
+          const { data, error } = await supabaseAdmin.rpc("apply_phone_outcome_atomic", {
+            _agent: caller.profile.id, _lead: lead_id, _call_uid: call_uid, _outcome: outcome,
+            _status: OUTCOME_STAGE[outcome], _notes: notes?.trim() ?? "", _connected: connected === true,
+          });
+          if (error) {
+            if (/another lead/.test(error.message)) return json({ error: "call_uid already used for another lead" }, 409);
+            if (/not assigned/.test(error.message)) return json({ error: LEAD_NOT_YOURS }, 403);
+            return json({ error: "Outcome could not be saved", retryable: true }, 500);
+          }
+          return json({ ...(data as Record<string, unknown>), idempotent: true });
+        }
+
+        // Legacy payload (older app, no call_uid): applied once as before, but
+        // flagged non-idempotent so the phone/IT know retries may duplicate.
         const stamp = new Date();
         const trimmed = notes?.trim();
         const appended = trimmed
@@ -104,6 +123,8 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
           status: OUTCOME_STAGE[outcome],
           outcome,
           server_time: stamp.toISOString(),
+          idempotent: false,
+          legacy: true,
         });
       },
     },

@@ -38,7 +38,18 @@ vi.mock("@/lib/ai-model.server", () => ({
 
 vi.mock("@/lib/service-bill-review.server", () => ({ currentServiceBill: async () => { state.configReads++; return { bill_id: "bill-a", amount: 35.29 }; } }));
 vi.mock("@/lib/support.server", () => ({ escalateConversation: async () => { state.escalations++; return { ref: "TKT-1" }; } }));
-vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: { from: (table: string) => {
+vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: {
+  // finalize_call_report_v2 is the single transaction: the report patch is what
+  // would be committed; lead writes happen only when the lead is still owned.
+  rpc: async (fn: string, args: Record<string, unknown>) => {
+    if (fn !== "finalize_call_report_v2") return { data: null, error: null };
+    state.writes.push({ table: "call_reports", patch: args._report_patch as Record<string, unknown> });
+    if (!state.allowSubmit) throw new Error("captured submission");
+    const reassigned = (state.leadOwner ?? null) !== args._agent;
+    if (!reassigned && args._lead_patch) state.writes.push({ table: "leads", patch: args._lead_patch as Record<string, unknown> });
+    return { data: { alreadySubmitted: false, reassigned, followUpId: null, currentOwnerId: reassigned ? state.leadOwner : null }, error: null };
+  },
+  from: (table: string) => {
   let selection = "";
   let filter = "";
   const result = () => {

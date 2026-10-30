@@ -181,11 +181,8 @@ export const Route = createFileRoute("/api/public/agent/report")({
           return json({ ok: true, report_id: report.id, reused: report.reused }, 201);
         }
 
-        {
-          const { requireAgentBriefing } = await import("@/lib/agent-briefing.server");
-          const block = await requireAgentBriefing(caller.profile.id);
-          if (block) return json({ error: block.reason, briefing: block.briefing }, 403);
-        }
+        // No 9:05 briefing gate here: completing a pending report (including a
+        // historical call) must never be blocked; new calls are gated at call-start.
         try {
           const result = await submitCallReport({
             reportId: body.report_id,

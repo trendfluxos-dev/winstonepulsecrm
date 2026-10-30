@@ -80,7 +80,7 @@ object AgentSession {
 
     /** Synchronous, cold-start-safe device token for Workers and receivers. */
     fun deviceTokenNow(context: Context): String? =
-        deviceToken ?: mirror(context).getString(M_DEVICE_TOKEN, null)?.also { deviceToken = it }
+        deviceToken ?: SecureTokenStore.read(context)?.also { deviceToken = it }
 
     fun deviceIdNow(context: Context): String? =
         deviceId ?: mirror(context).getString(M_DEVICE_ID, null)?.also { deviceId = it }
@@ -114,7 +114,12 @@ object AgentSession {
         m.getString(M_ALLOWED_ROLES, null)
             ?.split(',')?.map { it.trim() }?.filter { it.isNotEmpty() }
             ?.takeIf { it.isNotEmpty() }?.let { allowedRoles = it }
-        deviceToken = m.getString(M_DEVICE_TOKEN, null)
+        // One-time migration: a token left in plain storage by an older build
+        // moves into Keystore-backed storage and the plain copies are erased.
+        val legacyPlain = m.getString(M_DEVICE_TOKEN, null)
+        if (!legacyPlain.isNullOrBlank() && SecureTokenStore.read(context) == null) SecureTokenStore.write(context, legacyPlain)
+        if (legacyPlain != null) m.edit().remove(M_DEVICE_TOKEN).commit()
+        deviceToken = SecureTokenStore.read(context)
         deviceId = m.getString(M_DEVICE_ID, null)
         simNumber = m.getString(M_SIM, null)
 
@@ -126,7 +131,11 @@ object AgentSession {
         prefs[ALLOWED_ROLES]
             ?.split(',')?.map { it.trim() }?.filter { it.isNotEmpty() }
             ?.takeIf { it.isNotEmpty() }?.let { allowedRoles = it }
-        prefs[DEVICE_TOKEN]?.let { deviceToken = it }
+        prefs[DEVICE_TOKEN]?.let { plain ->
+            if (SecureTokenStore.read(context) == null) SecureTokenStore.write(context, plain)
+            deviceToken = SecureTokenStore.read(context)
+            context.sessionStore.edit { it.remove(DEVICE_TOKEN) }
+        }
         prefs[DEVICE_ID]?.let { deviceId = it }
         prefs[SIM_NUMBER]?.let { simNumber = it }
         m.edit()
@@ -135,7 +144,6 @@ object AgentSession {
             .putString(M_NAME, agentName)
             .putString(M_SELECTED_ROLE, selectedRole)
             .putString(M_ALLOWED_ROLES, allowedRoles.joinToString(","))
-            .putString(M_DEVICE_TOKEN, deviceToken)
             .putString(M_DEVICE_ID, deviceId)
             .putString(M_SIM, simNumber)
             .apply()
@@ -158,11 +166,13 @@ object AgentSession {
 
     /** Stores the device token the CRM issued for this phone. */
     suspend fun saveDevice(context: Context, token: String, id: String) {
-        deviceToken = token
+        // Keystore-encrypted only. If secure storage fails, keep no token so
+        // isSignedIn() stays false instead of falling back to plain text.
+        deviceToken = if (SecureTokenStore.write(context, token)) token else null
         deviceId = id
-        mirror(context).edit().putString(M_DEVICE_TOKEN, token).putString(M_DEVICE_ID, id).commit()
+        mirror(context).edit().remove(M_DEVICE_TOKEN).putString(M_DEVICE_ID, id).commit()
         context.sessionStore.edit {
-            it[DEVICE_TOKEN] = token
+            it.remove(DEVICE_TOKEN)
             it[DEVICE_ID] = id
         }
     }
@@ -178,7 +188,8 @@ object AgentSession {
         }
     }
 
-    fun isSignedIn(): Boolean = !employeeId.isNullOrBlank()
+    /** Signed in only with both an identity and a stored device token. */
+    fun isSignedIn(): Boolean = SessionRules.isSignedIn(employeeId, deviceToken)
 
     /** Stores the desks the server allows for this account. */
     suspend fun saveAllowedRoles(context: Context, roles: List<String>) {
@@ -198,6 +209,13 @@ object AgentSession {
     suspend fun clear(context: Context) {
         employeeId = null; agentId = null; agentName = null; selectedRole = null; allowedRoles = listOf("agent"); deviceToken = null; deviceId = null; simNumber = null
         mirror(context).edit().clear().commit()
+        SecureTokenStore.clear(context)
         context.sessionStore.edit { it.clear() }
     }
+}
+
+/** Pure session rules (unit-tested). */
+object SessionRules {
+    fun isSignedIn(employeeId: String?, token: String?): Boolean =
+        !employeeId.isNullOrBlank() && !token.isNullOrBlank() && token.trim().length >= 32
 }

@@ -373,9 +373,8 @@ export const submitMyReport = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const me = await agentOf(data.adminToken ?? null);
-    const { requireAgentBriefing } = await import("@/lib/agent-briefing.server");
-    const briefingBlock = await requireAgentBriefing(me.id);
-    if (briefingBlock) throw new Error(briefingBlock.reason);
+    // Completing a pending report is never blocked by the 9:05 briefing gate
+    // (same rule as the phone endpoint); new calls stay gated at call start.
     const { submitCallReport } = await import("@/lib/call-reports.server");
     return submitCallReport({
       reportId: data.reportId,

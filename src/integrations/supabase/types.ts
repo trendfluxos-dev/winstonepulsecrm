@@ -3818,6 +3818,36 @@ export type Database = {
         }
         Relationships: []
       }
+      phone_outcome_receipts: {
+        Row: {
+          agent_id: string
+          call_uid: string
+          created_at: string
+          id: string
+          lead_id: string
+          outcome: string
+          result: Json
+        }
+        Insert: {
+          agent_id: string
+          call_uid: string
+          created_at?: string
+          id?: string
+          lead_id: string
+          outcome: string
+          result: Json
+        }
+        Update: {
+          agent_id?: string
+          call_uid?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+          outcome?: string
+          result?: Json
+        }
+        Relationships: []
+      }
       phone_test_reports: {
         Row: {
           app_version: string | null
@@ -7092,6 +7122,18 @@ export type Database = {
         }
         Returns: Json
       }
+      apply_phone_outcome_atomic: {
+        Args: {
+          _agent: string
+          _call_uid: string
+          _connected: boolean
+          _lead: string
+          _notes: string
+          _outcome: string
+          _status: string
+        }
+        Returns: Json
+      }
       begin_pin_auth_attempt: {
         Args: { _subject: string; _surface: string }
         Returns: Json
@@ -7115,6 +7157,22 @@ export type Database = {
           _classification: Json
           _evaluation_detail: string
           _followup: Json
+          _lead_patch: Json
+          _outcome: string
+          _report: string
+          _report_patch: Json
+        }
+        Returns: Json
+      }
+      finalize_call_report_v2: {
+        Args: {
+          _agent: string
+          _audit: Json
+          _classify: boolean
+          _complete_reason: string
+          _evaluation_detail: string
+          _followup: Json
+          _followup_reason: string
           _lead_patch: Json
           _outcome: string
           _report: string

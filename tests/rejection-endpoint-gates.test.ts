@@ -16,8 +16,8 @@ describe("Android rejection endpoint keeps verified identity and briefing gates"
     it(`${category} refuses anonymous callers before report writes`, async () => {
       state.kind = "none"; expect((await post(category)).status).toBe(401); expect(state.submit).not.toHaveBeenCalled(); expect(state.ledger).not.toHaveBeenCalled();
     });
-    it(`${category} cannot spoof briefing acknowledgement`, async () => {
-      state.blocked = true; expect((await post(category)).status).toBe(403); expect(state.submit).not.toHaveBeenCalled(); expect(state.ledger).not.toHaveBeenCalled();
+    it(`${category} pending report completion is not blocked by the briefing gate`, async () => {
+      state.blocked = true; expect((await post(category)).status).toBe(200); expect(state.submit).toHaveBeenCalledWith(expect.objectContaining({ agentId: "verified-agent" }));
     });
     it(`${category} forwards only the verified device agent, ignoring forged authority/identity`, async () => {
       expect((await post(category)).status).toBe(200); expect(state.submit).toHaveBeenCalledWith(expect.objectContaining({ agentId: "verified-agent", category, durationSeconds: 3 }));
