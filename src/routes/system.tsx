@@ -3,6 +3,7 @@ import { DistributionFailurePanel } from "@/components/crm/DistributionFailurePa
 import { SystemManualCard } from "@/components/crm/SystemManualCard";
 import { DeploymentStatusPanel } from "@/components/crm/DeploymentStatusPanel";
 import { GitRepositoryStatusPanel } from "@/components/crm/GitRepositoryStatusPanel";
+import { GitHubActivityDashboard } from "@/components/crm/GitHubActivityDashboard";
 import { PAGE_SECTIONS, sectionSearch, useSection } from "@/lib/page-sections";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Coins, Database, KeyRound, Lock, Radio, Receipt } from "lucide-react";
@@ -161,6 +162,7 @@ function SystemBoard() {
         <div className="space-y-6">
           <DeploymentStatusPanel />
           <GitRepositoryStatusPanel />
+          <GitHubActivityDashboard />
           <SystemManualCard />
           <SystemUpdateReport />
           <BackendHealthPanel />
