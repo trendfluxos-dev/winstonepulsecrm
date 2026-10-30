@@ -94,7 +94,7 @@ SELECT public.apply_phone_outcome_atomic(:agent,'11111111-0000-4000-8000-0000000
 SELECT pg_temp.expect((public.apply_phone_outcome_atomic(:agent,'11111111-0000-4000-8000-000000000001','call-uid-0001','interested','contacted','note one',true)->>'duplicate')::boolean, 'replay flagged duplicate');
 SELECT pg_temp.expect((SELECT call_attempts FROM public.leads) = 1, 'attempts counted once');
 SELECT pg_temp.expect((SELECT count(*) FROM public.lead_events) = 1, 'timeline event once');
-SELECT pg_temp.expect((SELECT length(notes) - length(replace(notes,'note one',''))) = length('note one'), 'notes appended once');
+SELECT pg_temp.expect((SELECT length(notes) - length(replace(notes,'note one','')) FROM public.leads) = length('note one'), 'notes appended once');
 SELECT pg_temp.expect(pg_temp.fails($q$SELECT public.apply_phone_outcome_atomic('aaaaaaaa-0000-4000-8000-000000000001',gen_random_uuid(),'call-uid-0001','interested','contacted','',false)$q$), 'call_uid reused for other lead refused');
 SELECT pg_temp.reset();
 UPDATE public.leads SET assigned_agent_id = :other;
