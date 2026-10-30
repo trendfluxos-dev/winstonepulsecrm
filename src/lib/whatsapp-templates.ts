@@ -75,3 +75,30 @@ export const WhatsappTemplateInput = z.object({
     if (!valid) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["variables", i], message: `${label}: সঠিক তথ্য দিন (নাম / YYYY-MM-DD / পরিমাণ)` });
   });
 });
+
+/** Dhaka calendar date (YYYY-MM-DD) of an ISO timestamp. */
+export function dhakaDate(iso: string): string {
+  return new Date(new Date(iso).getTime() + 6 * 3600_000).toISOString().slice(0, 10);
+}
+
+/**
+ * Visit dates and payment amounts must come from saved CRM records, never the
+ * caller: the date must match a non-cancelled site visit for the lead and the
+ * amount must match an HQ-approved booking amount for the lead.
+ */
+export function savedFactsMatch(
+  template: WhatsAppTemplate,
+  variables: readonly string[],
+  facts: { visitAts: readonly string[]; approvedAmounts: readonly number[] },
+): string | null {
+  for (const [i, label] of template.variables.entries()) {
+    const value = variables[i] ?? "";
+    if (label === "ভিজিটের তারিখ" && !facts.visitAts.some((at) => dhakaDate(at) === value)) {
+      return "ভিজিটের তারিখ এই লিডের সংরক্ষিত সাইট ভিজিটের সাথে মিলছে না";
+    }
+    if (label === "বকেয়া পরিমাণ" && !facts.approvedAmounts.some((a) => Math.abs(a - Number(value)) < 0.005)) {
+      return "পরিমাণটি এই লিডের অনুমোদিত বুকিংয়ের সাথে মিলছে না";
+    }
+  }
+  return null;
+}

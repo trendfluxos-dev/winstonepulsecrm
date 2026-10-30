@@ -700,3 +700,13 @@
 
 ## 2026-10-29 — Android UI tests in CI
 - [x] Added .github/workflows/android-ui-tests.yml (JDK 17, Android SDK, emulator API 34, sandbox build). First run awaits GitHub sync.
+
+## 2026-10-30 — Production-readiness completion (audit plan)
+- [x] P0-1 WhatsApp inbound: already fails closed with signature check (verified in code); awaiting rescan after publish.
+- [x] P0-3 WhatsApp visit dates/amounts must match saved site visits / approved bookings; tests added.
+- [x] P0-4 Held leads re-check active + approved status at release; test added.
+- [x] P1-5 Voice notes require a real audio file signature; test added.
+- [ ] P0-2 Android keystore + local.properties still tracked in Git: now ignored, but untracking/rotation needs owner action outside the app.
+- [ ] P1-6/7/8 Messenger decisions, staff photos, release details: confirm via fresh security scan (owner runs from Security tab).
+- [ ] Publish (needs owner approval), then rescan and live marker check.
+- [ ] P2 items: handset tests, real call, Meta approvals, CI run, backup check — need devices/owner/provider.

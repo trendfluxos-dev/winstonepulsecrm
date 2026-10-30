@@ -67,6 +67,13 @@ async function writeState(next: FloorLockState) {
  * so the leads arrive on their own once the ten minutes pass — nobody has to
  * press anything. Safe to call repeatedly: a delivered batch is never redone.
  */
+export function isGrantRecipientEligible(profile: {
+  is_active?: boolean | null;
+  approval_status?: string | null;
+}): boolean {
+  return profile.is_active === true && profile.approval_status === "approved";
+}
+
 async function releaseDueGrants(state: FloorLockState): Promise<FloorLockState> {
   const due = state.pendingGrants.filter(
     (grant) => !grant.deliveredAt && grant.releaseAt && Date.now() >= new Date(grant.releaseAt).getTime(),
@@ -80,10 +87,13 @@ async function releaseDueGrants(state: FloorLockState): Promise<FloorLockState> 
   for (const grant of due) {
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("id, name")
+      .select("id, name, is_active, approval_status")
       .eq("employee_id", grant.employeeId)
       .maybeSingle();
     if (!profile) continue;
+    // Re-check at execution time: a revoked or deactivated account must never
+    // receive held leads, even if HQ approved the batch earlier.
+    if (!isGrantRecipientEligible(profile)) continue;
     try {
       const result = await grantExtraLeads({
         agentProfileId: profile.id,

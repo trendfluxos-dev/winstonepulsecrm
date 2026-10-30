@@ -107,6 +107,21 @@ export const sendWhatsappMessage = createServerFn({ method: "POST" })
       }
     }
 
+    // Dates and amounts must match saved records for this lead.
+    if (template.variables.some((l) => l === "ভিজিটের তারিখ" || l === "বকেয়া পরিমাণ")) {
+      const [visits, bookings] = await Promise.all([
+        supabaseAdmin.from("site_visits").select("visit_at, status").eq("lead_id", lead.id),
+        supabaseAdmin.from("bookings").select("amount_usd, approval_status").eq("lead_id", lead.id),
+      ]);
+      if (visits.error || bookings.error) throw new Error("সংরক্ষিত তথ্য যাচাই করা যায়নি");
+      const { savedFactsMatch } = await import("@/lib/whatsapp-templates");
+      const mismatch = savedFactsMatch(template, data.variables, {
+        visitAts: (visits.data ?? []).filter((v) => v.status !== "cancelled" && v.visit_at).map((v) => v.visit_at as string),
+        approvedAmounts: (bookings.data ?? []).filter((b) => b.approval_status === "approved" && b.amount_usd != null).map((b) => Number(b.amount_usd)),
+      });
+      if (mismatch) throw new Error(mismatch);
+    }
+
     const { assertContactable } = await import("@/lib/comms-guard.server");
     await assertContactable(lead.phone_number, "whatsapp");
 
