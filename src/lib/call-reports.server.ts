@@ -639,12 +639,10 @@ export async function submitCallReport(input: {
       .eq("id", report.recording_id);
   }
   const { logAudit } = await import("@/lib/audit.server");
-  void reassigned;
-  const reassignedFinal = reassignedAtCommit;
 
   // Separate, searchable trail for reports accepted after the lead moved owner.
-  if (reassigned) {
-    const currentOwnerId = currentLead ? (currentLead.assigned_to ?? currentLead.assigned_agent_id ?? null) : null;
+  if (reassignedAtCommit) {
+    const currentOwnerId = result.currentOwnerId ?? null;
     let currentOwnerName: string | null = null;
     if (currentOwnerId) {
       const { data: owner } = await supabaseAdmin.from("profiles").select("name").eq("id", currentOwnerId).maybeSingle();
@@ -727,7 +725,7 @@ export async function submitCallReport(input: {
     sheet,
     review,
     nextReportId: nextQueued,
-    reassigned,
+    reassigned: reassignedAtCommit,
     workState: received && classified ? ("completed" as const) : ("pending" as const),
   };
 
