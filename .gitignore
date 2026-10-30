@@ -31,3 +31,8 @@ dist-ssr
 *.sln
 *.sw?
 tmp-manual/
+
+# Android signing material and machine config — never commit
+android/local.properties
+*.jks
+*.keystore
