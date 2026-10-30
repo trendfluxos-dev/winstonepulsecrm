@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-30 — Current Git sync verification
+- [x] Read-only GitHub main head matches local saved HEAD at 96b57651ea91d4133e49142fca809dde723b2223; tracked working tree clean at 15:19:45 UTC. This is point-in-time commit evidence, not a live sync-queue check.
+- [ ] Show dated evidence in the existing full-IT-PIN System panel, retain unknown live sync fields and verify relevant tests.
+- [ ] Confirm current Lovable Git settings status and genuine IT-panel read-back; requires the owner's Git settings screenshot and full IT PIN session.
+
 ## 2026-10-29 — Publish, stale-PIN live check, support AI limits, Gemini
 - [x] WhatsApp inbound now refuses messages when no signing secret is set; published.
 - [x] Mehedi's live desk loads with a stale admin PIN saved; Call now shown and enabled. No call placed.
