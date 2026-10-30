@@ -216,4 +216,35 @@ describe("Top Performer loader (dailyTopPerformer)", () => {
     expect(board.winner?.agentId).toBe("a1");
     expect(board.winner?.photoUrl).toBeNull();
   });
+  it("only reads approved sales-agent profiles, so admin accounts never enter the board", async () => {
+    await dailyTopPerformer(new Date("2026-10-27T12:00:00Z"));
+    expect(state.filters).toEqual(expect.arrayContaining([{ table: "profiles", method: "eq", args: ["role", "agent"] }]));
+  });
+
+  it("counts only completed follow-ups and ignores rows not marked done", async () => {
+    state.profiles = [agent("a1", "Agent")];
+    state.follow_up_events = [
+      { id: "f1", agent_id: "a1", status: "done", completed_at: "2026-10-27T06:00:00Z", created_at: "2026-10-27T05:00:00Z" },
+      { id: "f1", agent_id: "a1", status: "done", completed_at: "2026-10-27T06:00:00Z", created_at: "2026-10-27T05:00:00Z" },
+      { id: "f2", agent_id: "a1", status: "scheduled", completed_at: null, created_at: "2026-10-27T05:00:00Z" },
+    ];
+    const board = await dailyTopPerformer(new Date("2026-10-27T12:00:00Z"));
+    expect([...board.topThree, ...board.otherAgents].find((l) => l.agentId === "a1")?.followUps).toBe(1);
+  });
+
+  it("does not award connected-call points for an unverified connection", async () => {
+    state.profiles = [agent("a1", "Agent")];
+    state.call_reports = [{ ...report("a1", true, "lead-1"), connection_verified: false, submitted_at: "2026-10-27T06:00:00Z" }];
+    const board = await dailyTopPerformer(new Date("2026-10-27T12:00:00Z"));
+    const line = [...board.topThree, ...board.otherAgents].find((l) => l.agentId === "a1");
+    expect(line?.connected).toBe(0);
+  });
+
+  it("gives no Top 3 when every agent has zero activity", async () => {
+    state.profiles = [agent("a1", "A"), agent("a2", "B")];
+    const board = await dailyTopPerformer(new Date("2026-10-27T12:00:00Z"));
+    expect(board.topThree).toEqual([]);
+    expect(board.winner).toBeNull();
+    expect(board.generatedAt).toBe("2026-10-27T12:00:00.000Z");
+  });
 });
