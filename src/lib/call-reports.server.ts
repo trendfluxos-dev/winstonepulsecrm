@@ -437,6 +437,8 @@ export async function submitCallReport(input: {
       .select("ai_grade, analysis_status, agent_id, lead_id").eq("id", report.recording_id).maybeSingle();
     if (gradedRecording?.agent_id === input.agentId && gradedRecording.lead_id === report.lead_id && gradedRecording.analysis_status === "completed" && LEAD_GRADES.includes(gradedRecording.ai_grade as LeadGrade)) trustedGrade = gradedRecording.ai_grade;
   }
+  // No completed, matched AI grade: the agent's own pick is the only evidence (AI grade still wins when present).
+  if (received && !trustedGrade && LEAD_GRADES.includes(input.grade as LeadGrade)) trustedGrade = input.grade as LeadGrade;
   const { followUpPriorityFor } = await import("@/lib/follow-up-priority");
   const followUpPriority = input.followUpAt
     ? evaluation?.priority ?? followUpPriorityFor(effectiveTemperature)
