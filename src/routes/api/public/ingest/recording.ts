@@ -4,8 +4,8 @@ import { z } from "zod";
 /**
  * Call recording upload from the Winstone Connect Android app.
  *
- * Authentication: `x-device-token` (per-device, bound to one agent profile) or
- * the server-side INGEST_SECRET for trusted back-office callers.
+ * Authentication: `x-device-token` only (per-device, bound to one agent
+ * profile). There is no shared-secret path.
  *
  * Audio is stored first and answered immediately; transcription + AI analysis
  * run afterwards through the durable queue (`analysis_status` on the row, swept
@@ -112,8 +112,8 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         const { ingestRecording } = await import("@/lib/call-intel.server");
-        const { resolveAgent, resolveLeadId } = await import("@/lib/ingest-resolve.server");
-        const { bindAgentSim, resolveAgentBySim, simMatchesAgent } =
+        const { resolveLeadId } = await import("@/lib/ingest-resolve.server");
+        const { bindAgentSim, simMatchesAgent } =
           await import("@/lib/agent-sim.server");
 
         let agent: { id: string } | null = null;
@@ -133,12 +133,6 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             });
           }
           agent = { id: caller.profile.id };
-        } else {
-          agent =
-            (await resolveAgent({
-              agentId: body.agent_id ?? null,
-              employeeId: body.employee_id ?? null,
-            })) ?? (await resolveAgentBySim(body.sim_number ?? null));
         }
 
         const { leadId, invalidPhone } = await resolveLeadId({
