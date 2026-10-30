@@ -99,7 +99,6 @@ function EntryHall() {
   const navigate = useNavigate();
   const { scope } = useMyAccount();
   const [pinOpen, setPinOpen] = useState(false);
-  const [versionOpen, setVersionOpen] = useState(false);
   const [pinTarget, setPinTarget] = useState<"/hq" | "/system" | "/leadhub">("/hq");
   const openPin = (target: "/hq" | "/system" | "/leadhub") => {
     setPinTarget(target);
@@ -242,8 +241,8 @@ function EntryHall() {
         </p>
 
         <div className="mx-auto mt-8 w-full max-w-md rounded-xl border border-border bg-card p-4 sm:p-6">
-          <Button onClick={() => setVersionOpen(true)} variant="plate" size="lg" className="h-auto w-full rounded-md py-2.5 text-base font-bold md:h-auto">
-              <span className="leading-tight"><span lang="en" className="block">Get started</span></span> <ChevronRight className="size-5" />
+          <Button asChild variant="plate" size="lg" className="h-auto w-full rounded-md py-2.5 text-base font-bold md:h-auto">
+            <Link to="/signin"><span className="leading-tight"><span lang="en" className="block">Get started</span></span> <ChevronRight className="size-5" /></Link>
           </Button>
           <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
             <span lang="en" className="block">Optional — pick a device above so we remember your preferred view.</span>
@@ -252,7 +251,6 @@ function EntryHall() {
 
 
         <section className="mt-10 rounded-xl border border-border bg-card p-5 sm:p-6">
-          <Button asChild variant="outline" className="mb-4"><Link to="/versions">Preview &amp; phone upgrade options</Link></Button>
           <Button asChild variant="ghost" className="mb-4"><Link to="/call-sandbox">Offline call sandbox</Link></Button>
           <h2 className="text-lg font-bold tracking-tight">
             <span lang="en" className="block">Are you a Winstone sales agent?</span>
@@ -346,26 +344,6 @@ function EntryHall() {
         </footer>
       </main>
 
-      <Dialog open={versionOpen} onOpenChange={setVersionOpen}>
-        <DialogContent className="theme-exec">
-          <DialogHeader>
-            <DialogTitle>Choose your version</DialogTitle>
-            <DialogDescription>Continue with Preview or review the updated Android phone version.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-1">
-            <h2 className="flex items-center gap-2 font-semibold"><Globe className="size-5 text-gold" />Previous version · Preview</h2>
-            <p className="text-sm font-medium">No new phone-upgrade payment required.</p>
-            <p className="text-sm text-muted-foreground">Pre-midnight release record: 2.13</p>
-            <Button asChild className="h-auto w-full whitespace-normal py-3"><Link to="/signin">Continue with previous version<ChevronRight className="size-4 shrink-0" /></Link></Button>
-          </div>
-          <div className="space-y-3 border-t border-border pt-4">
-            <h2 className="flex items-center gap-2 font-semibold"><Smartphone className="size-5 text-gold" />Updated Android version</h2>
-            <p className="text-sm text-muted-foreground">Review call detection, recording pickup, summaries and diagnostics before upgrading. Recording depends on your phone; testing is still required.</p>
-            <p className="text-sm text-muted-foreground">Payment must be verified and approved by the Architect before unlock. The upgrade price is not confirmed, so no payable bill is available yet.</p>
-            <Button asChild variant="outline" className="h-auto w-full whitespace-normal py-3"><Link to="/versions">Continue with updated version<ChevronRight className="size-4 shrink-0" /></Link></Button>
-          </div>
-        </DialogContent>
-      </Dialog>
       <AdminPinDialog
         open={pinOpen}
         onOpenChange={setPinOpen}
