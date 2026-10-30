@@ -158,6 +158,9 @@ class DeskViewModel(private val app: Application) : AndroidViewModel(app) {
 
     fun signOut() {
         viewModelScope.launch {
+            // Revoke ONLY this phone's token on the server, then wipe local state.
+            // Offline sign-out still clears locally; the token stays revocable from IT Console.
+            AgentSession.deviceTokenNow(app)?.let { WinstoneApi.logout(it) }
             AgentSession.clear(app)
             _state.value = DeskUiState()
         }
