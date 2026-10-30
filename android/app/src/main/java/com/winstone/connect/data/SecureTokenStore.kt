@@ -3,7 +3,7 @@ package com.winstone.connect.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
+import androidx.security.crypto.MasterKeys
 
 /**
  * Device token storage backed by the Android Keystore (AES-256 master key).
@@ -21,9 +21,10 @@ object SecureTokenStore {
         prefs?.let { return it }
         return runCatching {
             val app = context.applicationContext
-            val key = MasterKey.Builder(app).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
+            // security-crypto 1.0.0 (stable) API: Keystore-held AES256-GCM master key.
+            val alias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
             EncryptedSharedPreferences.create(
-                app, FILE, key,
+                FILE, alias, app,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
             )
