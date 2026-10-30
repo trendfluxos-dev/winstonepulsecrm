@@ -1,8 +1,12 @@
 name: Android APKs
 
 # Builds the Winstone Android companion (call-log tracing, recording pickup,
-# post-call reports) and attaches app-debug.apk to the workflow run.
-# Release is signed from encrypted repo secrets; the keystore is never committed.
+# post-call reports).
+# - debug job: always builds/uploads the side-by-side test APK (com.winstone.connect.test).
+#   It never needs signing secrets.
+# - release job: runs only when all four signing secrets exist; otherwise it is
+#   skipped with a notice. The keystore lives only in $RUNNER_TEMP and is always removed.
+# This workflow never creates a GitHub Release (see android-release.yml for tags).
 
 on:
   workflow_dispatch:
@@ -11,8 +15,12 @@ on:
       - "android/**"
       - ".github/workflows/android-apk.yml"
 
+env:
+  EXPECTED_VERSION_NAME: "2.18"
+  EXPECTED_VERSION_CODE: "29"
+
 jobs:
-  apk:
+  debug:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -24,31 +32,109 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
+      - name: Refuse committed signing material in the build tree
+        run: |
+          if [ -f local.properties ]; then echo "android/local.properties must not be committed"; exit 1; fi
+      - name: Check declared app version
+        run: |
+          grep -q "versionName = \"$EXPECTED_VERSION_NAME\"" app/build.gradle.kts
+          grep -q "versionCode = $EXPECTED_VERSION_CODE\b" app/build.gradle.kts
       - name: Point Gradle at the CI Android SDK
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
       - name: Unit tests
         run: chmod +x gradlew && ./gradlew --no-daemon testDebugUnitTest
       - name: Build debug APK
         run: ./gradlew --no-daemon assembleDebug
+      - name: Verify debug package id and version
+        run: |
+          set -euo pipefail
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          APK=$(ls app/build/outputs/apk/debug/*.apk | head -1)
+          "$BT/aapt2" dump badging "$APK" | head -1 | tee /tmp/badging.txt
+          grep -q "name='com.winstone.connect.test'" /tmp/badging.txt
+          grep -q "versionCode='$EXPECTED_VERSION_CODE'" /tmp/badging.txt
+          grep -q "versionName='$EXPECTED_VERSION_NAME-test'" /tmp/badging.txt
+          sha256sum "$APK"
       - uses: actions/upload-artifact@v4
         with:
           name: winstone-agent-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - name: Check all four signing secrets
+        id: secrets
+        working-directory: .
+        env:
+          A: ${{ secrets.WINSTONE_KEYSTORE_B64 }}
+          B: ${{ secrets.WINSTONE_KEYSTORE_PASSWORD }}
+          C: ${{ secrets.WINSTONE_KEY_ALIAS }}
+          D: ${{ secrets.WINSTONE_KEY_PASSWORD }}
+        run: |
+          if [ -n "$A" ] && [ -n "$B" ] && [ -n "$C" ] && [ -n "$D" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Release signing skipped: one or more of the four signing secrets is missing. The debug APK is unaffected."
+          fi
+      - uses: actions/checkout@v4
+        if: steps.secrets.outputs.ready == 'true'
+      - uses: actions/setup-java@v4
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.secrets.outputs.ready == 'true'
       - name: Build signed release APK
+        if: steps.secrets.outputs.ready == 'true'
         env:
           WINSTONE_KEYSTORE_B64: ${{ secrets.WINSTONE_KEYSTORE_B64 }}
           WINSTONE_KEYSTORE_PASSWORD: ${{ secrets.WINSTONE_KEYSTORE_PASSWORD }}
           WINSTONE_KEY_ALIAS: ${{ secrets.WINSTONE_KEY_ALIAS }}
           WINSTONE_KEY_PASSWORD: ${{ secrets.WINSTONE_KEY_PASSWORD }}
         run: |
-          test -n "$WINSTONE_KEYSTORE_B64" || { echo "Release signing secrets missing"; exit 1; }
-          echo "$WINSTONE_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
-          WINSTONE_KEYSTORE_PATH="$RUNNER_TEMP/release.jks" ./gradlew --no-daemon assembleRelease
-          rm -f "$RUNNER_TEMP/release.jks"
-          "$ANDROID_HOME"/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner verify --print-certs app/build/outputs/apk/release/*.apk | head -3
+          set -euo pipefail
+          KS="$RUNNER_TEMP/winstone-release.jks"
+          trap 'rm -f "$KS"' EXIT
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "$WINSTONE_KEYSTORE_B64" | base64 -d > "$KS"
+          chmod 600 "$KS"
+          chmod +x gradlew
+          WINSTONE_KEYSTORE_PATH="$KS" ./gradlew --no-daemon assembleRelease
+      - name: Remove keystore (always)
+        if: always()
+        run: rm -f "$RUNNER_TEMP/winstone-release.jks"
+      - name: Verify signer fingerprint, package id and version
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          EXPECTED_CERT_SHA256: ${{ vars.WINSTONE_RELEASE_CERT_SHA256 }}
+        run: |
+          set -euo pipefail
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          APK=$(ls app/build/outputs/apk/release/*.apk | grep -v unsigned | head -1)
+          "$BT/apksigner" verify --print-certs "$APK" | tee /tmp/certs.txt
+          ACTUAL=$(grep -m1 "certificate SHA-256 digest" /tmp/certs.txt | awk '{print $NF}' | tr 'A-F' 'a-f')
+          WANT=$(echo "${EXPECTED_CERT_SHA256:-}" | tr -d ': ' | tr 'A-F' 'a-f')
+          if [ -z "$WANT" ]; then
+            echo "::error::Set repository variable WINSTONE_RELEASE_CERT_SHA256 to the canonical signer fingerprint. Actual: $ACTUAL"; exit 1
+          fi
+          [ "$ACTUAL" = "$WANT" ] || { echo "::error::Signer fingerprint mismatch: $ACTUAL"; exit 1; }
+          "$BT/aapt2" dump badging "$APK" | head -1 | tee /tmp/badging.txt
+          grep -q "name='com.winstone.connect'" /tmp/badging.txt
+          grep -q "versionCode='$EXPECTED_VERSION_CODE'" /tmp/badging.txt
+          grep -q "versionName='$EXPECTED_VERSION_NAME'" /tmp/badging.txt
+          sha256sum "$APK"
       - uses: actions/upload-artifact@v4
+        if: steps.secrets.outputs.ready == 'true'
         with:
           name: winstone-agent-release-apk
-          path: android/app/build/outputs/apk/release/*.apk
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            !android/app/build/outputs/apk/release/*-unsigned.apk
           if-no-files-found: error
