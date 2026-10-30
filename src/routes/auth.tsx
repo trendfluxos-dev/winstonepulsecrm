@@ -94,8 +94,26 @@ function AuthPage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const lovableSignIn = useMutation({
+    mutationFn: async () => {
+      const result = await lovable.auth.signInWithOAuth("lovable", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) throw result.error;
+      if (result.redirected) return;
+      // Session already set by the integration; register the staff account.
+      await ensureRegistered();
+    },
+    onSuccess: () => {
+      if (!lovableSignIn.isPending) return;
+      toast.success("Signed in");
+      void navigate({ to: "/desk" });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const isSignup = mode === "signup";
-  const busy = signIn.isPending || signUp.isPending;
+  const busy = signIn.isPending || signUp.isPending || lovableSignIn.isPending;
   const canSubmit =
     (isSignup ? email.includes("@") : email.trim().length >= 4) &&
     password.length >= 6 &&
