@@ -278,6 +278,24 @@ function AuthPage() {
                 {isSignup ? "Create account" : "Sign in"}
               </Button>
 
+              <div className="flex items-center gap-3 py-1" aria-hidden>
+                <span className="h-px flex-1 bg-border" />
+                <span className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">or</span>
+                <span className="h-px flex-1 bg-border" />
+              </div>
+
+              <button
+                type="button"
+                className="lovable-auth-button"
+                onClick={() => {
+                  if (!busy) lovableSignIn.mutate();
+                }}
+                disabled={busy}
+                aria-label="Continue with Lovable"
+              >
+                Continue with Lovable
+              </button>
+
               {errorMessage && (
                 <p role="alert" className="text-center text-sm text-destructive">
                   {errorMessage}
