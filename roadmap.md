@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-30 — APK update build (2.18)
+- [x] Bumped Android versionCode 28→29, versionName 2.17→2.18 (android/app/build.gradle.kts).
+- [x] Verified GitHub repo head matches local b7bc9b75; signing secrets still 0/4 (only test APK possible).
+- [x] Dispatched run 41083019424 from pre-bump head and cancelled it (avoided duplicate artifact under quota pressure).
+- [ ] After Git sync pushes the 2.18 commit, the android/** push triggers "Android APKs" automatically; verify run succeeds and winstone-agent-debug-apk artifact uploads (GitHub storage quota may still block upload — user must clear account usage if so).
+
 ## 2026-10-30 — Manual GitHub re-check result
 - [x] Reuse existing full-IT-PIN check with explicit Re-check button, pending state, success/server time and failure/device completion time; no actual Lovable sync trigger or permission changes.
 - [x] 19 focused tests pass; automatic build OK.
