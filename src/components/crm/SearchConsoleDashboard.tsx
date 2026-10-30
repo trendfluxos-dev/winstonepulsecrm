@@ -105,7 +105,7 @@ export function SearchConsoleDashboard() {
   );
 }
 
-function Stat({ label, value, change, prev, lowerIsBetter }: { label: string; value: string; change?: number | null; prev?: string; lowerIsBetter?: boolean }) {
+function Stat({ label, value, change, prev, lowerIsBetter }: { label: string; value: string; change?: number | null | undefined; prev?: string | undefined; lowerIsBetter?: boolean }) {
   const good = change != null && change !== 0 && (lowerIsBetter ? change < 0 : change > 0);
   return (
     <div className="rounded-lg border border-border p-3">
