@@ -32,12 +32,18 @@ function dhakaDate(offsetDays: number) {
   return new Date(Date.now() + 6 * 3600_000 - offsetDays * 86400_000).toISOString().slice(0, 10);
 }
 
-export async function readSearchPerformance(siteUrl: string) {
+export async function readSearchPerformance(siteUrl: string, range?: { startDate: string; endDate: string }) {
   const verified = await listVerifiedProperties();
   if (!verified.includes(siteUrl)) throw new Error("This property is not verified for the connected Google account");
   // Search Console data lags ~2-3 days; use the latest 28 complete days.
-  const endDate = dhakaDate(3);
-  const startDate = dhakaDate(30);
+  let endDate = dhakaDate(3);
+  let startDate = dhakaDate(30);
+  if (range) {
+    const { validateRange } = await import("@/lib/search-console-range");
+    const err = validateRange(range, dhakaDate(0));
+    if (err) throw new Error(err);
+    ({ startDate, endDate } = range);
+  }
   const path = `/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`;
   const q = (body: Record<string, unknown>) => gsc<{ rows?: Row[] }>(path, { method: "POST", body: JSON.stringify({ startDate, endDate, ...body }) });
   const [totals, daily, queries, pages] = await Promise.all([
