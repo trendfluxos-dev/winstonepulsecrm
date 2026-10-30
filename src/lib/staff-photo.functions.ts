@@ -41,7 +41,7 @@ export const staffPhotoUrls = createServerFn({ method: "POST" })
     const caller = await resolveCaller(data.adminToken ?? null);
     if (caller.scope === "none" || !data.profileIds.length) return {} as Record<string, string>;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows } = await supabaseAdmin.from("profiles").select("id, photo_path").in("id", data.profileIds).not("photo_path", "is", null);
+    const { data: rows } = await supabaseAdmin.from("profiles").select("id, photo_path").in("id", data.profileIds).eq("is_active", true).eq("approval_status", "approved").not("photo_path", "is", null);
     const paths = (rows ?? []).map((r) => r.photo_path!);
     if (!paths.length) return {} as Record<string, string>;
     const { data: signed } = await supabaseAdmin.storage.from(BUCKET).createSignedUrls(paths, 300);
