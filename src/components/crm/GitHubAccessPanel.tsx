@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { KeyRound, RefreshCw } from "lucide-react";
@@ -11,7 +11,7 @@ import type { AccessVerdict } from "@/lib/github-access";
 import { useT } from "@/lib/i18n";
 
 const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
-const when = (iso: string | null) => iso ? new Date(iso).toLocaleString("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" }) : "—";
+const when = (iso: string | null | undefined) => iso ? new Date(iso).toLocaleString("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" }) : "—";
 
 /** Read-only GitHub access check (full IT PIN). Never changes connections or the repository. */
 export function GitHubAccessPanel() {
@@ -21,6 +21,18 @@ export function GitHubAccessPanel() {
   const load = useServerFn(getGithubAccess);
   const run = useMutation({ mutationFn: () => load({ data: { adminToken: getAdminToken(), repository: repository.trim() } }) });
   const valid = REPO_RE.test(repository.trim());
+  // Last successful repository-access verification per account, kept on this device only.
+  const STORE = "winstone.githubAccessVerified";
+  const [lastVerified, setLastVerified] = useState<Record<string, string>>({});
+  useEffect(() => { try { setLastVerified(JSON.parse(localStorage.getItem(STORE) ?? "{}")); } catch { /* ignore */ } }, []);
+  useEffect(() => {
+    if (!run.data) return;
+    const next = { ...lastVerified };
+    for (const c of run.data.connections) if (c.login && c.verdict === "ready") next[`${run.data.repository.toLowerCase()}|${c.login}`] = c.checkedAt;
+    setLastVerified(next);
+    try { localStorage.setItem(STORE, JSON.stringify(next)); } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run.data]);
 
   const verdictText: Record<AccessVerdict, { en: string; bn: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
     ready: { en: "Can see repository", bn: "রিপোজিটরি দেখা যায়", variant: "default" },
@@ -57,6 +69,9 @@ export function GitHubAccessPanel() {
                 <p className="mt-1 text-xs text-muted-foreground">
                   {c.usedByApp ? t({ en: "Used by these System panels", bn: "এই System প্যানেলগুলো এটি ব্যবহার করে" }) : t({ en: "Linked but not used by the panels", bn: "সংযুক্ত, তবে প্যানেলগুলো ব্যবহার করে না" })}
                   {c.visibility === "visible" && <> · {c.repoPrivate ? t({ en: "Private repository", bn: "প্রাইভেট রিপোজিটরি" }) : t({ en: "Public repository", bn: "পাবলিক রিপোজিটরি" })} · {c.canPush ? t({ en: "can write", bn: "লেখা যায়" }) : t({ en: "read only", bn: "শুধু পড়া" })}</>}
+                </p>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  {t({ en: "Checked", bn: "যাচাই" })}: {when(c.checkedAt)} · {t({ en: "Access last verified", bn: "সর্বশেষ অ্যাক্সেস নিশ্চিত" })}: {c.login && lastVerified[`${run.data.repository.toLowerCase()}|${c.login}`] ? when(lastVerified[`${run.data.repository.toLowerCase()}|${c.login}`]) : t({ en: "never on this device", bn: "এই ডিভাইসে কখনো নয়" })}
                 </p>
                 {c.invites.map((inv, j) => (
                   <p key={j} className="mt-1 text-xs">{t({ en: "Invitation from", bn: "আমন্ত্রণ পাঠিয়েছেন" })} {inv.inviter ?? "—"} · {when(inv.createdAt)} — {t({ en: "accept it at github.com/notifications while signed in as this account.", bn: "এই অ্যাকাউন্টে লগইন করে github.com/notifications থেকে গ্রহণ করুন।" })}</p>
