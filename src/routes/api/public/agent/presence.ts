@@ -48,14 +48,8 @@ export const Route = createFileRoute("/api/public/agent/presence")({
         }
         const { presence, call_started_at, lead_id } = parsed.data;
         const agent_id = caller.profile.id;
-        // Identity hints may only name the caller; anything else is refused.
-        if (parsed.data.agent_id && parsed.data.agent_id !== agent_id) return json({ error: "Forbidden" }, 403);
-        if (
-          parsed.data.employee_id &&
-          parsed.data.employee_id.toUpperCase() !== String(caller.profile.employee_id ?? "").toUpperCase()
-        ) {
-          return json({ error: "Forbidden" }, 403);
-        }
+        // Client agent_id / employee_id are accepted for old phones but ignored:
+        // identity always comes from the device token, so they cannot widen scope.
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 

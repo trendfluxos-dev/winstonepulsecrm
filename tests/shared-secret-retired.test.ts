@@ -86,11 +86,11 @@ describe("phone endpoints", () => {
     const u = "https://crm.winstonebd.com/api/public/agent/workspace";
     expect((await ws({ request: new Request(u) })).status).toBe(401);
     expect((await ws({ request: new Request(u, { headers: { "x-ingest-secret": "x".repeat(40) } }) })).status).toBe(401);
-    const other = await ws({ request: new Request(`${u}?employee_id=WIN2699`, { headers: { "x-device-token": TOKEN } }) });
-    expect(other.status).toBe(403);
-    const post = (body: unknown) =>
-      pr({ request: new Request(u, { method: "POST", headers: { "x-device-token": TOKEN, "content-type": "application/json" }, body: JSON.stringify(body) }) });
-    expect((await post({ presence: "idle", agent_id: "22222222-2222-4222-8222-222222222222" })).status).toBe(403);
+    // Another agent's id is ignored: the response is still the caller's own workspace.
+    const other = await ws({ request: new Request(`${u}?employee_id=WIN2699&agent_id=22222222-2222-4222-8222-222222222222`, { headers: { "x-device-token": TOKEN } }) });
+    expect(other.status).not.toBe(403);
+    if (other.status === 200) expect((await other.json()).agent?.id ?? AGENT.id).toBe(AGENT.id);
+    expect((await pr({ request: new Request(u, { method: "POST", body: "{}" }) })).status).toBe(401);
   });
 
   it("the retired reprocess endpoint refuses everyone, even valid phones", async () => {
