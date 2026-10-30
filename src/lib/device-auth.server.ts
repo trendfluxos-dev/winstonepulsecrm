@@ -132,11 +132,16 @@ export async function resolveApiCaller(request: Request): Promise<ApiCaller> {
         .select("*")
         .eq("id", device.profile_id)
         .maybeSingle();
-      if (profile && profile.is_active && (profile.approval_status ?? "pending") === "approved") {
-        void supabaseAdmin
+      if (
+        (device.status ?? "active") === "active" &&
+        profile && profile.is_active && (profile.approval_status ?? "pending") === "approved"
+      ) {
+        // Await the heartbeat: an un-awaited query builder is never sent.
+        const { error: seenError } = await supabaseAdmin
           .from("agent_devices")
           .update({ last_seen_at: new Date().toISOString() })
           .eq("id", device.id);
+        if (seenError) console.warn("device heartbeat failed");
         return { kind: "device", device, profile };
       }
       return { kind: "none" };

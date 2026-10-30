@@ -42,6 +42,12 @@ export const Route = createFileRoute("/api/public/ingest/lead")({
         const caller = await resolveApiCaller(request);
         if (caller.kind !== "device") return json({ error: "Unauthorized" }, 401);
 
+        {
+          const { requireAgentBriefing } = await import("@/lib/agent-briefing.server");
+          const briefingBlock = await requireAgentBriefing(caller.profile.id);
+          if (briefingBlock) return json(briefingBlock, 409);
+        }
+
         const parsed = Payload.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return json({ error: "Invalid payload" }, 400);
         const body = parsed.data;
