@@ -1,7 +1,7 @@
 /**
  * Per-device authentication for the Winstone Connect Android app.
  *
- * The distributed APK no longer carries the privileged shared INGEST_SECRET.
+ * The distributed APK no longer carries any privileged shared secret.
  * Instead the phone signs in once with the agent's CRM email + password and
  * receives a long random device token, bound to that agent profile and stored
  * only as a SHA-256 hash in `agent_devices`. Every later phone request carries
