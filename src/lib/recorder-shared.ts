@@ -63,3 +63,21 @@ export function classifyMicError(err: unknown): MicProblem {
   if (name === "NotReadableError" || name === "TrackStartError" || name === "AbortError") return "busy";
   return "unknown";
 }
+
+/**
+ * True only when the bytes start with a known audio container signature
+ * (WebM/Matroska, Ogg, MP4/M4A/3GP, WAV, MP3, AAC ADTS, AMR). A renamed
+ * document or image never passes, whatever MIME type the caller claims.
+ */
+export function looksLikeAudio(bytes: Uint8Array): boolean {
+  if (bytes.length < 12) return false;
+  const ascii = (start: number, len: number) => String.fromCharCode(...bytes.slice(start, start + len));
+  if (bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3) return true; // WebM
+  if (ascii(0, 4) === "OggS") return true;
+  if (ascii(4, 4) === "ftyp") return true; // MP4 / M4A / 3GP
+  if (ascii(0, 4) === "RIFF" && ascii(8, 4) === "WAVE") return true;
+  if (ascii(0, 3) === "ID3") return true;
+  if (bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0) return true; // MP3 / AAC frame sync
+  if (ascii(0, 5) === "#!AMR") return true;
+  return false;
+}

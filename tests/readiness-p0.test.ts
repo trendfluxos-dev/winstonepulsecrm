@@ -25,3 +25,16 @@ describe("held leads never reach revoked accounts", () => {
     expect(isGrantRecipientEligible({ is_active: false, approval_status: "approved" })).toBe(false);
   });
 });
+
+import { looksLikeAudio } from "@/lib/recorder-shared";
+describe("voice notes accept audio only", () => {
+  const pad = (h: number[]) => new Uint8Array([...h, ...new Array(20).fill(0)]);
+  it("accepts WebM and Ogg", () => {
+    expect(looksLikeAudio(pad([0x1a, 0x45, 0xdf, 0xa3]))).toBe(true);
+    expect(looksLikeAudio(pad([0x4f, 0x67, 0x67, 0x53]))).toBe(true);
+  });
+  it("rejects a PDF or PNG disguised as audio", () => {
+    expect(looksLikeAudio(pad([0x25, 0x50, 0x44, 0x46]))).toBe(false);
+    expect(looksLikeAudio(pad([0x89, 0x50, 0x4e, 0x47]))).toBe(false);
+  });
+});

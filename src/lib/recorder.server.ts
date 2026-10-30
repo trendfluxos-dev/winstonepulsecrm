@@ -2,6 +2,7 @@ import {
   MAX_VOICE_NOTE_BYTES,
   MIN_VOICE_NOTE_BYTES,
   contentTypeFor,
+  looksLikeAudio,
   extensionForMime,
   normaliseInsight,
   type RecorderInsight,
@@ -20,6 +21,7 @@ Return JSON: {"title": short title, "summary": 2-4 sentences, "takeaways": [up t
 export async function storeVoiceNote(agentId: string, bytes: Uint8Array, mimeType: string, durationSeconds: number) {
   if (bytes.byteLength < MIN_VOICE_NOTE_BYTES) throw new Error("Recording too short — please record again");
   if (bytes.byteLength > MAX_VOICE_NOTE_BYTES) throw new Error("Recording too long — keep notes under ~10 minutes");
+  if (!looksLikeAudio(bytes)) throw new Error("Only audio recordings can be saved as voice notes");
 
   const ext = extensionForMime(mimeType);
   const contentType = contentTypeFor(ext);
