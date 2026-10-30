@@ -107,6 +107,8 @@ export function validateReport(input: {
   connected?: boolean;
   temperature?: string | null;
   grade?: string | null;
+  /** Grade is set only by AI analysis or HQ; a connected report may save with it pending. */
+  allowPendingGrade?: boolean;
   /** Set on a fresh submit: direction, call state, duration and follow-up are mandatory. */
   requireCallFacts?: boolean;
   direction?: string | null;
@@ -135,7 +137,7 @@ export function validateReport(input: {
     if (!LEAD_TEMPERATURES.includes((input.temperature ?? "") as LeadTemperature)) {
       return { field: "temperature", message: "কথা হওয়া কলে Hot / Warm / Cold বাছাই করুন" };
     }
-    if (!LEAD_GRADES.includes((input.grade ?? "") as LeadGrade)) {
+    if (!input.allowPendingGrade && !LEAD_GRADES.includes((input.grade ?? "") as LeadGrade)) {
       return { field: "grade", message: "কথা হওয়া কলে গ্রেড A / B / C / D বাছাই করুন" };
     }
   }
@@ -442,7 +444,7 @@ export async function submitCallReport(input: {
     ? evaluation?.priority ?? followUpPriorityFor(effectiveTemperature)
     : followUpPriorityFor(effectiveTemperature);
 
-  const invalid = validateReport({ ...input, temperature: effectiveTemperature, grade: trustedGrade, connected: received, requireCallFacts: true });
+  const invalid = validateReport({ ...input, temperature: effectiveTemperature, grade: trustedGrade, allowPendingGrade: true, connected: received, requireCallFacts: true });
   if (invalid) throw new Error(invalid.message);
 
   const temperature = received ? ((effectiveTemperature ?? null) as LeadTemperature | null) : null;
