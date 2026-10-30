@@ -1497,6 +1497,33 @@ export type Database = {
         }
         Relationships: []
       }
+      db_performance_snapshots: {
+        Row: {
+          captured_at: string
+          db_size_bytes: number
+          id: string
+          top_queries: Json
+          total_calls: number
+          total_exec_ms: number
+        }
+        Insert: {
+          captured_at?: string
+          db_size_bytes: number
+          id?: string
+          top_queries?: Json
+          total_calls: number
+          total_exec_ms: number
+        }
+        Update: {
+          captured_at?: string
+          db_size_bytes?: number
+          id?: string
+          top_queries?: Json
+          total_calls?: number
+          total_exec_ms?: number
+        }
+        Relationships: []
+      }
       device_call_tests: {
         Row: {
           android_version: string
@@ -7069,6 +7096,7 @@ export type Database = {
         Args: { _subject: string; _surface: string }
         Returns: Json
       }
+      capture_db_performance_snapshot: { Args: never; Returns: string }
       clean_person_name: { Args: { _raw: string }; Returns: string }
       create_report_follow_up_atomic: {
         Args: { _agent: string; _patch: Json; _reason: string; _report: string }

@@ -7,6 +7,7 @@ import { GitHubActivityDashboard } from "@/components/crm/GitHubActivityDashboar
 import { AndroidBuildStatus } from "@/components/crm/AndroidBuildStatus";
 import { ItPhoneTestReports } from "@/components/crm/ItPhoneTestReports";
 import { SearchConsoleDashboard } from "@/components/crm/SearchConsoleDashboard";
+import { DbPerformanceDashboard } from "@/components/crm/DbPerformanceDashboard";
 import { PAGE_SECTIONS, sectionSearch, useSection } from "@/lib/page-sections";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Coins, Database, KeyRound, Lock, Radio, Receipt } from "lucide-react";
@@ -169,6 +170,7 @@ function SystemBoard() {
           <AndroidBuildStatus />
           <ItPhoneTestReports />
           <SearchConsoleDashboard />
+          <DbPerformanceDashboard />
           <SystemManualCard />
           <SystemUpdateReport />
           <BackendHealthPanel />
