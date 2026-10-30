@@ -192,8 +192,9 @@ describe("report submission verifies only phone-measured duration", () => {
   });
   it("an agent's chosen grade cannot fill missing server classification", async () => {
     state.savedGrade = null;
-    await expect(submitCallReport(input)).rejects.toThrow();
-    expect(state.writes).toEqual([]);
+    await expect(submitCallReport(input)).rejects.toThrow("captured submission");
+    // The report saves with the grade pending — never the agent's own "A".
+    expect(state.writes[0]?.patch.grade).toBeNull();
   });
   it("a forged web time and connected claim do not earn verification", async () => {
     await expect(submitCallReport(input)).rejects.toThrow("captured submission");

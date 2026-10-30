@@ -159,7 +159,6 @@ export const _LEGACY_TEMPERATURES: Opt[] = [
   { value: "warm", label: "WARM" },
   { value: "cold", label: "COLD" },
 ];
-const GRADES: Opt[] = ["A", "B", "C", "D"].map((g) => ({ value: g, label: g }));
 
 const labelOf = (opts: Opt[], value: string) => opts.find((o) => o.value === value)?.label ?? value;
 
@@ -566,9 +565,7 @@ export function PostCallReportGate() {
                         ? t({ bn: "Next Action-এ Other হলে ছোট নোট দিন", en: "Add a short note when Next Action is Other" })
                         : qualifying && !answeredAll
                           ? t({ bn: "ছয়টি প্রশ্নের সবগুলোর হ্যাঁ / না দিন", en: "Answer Yes / No for all six questions" })
-                          : qualifying && !grade
-                            ? t({ bn: "Grade (A / B / C / D) বাছাই করুন", en: "Select Grade (A / B / C / D)" })
-                            : qualifying && followMode === "set" && !when
+                          : qualifying && followMode === "set" && !when
                               ? t({ bn: "Follow-up সময় দিন, নয়তো 'No Follow-up Required' বাছাই করুন", en: "Set a follow-up time, or select 'No Follow-up Required'" })
                               : qualifying && followMode === "none" && !noFuReason
                                 ? t({ bn: "Follow-up না লাগার কারণ বাছাই করুন", en: "Select why no follow-up is needed" })
@@ -583,7 +580,7 @@ export function PostCallReportGate() {
     aiUsed &&
     (recs.category?.value === category || !recs.category) &&
     (recs.temperature?.value === temperature || !recs.temperature) &&
-    (recs.grade?.value === grade || !recs.grade);
+    true;
 
   const payloadOf = () => {
     const summary = connected
@@ -615,7 +612,7 @@ export function PostCallReportGate() {
       followUpReasonNote: followUpAt && fuReason === "other" ? fuReasonNote.trim() || null : null,
       reminderMinutes: 30,
       temperature: connected ? (temperature as "hot" | "warm" | "cold") : null,
-      grade: connected ? (grade as "A" | "B" | "C" | "D") : null,
+      grade: null,
       aiDecision: aiUsed ? (aiAllConfirmed ? ("accepted" as const) : ("edited" as const)) : null,
       direction: direction as "outgoing" | "incoming",
       callStatus: callState as "connected" | "no_answer" | "busy" | "failed",
@@ -862,7 +859,11 @@ export function PostCallReportGate() {
                 </div>
               ))}
             </div>
-            <SmartRow id="sr-grade" label="Grade" required options={GRADES} value={grade} onChange={setGrade} rec={recs.grade} skipped={skipped["grade"]} onSkip={skip("grade")} />
+            <p id="sr-grade" className="text-sm text-muted-foreground">
+              {recs.grade
+                ? t({ bn: `Grade: ${recs.grade.value} (কল বিশ্লেষণ থেকে)`, en: `Grade: ${recs.grade.value} (from call analysis)` })
+                : t({ bn: "Grade অপেক্ষমাণ — কল বিশ্লেষণ বা HQ ঠিক করবে", en: "Grade pending — set by AI analysis or HQ" })}
+            </p>
           </div>
         </>
       ) : null}

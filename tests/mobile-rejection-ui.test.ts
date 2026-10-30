@@ -49,7 +49,7 @@ describe("actual mobile report interactions with isolated server fixtures", () =
   });
   it("normal Interested still requires property/action selections and all six answers", async () => {
     await open(); choose("interested");
-    for (const label of ["Requirement", "Next Action", "Customer Interest", "Customer Response", "Grade"]) expect(screen.getByLabelText(new RegExp(`^${label}`))).toBeTruthy();
+    for (const label of ["Requirement", "Next Action", "Customer Interest", "Customer Response"]) expect(screen.getByLabelText(new RegExp(`^${label}`))).toBeTruthy();
     expect(screen.getAllByRole("button", { name: "Yes", exact: true })).toHaveLength(6);
     expect((screen.getByRole("button", { name: "Confirm & Submit" }) as HTMLButtonElement).disabled).toBe(true);
   });
