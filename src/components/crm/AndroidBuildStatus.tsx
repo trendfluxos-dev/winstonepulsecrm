@@ -116,7 +116,9 @@ function ArtifactFacts({ a, version }: { a: { name: string; sizeBytes: number; s
     <span className="min-w-0 space-y-0.5 text-xs">
       <span className="block truncate text-sm font-medium">{a.name}</span>
       <span className="block text-muted-foreground">{t({ en: "Version", bn: "ভার্সন" })}: {version ?? t({ en: "unknown", bn: "অজানা" })} · {a.sizeMb} MB ({a.sizeBytes.toLocaleString()} bytes)</span>
-      <span className="block break-all font-mono text-muted-foreground">{t({ en: "Download ZIP SHA-256", bn: "ডাউনলোড ZIP SHA-256" })}: {a.sha256 ?? t({ en: "not provided by GitHub", bn: "GitHub দেয়নি" })}</span>
+      <span className="block break-all font-mono text-muted-foreground">{t({ en: "Download ZIP SHA-256", bn: "ডাউনলোড ZIP SHA-256" })}: {a.sha256 ?? t({ en: "not provided by GitHub", bn: "GitHub দেয়নি" })}
+        {a.sha256 && <Button type="button" size="sm" variant="outline" className="ml-2 h-6 px-2 text-xs" onClick={() => navigator.clipboard.writeText(a.sha256!).then(() => toast.success(t({ en: "Checksum copied", bn: "চেকসাম কপি হয়েছে" })), () => toast.error(t({ en: "Could not copy", bn: "কপি করা যায়নি" })))}>{t({ en: "Copy", bn: "কপি" })}</Button>}
+      </span>
       {a.sha256 && <ChecksumVerifier expected={a.sha256} />}
     </span>
   );
