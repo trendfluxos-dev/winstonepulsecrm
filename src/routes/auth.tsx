@@ -11,8 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
-import "@lovable.dev/cloud-auth-js/styles.css";
 import { signInWithIdentifier } from "@/lib/accounts.functions";
 import { ensureRegistered, saveSignupDraft } from "@/lib/session";
 
@@ -94,25 +92,9 @@ function AuthPage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const lovableSignIn = useMutation({
-    mutationFn: async () => {
-      const result = await lovable.auth.signInWithOAuth("lovable", {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) throw result.error;
-      if (result.redirected) return;
-      // Session already set by the integration; register the staff account.
-      await ensureRegistered();
-    },
-    onSuccess: () => {
-      toast.success("Signed in");
-      void navigate({ to: "/desk" });
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
 
   const isSignup = mode === "signup";
-  const busy = signIn.isPending || signUp.isPending || lovableSignIn.isPending;
+  const busy = signIn.isPending || signUp.isPending;
   const canSubmit =
     (isSignup ? email.includes("@") : email.trim().length >= 4) &&
     password.length >= 6 &&
@@ -278,23 +260,7 @@ function AuthPage() {
                 {isSignup ? "Create account" : "Sign in"}
               </Button>
 
-              <div className="flex items-center gap-3 py-1" aria-hidden>
-                <span className="h-px flex-1 bg-border" />
-                <span className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">or</span>
-                <span className="h-px flex-1 bg-border" />
-              </div>
-
-              <button
-                type="button"
-                className="lovable-auth-button"
-                onClick={() => {
-                  if (!busy) lovableSignIn.mutate();
-                }}
-                disabled={busy}
-                aria-label="Continue with Lovable"
-              >
-                Continue with Lovable
-              </button>
+              
 
               {errorMessage && (
                 <p role="alert" className="text-center text-sm text-destructive">
