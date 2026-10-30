@@ -152,3 +152,22 @@ function ChecksumVerifier({ expected }: { expected: string }) {
     </span>
   );
 }
+
+/** Opens the user's own WhatsApp with a pre-filled APK message (link, version, size, checksum); they pick the agent and send it themselves. */
+function WhatsAppShareButton({ a, version }: { a: { name: string; url: string; sizeMb: number; sha256: string | null }; version: string | null }) {
+  const t = useT();
+  const lines = [
+    t({ en: "Winstone Pulse Android app (test build)", bn: "Winstone Pulse Android অ্যাপ (টেস্ট build)" }),
+    `${t({ en: "Version", bn: "ভার্সন" })}: ${version ?? t({ en: "unknown", bn: "অজানা" })} · ${a.sizeMb} MB`,
+    `${t({ en: "Download", bn: "ডাউনলোড" })}: ${a.url}`,
+    a.sha256 ? `SHA-256: ${a.sha256}` : null,
+    t({ en: "Check the checksum before installing. Needs a GitHub sign-in with repository access.", bn: "ইনস্টলের আগে চেকসাম যাচাই করুন। ডাউনলোডে রিপোজিটরি অ্যাক্সেস থাকা GitHub লগইন লাগবে।" }),
+  ].filter(Boolean).join("\n");
+  return (
+    <Button asChild size="sm" variant="outline" title={t({ en: "Share on WhatsApp", bn: "WhatsApp-এ পাঠান" })}>
+      <a href={`https://wa.me/?text=${encodeURIComponent(lines)}`} target="_blank" rel="noreferrer" aria-label={t({ en: "Share on WhatsApp", bn: "WhatsApp-এ পাঠান" })}>
+        <MessageCircle className="size-4" />{t({ en: "WhatsApp", bn: "WhatsApp" })}
+      </a>
+    </Button>
+  );
+}
