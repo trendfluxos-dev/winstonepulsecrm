@@ -186,7 +186,7 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             expectedChecksum: body.checksum ?? null,
             callStartedAt: body.call_started_at ?? null,
             recorderSource: body.recorder_source,
-            deviceId: caller.kind === "device" ? caller.device.id : null,
+            deviceId: caller.device.id,
           });
 
           await logLeadEvent({
@@ -208,7 +208,7 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
               leadId,
               agentId: agent.id,
               recordingId,
-              deviceId: caller.kind === "device" ? caller.device.id : null,
+              deviceId: caller.device.id,
               phoneNumber: body.phone_number ?? null,
               callStartedAt: lifecycle.data.started_at,
               durationSeconds: lifecycle.data.duration_seconds,

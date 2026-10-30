@@ -5,7 +5,7 @@ import { z } from "zod";
  * Live presence beacon for the Winstone Connect Android in-call screen.
  *
  * POST /api/public/agent/presence
- * Header: x-ingest-secret
+ * Header: x-device-token (per-agent; identity comes from the token, never the query/body)
  * Body: { employee_id? , agent_id? , presence: "on_call" | "idle" | "offline",
  *         call_started_at?: ISO string }
  *
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/api/public/agent/presence")({
       POST: async ({ request }) => {
         const { resolveApiCaller } = await import("@/lib/device-auth.server");
         const caller = await resolveApiCaller(request);
-        if (caller.kind === "none") return json({ error: "Unauthorized" }, 401);
+        if (caller.kind !== "device") return json({ error: "Unauthorized" }, 401);
 
         let raw: unknown;
         try {
@@ -47,18 +47,23 @@ export const Route = createFileRoute("/api/public/agent/presence")({
           return json({ error: "Invalid payload", issues: parsed.error.issues }, 400);
         }
         const { presence, call_started_at, lead_id } = parsed.data;
-        const agent_id = caller.kind === "device" ? caller.profile.id : parsed.data.agent_id;
-        const employee_id = caller.kind === "device" ? undefined : parsed.data.employee_id;
-        if (!employee_id && !agent_id) {
-          return json({ error: "employee_id or agent_id is required" }, 400);
+        const agent_id = caller.profile.id;
+        // Identity hints may only name the caller; anything else is refused.
+        if (parsed.data.agent_id && parsed.data.agent_id !== agent_id) return json({ error: "Forbidden" }, 403);
+        if (
+          parsed.data.employee_id &&
+          parsed.data.employee_id.toUpperCase() !== String(caller.profile.employee_id ?? "").toUpperCase()
+        ) {
+          return json({ error: "Forbidden" }, 403);
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        const lookup = supabaseAdmin.from("profiles").select("id, name, employee_id");
-        const { data: agent } = agent_id
-          ? await lookup.eq("id", agent_id).maybeSingle()
-          : await lookup.eq("employee_id", employee_id ?? "").maybeSingle();
+        const { data: agent } = await supabaseAdmin
+          .from("profiles")
+          .select("id, name, employee_id")
+          .eq("id", agent_id)
+          .maybeSingle();
         if (!agent) return json({ error: "Unknown agent" }, 404);
 
         if (lead_id) {

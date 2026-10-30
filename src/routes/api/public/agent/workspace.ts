@@ -5,7 +5,7 @@ import { z } from "zod";
  * Agent Workspace feed for the Winstone Connect Android app.
  *
  * GET /api/public/agent/workspace
- * Header: x-ingest-secret
+ * Header: x-device-token (per-agent; identity comes from the token, never the query/body)
  *
  * Returns the agent's profile, their leads, and their call / WhatsApp logs so the
  * app shows exactly what the web "My Leads" page shows for that agent.
@@ -29,31 +29,33 @@ export const Route = createFileRoute("/api/public/agent/workspace")({
       GET: async ({ request }) => {
         const { resolveApiCaller } = await import("@/lib/device-auth.server");
         const caller = await resolveApiCaller(request);
-        if (caller.kind === "none") return json({ error: "Unauthorized" }, 401);
+        if (caller.kind !== "device") return json({ error: "Unauthorized" }, 401);
 
         const url = new URL(request.url);
         const parsed = Query.safeParse(Object.fromEntries(url.searchParams));
         if (!parsed.success) return json({ error: "Invalid query" }, 400);
         const { limit } = parsed.data;
         // A phone may only ever read its own agent's workspace.
-        const agent_id = caller.kind === "device" ? caller.profile.id : parsed.data.agent_id;
-        const employee_id = caller.kind === "device" ? undefined : parsed.data.employee_id;
-        if (!employee_id && !agent_id) {
-          return json({ error: "employee_id or agent_id is required" }, 400);
+        const agent_id = caller.profile.id;
+        // Identity hints may only name the caller; anything else is refused.
+        if (parsed.data.agent_id && parsed.data.agent_id !== agent_id) return json({ error: "Forbidden" }, 403);
+        if (
+          parsed.data.employee_id &&
+          parsed.data.employee_id.toUpperCase() !== String(caller.profile.employee_id ?? "").toUpperCase()
+        ) {
+          return json({ error: "Forbidden" }, 403);
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        // Roster: agent list so the app can offer an "Operating as" switcher too.
+        // Roster is the caller only: a phone never receives other staff contacts.
         const { data: roster } = await supabaseAdmin
           .from("profiles")
           .select("id, name, employee_id, phone, role, is_active")
-          .eq("is_active", true)
-          .order("name");
+          .eq("id", agent_id)
+          .eq("is_active", true);
 
-        const agent = (roster ?? []).find((p) =>
-          agent_id ? p.id === agent_id : p.employee_id === employee_id,
-        );
+        const agent = (roster ?? [])[0];
         if (!agent) return json({ error: "Unknown agent" }, 404);
 
         const { data: leads, error: leadsError } = await supabaseAdmin
