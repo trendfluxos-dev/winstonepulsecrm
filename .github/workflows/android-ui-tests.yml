@@ -93,6 +93,12 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
+          cores: 4
+          # The Pixel 6 profile defaults to a 6 GB userdata partition, more
+          # than the runner's free disk after the SDK install. Cap it — the
+          # sandbox tests don't need a large data partition.
+          pre-emulator-launch-script: |
+            printf 'disk.dataPartition.size=2048M\n' >> "$HOME/.android/avd/test.avd/config.ini"
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           working-directory: android
