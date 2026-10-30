@@ -91,10 +91,11 @@ export function AndroidBuildStatus() {
                   return (
                     <li key={r.id} className="flex flex-wrap items-center gap-2 p-2">
                       <Badge variant={ok ? "default" : r.status === "completed" ? "destructive" : "secondary"}>{r.status !== "completed" ? t({ en: "Building", bn: "চলছে" }) : ok ? t({ en: "Succeeded", bn: "সফল" }) : t({ en: `Failed (${r.conclusion})`, bn: `ব্যর্থ (${r.conclusion})` })}</Badge>
-                      <span className="text-muted-foreground">{when(r.startedAt)} · {r.sha}</span>
+                      <span className="text-muted-foreground">{t({ en: "Released", bn: "প্রকাশ" })}: {r.status === "completed" ? when(r.updatedAt) : "—"} · {r.version ?? t({ en: "version unknown", bn: "ভার্সন অজানা" })} · {r.sha}</span>
                       <a className="text-primary underline" href={r.url} target="_blank" rel="noreferrer">GitHub</a>
                       <span className="ml-auto flex flex-wrap gap-1">
-                        {live.length === 0 ? <span className="text-xs text-muted-foreground">{r.artifacts.length ? t({ en: "Downloads expired", bn: "ডাউনলোড মেয়াদোত্তীর্ণ" }) : t({ en: "No downloads", bn: "ডাউনলোড নেই" })}</span>
+                        {r.artifacts.filter((a) => a.expired).map((a) => <span key={a.id} className="flex w-full items-center justify-between gap-2 rounded-md border border-dashed p-2"><ArtifactFacts a={a} version={r.version} /><Badge variant="outline">{t({ en: "Expired", bn: "মেয়াদোত্তীর্ণ" })}</Badge></span>)}
+                        {live.length === 0 ? (r.artifacts.length ? null : <span className="text-xs text-muted-foreground">{t({ en: "No downloads", bn: "ডাউনলোড নেই" })}</span>)
                           : <span className="flex w-full flex-col gap-1">{live.map((a) => <span key={a.id} className="flex items-center justify-between gap-2 rounded-md border p-2"><ArtifactFacts a={a} version={r.version} /><Button asChild size="sm" variant="outline"><a href={a.url} target="_blank" rel="noreferrer"><Download className="size-3" />{t({ en: "Download", bn: "ডাউনলোড" })}</a></Button></span>)}</span>}
                       </span>
                     </li>
