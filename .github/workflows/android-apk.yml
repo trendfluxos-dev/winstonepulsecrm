@@ -19,6 +19,11 @@ env:
   EXPECTED_VERSION_NAME: "2.18"
   EXPECTED_VERSION_CODE: "29"
 
+# The apk-builds branch is our quota-independent fallback storage for built APKs:
+# GITHUB_TOKEN only needs contents:write for that push.
+permissions:
+  contents: write
+
 jobs:
   debug:
     runs-on: ubuntu-latest
@@ -55,6 +60,37 @@ jobs:
           grep -q "versionCode='$EXPECTED_VERSION_CODE'" /tmp/badging.txt
           grep -q "versionName='$EXPECTED_VERSION_NAME-test'" /tmp/badging.txt
           sha256sum "$APK"
+      - name: Save debug APK to apk-builds branch
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          apk_path=$(ls android/app/build/outputs/apk/debug/*.apk | head -1)
+          apk_name=$(basename "$apk_path")
+          sha=$(sha256sum "$apk_path" | awk '{print $1}')
+          repo_url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          rm -rf /tmp/apk-repo
+          if git ls-remote --exit-code --heads "$repo_url" apk-builds >/dev/null 2>&1; then
+            git clone --quiet --depth=1 --branch apk-builds "$repo_url" /tmp/apk-repo
+          else
+            git init --quiet -b apk-builds /tmp/apk-repo
+          fi
+          cp "$apk_path" "/tmp/apk-repo/$apk_name"
+          {
+            echo "package: com.winstone.connect.test"
+            echo "version: ${EXPECTED_VERSION_NAME}-test (versionCode ${EXPECTED_VERSION_CODE})"
+            echo "sha256: $sha"
+            echo "build: run ${GITHUB_RUN_NUMBER} (commit ${GITHUB_SHA})"
+            echo "built_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > "/tmp/apk-repo/build-info.txt"
+          cd /tmp/apk-repo
+          git config user.name "winstone-apk-bot"
+          git config user.email "winstone-apk-bot@users.noreply.github.com"
+          git add -A
+          git commit --quiet -m "Test APK ${apk_name} (build ${GITHUB_RUN_NUMBER})"
+          git push --quiet origin HEAD:apk-builds
+          echo "Pushed to apk-builds: $apk_name (sha256 $sha)"
       - uses: actions/upload-artifact@v4
         with:
           name: winstone-agent-debug-apk
@@ -131,6 +167,38 @@ jobs:
           grep -q "versionCode='$EXPECTED_VERSION_CODE'" /tmp/badging.txt
           grep -q "versionName='$EXPECTED_VERSION_NAME'" /tmp/badging.txt
           sha256sum "$APK"
+      - name: Save signed release APK to apk-builds branch
+        if: steps.secrets.outputs.ready == 'true'
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          apk_path=$(ls android/app/build/outputs/apk/release/*.apk | grep -v unsigned | head -1)
+          apk_name=$(basename "$apk_path")
+          sha=$(sha256sum "$apk_path" | awk '{print $1}')
+          repo_url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          rm -rf /tmp/apk-repo
+          if git ls-remote --exit-code --heads "$repo_url" apk-builds >/dev/null 2>&1; then
+            git clone --quiet --depth=1 --branch apk-builds "$repo_url" /tmp/apk-repo
+          else
+            git init --quiet -b apk-builds /tmp/apk-repo
+          fi
+          cp "$apk_path" "/tmp/apk-repo/$apk_name"
+          {
+            echo "package: com.winstone.connect"
+            echo "version: ${EXPECTED_VERSION_NAME} (versionCode ${EXPECTED_VERSION_CODE})"
+            echo "sha256: $sha"
+            echo "build: run ${GITHUB_RUN_NUMBER} (commit ${GITHUB_SHA})"
+            echo "built_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > "/tmp/apk-repo/build-info.txt"
+          cd /tmp/apk-repo
+          git config user.name "winstone-apk-bot"
+          git config user.email "winstone-apk-bot@users.noreply.github.com"
+          git add -A
+          git commit --quiet -m "Release APK ${apk_name} (build ${GITHUB_RUN_NUMBER})"
+          git push --quiet origin HEAD:apk-builds
+          echo "Pushed to apk-builds: $apk_name (sha256 $sha)"
       - uses: actions/upload-artifact@v4
         if: steps.secrets.outputs.ready == 'true'
         with:
