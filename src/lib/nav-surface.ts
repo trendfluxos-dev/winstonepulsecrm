@@ -38,7 +38,7 @@ export const SHARED_NAV_ROUTES = [
 export type NavSurface = "it" | "hq" | "work";
 
 export function navSurfaceForPath(pathname: string): NavSurface {
-  const p = pathname.split("?")[0].replace(/\/+$/, "") || "/";
+  const p = (pathname.split("?")[0] ?? pathname).replace(/\/+$/, "") || "/";
   if ((IT_SURFACE_ROUTES as readonly string[]).includes(p)) return "it";
   if ((HQ_SURFACE_ROUTES as readonly string[]).includes(p)) return "hq";
   return "work";
