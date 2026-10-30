@@ -105,101 +105,23 @@ const ANALYSIS_SCHEMA = {
   },
 } as const;
 
-/** Runs the sales-call analysis on a raw transcript using Lovable AI. */
+/** Runs the sales-call analysis through the shared HQ-selected AI provider. */
 export async function analyzeTranscript(
   transcript: string,
   durationSeconds: number,
 ): Promise<CallAnalysis> {
-  const res = await fetch(`${GATEWAY}/responses`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Lovable-API-Key": apiKey(),
-      "X-Lovable-AIG-SDK": "fetch",
-    },
-    body: JSON.stringify({
-      model: "openai/gpt-6-astra",
-      stream: true,
-      reasoning: { effort: "low", summary: "auto" },
-      input: [
-        {
-          role: "developer",
-          content: [
-            {
-              type: "input_text",
-              text: "You analyse tele-sales phone calls for a Bangladeshi B2B sales team. Calls are in Bangla. Write summary_bullets, objections, deal_stage, intent and next_action in Bangla, and keep the transcript in its original Bangla wording. lead_category must be the single best-fitting category id for the call outcome. Be concise and factual, never invent facts that are not in the transcript.",
-            },
-          ],
-        },
-        {
-          role: "user",
-          content: [
-            {
-              type: "input_text",
-              text: `Analyse this sales call (about ${durationSeconds} seconds long). Split the raw transcript into speaker lines with plausible [MM:SS] timestamps spread evenly across the call duration, labelling each line as Agent or Customer.\n\nRaw transcript:\n${transcript}`,
-            },
-          ],
-        },
-      ],
-      text: {
-        format: {
-          type: "json_schema",
-          name: "call_analysis",
-          strict: true,
-          schema: ANALYSIS_SCHEMA,
-        },
-      },
-    }),
+  const { aiChatJson } = await import("@/lib/ai-model.server");
+  const parsed = await aiChatJson<CallAnalysis>({
+    system:
+      "You analyse tele-sales phone calls for a Bangladeshi B2B sales team. Calls are in Bangla. Write summary_bullets, objections, deal_stage, intent and next_action in Bangla, and keep the transcript in its original Bangla wording. lead_category must be the single best-fitting category id for the call outcome. Be concise and factual, never invent facts that are not in the transcript. Reply with ONE JSON object only, matching this JSON schema exactly (all fields required):\n" +
+      JSON.stringify(ANALYSIS_SCHEMA),
+    user: `Analyse this sales call (about ${durationSeconds} seconds long). Split the raw transcript into speaker lines with plausible [MM:SS] timestamps spread evenly across the call duration, labelling each line as Agent or Customer.\n\nRaw transcript:\n${transcript}`,
   });
-
-  if (!res.ok) {
-    throw new Error(`Call analysis failed (${res.status}): ${await res.text().catch(() => "")}`);
+  if (!parsed || !Array.isArray(parsed.summary_bullets) || parsed.summary_bullets.length === 0) {
+    throw new Error("The AI returned an incomplete call analysis — please retry");
   }
-
-  const raw = await readSseText(res);
-  const parsed = JSON.parse(raw) as CallAnalysis;
+  if (!Array.isArray(parsed.objections)) parsed.objections = [];
   return parsed;
-}
-
-async function readSseText(res: Response): Promise<string> {
-  const body = res.body;
-  if (!body) throw new Error("Empty analysis response");
-
-  const reader = body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let text = "";
-
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      if (!line.startsWith("data:")) continue;
-      const payload = line.slice(5).trim();
-      if (!payload || payload === "[DONE]") continue;
-      try {
-        const event = JSON.parse(payload) as {
-          type?: string;
-          delta?: string;
-          response?: { output_text?: string };
-        };
-        if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
-          text += event.delta;
-        } else if (event.type === "response.completed" && event.response?.output_text) {
-          if (!text) text = event.response.output_text;
-        }
-      } catch {
-        // ignore keep-alive / partial frames
-      }
-    }
-  }
-
-  if (!text) throw new Error("Analysis returned no content");
-  return text;
 }
 
 /** Transcribes + analyses a stored recording and writes the intelligence back to the row. */
@@ -261,7 +183,7 @@ export async function processRecording(recordingId: string): Promise<"done" | "e
     const analysis = await analyzeTranscript(transcript, recording.duration_seconds);
     await logAiUsage({
       category: "analysis",
-      model: "openai/gpt-6-astra",
+      model: await currentAiModelLabel(),
       actorProfileId: recording.agent_id,
       detail: recordingId,
     });
@@ -452,4 +374,10 @@ function mimeFor(ext: string): string {
     default:
       return "audio/mpeg";
   }
+}
+
+async function currentAiModelLabel(): Promise<string> {
+  const { getAiModelChoice } = await import("@/lib/ai-model.server");
+  const { resolveAiProvider } = await import("@/lib/ai-providers");
+  return resolveAiProvider(await getAiModelChoice()).model;
 }
