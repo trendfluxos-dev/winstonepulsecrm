@@ -31,7 +31,7 @@ vi.mock("@/integrations/supabase/client.server", () => ({
       const chain: Record<string, unknown> = {
         select: () => chain,
         eq: (k: string, v: unknown) => { if (table === "agent_devices") s.revokeFilters.push([k, v]); return chain; },
-        is: (k: string, v: unknown) => { if (table === "agent_devices") s.revokeFilters.push([k, v]); return Promise.resolve({ data: Array.from({ length: s.revoked }, () => ({ id: "dev-1" })), error: null }).then ? Object.assign(Promise.resolve({ data: Array.from({ length: s.revoked }, () => ({ id: "dev-1" })), error: null }), { select: () => Promise.resolve({ data: Array.from({ length: s.revoked }, () => ({ id: "dev-1" })), error: null }) }) : chain; },
+        is: (k: string, v: unknown) => { s.revokeFilters.push([k, v]); return { select: async () => ({ data: Array.from({ length: s.revoked }, () => ({ id: "dev-1" })), error: null }) }; },
         update: () => { if (table === "leads") s.leadUpdates++; return chain; },
         maybeSingle: async () => ({ data: table === "profiles" ? { id: "agent-a", name: "Agent A" } : s.lead, error: null }),
         then: (fn: (v: unknown) => unknown) => Promise.resolve({ error: null }).then(fn),
