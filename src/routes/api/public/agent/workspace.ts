@@ -52,15 +52,20 @@ export const Route = createFileRoute("/api/public/agent/workspace")({
         const agent = (roster ?? [])[0];
         if (!agent) return json({ error: "Unknown agent" }, 404);
 
-        const { data: leads, error: leadsError } = await supabaseAdmin
+        const { data: leadRows, error: leadsError } = await supabaseAdmin
           .from("leads")
           .select(
-            "id, name, phone_number, company, address, notes, status, outcome_category, call_attempts, source, created_at, updated_at",
+            "id, name, phone_number, company, address, notes, status, outcome_category, call_attempts, source, created_at, updated_at, assigned_to, assigned_agent_id",
           )
           .or(`assigned_to.eq.${agent.id},assigned_agent_id.eq.${agent.id}`)
           .order("updated_at", { ascending: false })
           .limit(limit);
         if (leadsError) return json({ error: leadsError.message }, 500);
+        // Same strict owner rule as the write endpoints: conflicting owners are hidden.
+        const { leadOwnerId } = await import("@/lib/lead-access.server");
+        const leads = (leadRows ?? [])
+          .filter((l) => leadOwnerId(l) === agent.id)
+          .map(({ assigned_to: _a, assigned_agent_id: _b, ...rest }) => rest);
 
         const leadIds = (leads ?? []).map((l) => l.id);
         const [{ data: calls }, { data: messages }] = leadIds.length
