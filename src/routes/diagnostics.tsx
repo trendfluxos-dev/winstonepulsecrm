@@ -174,7 +174,7 @@ function DiagnosticsPage() {
         title="পেজ-লোড ডায়াগনস্টিক্স"
         description="শুধু স্টাফদের জন্য — সাইন ইন করুন।"
       >
-        <div className="mx-auto max-w-5xl space-y-6"><CallDiagnosticsPanel /><DeviceCallTestChecklist /><SandboxResultsReport /><AuthorityCompat /><Board /></div>
+        <div className="mx-auto max-w-5xl space-y-6"><AndroidApkInstallGuide /><CallDiagnosticsPanel /><DeviceCallTestChecklist /><SandboxResultsReport /><AuthorityCompat /><Board /></div>
       </RoleGate>
     </AppShell>
   );
