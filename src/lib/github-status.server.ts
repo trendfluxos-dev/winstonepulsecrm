@@ -72,3 +72,34 @@ export async function readGithubActivity(repository: string) {
     openPullCount: pulls.filter((p) => p.state === "open").length,
   };
 }
+
+type GhRun = { id: number; status: string; conclusion: string | null; html_url: string; head_sha: string; head_branch: string; created_at: string; updated_at: string; run_started_at?: string };
+type GhArtifact = { id: number; name: string; size_in_bytes: number; expired: boolean; expires_at: string | null };
+
+/** Read-only: latest runs of the Android APK workflow and artifacts of the newest one. Never triggers builds. */
+export async function readAndroidBuilds(repository: string) {
+  const key = process.env["GITHUB_API_KEY"];
+  const lovableKey = process.env["LOVABLE_API_KEY"];
+  if (!key || !lovableKey) throw new Error("GitHub connection is not configured");
+  const headers = { Accept: "application/vnd.github+json", Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": key };
+  async function read<T>(path: string): Promise<T | null> {
+    const response = await fetch(`${GATEWAY_URL}${path}`, { headers, signal: AbortSignal.timeout(10000), redirect: "error" });
+    if (response.status === 404) return null;
+    if (!response.ok) {
+      console.error(`GitHub build read failed [${response.status}]`);
+      throw new Error(`GitHub read failed (HTTP ${response.status})`);
+    }
+    return response.json() as Promise<T>;
+  }
+  const runs = await read<{ workflow_runs: GhRun[] }>(`/repos/${repository}/actions/workflows/android-apk.yml/runs?per_page=5`);
+  const list = runs?.workflow_runs ?? [];
+  const latest = list[0];
+  const arts = latest ? await read<{ artifacts: GhArtifact[] }>(`/repos/${repository}/actions/runs/${latest.id}/artifacts?per_page=20`) : null;
+  return {
+    repository,
+    workflowFound: runs !== null,
+    checkedAt: new Date().toISOString(),
+    runs: list.map((r) => ({ id: r.id, status: r.status, conclusion: r.conclusion, url: r.html_url, sha: r.head_sha.slice(0, 7), branch: r.head_branch, startedAt: r.run_started_at ?? r.created_at, updatedAt: r.updated_at })),
+    artifacts: (arts?.artifacts ?? []).map((a) => ({ id: a.id, name: a.name.slice(0, 120), sizeMb: Math.round(a.size_in_bytes / 104857.6) / 10, expired: a.expired, expiresAt: a.expires_at, url: latest ? `https://github.com/${repository}/actions/runs/${latest.id}/artifacts/${a.id}` : "" })),
+  };
+}
