@@ -159,7 +159,6 @@ export const _LEGACY_TEMPERATURES: Opt[] = [
   { value: "warm", label: "WARM" },
   { value: "cold", label: "COLD" },
 ];
-const GRADES: Opt[] = ["A", "B", "C", "D"].map((g) => ({ value: g, label: g }));
 
 const labelOf = (opts: Opt[], value: string) => opts.find((o) => o.value === value)?.label ?? value;
 
