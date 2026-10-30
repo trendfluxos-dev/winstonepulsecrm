@@ -11,7 +11,7 @@ import type { AccessVerdict } from "@/lib/github-access";
 import { useT } from "@/lib/i18n";
 
 const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
-const when = (iso: string | null) => iso ? new Date(iso).toLocaleString("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" }) : "—";
+const when = (iso: string | null | undefined) => iso ? new Date(iso).toLocaleString("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" }) : "—";
 
 /** Read-only GitHub access check (full IT PIN). Never changes connections or the repository. */
 export function GitHubAccessPanel() {
