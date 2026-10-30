@@ -44,7 +44,8 @@ export const LEAD_STATUS_FOR: Record<CallCategory, "pending" | "contacted" | "fo
   callback: "follow_up",
   no_answer: "contacted",
   wrong_number: "closed",
-  closed_converted: "closed",
+  // A claimed sale stays open: the pending booking (HQ/IT approval) is the only path to a confirmed close.
+  closed_converted: "follow_up",
 };
 
 /**

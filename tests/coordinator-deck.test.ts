@@ -71,7 +71,7 @@ describe("report category → lead status", () => {
       callback: "follow_up",
       no_answer: "contacted",
       wrong_number: "closed",
-      closed_converted: "closed",
+      closed_converted: "follow_up",
     });
   });
 
