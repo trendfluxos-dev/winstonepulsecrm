@@ -71,6 +71,14 @@ export function GitRepositoryStatusPanel() {
       </div>
       <div className="space-y-2 border-t border-border pt-3 text-sm">
         <h3 className="font-medium">Lovable Git sync</h3>
+        <div className="space-y-2 border-l-2 border-primary pl-3" aria-label="Saved commit comparison">
+          <p className="font-medium">{t({ en: "Last saved-commit comparison: matched", bn: "শেষ সংরক্ষিত কাজের তুলনা: মিলেছে" })}</p>
+          <p className="break-all">trendfluxos-dev/winstone-pulse-crm · main</p>
+          <a className="break-all underline" href="https://github.com/trendfluxos-dev/winstone-pulse-crm/commit/96b57651ea91d4133e49142fca809dde723b2223" target="_blank" rel="noopener noreferrer">96b57651ea91d4133e49142fca809dde723b2223</a>
+          <p className="text-xs text-muted-foreground">{t({ en: "Compared in chat", bn: "চ্যাটে তুলনা করা হয়েছে" })}: <time dateTime="2026-10-30T15:19:45Z">30 Oct 2026 · 21:19:45 Dhaka</time></p>
+          <p className="text-muted-foreground">{t({ en: "The project's saved commit and GitHub main head matched at that time. This dated evidence is not a live sync status; later edits are not covered.", bn: "ওই সময় প্রকল্পের সংরক্ষিত কাজ ও GitHub main-এর সর্বশেষ কাজ একই ছিল। এটি ওই সময়ের প্রমাণ, বর্তমান সিঙ্ক অবস্থা নয়; পরের পরিবর্তন এতে অন্তর্ভুক্ত নয়।" })}</p>
+        </div>
+        <p className="text-muted-foreground">{t({ en: "Current Lovable sync: not verified. GitHub access checks do not read the sync queue. Confirm Connected / In sync with GitHub in Lovable Project settings → Git → Re-check.", bn: "বর্তমান Lovable সিঙ্ক: যাচাই হয়নি। GitHub অ্যাক্সেস যাচাইয়ে সিঙ্কের অপেক্ষমাণ কাজ দেখা যায় না। Lovable Project settings → Git → Re-check-এ Connected / In sync with GitHub নিশ্চিত করুন।" })}</p>
         <dl className="grid gap-3 sm:grid-cols-2">{[t({ en: "Connected repository", bn: "সংযুক্ত রিপোজিটরি" }), t({ en: "Synced branch", bn: "সিঙ্ক ব্রাঞ্চ" }), t({ en: "Pending changes", bn: "অপেক্ষমাণ পরিবর্তন" }), t({ en: "Recent sync errors", bn: "সাম্প্রতিক সিঙ্ক ত্রুটি" })].map(label => <div key={label}><dt>{label}</dt><dd className="text-xs text-muted-foreground">{unknown}</dd></div>)}</dl>
       </div>
     </section>
