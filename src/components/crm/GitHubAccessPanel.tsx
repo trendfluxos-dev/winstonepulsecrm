@@ -60,10 +60,18 @@ export function GitHubAccessPanel() {
         <div className="space-y-2">
           {run.data.connections.map((c, i) => {
             const v = verdictText[c.verdict];
+            const profileUrl = c.login ? `https://github.com/${encodeURIComponent(c.login)}` : null;
             return (
               <div key={i} className="rounded-md border border-border p-3 text-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-medium">{c.login ?? t({ en: "Unknown account", bn: "অজানা অ্যাকাউন্ট" })}</span>
+                  {profileUrl ? (
+                    <a href={profileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium underline decoration-border underline-offset-2 hover:decoration-foreground" aria-label={t({ en: "Open GitHub profile", bn: "GitHub প্রোফাইল খুলুন" })}>
+                      {c.login}
+                      <ExternalLink className="size-3 shrink-0 text-muted-foreground" aria-hidden="true" />
+                    </a>
+                  ) : (
+                    <span className="font-medium">{t({ en: "Unknown account", bn: "অজানা অ্যাকাউন্ট" })}</span>
+                  )}
                   <Badge variant={v.variant}>{t(v)}</Badge>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
