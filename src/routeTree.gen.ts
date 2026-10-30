@@ -101,7 +101,6 @@ import { Route as ApiPublicConfigRulesRouteImport } from './routes/api/public/co
 import { Route as ApiPublicDownloadApkRouteImport } from './routes/api/public/download/apk'
 import { Route as ApiPublicHooksDeployHealthRouteImport } from './routes/api/public/hooks/deploy-health'
 import { Route as ApiPublicHooksDriveBackupRouteImport } from './routes/api/public/hooks/drive-backup'
-import { Route as ApiPublicHooksGithubAccessWatchRouteImport } from './routes/api/public/hooks/github-access-watch'
 import { Route as ApiPublicHooksLeadDistributionRouteImport } from './routes/api/public/hooks/lead-distribution'
 import { Route as ApiPublicHooksLeadNeglectRouteImport } from './routes/api/public/hooks/lead-neglect'
 import { Route as ApiPublicHooksMarketNewsRouteImport } from './routes/api/public/hooks/market-news'
@@ -118,6 +117,7 @@ import { Route as ApiPublicIngestOutcomeRouteImport } from './routes/api/public/
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
 import { Route as ApiPublicIngestReprocessRouteImport } from './routes/api/public/ingest/reprocess'
 import { Route as ApiPublicIntegrationsStatusRouteImport } from './routes/api/public/integrations/status'
+import { Route as ApiPublicJobsGithubAccessWatchRouteImport } from './routes/api/public/jobs/github-access-watch'
 import { Route as ApiPublicJobsInventorySheetRouteImport } from './routes/api/public/jobs/inventory-sheet'
 import { Route as ApiPublicJobsLeadReportSheetRouteImport } from './routes/api/public/jobs/lead-report-sheet'
 import { Route as ApiPublicJobsMessengerRetentionRouteImport } from './routes/api/public/jobs/messenger-retention'
@@ -600,12 +600,6 @@ const ApiPublicHooksDriveBackupRoute =
     path: '/api/public/hooks/drive-backup',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicHooksGithubAccessWatchRoute =
-  ApiPublicHooksGithubAccessWatchRouteImport.update({
-    id: '/api/public/hooks/github-access-watch',
-    path: '/api/public/hooks/github-access-watch',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicHooksLeadDistributionRoute =
   ApiPublicHooksLeadDistributionRouteImport.update({
     id: '/api/public/hooks/lead-distribution',
@@ -695,6 +689,12 @@ const ApiPublicIntegrationsStatusRoute =
   ApiPublicIntegrationsStatusRouteImport.update({
     id: '/api/public/integrations/status',
     path: '/api/public/integrations/status',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicJobsGithubAccessWatchRoute =
+  ApiPublicJobsGithubAccessWatchRouteImport.update({
+    id: '/api/public/jobs/github-access-watch',
+    path: '/api/public/jobs/github-access-watch',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicJobsInventorySheetRoute =
@@ -862,7 +862,6 @@ export interface FileRoutesByFullPath {
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/hooks/deploy-health': typeof ApiPublicHooksDeployHealthRoute
   '/api/public/hooks/drive-backup': typeof ApiPublicHooksDriveBackupRoute
-  '/api/public/hooks/github-access-watch': typeof ApiPublicHooksGithubAccessWatchRoute
   '/api/public/hooks/lead-distribution': typeof ApiPublicHooksLeadDistributionRoute
   '/api/public/hooks/lead-neglect': typeof ApiPublicHooksLeadNeglectRoute
   '/api/public/hooks/market-news': typeof ApiPublicHooksMarketNewsRoute
@@ -879,6 +878,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/github-access-watch': typeof ApiPublicJobsGithubAccessWatchRoute
   '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
   '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
   '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
@@ -986,7 +986,6 @@ export interface FileRoutesByTo {
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/hooks/deploy-health': typeof ApiPublicHooksDeployHealthRoute
   '/api/public/hooks/drive-backup': typeof ApiPublicHooksDriveBackupRoute
-  '/api/public/hooks/github-access-watch': typeof ApiPublicHooksGithubAccessWatchRoute
   '/api/public/hooks/lead-distribution': typeof ApiPublicHooksLeadDistributionRoute
   '/api/public/hooks/lead-neglect': typeof ApiPublicHooksLeadNeglectRoute
   '/api/public/hooks/market-news': typeof ApiPublicHooksMarketNewsRoute
@@ -1003,6 +1002,7 @@ export interface FileRoutesByTo {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/github-access-watch': typeof ApiPublicJobsGithubAccessWatchRoute
   '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
   '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
   '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
@@ -1111,7 +1111,6 @@ export interface FileRoutesById {
   '/api/public/download/apk': typeof ApiPublicDownloadApkRoute
   '/api/public/hooks/deploy-health': typeof ApiPublicHooksDeployHealthRoute
   '/api/public/hooks/drive-backup': typeof ApiPublicHooksDriveBackupRoute
-  '/api/public/hooks/github-access-watch': typeof ApiPublicHooksGithubAccessWatchRoute
   '/api/public/hooks/lead-distribution': typeof ApiPublicHooksLeadDistributionRoute
   '/api/public/hooks/lead-neglect': typeof ApiPublicHooksLeadNeglectRoute
   '/api/public/hooks/market-news': typeof ApiPublicHooksMarketNewsRoute
@@ -1128,6 +1127,7 @@ export interface FileRoutesById {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/github-access-watch': typeof ApiPublicJobsGithubAccessWatchRoute
   '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
   '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
   '/api/public/jobs/messenger-retention': typeof ApiPublicJobsMessengerRetentionRoute
@@ -1237,7 +1237,6 @@ export interface FileRouteTypes {
     | '/api/public/download/apk'
     | '/api/public/hooks/deploy-health'
     | '/api/public/hooks/drive-backup'
-    | '/api/public/hooks/github-access-watch'
     | '/api/public/hooks/lead-distribution'
     | '/api/public/hooks/lead-neglect'
     | '/api/public/hooks/market-news'
@@ -1254,6 +1253,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/github-access-watch'
     | '/api/public/jobs/inventory-sheet'
     | '/api/public/jobs/lead-report-sheet'
     | '/api/public/jobs/messenger-retention'
@@ -1361,7 +1361,6 @@ export interface FileRouteTypes {
     | '/api/public/download/apk'
     | '/api/public/hooks/deploy-health'
     | '/api/public/hooks/drive-backup'
-    | '/api/public/hooks/github-access-watch'
     | '/api/public/hooks/lead-distribution'
     | '/api/public/hooks/lead-neglect'
     | '/api/public/hooks/market-news'
@@ -1378,6 +1377,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/github-access-watch'
     | '/api/public/jobs/inventory-sheet'
     | '/api/public/jobs/lead-report-sheet'
     | '/api/public/jobs/messenger-retention'
@@ -1485,7 +1485,6 @@ export interface FileRouteTypes {
     | '/api/public/download/apk'
     | '/api/public/hooks/deploy-health'
     | '/api/public/hooks/drive-backup'
-    | '/api/public/hooks/github-access-watch'
     | '/api/public/hooks/lead-distribution'
     | '/api/public/hooks/lead-neglect'
     | '/api/public/hooks/market-news'
@@ -1502,6 +1501,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/github-access-watch'
     | '/api/public/jobs/inventory-sheet'
     | '/api/public/jobs/lead-report-sheet'
     | '/api/public/jobs/messenger-retention'
@@ -1610,7 +1610,6 @@ export interface RootRouteChildren {
   ApiPublicDownloadApkRoute: typeof ApiPublicDownloadApkRoute
   ApiPublicHooksDeployHealthRoute: typeof ApiPublicHooksDeployHealthRoute
   ApiPublicHooksDriveBackupRoute: typeof ApiPublicHooksDriveBackupRoute
-  ApiPublicHooksGithubAccessWatchRoute: typeof ApiPublicHooksGithubAccessWatchRoute
   ApiPublicHooksLeadDistributionRoute: typeof ApiPublicHooksLeadDistributionRoute
   ApiPublicHooksLeadNeglectRoute: typeof ApiPublicHooksLeadNeglectRoute
   ApiPublicHooksMarketNewsRoute: typeof ApiPublicHooksMarketNewsRoute
@@ -1627,6 +1626,7 @@ export interface RootRouteChildren {
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
   ApiPublicIngestReprocessRoute: typeof ApiPublicIngestReprocessRoute
   ApiPublicIntegrationsStatusRoute: typeof ApiPublicIntegrationsStatusRoute
+  ApiPublicJobsGithubAccessWatchRoute: typeof ApiPublicJobsGithubAccessWatchRoute
   ApiPublicJobsInventorySheetRoute: typeof ApiPublicJobsInventorySheetRoute
   ApiPublicJobsLeadReportSheetRoute: typeof ApiPublicJobsLeadReportSheetRoute
   ApiPublicJobsMessengerRetentionRoute: typeof ApiPublicJobsMessengerRetentionRoute
@@ -2288,13 +2288,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksDriveBackupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/github-access-watch': {
-      id: '/api/public/hooks/github-access-watch'
-      path: '/api/public/hooks/github-access-watch'
-      fullPath: '/api/public/hooks/github-access-watch'
-      preLoaderRoute: typeof ApiPublicHooksGithubAccessWatchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/hooks/lead-distribution': {
       id: '/api/public/hooks/lead-distribution'
       path: '/api/public/hooks/lead-distribution'
@@ -2405,6 +2398,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/integrations/status'
       fullPath: '/api/public/integrations/status'
       preLoaderRoute: typeof ApiPublicIntegrationsStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs/github-access-watch': {
+      id: '/api/public/jobs/github-access-watch'
+      path: '/api/public/jobs/github-access-watch'
+      fullPath: '/api/public/jobs/github-access-watch'
+      preLoaderRoute: typeof ApiPublicJobsGithubAccessWatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/jobs/inventory-sheet': {
@@ -2595,7 +2595,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDownloadApkRoute: ApiPublicDownloadApkRoute,
   ApiPublicHooksDeployHealthRoute: ApiPublicHooksDeployHealthRoute,
   ApiPublicHooksDriveBackupRoute: ApiPublicHooksDriveBackupRoute,
-  ApiPublicHooksGithubAccessWatchRoute: ApiPublicHooksGithubAccessWatchRoute,
   ApiPublicHooksLeadDistributionRoute: ApiPublicHooksLeadDistributionRoute,
   ApiPublicHooksLeadNeglectRoute: ApiPublicHooksLeadNeglectRoute,
   ApiPublicHooksMarketNewsRoute: ApiPublicHooksMarketNewsRoute,
@@ -2612,6 +2611,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
   ApiPublicIngestReprocessRoute: ApiPublicIngestReprocessRoute,
   ApiPublicIntegrationsStatusRoute: ApiPublicIntegrationsStatusRoute,
+  ApiPublicJobsGithubAccessWatchRoute: ApiPublicJobsGithubAccessWatchRoute,
   ApiPublicJobsInventorySheetRoute: ApiPublicJobsInventorySheetRoute,
   ApiPublicJobsLeadReportSheetRoute: ApiPublicJobsLeadReportSheetRoute,
   ApiPublicJobsMessengerRetentionRoute: ApiPublicJobsMessengerRetentionRoute,
