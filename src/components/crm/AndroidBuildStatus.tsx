@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bell, Download, RefreshCw, Smartphone } from "lucide-react";
+import { Bell, Download, MessageCircle, RefreshCw, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,7 +75,10 @@ export function AndroidBuildStatus() {
                 <li key={a.id} className="flex items-center justify-between gap-2 rounded-md border p-2 text-sm">
                   <ArtifactFacts a={a} version={latest.version} />
                   {a.expired ? <Badge variant="outline">{t({ en: "Expired", bn: "মেয়াদোত্তীর্ণ" })}</Badge> : (
-                    <Button asChild size="sm"><a href={a.url} target="_blank" rel="noreferrer"><Download className="size-4" />{t({ en: "Download", bn: "ডাউনলোড" })}</a></Button>
+                    <span className="flex shrink-0 gap-1">
+                      <WhatsAppShareButton a={a} version={latest.version} />
+                      <Button asChild size="sm"><a href={a.url} target="_blank" rel="noreferrer"><Download className="size-4" />{t({ en: "Download", bn: "ডাউনলোড" })}</a></Button>
+                    </span>
                   )}
                 </li>
               ))}
@@ -96,7 +99,7 @@ export function AndroidBuildStatus() {
                       <span className="ml-auto flex flex-wrap gap-1">
                         {r.artifacts.filter((a) => a.expired).map((a) => <span key={a.id} className="flex w-full items-center justify-between gap-2 rounded-md border border-dashed p-2"><ArtifactFacts a={a} version={r.version} /><Badge variant="outline">{t({ en: "Expired", bn: "মেয়াদোত্তীর্ণ" })}</Badge></span>)}
                         {live.length === 0 ? (r.artifacts.length ? null : <span className="text-xs text-muted-foreground">{t({ en: "No downloads", bn: "ডাউনলোড নেই" })}</span>)
-                          : <span className="flex w-full flex-col gap-1">{live.map((a) => <span key={a.id} className="flex items-center justify-between gap-2 rounded-md border p-2"><ArtifactFacts a={a} version={r.version} /><Button asChild size="sm" variant="outline"><a href={a.url} target="_blank" rel="noreferrer"><Download className="size-3" />{t({ en: "Download", bn: "ডাউনলোড" })}</a></Button></span>)}</span>}
+                          : <span className="flex w-full flex-col gap-1">{live.map((a) => <span key={a.id} className="flex items-center justify-between gap-2 rounded-md border p-2"><ArtifactFacts a={a} version={r.version} /><span className="flex shrink-0 gap-1"><WhatsAppShareButton a={a} version={r.version} /><Button asChild size="sm" variant="outline"><a href={a.url} target="_blank" rel="noreferrer"><Download className="size-3" />{t({ en: "Download", bn: "ডাউনলোড" })}</a></Button></span></span>)}</span>}
                       </span>
                     </li>
                   );
