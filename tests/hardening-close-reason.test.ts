@@ -64,7 +64,8 @@ describe("9:05 gate", () => {
     expect(desk.match(/assertBriefingForCaller/g)?.length).toBeGreaterThanOrEqual(2);
     expect(whatsapp).toContain("assertBriefingForCaller(caller)");
     expect(calls.match(/assertAgentBriefing|assertBriefingForCaller/g)?.length).toBeGreaterThanOrEqual(3);
-    expect(api).toContain("requireAgentBriefing");
+    // Pending report completion is deliberately ungated (owner decision 2026-10-30).
+    expect(api).not.toContain("requireAgentBriefing");
   });
 });
 
