@@ -96,7 +96,6 @@ SELECT pg_temp.expect((SELECT call_attempts FROM public.leads) = 1, 'attempts co
 SELECT pg_temp.expect((SELECT count(*) FROM public.lead_events) = 1, 'timeline event once');
 SELECT pg_temp.expect((SELECT length(notes) - length(replace(notes,'note one',''))) = length('note one'), 'notes appended once');
 SELECT pg_temp.expect(pg_temp.fails($q$SELECT public.apply_phone_outcome_atomic('aaaaaaaa-0000-4000-8000-000000000001',gen_random_uuid(),'call-uid-0001','interested','contacted','',false)$q$), 'call_uid reused for other lead refused');
-SELECT pg_temp.expect((public.apply_phone_outcome_atomic(:other,'11111111-0000-4000-8000-000000000001','call-uid-0001','x','pending','',false) IS NULL) IS NOT TRUE OR true, 'placeholder');
 SELECT pg_temp.reset();
 UPDATE public.leads SET assigned_agent_id = :other;
 SELECT pg_temp.expect(pg_temp.fails($q$SELECT public.apply_phone_outcome_atomic('aaaaaaaa-0000-4000-8000-000000000001','11111111-0000-4000-8000-000000000001','call-uid-0002','interested','contacted','',false)$q$), 'conflicting owner refused');
