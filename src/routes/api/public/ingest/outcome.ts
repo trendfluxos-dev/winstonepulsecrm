@@ -6,7 +6,7 @@ import { z } from "zod";
  *
  * POST /api/public/ingest/outcome
  * Header: x-device-token (per-agent; the agent comes from the token)
- * Body: { lead_id, agent_id?, outcome, notes?, connected? }
+ * Body: { lead_id, outcome, notes?, connected?, call_uid? } (agent_id ignored)
  *
  * Moves the lead to the right stage, appends the agent's in-call notes and
  * bumps the attempt counter so the web queue matches the phone instantly.
