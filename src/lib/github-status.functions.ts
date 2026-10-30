@@ -26,3 +26,12 @@ export const getGithubActivity = createServerFn({ method: "POST" })
     const { readGithubActivity } = await import("@/lib/github-status.server");
     return readGithubActivity(data.repository);
   });
+
+export const getAndroidBuilds = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => githubCheckInput.omit({ branch: true }).parse(input))
+  .handler(async ({ data }) => {
+    const { adminTokenScope } = await import("@/lib/admin-gate.server");
+    if (adminTokenScope(data.adminToken) !== "full") throw new Error("Full IT PIN required");
+    const { readAndroidBuilds } = await import("@/lib/github-status.server");
+    return readAndroidBuilds(data.repository);
+  });
