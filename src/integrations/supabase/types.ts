@@ -3791,6 +3791,50 @@ export type Database = {
         }
         Relationships: []
       }
+      phone_test_reports: {
+        Row: {
+          app_version: string | null
+          created_at: string
+          failed_count: number
+          id: string
+          issue: string | null
+          phone_model: string
+          profile_id: string
+          results: Json
+          sent_to_it: boolean
+        }
+        Insert: {
+          app_version?: string | null
+          created_at?: string
+          failed_count?: number
+          id?: string
+          issue?: string | null
+          phone_model: string
+          profile_id: string
+          results: Json
+          sent_to_it?: boolean
+        }
+        Update: {
+          app_version?: string | null
+          created_at?: string
+          failed_count?: number
+          id?: string
+          issue?: string | null
+          phone_model?: string
+          profile_id?: string
+          results?: Json
+          sent_to_it?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "phone_test_reports_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pin_auth_attempt_state: {
         Row: {
           blocked_until: string | null

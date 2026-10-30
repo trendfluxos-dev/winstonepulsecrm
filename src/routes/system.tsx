@@ -5,6 +5,7 @@ import { DeploymentStatusPanel } from "@/components/crm/DeploymentStatusPanel";
 import { GitRepositoryStatusPanel } from "@/components/crm/GitRepositoryStatusPanel";
 import { GitHubActivityDashboard } from "@/components/crm/GitHubActivityDashboard";
 import { AndroidBuildStatus } from "@/components/crm/AndroidBuildStatus";
+import { ItPhoneTestReports } from "@/components/crm/ItPhoneTestReports";
 import { SearchConsoleDashboard } from "@/components/crm/SearchConsoleDashboard";
 import { PAGE_SECTIONS, sectionSearch, useSection } from "@/lib/page-sections";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -166,6 +167,7 @@ function SystemBoard() {
           <GitRepositoryStatusPanel />
           <GitHubActivityDashboard />
           <AndroidBuildStatus />
+          <ItPhoneTestReports />
           <SearchConsoleDashboard />
           <SystemManualCard />
           <SystemUpdateReport />

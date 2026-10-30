@@ -81,6 +81,28 @@ export function AndroidBuildStatus() {
               ))}
             </ul>
           )}
+          {q.data!.runs.length > 1 && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">{t({ en: "Recent builds", bn: "সাম্প্রতিক build" })}</h3>
+              <ul className="divide-y divide-border rounded-md border text-sm">
+                {q.data!.runs.slice(1).map((r) => {
+                  const ok = r.status === "completed" && r.conclusion === "success";
+                  const live = r.artifacts.filter((a) => !a.expired);
+                  return (
+                    <li key={r.id} className="flex flex-wrap items-center gap-2 p-2">
+                      <Badge variant={ok ? "default" : r.status === "completed" ? "destructive" : "secondary"}>{r.status !== "completed" ? t({ en: "Building", bn: "চলছে" }) : ok ? t({ en: "Succeeded", bn: "সফল" }) : t({ en: `Failed (${r.conclusion})`, bn: `ব্যর্থ (${r.conclusion})` })}</Badge>
+                      <span className="text-muted-foreground">{when(r.startedAt)} · {r.sha}</span>
+                      <a className="text-primary underline" href={r.url} target="_blank" rel="noreferrer">GitHub</a>
+                      <span className="ml-auto flex flex-wrap gap-1">
+                        {live.length === 0 ? <span className="text-xs text-muted-foreground">{r.artifacts.length ? t({ en: "Downloads expired", bn: "ডাউনলোড মেয়াদোত্তীর্ণ" }) : t({ en: "No downloads", bn: "ডাউনলোড নেই" })}</span>
+                          : live.map((a) => <Button key={a.id} asChild size="sm" variant="outline"><a href={a.url} target="_blank" rel="noreferrer"><Download className="size-3" />{a.name}</a></Button>)}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
           <p className="text-[11px] text-muted-foreground">{t({ en: "Downloads need a GitHub sign-in with access to this repository. Checked", bn: "ডাউনলোডে এই রিপোজিটরিতে অ্যাক্সেস থাকা GitHub লগইন লাগবে। যাচাই" })}: {when(q.data!.checkedAt)}</p>
         </div>
       )}
