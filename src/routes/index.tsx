@@ -18,7 +18,7 @@ import emblemAsset from "@/assets/winstone-emblem.png.asset.json";
 import androidAsset from "@/assets/device-android.webp.asset.json";
 import webAsset from "@/assets/device-web.webp.asset.json";
 import desktopAsset from "@/assets/device-desktop.webp.asset.json";
-import teamHeroAsset from "@/assets/home-team-hero-v7.webp.asset.json";
+import teamHeroAsset from "@/assets/home-team-hero-v8.webp.asset.json";
 import brandArchitectAsset from "@/assets/brand-architect.jpeg.asset.json";
 import { scrollToTopAdaptive } from "@/lib/motion";
 import { AdminPinDialog } from "@/components/crm/AdminPinDialog";
@@ -168,11 +168,11 @@ function EntryHall() {
             <figure className="mt-8 overflow-hidden rounded-xl border border-border/70 bg-card shadow-soft sm:mt-10">
               <img
                 src={teamHeroAsset.url}
-                alt="Two professionals discussing the Winstone Pulse CRM"
-                width={1376}
-                height={768}
+                alt="Winstone Properties sales team meeting in the office"
+                width={1600}
+                height={1073}
                 fetchPriority="high"
-                className="block h-auto w-full opacity-80"
+                className="block h-auto w-full"
               />
             </figure>
             <div className="mt-8 grid overflow-hidden rounded-xl border border-border bg-card sm:mt-10 sm:grid-cols-2 lg:grid-cols-3">
