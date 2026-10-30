@@ -5,6 +5,7 @@ import { DeploymentStatusPanel } from "@/components/crm/DeploymentStatusPanel";
 import { GitRepositoryStatusPanel } from "@/components/crm/GitRepositoryStatusPanel";
 import { GitHubActivityDashboard } from "@/components/crm/GitHubActivityDashboard";
 import { AndroidBuildStatus } from "@/components/crm/AndroidBuildStatus";
+import { BuildEfficiencyDashboard } from "@/components/crm/BuildEfficiencyDashboard";
 import { ItPhoneTestReports } from "@/components/crm/ItPhoneTestReports";
 import { SearchConsoleDashboard } from "@/components/crm/SearchConsoleDashboard";
 import { DbPerformanceDashboard } from "@/components/crm/DbPerformanceDashboard";
@@ -168,6 +169,7 @@ function SystemBoard() {
           <GitRepositoryStatusPanel />
           <GitHubActivityDashboard />
           <AndroidBuildStatus />
+          <BuildEfficiencyDashboard />
           <ItPhoneTestReports />
           <SearchConsoleDashboard />
           <DbPerformanceDashboard />
