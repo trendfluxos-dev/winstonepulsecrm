@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Lock, LockOpen, LogOut, Smartphone, Sparkles } from "lucide-react";
 import { MobileNavDrawer, NavSidebar, NAV_ICONS } from "@/components/crm/NavSidebar";
 import { Suspense, lazy, useEffect, useState, type ReactNode } from "react";
@@ -20,6 +20,7 @@ import { useCrmRealtime } from "@/hooks/use-crm-realtime";
 import { setAdminToken, useAdminToken } from "@/lib/local-session";
 import { useMyAccount, useSignOut } from "@/lib/session";
 import { NAV_LABELS, setLang, useLang, useT } from "@/lib/i18n";
+import { filterNavForSurface } from "@/lib/nav-surface";
 
 // Overlays, dialogs and gates load on demand so the shared page frame stays small on phones.
 const CommandPalette = lazy(() => import("@/components/crm/CommandPalette").then((m) => ({ default: m.CommandPalette })));
@@ -95,9 +96,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     // Keep the saved value untouched; it must not affect today's palette.
     document.documentElement.classList.remove("dark");
   }, []);
-  const nav = NAV.filter((item) => (item.scopes as readonly Scope[]).includes(scope as Scope))
-    .filter((item) => !(account?.readOnly && READ_ONLY_HIDDEN.includes(item.to)))
-    .map((item) => ({
+  const path = useRouterState({ select: (st) => st.location.pathname });
+  const nav = filterNavForSurface(
+    NAV.filter((item) => (item.scopes as readonly Scope[]).includes(scope as Scope))
+      .filter((item) => !(account?.readOnly && READ_ONLY_HIDDEN.includes(item.to))),
+    path,
+  ).map((item) => ({
     ...item,
     label: NAV_LABELS[item.to]?.[lang] ?? item.label,
   }));
