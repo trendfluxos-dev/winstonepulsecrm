@@ -2,7 +2,8 @@
 
 ## 2026-10-30 — Manual GitHub re-check result
 - [x] Reuse existing full-IT-PIN check with explicit Re-check button, pending state, success/server time and failure/device completion time; no actual Lovable sync trigger or permission changes.
-- [ ] Run focused tests; genuine IT-panel interaction requires a full IT PIN session. No publication requested.
+- [x] 19 focused tests pass; automatic build OK.
+- [ ] Genuine IT-panel interaction requires a full IT PIN session. No publication requested.
 
 ## 2026-10-30 — Current Git sync verification
 - [x] Read-only GitHub main head matches local saved HEAD at 96b57651ea91d4133e49142fca809dde723b2223; tracked working tree clean at 15:19:45 UTC. This is point-in-time commit evidence, not a live sync-queue check.
