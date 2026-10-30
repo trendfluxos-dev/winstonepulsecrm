@@ -5,7 +5,7 @@ import { z } from "zod";
  * Post-call outcome from the Android live call screen.
  *
  * POST /api/public/ingest/outcome
- * Header: x-ingest-secret
+ * Header: x-device-token (per-agent; the agent comes from the token)
  * Body: { lead_id, agent_id?, outcome, notes?, connected? }
  *
  * Moves the lead to the right stage, appends the agent's in-call notes and
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
       POST: async ({ request }) => {
         const { resolveApiCaller } = await import("@/lib/device-auth.server");
         const caller = await resolveApiCaller(request);
-        if (caller.kind === "none") return json({ error: "Unauthorized" }, 401);
+        if (caller.kind !== "device") return json({ error: "Unauthorized" }, 401);
 
         let raw: unknown;
         try {
@@ -64,7 +64,7 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
           .maybeSingle();
         if (!lead) return json({ error: "Unknown lead" }, 404);
         // A phone may only close out a lead that belongs to its own agent.
-        if (caller.kind === "device" && leadHeldByOther(lead, caller.profile.id)) {
+        if (leadHeldByOther(lead, caller.profile.id)) {
           return json({ error: LEAD_NOT_YOURS }, 403);
         }
 
@@ -90,7 +90,7 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
         const { logLeadEvent } = await import("@/lib/lead-events.server");
         await logLeadEvent({
           leadId: lead_id,
-          agentId: caller.kind === "device" ? caller.profile.id : (parsed.data.agent_id ?? null),
+          agentId: caller.profile.id,
           kind: "outcome_logged",
           detail: `কলের ফল: ${outcome.replace(/_/g, " ")}`,
         });

@@ -100,7 +100,7 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
       POST: async ({ request }) => {
         const { resolveApiCaller } = await import("@/lib/device-auth.server");
         const caller = await resolveApiCaller(request);
-        if (caller.kind === "none") return json({ error: "Unauthorized" }, 401);
+        if (caller.kind !== "device") return json({ error: "Unauthorized" }, 401);
 
         const parsed = await readPayload(request);
         if (!parsed.success) {

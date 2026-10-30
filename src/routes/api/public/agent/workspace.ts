@@ -4,7 +4,7 @@ import { z } from "zod";
 /**
  * Agent Workspace feed for the Winstone Connect Android app.
  *
- * GET /api/public/agent/workspace?employee_id=WIN2601
+ * GET /api/public/agent/workspace
  * Header: x-ingest-secret
  *
  * Returns the agent's profile, their leads, and their call / WhatsApp logs so the
