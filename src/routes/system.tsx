@@ -4,6 +4,7 @@ import { SystemManualCard } from "@/components/crm/SystemManualCard";
 import { DeploymentStatusPanel } from "@/components/crm/DeploymentStatusPanel";
 import { GitRepositoryStatusPanel } from "@/components/crm/GitRepositoryStatusPanel";
 import { GitHubActivityDashboard } from "@/components/crm/GitHubActivityDashboard";
+import { SearchConsoleDashboard } from "@/components/crm/SearchConsoleDashboard";
 import { PAGE_SECTIONS, sectionSearch, useSection } from "@/lib/page-sections";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Coins, Database, KeyRound, Lock, Radio, Receipt } from "lucide-react";
@@ -163,6 +164,7 @@ function SystemBoard() {
           <DeploymentStatusPanel />
           <GitRepositoryStatusPanel />
           <GitHubActivityDashboard />
+          <SearchConsoleDashboard />
           <SystemManualCard />
           <SystemUpdateReport />
           <BackendHealthPanel />
