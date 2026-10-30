@@ -361,8 +361,7 @@ object WinstoneApi {
         followUpNote?.let { if (it.isNotBlank()) put("follow_up_note", it) }
         // Canonical contact-close reason code (same list as web: src/lib/contact-close-reasons.ts)
         noFollowUpReason?.let { if (it.isNotBlank()) put("no_follow_up_reason", it) }
-        temperature?.let { put("temperature", it) }
-        grade?.let { put("grade", it) }
+        // Score/temperature/grade are server-derived from the six raw answers; never sent.
         evaluationAnswers?.let { answers ->
             put("evaluation_answers", JSONObject().apply {
                 answers.forEach { (key, value) -> put(key, value) }

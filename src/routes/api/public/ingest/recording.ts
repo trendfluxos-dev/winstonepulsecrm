@@ -154,7 +154,9 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             .select("id, assigned_to, assigned_agent_id")
             .eq("id", leadId)
             .maybeSingle();
-          const ownerId = leadOwner?.assigned_to ?? leadOwner?.assigned_agent_id ?? null;
+          const { leadOwnerId } = await import("@/lib/lead-access.server");
+          const conflicting = Boolean(leadOwner?.assigned_to && leadOwner?.assigned_agent_id && leadOwner.assigned_to !== leadOwner.assigned_agent_id);
+          const ownerId = conflicting ? "conflict" : leadOwnerId(leadOwner);
           if (ownerId && ownerId !== agent.id) {
             return json(
               { error: "এই লিড অন্য এজেন্টের কাছে আছে — কল সিংক করা যাবে না", lead_id: leadId },
