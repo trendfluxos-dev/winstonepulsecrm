@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminToken } from "@/lib/local-session";
 import { listAppReleases, publishAppRelease } from "@/lib/releases.functions";
-import { PhoneUpgradePreparation } from "@/components/crm/PhoneUpgradePreparation";
 
 async function fileToBase64(file: File): Promise<string> {
   const buffer = new Uint8Array(await file.arrayBuffer());
@@ -77,7 +76,6 @@ export function AppReleasePanel() {
 
   return (
     <section className="space-y-3">
-      <PhoneUpgradePreparation />
       <h2 className="flex items-center gap-2 text-lg font-semibold">
         <Smartphone className="size-4 text-primary" /> ফোন অ্যাপের নতুন ভার্সন
       </h2>
