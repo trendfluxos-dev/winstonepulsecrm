@@ -73,6 +73,10 @@ function browserAsyncHooksStub() {
 export default defineConfig({
   plugins: [mcpPlugin(), browserAsyncHooksStub()],
   vite: {
+    // Build stamp shown in the nav so staff can confirm which published build they run.
+    define: {
+      __BUILD_STAMP__: JSON.stringify(new Date().toISOString()),
+    },
     // Root cause of "Failed to fetch dynamically imported module" / "Invalid server
     // function ID" after a restart: Vite discovered these deps late on every cold
     // start, re-optimized and force-reloaded, invalidating chunk hashes that open
