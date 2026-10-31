@@ -915,8 +915,8 @@ export async function editSubmittedReport(input: {
   }
 
   const received = report.connected !== false;
-  if (input.category !== report.category) {
-    throw new Error("জমা দেওয়া রিপোর্টের ফলাফল বদলাতে পূর্ণ যোগ্যতা যাচাই প্রয়োজন; এই সংশোধনে শুধু নোট বদলান।");
+  if (Boolean(fastDisqualification(input.category)) !== Boolean(fastDisqualification(report.category ?? ""))) {
+    throw new Error("সেলস ও অযোগ্য ফলাফলের মধ্যে পরিবর্তনে পূর্ণ রিপোর্ট যাচাই প্রয়োজন; এই সংশোধনে শুধু নোট বদলান।");
   }
   // Edits can change notes, never replace saved classification with a pick.
   const temperature = received ? report.temperature as LeadTemperature | null : null;
