@@ -1081,6 +1081,19 @@ private fun StatusCards(state: DeskUiState) {
                 fontSize = 12.sp,
                 color = if (state.recordingStatus != null) WinGreen else WinInkMuted,
             )
+            val consentContext = androidx.compose.ui.platform.LocalContext.current
+            val consentTick by com.winstone.connect.telephony.RecordingConsent.changes.collectAsStateSafe()
+            val consented = remember(consentTick, state.employeeId) {
+                com.winstone.connect.telephony.RecordingConsent.granted(consentContext, state.employeeId)
+            }
+            Text(
+                if (consented) "রেকর্ডিং সম্মতি: দেওয়া হয়েছে" else "রেকর্ডিং সম্মতি: দেওয়া হয়নি — অডিও রেকর্ড/আপলোড বন্ধ",
+                fontSize = 12.sp,
+                color = if (consented) WinGreen else WinInkMuted,
+            )
+            OutlinedButton(onClick = { com.winstone.connect.telephony.RecordingConsent.reset(consentContext) }) {
+                Text(if (consented) "সম্মতি প্রত্যাহার / পরিবর্তন" else "সম্মতি দিন")
+            }
         }
 
         WinCard {

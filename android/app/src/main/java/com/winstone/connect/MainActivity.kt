@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
                 val tick by reportTick.collectAsStateSafe()
                 var pendingReport by remember { mutableStateOf(false) }
                 // Recording consent is per agent; re-read on account change or a new choice.
-                var consentTick by remember { mutableStateOf(0) }
+                val consentTick by RecordingConsent.changes.collectAsStateSafe()
                 val consentDecision = remember(state.employeeId, consentTick) {
                     RecordingConsent.decision(this@MainActivity, state.employeeId)
                 }
@@ -113,12 +113,10 @@ class MainActivity : ComponentActivity() {
                         agentName = state.agentName ?: "",
                         onAccept = {
                             RecordingConsent.record(this@MainActivity, state.employeeId!!, granted = true)
-                            consentTick++
                             requestAudioPermissions()
                         },
                         onDecline = {
                             RecordingConsent.record(this@MainActivity, state.employeeId!!, granted = false)
-                            consentTick++
                         },
                     )
                 } else {

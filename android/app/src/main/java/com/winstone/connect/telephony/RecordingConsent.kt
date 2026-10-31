@@ -1,6 +1,7 @@
 package com.winstone.connect.telephony
 
 import android.content.Context
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * Recording consent gate.
@@ -25,6 +26,9 @@ object RecordingConsent {
     private const val KEY_VERSION = "version"
     private const val KEY_DECISION = "decision"
     private const val KEY_AT = "decided_at"
+
+    /** Bumped on every choice/reset so screens re-read the decision. */
+    val changes = MutableStateFlow(0)
 
     enum class Decision { NONE, GRANTED, DECLINED }
 
@@ -66,10 +70,12 @@ object RecordingConsent {
             .putString(KEY_DECISION, if (granted) "granted" else "declined")
             .putLong(KEY_AT, System.currentTimeMillis())
             .apply()
+        changes.value = changes.value + 1
     }
 
     /** Lets the agent review the choice again (e.g. to withdraw consent). */
     fun reset(context: Context) {
         context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().clear().apply()
+        changes.value = changes.value + 1
     }
 }
