@@ -5,9 +5,10 @@ import { CONTACT_CLOSE_REASONS, contactCloseReasonLabelFor } from "@/lib/contact
 import { FOLLOW_UP_REASONS, FOLLOW_UP_REASONS_EN, type FollowUpReasonCode } from "@/lib/follow-up-reasons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { AlertTriangle, Bot, Check, Loader2, X } from "lucide-react";
+import { AlertTriangle, Bot, Check, Loader2, RotateCcw, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { clearReportDraft, loadReportDraft, saveReportDraft } from "@/lib/report-draft";
+import { classifyReportSaveError, type ReportSaveFailure } from "@/lib/report-save-feedback";
 import { toast } from "sonner";
 
 import { createSaveLatch, matchCallShortcut, SHORTCUT_LABELS } from "@/lib/call-shortcuts";
@@ -951,6 +952,8 @@ function ReportDialog({
   children: React.ReactNode;
 }) {
   const t = useT();
+  const [failure, setFailure] = useState<ReportSaveFailure | null>(null);
+  const leadName = detail.lead?.name ?? t({ bn: "লিড", en: "lead" });
   const send = useMutation({
     mutationFn: async () => {
       const payload = payloadOf();
@@ -964,8 +967,13 @@ function ReportDialog({
       const res = (await submit({ data: payload } as never)) as { reassigned?: boolean } | undefined;
       return { offline: false as const, reassigned: Boolean(res?.reassigned) };
     },
+    onMutate: () => {
+      setFailure(null);
+      toast.dismiss(`report-save-${detail.report.id}`);
+    },
     onSuccess: (result) => {
       clearReportDraft(detail.report.id);
+      setFailure(null);
       if (!result.offline && "reassigned" in result && result.reassigned) {
         toast.warning(
           t({
@@ -977,7 +985,8 @@ function ReportDialog({
       } else toast.success(
         result.offline
           ? t({ bn: "ইন্টারনেট নেই — রিপোর্ট এই ফোনে সেভ হয়েছে, নেট ফিরলে নিজেই সার্ভারে যাবে", en: "No internet — the report is saved on this phone and will sync once you're back online" })
-          : t({ bn: "রিপোর্ট জমা হয়েছে — পরের লিড খুলে গেল", en: "Report submitted — the next lead has opened" }),
+          : t({ bn: `${leadName}-এর রিপোর্ট সেভ হয়েছে — পরের লিড খুলে গেল`, en: `Report saved for ${leadName} — the next lead has opened` }),
+        { duration: 6_000 },
       );
       void queryClient.invalidateQueries({ queryKey: ["pending-call-report"] });
       void queryClient.invalidateQueries({ queryKey: ["crm-snapshot"] });
@@ -990,7 +999,18 @@ function ReportDialog({
         }),
       );
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => {
+      const f = classifyReportSaveError(error);
+      setFailure(f);
+      toast.error(t({ bn: "রিপোর্ট সেভ হয়নি", en: "Report not saved" }), {
+        id: `report-save-${detail.report.id}`,
+        description: t(f.message),
+        duration: 12_000,
+        action: f.retryable
+          ? { label: t({ bn: "আবার চেষ্টা", en: "Try again" }), onClick: () => send.mutate() }
+          : undefined,
+      });
+    },
   });
 
   // Ctrl/⌘+Enter runs the exact same send.mutate() as the button, under the same guards.
@@ -1049,6 +1069,26 @@ function ReportDialog({
             </p>
           ) : null}
           <div className="space-y-2">{children}</div>
+          {failure && !send.isPending ? (
+            <div role="alert" className="space-y-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs">
+              <p className="flex items-start gap-1.5 font-semibold text-destructive">
+                <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+                {t({ bn: "রিপোর্ট সেভ হয়নি", en: "Report not saved" })}
+              </p>
+              <p>{t(failure.message)}</p>
+              {failure.kind !== "validation" && failure.detail ? (
+                <details className="text-muted-foreground">
+                  <summary className="cursor-pointer">{t({ bn: "IT-এর জন্য বিস্তারিত", en: "Details for IT" })}</summary>
+                  <p className="mt-1 break-words font-mono text-[10px]">{failure.detail}</p>
+                </details>
+              ) : null}
+              {failure.retryable ? (
+                <Button size="sm" variant="outline" className="w-full gap-1.5" onClick={() => send.mutate()}>
+                  <RotateCcw className="size-3.5" /> {t({ bn: "আবার চেষ্টা করুন", en: "Try again" })}
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
           {missing ? (
             <p role="status" aria-live="polite" className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs font-medium">
               {t({ bn: "জমা দিতে বাকি", en: "Still required" })}: {missing}
