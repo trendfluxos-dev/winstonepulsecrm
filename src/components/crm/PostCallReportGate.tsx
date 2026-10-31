@@ -1069,6 +1069,26 @@ function ReportDialog({
             </p>
           ) : null}
           <div className="space-y-2">{children}</div>
+          {failure && !send.isPending ? (
+            <div role="alert" className="space-y-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs">
+              <p className="flex items-start gap-1.5 font-semibold text-destructive">
+                <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+                {t({ bn: "রিপোর্ট সেভ হয়নি", en: "Report not saved" })}
+              </p>
+              <p>{t(failure.message)}</p>
+              {failure.kind !== "validation" && failure.detail ? (
+                <details className="text-muted-foreground">
+                  <summary className="cursor-pointer">{t({ bn: "IT-এর জন্য বিস্তারিত", en: "Details for IT" })}</summary>
+                  <p className="mt-1 break-words font-mono text-[10px]">{failure.detail}</p>
+                </details>
+              ) : null}
+              {failure.retryable ? (
+                <Button size="sm" variant="outline" className="w-full gap-1.5" onClick={() => send.mutate()}>
+                  <RotateCcw className="size-3.5" /> {t({ bn: "আবার চেষ্টা করুন", en: "Try again" })}
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
           {missing ? (
             <p role="status" aria-live="polite" className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs font-medium">
               {t({ bn: "জমা দিতে বাকি", en: "Still required" })}: {missing}
