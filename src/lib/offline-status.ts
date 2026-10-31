@@ -68,10 +68,6 @@ export function offlineTimeline(item: OfflineItem | SentItem): { steps: OfflineT
   };
 }
 
-/** A report counts as stuck after this long in "Syncing". */
-export const SYNCING_ALERT_MS = 2 * 60 * 1000;
-/** ...or when it still has not reached "Sent" this long after it was queued. */
-export const NOT_SENT_ALERT_MS = 15 * 60 * 1000;
 
 export type StuckReason = "syncing_too_long" | "not_sent" | "refused";
 
