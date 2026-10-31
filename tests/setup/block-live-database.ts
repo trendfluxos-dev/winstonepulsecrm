@@ -49,6 +49,11 @@ function carriesServiceKey(input: RequestInfo | URL, init?: RequestInit): boolea
 
 const blocked: string[] = [];
 
+/** For the guard's own test only: returns and clears the refused requests. */
+export function takeBlockedRequests(): string[] {
+  return blocked.splice(0);
+}
+
 const realFetch = globalThis.fetch;
 if (typeof realFetch === "function" && !stagingMode) {
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {

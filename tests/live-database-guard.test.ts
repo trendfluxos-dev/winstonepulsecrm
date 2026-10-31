@@ -4,12 +4,12 @@ import { describe, expect, it } from "vitest";
 const LIVE = "https://siepfegeubbqwhodyxcg.supabase.co";
 
 describe("routine tests cannot reach the real database", () => {
-  it("a read to the live backend is refused", async () => {
-    if (process.env["RUN_LIVE_SCOPE_TESTS"] === "1") return; // reads are allowed in the explicit live mode
+  it("reads and writes to the live backend are refused and recorded", async () => {
+    if (process.env["RUN_LIVE_SCOPE_TESTS"] === "1") return; // explicit live mode allows reads
+    const { takeBlockedRequests } = await import("./setup/block-live-database");
     await expect(fetch(`${LIVE}/rest/v1/leads?select=id&limit=1`)).rejects.toThrow("[test-guard]");
-    // The guard also fails the test after it; clear that record for this deliberate probe.
-    const { afterEach } = await import("vitest");
-    void afterEach;
+    await expect(fetch(`${LIVE}/rest/v1/leads`, { method: "POST", body: "{}" })).rejects.toThrow("[test-guard]");
+    expect(takeBlockedRequests()).toEqual(["GET /rest/v1/leads", "POST /rest/v1/leads"]);
   });
 
   it("the guard is loaded for every routine test file", () => {
