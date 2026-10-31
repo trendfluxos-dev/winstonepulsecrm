@@ -1,6 +1,12 @@
 # Unified call qualification — implementation evidence
 
-Date: 2026-10-31. **Release recommendation: NOT READY TO PUBLISH.**
+Date: 2026-10-31. **Status: database rule applied; web fix needs publishing; phone fix needs a rebuilt APK.**
+
+## 2026-10-31 production grade-error fix
+- Root cause (verified in the published code + live database): the published report form showed "Grade pending — set by AI analysis or HQ" (no selector) and the published server allowed a pending grade, but the live `validate_call_report` trigger demanded a grade (and temperature) on every connected report, including connected rejections → "a received call requires a grade classification" with no way to pick one.
+- Fix: web form now shows an always-visible A/B/C/D radio group (touch + arrow keys) bound to `grade`, with an inline "Grade missing" message; Android LiveCallScreen gets the same inline message. Migration `drizzle/migrations/0138_unified_call_qualification_triggers.sql` (function-only, no data changes) replaced the former unapplied proposal: connected sales require grade + six answers + matching score/temperature; Fast Disqualification stores no grade/score/temperature; lead completion bypass only for the server finalizer on closed rejections.
+- Verified: full Vitest 1,576 passed / 9 skipped; focused 113/113; report form UI 16/16; local SQL harness 96/96 (`SQL tests: PASS`); `bunx tsgo --noEmit` clean; live function bodies confirmed updated (read-only). Android not compiled; no handset test.
+
 
 ## Implemented
 - Both Web `submitMyReport` and Android `/api/public/agent/report` use `submitCallReport` → `qualifyCallReport`. Connected sales reports require six explicit booleans plus manual A/B/C/D; server calculates score/temperature with unchanged 15/15/10/20/20/10 points and 20/50 cutoffs.
@@ -23,7 +29,7 @@ Date: 2026-10-31. **Release recommendation: NOT READY TO PUBLISH.**
 | Live schema (read-only `pg_get_functiondef`) | Existing validate_call_report requires temperature/grade on every connected report; enforce_lead_completion requires classification |
 | Publishing / production customer writes | None |
 
-## Important release blocker
+## Former release blocker (resolved 2026-10-31 by migration 0138)
 Live triggers conflict with null rejection classification. `docs/proposals/unified-call-qualification.UNAPPLIED.sql` contains function-only changes and was tested locally, **not applied**. No migration was added/applied and no customer data was changed. New rejection submits against the current shared live database can be refused; do not publish until this proposal is separately reviewed/applied through the managed migration path. It makes no data backfill, retains existing trigger bindings/access rules, and allows historical note corrections without retroactive scoring. Recovery restores prior function definitions, never deletes/restores business rows.
 
 Existing Android APKs that omit grade will receive the actionable grade error on connected sales submission. Rollout needs compatible rebuilt APK plus web/backend deployment together. Physical two-agent tests must verify offline retry, manual grade retention, rejection with connected conversation, pre-briefing historical report completion and delayed recording upload. No real-agent save/read-back or audio-upload evidence obtained here.

@@ -352,6 +352,56 @@ function SmartRow({
   );
 }
 
+/**
+ * Mandatory manual Grade for a connected property-sales call. Always visible as
+ * four touch/keyboard radio options (A/B/C/D) bound to the same `grade` value the
+ * server validates; an empty choice shows an inline, actionable message.
+ */
+function GradePicker({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const t = useT();
+  const selected = REPORT_GRADES.some((g) => g === value);
+  const move = (from: number, delta: number) => {
+    const next = REPORT_GRADES[(from + delta + REPORT_GRADES.length) % REPORT_GRADES.length] ?? "A";
+    onChange(next);
+    document.getElementById(`sr-grade-${next}`)?.focus();
+  };
+  return (
+    <fieldset className="space-y-1.5 rounded-lg border border-border bg-card p-2.5 sm:col-span-2" aria-describedby="sr-grade-help">
+      <legend id="sr-grade-label" className="px-1 text-xs font-semibold">
+        {t({ bn: "গ্রেড", en: "Grade" })}<span className="text-destructive"> *</span>
+      </legend>
+      <div role="radiogroup" aria-labelledby="sr-grade-label" aria-required="true" aria-invalid={!selected}
+        className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+        {REPORT_GRADES.map((g, i) => {
+          const active = value === g;
+          return (
+            <button key={g} id={`sr-grade-${g}`} type="button" role="radio" aria-checked={active}
+              tabIndex={active || (!selected && i === 0) ? 0 : -1}
+              onClick={() => onChange(g)}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); move(i, 1); }
+                if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); move(i, -1); }
+              }}
+              title={REPORT_GRADE_LABELS[g]}
+              className={`min-h-11 rounded-md border px-2 py-1.5 text-left text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                active ? "border-primary bg-primary text-primary-foreground" : "border-input bg-background hover:bg-muted"
+              }`}>
+              <span className="block text-base font-bold leading-tight">{g}</span>
+              <span className={`block leading-snug ${active ? "" : "text-muted-foreground"}`}>{REPORT_GRADE_LABELS[g].split(" — ")[0]}</span>
+            </button>
+          );
+        })}
+      </div>
+      <p id="sr-grade-help" role={selected ? undefined : "alert"}
+        className={`text-xs ${selected ? "text-muted-foreground" : "font-medium text-destructive"}`}>
+        {selected
+          ? REPORT_GRADE_LABELS[value as (typeof REPORT_GRADES)[number]]
+          : t({ bn: "গ্রেড বাকি — উপরের A / B / C / D থেকে একটি বাছাই করুন, তারপর জমা দিন", en: "Grade missing — choose A, B, C or D above, then submit" })}
+      </p>
+    </fieldset>
+  );
+}
+
 export function PostCallReportGate() {
   const t = useT();
   const lang = useLang();
@@ -862,9 +912,7 @@ export function PostCallReportGate() {
                 </div>
               ))}
             </div>
-            <SmartRow id="sr-grade" label={t({ bn: "গ্রেড", en: "Grade" })} required
-              options={REPORT_GRADES.map(value => ({ value, label: `${value} — ${REPORT_GRADE_LABELS[value]}` }))}
-              value={grade} onChange={setGrade} />
+            <GradePicker value={grade} onChange={setGrade} />
           </div>
         </>
       ) : null}
