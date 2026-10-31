@@ -72,7 +72,7 @@ export const Route = createFileRoute("/api/public/smoke")({
             name: "/api/public/download/apk",
             ok: false,
             status: null,
-            detail: err instanceof Error ? err.message : "স্টোরেজ পড়া যায়নি",
+            detail: "স্টোরেজ পড়া যায়নি",
           });
         }
 
@@ -108,7 +108,7 @@ export const Route = createFileRoute("/api/public/smoke")({
             name: "/api/public/agent/version",
             ok: false,
             status: null,
-            detail: err instanceof Error ? err.message : "রিকোয়েস্ট ব্যর্থ",
+            detail: "রিকোয়েস্ট ব্যর্থ",
           });
         }
 
