@@ -1,5 +1,5 @@
 import { isContactCloseReason } from "@/lib/contact-close-reasons";
-import { fastDisqualification } from "@/lib/fast-disqualification";
+import { FAKE_NEEDS_ANSWERED_CALL, fakeNeedsAnsweredCall, fastDisqualification } from "@/lib/fast-disqualification";
 import { qualifyCallReport } from "@/lib/call-qualification";
 /**
  * The mandatory post-call workflow.
