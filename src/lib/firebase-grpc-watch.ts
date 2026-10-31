@@ -68,7 +68,7 @@ export function evaluateFirebase(
   };
 }
 
-/** Alert exactly once: when the verdict first becomes fixed for a Firebase version. */
+/** Alert exactly once: the first time any Firebase release allows the fix. */
 export function shouldAlert(verdict: WatchVerdict, previous: { alertedFor?: string | null } | null): boolean {
-  return verdict.fixed === true && previous?.alertedFor !== verdict.firebaseVersion && !previous?.alertedFor;
+  return verdict.fixed === true && !previous?.alertedFor;
 }

@@ -118,6 +118,7 @@ import { Route as ApiPublicIngestOutcomeRouteImport } from './routes/api/public/
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
 import { Route as ApiPublicIngestReprocessRouteImport } from './routes/api/public/ingest/reprocess'
 import { Route as ApiPublicIntegrationsStatusRouteImport } from './routes/api/public/integrations/status'
+import { Route as ApiPublicJobsFirebaseGrpcWatchRouteImport } from './routes/api/public/jobs/firebase-grpc-watch'
 import { Route as ApiPublicJobsGithubAccessWatchRouteImport } from './routes/api/public/jobs/github-access-watch'
 import { Route as ApiPublicJobsInventorySheetRouteImport } from './routes/api/public/jobs/inventory-sheet'
 import { Route as ApiPublicJobsLeadReportSheetRouteImport } from './routes/api/public/jobs/lead-report-sheet'
@@ -697,6 +698,12 @@ const ApiPublicIntegrationsStatusRoute =
     path: '/api/public/integrations/status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsFirebaseGrpcWatchRoute =
+  ApiPublicJobsFirebaseGrpcWatchRouteImport.update({
+    id: '/api/public/jobs/firebase-grpc-watch',
+    path: '/api/public/jobs/firebase-grpc-watch',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsGithubAccessWatchRoute =
   ApiPublicJobsGithubAccessWatchRouteImport.update({
     id: '/api/public/jobs/github-access-watch',
@@ -885,6 +892,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/firebase-grpc-watch': typeof ApiPublicJobsFirebaseGrpcWatchRoute
   '/api/public/jobs/github-access-watch': typeof ApiPublicJobsGithubAccessWatchRoute
   '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
   '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
@@ -1010,6 +1018,7 @@ export interface FileRoutesByTo {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/firebase-grpc-watch': typeof ApiPublicJobsFirebaseGrpcWatchRoute
   '/api/public/jobs/github-access-watch': typeof ApiPublicJobsGithubAccessWatchRoute
   '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
   '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
@@ -1136,6 +1145,7 @@ export interface FileRoutesById {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/firebase-grpc-watch': typeof ApiPublicJobsFirebaseGrpcWatchRoute
   '/api/public/jobs/github-access-watch': typeof ApiPublicJobsGithubAccessWatchRoute
   '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
   '/api/public/jobs/lead-report-sheet': typeof ApiPublicJobsLeadReportSheetRoute
@@ -1263,6 +1273,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/firebase-grpc-watch'
     | '/api/public/jobs/github-access-watch'
     | '/api/public/jobs/inventory-sheet'
     | '/api/public/jobs/lead-report-sheet'
@@ -1388,6 +1399,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/firebase-grpc-watch'
     | '/api/public/jobs/github-access-watch'
     | '/api/public/jobs/inventory-sheet'
     | '/api/public/jobs/lead-report-sheet'
@@ -1513,6 +1525,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/firebase-grpc-watch'
     | '/api/public/jobs/github-access-watch'
     | '/api/public/jobs/inventory-sheet'
     | '/api/public/jobs/lead-report-sheet'
@@ -1639,6 +1652,7 @@ export interface RootRouteChildren {
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
   ApiPublicIngestReprocessRoute: typeof ApiPublicIngestReprocessRoute
   ApiPublicIntegrationsStatusRoute: typeof ApiPublicIntegrationsStatusRoute
+  ApiPublicJobsFirebaseGrpcWatchRoute: typeof ApiPublicJobsFirebaseGrpcWatchRoute
   ApiPublicJobsGithubAccessWatchRoute: typeof ApiPublicJobsGithubAccessWatchRoute
   ApiPublicJobsInventorySheetRoute: typeof ApiPublicJobsInventorySheetRoute
   ApiPublicJobsLeadReportSheetRoute: typeof ApiPublicJobsLeadReportSheetRoute
@@ -2420,6 +2434,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIntegrationsStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/firebase-grpc-watch': {
+      id: '/api/public/jobs/firebase-grpc-watch'
+      path: '/api/public/jobs/firebase-grpc-watch'
+      fullPath: '/api/public/jobs/firebase-grpc-watch'
+      preLoaderRoute: typeof ApiPublicJobsFirebaseGrpcWatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/github-access-watch': {
       id: '/api/public/jobs/github-access-watch'
       path: '/api/public/jobs/github-access-watch'
@@ -2632,6 +2653,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
   ApiPublicIngestReprocessRoute: ApiPublicIngestReprocessRoute,
   ApiPublicIntegrationsStatusRoute: ApiPublicIntegrationsStatusRoute,
+  ApiPublicJobsFirebaseGrpcWatchRoute: ApiPublicJobsFirebaseGrpcWatchRoute,
   ApiPublicJobsGithubAccessWatchRoute: ApiPublicJobsGithubAccessWatchRoute,
   ApiPublicJobsInventorySheetRoute: ApiPublicJobsInventorySheetRoute,
   ApiPublicJobsLeadReportSheetRoute: ApiPublicJobsLeadReportSheetRoute,
