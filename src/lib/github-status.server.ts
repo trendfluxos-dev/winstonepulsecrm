@@ -1,10 +1,34 @@
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/github";
 
+/**
+ * The first linked GitHub credential (in GITHUB_KEY_NAMES order) that can see the repository.
+ * Several accounts are linked; the CRM code copy moved to an account the first key can't see,
+ * so always reading GITHUB_API_KEY made every IT Console GitHub view fail with 404.
+ */
+async function githubKeyFor(repository: string): Promise<string> {
+  const { GITHUB_KEY_NAMES } = await import("@/lib/github-access");
+  const lovableKey = process.env["LOVABLE_API_KEY"];
+  const keys = GITHUB_KEY_NAMES.map((n) => process.env[n]).filter((k): k is string => !!k);
+  if (!lovableKey || keys.length === 0) throw new Error("GitHub connection is not configured");
+  if (keys.length === 1) return keys[0]!;
+  for (const key of keys) {
+    try {
+      const res = await fetch(`${GATEWAY_URL}/repos/${repository}`, {
+        headers: { Accept: "application/vnd.github+json", Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": key },
+        signal: AbortSignal.timeout(10000), redirect: "error",
+      });
+      if (res.ok) return key;
+    } catch { /* try the next linked account */ }
+  }
+  // None can see it: keep the first key so callers report GitHub's own status (e.g. 404).
+  return keys[0]!;
+}
+
 /** Bounded read-only GitHub facts; none of these establish Lovable Git sync. */
 export async function readGithubStatus(repository: string, branch: string | undefined) {
-  const key = process.env["GITHUB_API_KEY"];
   const lovableKey = process.env["LOVABLE_API_KEY"];
-  if (!key || !lovableKey) throw new Error("GitHub connection is not configured");
+  if (!lovableKey) throw new Error("GitHub connection is not configured");
+  const key = await githubKeyFor(repository);
   const headers = { Accept: "application/vnd.github+json", Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": key };
   async function read(path: string): Promise<unknown> {
     const response = await fetch(`${GATEWAY_URL}${path}`, {
@@ -39,9 +63,9 @@ type GhPull = { number: number; title: string; html_url: string; state: string; 
 
 /** Bounded read-only summary of recent commits, issues and pull requests. */
 export async function readGithubActivity(repository: string) {
-  const key = process.env["GITHUB_API_KEY"];
   const lovableKey = process.env["LOVABLE_API_KEY"];
-  if (!key || !lovableKey) throw new Error("GitHub connection is not configured");
+  if (!lovableKey) throw new Error("GitHub connection is not configured");
+  const key = await githubKeyFor(repository);
   const headers = { Accept: "application/vnd.github+json", Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": key };
   async function read<T>(path: string): Promise<T> {
     const response = await fetch(`${GATEWAY_URL}${path}`, { headers, signal: AbortSignal.timeout(10000), redirect: "error" });
@@ -92,9 +116,9 @@ export function parseSha256(digest: string | null | undefined): string | null {
 
 /** Read-only: latest runs of the Android APK workflow and artifacts of the newest one. Never triggers builds. */
 export async function readAndroidBuilds(repository: string) {
-  const key = process.env["GITHUB_API_KEY"];
   const lovableKey = process.env["LOVABLE_API_KEY"];
-  if (!key || !lovableKey) throw new Error("GitHub connection is not configured");
+  if (!lovableKey) throw new Error("GitHub connection is not configured");
+  const key = await githubKeyFor(repository);
   const headers = { Accept: "application/vnd.github+json", Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": key };
   async function read<T>(path: string): Promise<T | null> {
     const response = await fetch(`${GATEWAY_URL}${path}`, { headers, signal: AbortSignal.timeout(10000), redirect: "error" });
@@ -141,9 +165,9 @@ export async function readAndroidBuilds(repository: string) {
  */
 export async function readAndroidSigningReadiness(repository: string) {
   const { classifySigningReadiness } = await import("@/lib/android-signing-readiness");
-  const key = process.env["GITHUB_API_KEY"];
   const lovableKey = process.env["LOVABLE_API_KEY"];
-  if (!key || !lovableKey) throw new Error("GitHub connection is not configured");
+  if (!lovableKey) throw new Error("GitHub connection is not configured");
+  const key = await githubKeyFor(repository);
   const headers = { Accept: "application/vnd.github+json", Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": key };
   async function names(path: string, field: "secrets" | "variables"): Promise<{ list: string[] | null; status: number | null }> {
     try {
