@@ -54,7 +54,10 @@ export function ReportDetails({ report, defaultOpen = false }: { report: ReportL
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-1.5 text-xs">
         <span className="tabular font-semibold">{fullDateTime(reportWhen(report))}</span>
-        {report.agentName ? <span className="text-muted-foreground">· {report.agentName}</span> : null}
+        <span className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-[11px]">
+          জমা দিয়েছেন:{" "}
+          <b className="font-semibold text-foreground">{report.agentName?.trim() || "এজেন্ট অজানা"}</b>
+        </span>
         <Badge variant={report.connected ? "default" : "secondary"} className="text-[11px]">
           {report.connected ? "কথা হয়েছে" : "কথা হয়নি"}
         </Badge>
