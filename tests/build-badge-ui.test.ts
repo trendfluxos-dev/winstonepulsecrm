@@ -1,0 +1,74 @@
+// @vitest-environment jsdom
+import React from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({ children, to, ...rest }: { children?: React.ReactNode; to: string }) =>
+    React.createElement("a", { href: to, ...rest }, children),
+  useRouterState: ({ select }: { select: (s: unknown) => unknown }) =>
+    select({ location: { pathname: "/desk", search: {} } }),
+}));
+vi.mock("@/lib/session", () => ({
+  useMyAccount: () => ({ account: { profile: { name: "Test Agent", employee_id: "E1" } }, scope: "agent" }),
+  useSignOut: () => () => {},
+}));
+vi.mock("@/assets/winstone-emblem.png.asset.json", () => ({ default: { url: "/logo.png" } }));
+
+import { NavSidebar, MobileNavDrawer } from "@/components/crm/NavSidebar";
+import { MANUAL_VERSION } from "@/lib/system-manual";
+
+const items = [{ to: "/desk", label: "My desk" }] as const;
+
+function setHost(hostname: string) {
+  vi.stubGlobal("location", { ...window.location, hostname });
+}
+
+beforeEach(() => localStorage.setItem("winstone.lang", "en"));
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
+
+async function badgeIn(container: HTMLElement) {
+  const badge = await within(container).findByTestId("build-badge");
+  await within(badge).findByText(/^(Live|Preview)$/);
+  return badge;
+}
+
+describe("version indicator in the desktop sidebar", () => {
+  it("shows Live with the version on the live CRM address", async () => {
+    setHost("crm.winstonebd.com");
+    const { container } = render(React.createElement(NavSidebar, { items }));
+    const badge = await badgeIn(container);
+    expect(badge.textContent).toContain("Live");
+    expect(badge.textContent).toContain(`v${MANUAL_VERSION}`);
+    expect(badge.getAttribute("title")).toMatch(/\(Dhaka\)$/);
+  });
+
+  it("shows Preview on a preview address", async () => {
+    setHost("id-preview--990267f3-4198-4d83-ae21-7d9c802617f4.lovable.app");
+    const { container } = render(React.createElement(NavSidebar, { items }));
+    const badge = await badgeIn(container);
+    expect(badge.textContent).toContain("Preview");
+    expect(badge.textContent).not.toContain("Live");
+  });
+});
+
+describe("version indicator in the mobile menu", () => {
+  for (const [host, label] of [
+    ["crm.winstonebd.com", "Live"],
+    ["localhost", "Preview"],
+  ] as const) {
+    it(`shows ${label} after opening the menu on ${host}`, async () => {
+      setHost(host);
+      render(React.createElement(MobileNavDrawer, { items }));
+      expect(screen.queryByTestId("build-badge")).toBeNull();
+      fireEvent.click(screen.getByRole("button", { name: /Open navigation menu/ }));
+      const dialog = await screen.findByRole("dialog");
+      const badge = await badgeIn(dialog);
+      expect(within(badge).getByText(label)).toBeTruthy();
+      expect(badge.textContent).toContain(`v${MANUAL_VERSION}`);
+    });
+  }
+});
