@@ -49,7 +49,8 @@ import { formatTalkTime, relativeTime, shortDate } from "@/lib/crm-format";
 import { useMyAccount } from "@/lib/session";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getDeskWork } from "@/lib/desk-work.functions";
+import { getDeskReports, getDeskWork } from "@/lib/desk-work.functions";
+import { attemptCount, compareQueue, lastWasNotReceived, summarizeReports } from "@/lib/desk-queue";
 import { getDailyAllocation } from "@/lib/daily-allocation.functions";
 import { deskFollowUpCounts, deskLeadCounts, deskReportCounts, isActiveAssigned, isHotActive } from "@/lib/desk-counts";
 import { cn } from "@/lib/utils";
@@ -184,6 +185,11 @@ export function DeskCommandCenter({
   const deskWork = useQuery({ queryKey: ["desk-work", account?.profile?.id ?? "session"], queryFn: () => readDeskWork(), refetchInterval: 60_000 });
   const me = deskWork.data?.agentId ?? "";
   const allocation = useQuery({ queryKey: ["daily-new-allocation", "self", null, me], queryFn: () => readAllocation({ data: { surface: "self", adminToken: null } }), enabled: Boolean(me) });
+  // Own submitted reports (server-scoped) drive "report saved", not-received tags and attempt numbers.
+  const readReports = useServerFn(getDeskReports);
+  const deskReports = useQuery({ queryKey: ["desk-reports-all"], queryFn: () => readReports(), enabled: Boolean(me), staleTime: 60_000, refetchInterval: 120_000 });
+  const reportSummaries = useMemo(() => summarizeReports(deskReports.data?.reports ?? []), [deskReports.data]);
+  const attemptsOf = (lead: Lead) => attemptCount(lead, reportSummaries.get(lead.id));
   const ledgerToday = allocation.data?.agents.find((a) => a.id === me)?.received;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   // ?lead=<id> (from Pipeline / Tasks / search) selects that lead if it is in the caller's own snapshot.
@@ -268,24 +274,11 @@ export function DeskCommandCenter({
         if (sort === "serial") {
           return (a.serial_no ?? "").localeCompare(b.serial_no ?? "", "bn", { numeric: true });
         }
-        const aOver = a.retry_after && Date.parse(a.retry_after) < now ? 0 : 1;
-        const bOver = b.retry_after && Date.parse(b.retry_after) < now ? 0 : 1;
-        if (aOver !== bOver) return aOver - bOver;
-        // Not connected / busy / failed retries go to the end of the queue and
-        // come back in order: the longest-waiting retry first.
-        const retry = (lead: Lead) => (lead.status === "pending" && lead.last_call_at ? 1 : 0);
-        if (retry(a) !== retry(b)) return retry(a) - retry(b);
-        if (retry(a) && retry(b)) {
-          return Date.parse(a.last_call_at!) - Date.parse(b.last_call_at!);
-        }
-        const rank = (lead: Lead) =>
-          lead.temperature === "hot" ? 0 : lead.temperature === "warm" ? 1 : 2;
-        const byTemperature = rank(a) - rank(b);
-        if (byTemperature !== 0) return byTemperature;
-        return (a.serial_no ?? "").localeCompare(b.serial_no ?? "", "bn", { numeric: true });
+        // Did-not-receive / already-called retries go to the back; see desk-queue.ts.
+        return compareQueue(a, b, reportSummaries, now);
       })
       .slice(0, 60);
-  }, [leads, filter, search, sort]);
+  }, [leads, filter, search, sort, reportSummaries]);
 
   const priority = useMemo(() => {
     const now = Date.now();
@@ -681,7 +674,7 @@ export function DeskCommandCenter({
                     <p className="truncate text-xs tabular-nums text-muted-foreground">
                       {selected.phone_number}
                       {selected.temperature ? ` · ${tempLabel(selected.temperature, lang)}` : ""}
-                      {` · ${t({ bn: `${bn(selected.call_attempts, lang)} বার চেষ্টা`, en: `${bn(selected.call_attempts, lang)} attempts` })}`}
+                      {` · ${attemptsOf(selected) ? t({ bn: `${bn(attemptsOf(selected), lang)} বার চেষ্টা`, en: `Attempt ${bn(attemptsOf(selected), lang)}` }) : t({ bn: "এখনো কল হয়নি", en: "Not called yet" })}`}
                       {selected.last_call_at
                         ? ` · ${t({ bn: `শেষ কল ${relativeTime(selected.last_call_at)}`, en: `Last call ${relativeTime(selected.last_call_at)}` })}`
                         : ""}
@@ -814,6 +807,10 @@ export function DeskCommandCenter({
               >
                 {rows.map((lead) => {
                   const overdue = lead.retry_after ? Date.parse(lead.retry_after) < Date.now() : false;
+                  const summary = reportSummaries.get(lead.id);
+                  const attempts = attemptCount(lead, summary);
+                  const notReceived = lead.status !== "closed" && lastWasNotReceived(lead, summary);
+                  const lastTouch = [lead.last_call_at, summary?.lastAt].filter(Boolean).sort().pop() ?? null;
                   return (
                     <li
                       key={lead.id}
@@ -886,15 +883,26 @@ export function DeskCommandCenter({
                               {tempLabel(lead.temperature, lang)}
                             </span>
                           )}
-                          {overdue && (
+                          {overdue && !notReceived && (
                             <span className="rounded-full border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold text-destructive">
                               {t({ bn: "সময় পেরিয়েছে", en: "Overdue" })}
                             </span>
                           )}
+                          {notReceived && (
+                            <span className="rounded-full border border-chart-4/30 bg-chart-4/10 px-2 py-0.5 text-[10px] font-semibold text-chart-4">
+                              {t({ bn: "কল ধরেনি", en: "Not received" })}
+                            </span>
+                          )}
+                          {summary && (
+                            <span className="rounded-full border border-primary/25 bg-accent px-2 py-0.5 text-[10px] font-semibold text-accent-foreground">
+                              {t({ bn: "রিপোর্ট জমা আছে", en: "Report saved" })}
+                            </span>
+                          )}
                           <span className="w-full text-[10px] text-muted-foreground">
-                            {lead.last_call_at
-                              ? relativeTime(lead.last_call_at)
-                              : t({ bn: `${bn(lead.call_attempts, lang)} বার চেষ্টা`, en: `${bn(lead.call_attempts, lang)} attempts` })}
+                            {attempts
+                              ? t({ bn: `${bn(attempts, lang)} বার চেষ্টা`, en: `Attempt ${bn(attempts, lang)}` })
+                              : t({ bn: "এখনো কল হয়নি", en: "Not called yet" })}
+                            {lastTouch ? ` · ${t({ bn: `শেষ চেষ্টা ${relativeTime(lastTouch)}`, en: `last ${relativeTime(lastTouch)}` })}` : ""}
                           </span>
                         </div>
                       </Button>
@@ -1061,7 +1069,7 @@ export function DeskCommandCenter({
                     label={t({ bn: "শেষ কল", en: "Last call" })}
                     value={selected.last_call_at ? relativeTime(selected.last_call_at) : null}
                   />
-                  <Field label={t({ bn: "চেষ্টা", en: "Attempts" })} value={bn(selected.call_attempts, lang)} />
+                  <Field label={t({ bn: "চেষ্টা", en: "Attempts" })} value={attemptsOf(selected) ? t({ bn: `${bn(attemptsOf(selected), lang)} বার`, en: `${bn(attemptsOf(selected), lang)}` }) : t({ bn: "এখনো কল হয়নি", en: "Not called yet" })} />
                   <Field
                     label={t({ bn: "পরের যোগাযোগ", en: "Next follow-up" })}
                     value={selected.retry_after ? shortDate(selected.retry_after) : null}
@@ -1153,6 +1161,7 @@ export function DeskCommandCenter({
             <Lead360Content
               selected={selected}
               selectedHistory={selectedHistory}
+              attempts={selected ? attemptsOf(selected) : 0}
               onOpenDossier={(id) => {
                 setMobile360Open(false);
                 setDossierId(id);
@@ -1203,10 +1212,12 @@ function Lead360Content({
   selected,
   selectedHistory,
   onOpenDossier,
+  attempts = 0,
 }: {
   selected: Lead | null;
   selectedHistory: { key: string; at: string; title: string }[];
   onOpenDossier: (id: string) => void;
+  attempts?: number;
 }) {
   const t = useT();
   const lang = useLang();
@@ -1265,7 +1276,7 @@ function Lead360Content({
         <Field label={t({ bn: "রেফারেন্স", en: "Reference" })} value={selected.reference_by} />
         <Field label={t({ bn: "সোর্স", en: "Source" })} value={selected.source} />
         <Field label={t({ bn: "শেষ কল", en: "Last call" })} value={selected.last_call_at ? relativeTime(selected.last_call_at) : null} />
-        <Field label={t({ bn: "চেষ্টা", en: "Attempts" })} value={bn(selected.call_attempts, lang)} />
+        <Field label={t({ bn: "চেষ্টা", en: "Attempts" })} value={attempts ? t({ bn: `${bn(attempts, lang)} বার`, en: `${bn(attempts, lang)}` }) : t({ bn: "এখনো কল হয়নি", en: "Not called yet" })} />
         <Field label={t({ bn: "পরের যোগাযোগ", en: "Next follow-up" })} value={selected.retry_after ? shortDate(selected.retry_after) : null} />
         <Field label={t({ bn: "কাজের দিন", en: "Work date" })} value={selected.work_date} />
       </dl>
