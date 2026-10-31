@@ -73,7 +73,7 @@ export const listMySocial = createServerFn({ method: "POST" })
 
 const Activity = Base.extend({
   kind: z.enum(SOCIAL_KINDS),
-  pageId: z.string({ required_error: "পেজ বা গ্রুপ বেছে নিন" }).uuid("পেজ বা গ্রুপ বেছে নিন"),
+  pageId: z.string({ error: "পেজ বা গ্রুপ বেছে নিন" }).uuid("পেজ বা গ্রুপ বেছে নিন"),
   link: Link.nullable().optional().or(z.literal("").transform(() => null)),
   note: z.string().trim().max(1000).nullable().optional(),
   replyCount: z.number().int().min(1).max(500).default(1),
