@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-31 — Recording consent + real-phone check
+- [x] Per-agent recording consent screen before any audio capture/pickup/upload; customer notice on live call; withdraw from status page; 26 source checks pass.
+- [ ] Real-handset test of call trace, call log, consent-gated recording and sync: no phone/emulator/Android SDK here; needs a rebuilt APK and two agents on real phones.
+
 ## 2026-10-31 — New workspace connections
 - [x] Connect GitHub API fresh; /user HTTP 200 confirms trendfluxos-dev.
 - [x] Connect Google Search Console fresh; /sites HTTP 200 confirms crm.winstonebd.com siteOwner.
