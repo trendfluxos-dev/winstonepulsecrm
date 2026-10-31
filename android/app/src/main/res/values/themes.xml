@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.WinstoneConnect" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.WinstoneConnect" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:colorBackground">@color/win_cream</item>
+        <item name="android:windowBackground">@color/win_cream</item>
         <item name="android:statusBarColor">@color/win_cream</item>
         <item name="android:navigationBarColor">@color/win_cream</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

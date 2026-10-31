@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Winstone Connect — কালো-সোনালি প্যালেট, ওয়েব CRM-এর টোকেনের সাথে মিলিয়ে।
+  Winstone Connect — সাদা কর্পোরেট প্যালেট (চারকোল লেখা, শ্যাম্পেন সোনালি অ্যাকসেন্ট), ওয়েব CRM-এর সাথে মিলিয়ে।
 -->
 <resources>
     <!-- Foundation -->
-    <color name="win_cream">#0B0B0C</color>          <!-- app background -->
-    <color name="win_cream_deep">#141416</color>     <!-- muted / surface-2 -->
-    <color name="win_white">#15151A</color>          <!-- cards, sheets -->
-    <color name="win_ink">#F6F2E7</color>            <!-- primary text -->
-    <color name="win_ink_muted">#9E9683</color>      <!-- secondary text -->
-    <color name="win_border">#2C2720</color>         <!-- hairline borders -->
+    <color name="win_cream">#FFFFFF</color>          <!-- app background -->
+    <color name="win_cream_deep">#F5F2EA</color>     <!-- muted / surface-2 (ivory) -->
+    <color name="win_white">#FFFFFF</color>          <!-- cards, sheets -->
+    <color name="win_ink">#171717</color>            <!-- primary text -->
+    <color name="win_ink_muted">#77736C</color>      <!-- secondary text -->
+    <color name="win_border">#DED8CC</color>         <!-- hairline borders -->
 
-    <!-- Gold accents -->
-    <color name="win_green">#D4AF37</color>          <!-- primary action -->
-    <color name="win_green_dark">#B08F21</color>     <!-- pressed state -->
-    <color name="win_green_soft">#211C10</color>     <!-- tinted pill background -->
-    <color name="win_live">#4FC98A</color>           <!-- on-call pulse -->
+    <!-- Gold accents (deepened for legibility on white) -->
+    <color name="win_green">#8F6B2E</color>          <!-- accent text/icons -->
+    <color name="win_green_dark">#AD8744</color>     <!-- pressed state -->
+    <color name="win_green_soft">#F6EFE0</color>     <!-- tinted pill background -->
+    <color name="win_live">#2E9E63</color>           <!-- on-call pulse -->
 
     <!-- Status -->
-    <color name="win_amber">#E2B94F</color>          <!-- pending / idle -->
-    <color name="win_red">#E0705B</color>            <!-- failed sync / critical -->
-    <color name="win_on_green">#17130A</color>
+    <color name="win_amber">#B7791F</color>          <!-- pending / idle -->
+    <color name="win_red">#C2412D</color>            <!-- failed sync / critical -->
+    <color name="win_on_green">#FFFFFF</color>
+
+    <!-- Launcher icon tile -->
+    <color name="win_icon_background">#FFFFFF</color>
 </resources>
