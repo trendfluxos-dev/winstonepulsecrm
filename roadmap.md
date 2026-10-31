@@ -1,5 +1,14 @@
 # Roadmap
 
+## 2026-11-01 — Retired key removal + CI repair
+- [x] Retired android/winstone-release.jks removed from HEAD (history not rewritten — old copies remain in Git history); .gitignore + tests/no-signing-material.test.ts + Android APK workflow step block keystores/certs/signing configs.
+- [x] Real CI (run 41243465048) confirmed the package parser fix; next gate failure "found 0 signers" fixed for SDK-targeted apksigner output, distinct-certificate count + "Number of signers" check; 21 gate tests.
+- [x] Build tool pin workflow: npm peer-resolver crash fixed (--legacy-peer-deps + explicit vite).
+- [x] CI workflow now also runs on push to main (bun pinned 1.4.4).
+- [ ] Verify the next GitHub runs after today's changes sync (Android APKs test build, Build tool pin, CI) — results only visible after the sync.
+- [ ] Signed live build — blocked on company key (decision B) + WINSTONE_RELEASE_CERT_SHA256 in repo settings.
+- [ ] 195 pre-existing Prettier formatting errors in older files (lint is not in CI); not touched to avoid churn.
+
 ## 2026-11-01 — Android CI release check
 - [x] Gate script checks version, package, signer fingerprint and checksum before any APK is made available (test, release and tagged builds); 14 tests pass.
 - [ ] Set repository variable WINSTONE_RELEASE_CERT_SHA256 (public company fingerprint) — owner/IT; release builds refuse to publish without it.
