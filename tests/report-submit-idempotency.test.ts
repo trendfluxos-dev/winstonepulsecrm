@@ -49,6 +49,8 @@ vi.mock("@/integrations/supabase/client.server", () => {
     },
   };
 });
+// Never reach a real database from this test.
+vi.mock("@/integrations/supabase/client", () => ({ supabase: new Proxy({}, { get: (_t, k) => { throw new Error(`browser client used: ${String(k)}`); } }) }));
 vi.mock("@/lib/call-jobs.server", () => ({ recordSyncEvent: async () => { s.sideEffects.push("sync_event"); } }));
 vi.mock("@/lib/classification-review.server", () => ({ reviewSubmittedReport: async () => { s.sideEffects.push("review"); return { mismatchAlertId: null, missingRecordingAlertId: null }; } }));
 vi.mock("@/lib/report-sheet.server", () => ({ syncReportsToSheet: async () => { s.sideEffects.push("sheet"); return { appended: 1 }; } }));
