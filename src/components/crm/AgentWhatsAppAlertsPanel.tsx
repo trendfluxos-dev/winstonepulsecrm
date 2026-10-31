@@ -74,6 +74,13 @@ export function AgentWhatsAppAlertsPanel() {
           <Button variant="outline" onClick={() => hqSave.mutate()} disabled={hqSave.isPending}>{hqSave.isPending ? "…" : t({ en: "Save number", bn: "নম্বর সংরক্ষণ" })}</Button>
         </div>
       )}
+      {d && (
+        <div className="rounded-md border border-border p-3 text-xs">
+          <p className="font-medium">{t({ en: "Daily HQ report (17:40 Dhaka, official days)", bn: "দৈনিক HQ রিপোর্ট (বিকেল ৫:৪০, অফিসের দিন)" })}</p>
+          <p className="text-muted-foreground">{t({ en: "Bangla summary + PDF to:", bn: "বাংলা সারাংশ ও PDF যাবে:" })} {d.hqDaily.recipients.map((r) => displayAgentWhatsApp(r)).join(", ") || "—"} · {d.hqDaily.enabled ? t({ en: "On", bn: "চালু" }) : t({ en: "Off", bn: "বন্ধ" })}</p>
+          {d.hqDaily.last.length > 0 && <p className="text-muted-foreground">{t({ en: "Last sends:", bn: "সর্বশেষ:" })} {d.hqDaily.last.map((x) => `${x.work_date} ${x.status}${x.with_pdf ? " +PDF" : ""}`).join(" · ")}</p>}
+        </div>
+      )}
       {d && d.enabled && !allApproved && <p className="text-xs text-muted-foreground">{t({ en: "Sending is on, but WhatsApp will refuse messages until Meta approves the templates.", bn: "পাঠানো চালু, কিন্তু Meta টেমপ্লেটগুলো অনুমোদন না করা পর্যন্ত WhatsApp মেসেজ নেবে না।" })}</p>}
     </section>
   );

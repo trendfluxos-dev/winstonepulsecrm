@@ -995,6 +995,13 @@
       "when": 1793456198593,
       "tag": "0141_agent_whatsapp_hq_report_kind",
       "breakpoints": true
+    },
+    {
+      "idx": 142,
+      "version": "7",
+      "when": 1793456712300,
+      "tag": "0142_hq_whatsapp_daily_reports",
+      "breakpoints": true
     }
   ]
 }

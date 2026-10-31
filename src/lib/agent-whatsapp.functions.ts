@@ -92,9 +92,12 @@ export const getAgentWhatsAppAdmin = createServerFn({ method: "POST" })
       supabaseAdmin.from("agent_whatsapp_alerts").select("status").gte("created_at", since).limit(5000),
     ]);
     if (optins.error || alerts.error) throw new Error("Alert overview unavailable");
+    const { readHqReportSettings } = await import("@/lib/hq-daily-report.server");
+    const hqDaily = await readHqReportSettings();
+    const lastHq = await supabaseAdmin.from("hq_whatsapp_report_sends").select("work_date, status, with_pdf").order("created_at", { ascending: false }).limit(3);
     const byStatus: Record<string, number> = {};
     for (const row of alerts.data ?? []) byStatus[row.status] = (byStatus[row.status] ?? 0) + 1;
-    return { enabled, hqNumber, templates, optedIn: optins.count ?? 0, last7Days: byStatus };
+    return { enabled, hqNumber, hqDaily: { enabled: hqDaily.enabled, recipients: hqDaily.recipients, last: lastHq.data ?? [] }, templates, optedIn: optins.count ?? 0, last7Days: byStatus };
   });
 
 export const setAgentWhatsAppEnabled = createServerFn({ method: "POST" })

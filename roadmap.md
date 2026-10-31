@@ -4,7 +4,10 @@
 - [x] Publish requested for crm.winstonebd.com (basic security scan clean).
 - [ ] TalkBack/VoiceOver walk on real devices — needs a person with an Android phone and an iPhone (guide: accessibility/version-line-screen-reader-guide.pdf).
 - [x] WhatsApp call report summary (counts only) from agent → one HQ number: built; template sent to Meta for review.
-- [ ] HQ WhatsApp number — waiting on owner; IT saves it in IT Console. Publish needed for the new button.
+- [x] Daily 17:40 Bangla HQ report + PDF to 01730-320178, 01819-225751, 01766-667640 (official days): built, scheduled; text template sent to Meta.
+- [ ] PDF template must be created in WhatsApp Manager (API can't upload the sample) — owner action; sample PDF in Files.
+- [ ] Publish so tomorrow's 17:40 run uses the new code.
+- [ ] HQ WhatsApp number for agent summaries — waiting on owner; IT saves it in IT Console. Publish needed for the new button.
 - [x] Phone app: 2.21-test APK already built from the current phone code (no phone-app changes since).
 - [ ] GitHub copy still stuck at 04:38 UTC — owner must restore Git sync.
 - [ ] Agent WhatsApp alerts go live after Meta approves 2 templates, Incoming messages destination is set to this project, and IT turns on the switch.
