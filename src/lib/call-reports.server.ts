@@ -452,10 +452,11 @@ export async function submitCallReport(input: {
   if (report.recording_id && !isWhatsapp) {
     const { data: rec } = await supabaseAdmin
       .from("call_recordings")
-      .select("duration_seconds, call_source, created_at, agent_id, lead_id, call_status")
+      .select("duration_seconds, call_source, external_call_id, created_at, agent_id, lead_id, call_status")
       .eq("id", report.recording_id)
       .maybeSingle();
-    if (rec && rec.agent_id === input.agentId && rec.lead_id === report.lead_id && ["android_sim", "phone_recorder"].includes(String(rec.call_source ?? "")) && rec.call_status === "completed") {
+    const { isPhoneMeasuredCall } = await import("@/lib/call-duration");
+    if (rec && rec.agent_id === input.agentId && rec.lead_id === report.lead_id && isPhoneMeasuredCall(rec) && rec.call_status === "completed") {
       phoneSeconds = rec.duration_seconds ?? null;
       phoneSyncedAt = rec.created_at ?? null;
     }
@@ -465,14 +466,14 @@ export async function submitCallReport(input: {
     const since = new Date(new Date(report.created_at).getTime() - 3 * 60 * 60 * 1000).toISOString();
     const { data: phoneRows } = await supabaseAdmin
       .from("call_recordings")
-      .select("started_at, created_at, duration_seconds, call_source, call_status")
+      .select("started_at, created_at, duration_seconds, call_source, external_call_id, call_status")
       .eq("lead_id", report.lead_id)
       .eq("agent_id", report.agent_id)
       .gte("created_at", since)
       .order("created_at", { ascending: false })
       .limit(10);
-    const { pickPhoneMeasuredCall } = await import("@/lib/call-duration");
-    const match = pickPhoneMeasuredCall(report.created_at, (phoneRows ?? []).filter((row) => row.call_status === "completed" && ["android_sim", "phone_recorder"].includes(String(row.call_source ?? ""))));
+    const { pickPhoneMeasuredCall, isPhoneMeasuredCall } = await import("@/lib/call-duration");
+    const match = pickPhoneMeasuredCall(report.created_at, (phoneRows ?? []).filter((row) => row.call_status === "completed" && isPhoneMeasuredCall(row)));
     phoneSeconds = match?.seconds ?? null;
     phoneSyncedAt = match?.syncedAt ?? null;
   }
