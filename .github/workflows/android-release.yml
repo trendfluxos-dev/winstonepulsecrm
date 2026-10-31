@@ -77,5 +77,5 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" "${{ steps.gate.outputs.dir }}"/* \
             --repo "$GITHUB_REPOSITORY" --title "Winstone Agent $GITHUB_REF_NAME" \
-            --notes "Signed release APK. SHA-256: \`${{ steps.gate.outputs.sha }}\` — verify before installing." \
+            --notes "Signed release APK. SHA-256: \`${{ steps.gate.outputs.sha256 }}\` — verify before installing." \
             || gh release upload "$GITHUB_REF_NAME" "${{ steps.gate.outputs.dir }}"/* --repo "$GITHUB_REPOSITORY" --clobber
