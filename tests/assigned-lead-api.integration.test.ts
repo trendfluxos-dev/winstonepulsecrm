@@ -5,7 +5,8 @@ import { leadOwner } from '@/lib/lead-owner';
 
 const url = process.env['SUPABASE_URL'] ?? process.env['VITE_SUPABASE_URL'];
 const key = process.env['SUPABASE_PUBLISHABLE_KEY'] ?? process.env['VITE_SUPABASE_PUBLISHABLE_KEY'];
-const token = staffAccessToken();
+// Opt-in: each run pages six whole tables through row security on the shared live database.
+const token = process.env['RUN_LIVE_SCOPE_TESTS'] === '1' ? staffAccessToken() : null;
 describe.runIf(Boolean(url && key && token))('assigned-lead API scope (read-only, real staff session)', () => {
   async function clientAndOwner() {
     if (!url || !key || !token) throw new Error('Staff session unavailable');
