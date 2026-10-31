@@ -1,5 +1,5 @@
 import { EVALUATION_QUESTIONS, EVALUATION_QUESTIONS_LABEL_EN, categoryForScore, type EvaluationKey } from "@/lib/lead-evaluation";
-import { fastDisqualification } from "@/lib/fast-disqualification";
+import { FAKE_NEEDS_ANSWERED_CALL, fakeNeedsAnsweredCall, fastDisqualification } from "@/lib/fast-disqualification";
 import { REPORT_GRADES, REPORT_GRADE_LABELS } from "@/lib/call-qualification";
 import { CONTACT_CLOSE_REASONS, contactCloseReasonLabelFor } from "@/lib/contact-close-reasons";
 import { FOLLOW_UP_REASONS, FOLLOW_UP_REASONS_EN, type FollowUpReasonCode } from "@/lib/follow-up-reasons";
@@ -602,6 +602,8 @@ export function PostCallReportGate() {
           ? t({ bn: "Lead Category বাছাই করুন (Confirm বা Change)", en: "Select Lead Category (Confirm or Change)" })
           : connected && category === "no_answer"
             ? t({ bn: "কথা হওয়া কলে NO ANSWER দেওয়া যাবে না", en: "A connected call cannot be marked NO ANSWER" })
+          : fakeNeedsAnsweredCall(category, connected)
+            ? t(FAKE_NEEDS_ANSWERED_CALL)
             : qualifying && !interest
               ? t({ bn: "Customer Interest বাছাই করুন", en: "Select Customer Interest" })
               : qualifying && !requirement

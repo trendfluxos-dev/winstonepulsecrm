@@ -1,5 +1,5 @@
 import { evaluate, parseAnswers } from "./lead-evaluation";
-import { fastDisqualification } from "./fast-disqualification";
+import { FAKE_NEEDS_ANSWERED_CALL, fakeNeedsAnsweredCall, fastDisqualification } from "./fast-disqualification";
 
 export const REPORT_GRADES = ["A", "B", "C", "D"] as const;
 export type ReportGrade = (typeof REPORT_GRADES)[number];
@@ -18,6 +18,8 @@ export function qualifyCallReport(input: {
   grade?: string | null;
   followUpPending: boolean;
 }) {
+  // FAKE LEAD is only known from a conversation; refuse it on an unanswered call.
+  if (fakeNeedsAnsweredCall(input.category, input.connected)) throw new Error(FAKE_NEEDS_ANSWERED_CALL.bn);
   const rejection = fastDisqualification(input.category);
   if (rejection || !input.connected)
     return { rejection, answers: null, evaluation: null, grade: null };

@@ -239,7 +239,8 @@ fun ReportSheet(
     val evaluationComplete = LeadEvaluation.isComplete(evaluationAnswers)
     val evaluationScore = LeadEvaluation.score(evaluationAnswers)
     val temperature = if (evaluationComplete) LeadEvaluation.category(evaluationScore) else null
-    val ready = category.isNotBlank() &&
+    val fakeBlocked = ShortRejectionReport.fakeNeedsAnsweredCall(category, received)
+    val ready = category.isNotBlank() && !fakeBlocked &&
         seconds >= 0 && (!received || seconds >= 1) &&
         (if (rejection != null) true else
             summary.trim().length > 1 && note.trim().length > 1 &&
@@ -463,6 +464,16 @@ fun ReportSheet(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
             )
+
+            if (fakeBlocked) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    ShortRejectionReport.FAKE_NEEDS_ANSWERED_CALL,
+                    color = Color(0xFFB3261E),
+                    fontSize = 12.sp,
+                    modifier = Modifier.testTag("fake-needs-answered-call"),
+                )
+            }
 
             error?.let {
                 Spacer(Modifier.height(8.dp))

@@ -125,9 +125,16 @@ describe("actual mobile report interactions with isolated server fixtures", () =
     await waitFor(() => expect(fixture.submit).toHaveBeenCalled());
     expect(fixture.submit.mock.calls[0]?.[0]).toMatchObject({ data: { requirement: null, nextAction: "no_action" } });
   });
-  it("final rejection disposition is independent of connection status", async () => {
-    fixture.connected = false; await open(); choose("fake"); absentSalesInputs();
+  it("NOT INTERESTED stays submittable when the call was not answered", async () => {
+    fixture.connected = false; await open(); choose("not_interested"); absentSalesInputs();
     expect((screen.getByRole("button", { name: "Confirm & Submit" }) as HTMLButtonElement).disabled).toBe(false);
+    expect(fixture.submit).not.toHaveBeenCalled();
+  });
+
+  it("FAKE LEAD on an unanswered call is blocked with a clear message", async () => {
+    fixture.connected = false; await open(); choose("fake");
+    expect((screen.getByRole("button", { name: "Confirm & Submit" }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getAllByText(/FAKE LEAD needs an answered call|কল ধরা না হলে FAKE LEAD দেওয়া যাবে না/).length).toBeGreaterThan(0);
     expect(fixture.submit).not.toHaveBeenCalled();
   });
 });
