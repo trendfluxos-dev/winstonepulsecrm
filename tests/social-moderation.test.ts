@@ -28,7 +28,7 @@ describe("social moderation (Method A)", () => {
   });
 
   it("page/group selection is mandatory so lead sources are never blank", () => {
-    expect(src).toMatch(/pageId: z\.string\(\{ required_error/);
+    expect(src).toMatch(/pageId: z\.string\(\{ error: "পেজ বা গ্রুপ বেছে নিন"/);
     expect(src).toMatch(/\.uuid\("পেজ বা গ্রুপ বেছে নিন"\)/);
     for (const fn of ["logSocialActivity", "convertSocialToLead"]) {
       expect(src).toMatch(new RegExp(`${fn}[\\s\\S]*?requireActivePage\\(db, data\\.pageId\\)`));

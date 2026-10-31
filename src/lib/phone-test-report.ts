@@ -4,10 +4,12 @@ import { z } from "zod";
 export const PHONE_TEST_CHECKS = ["install", "signin", "call_detected", "recording_upload", "rejection_report", "normal_report"] as const;
 export type PhoneTestCheck = (typeof PHONE_TEST_CHECKS)[number];
 
+const PassFail = z.enum(["pass", "fail"]);
+
 export const PhoneTestReportSchema = z.object({
   phoneModel: z.string().trim().min(2).max(80),
   appVersion: z.string().trim().max(30).optional(),
-  results: z.object(Object.fromEntries(PHONE_TEST_CHECKS.map((k) => [k, z.enum(["pass", "fail"])])) as Record<PhoneTestCheck, z.ZodEnum<["pass", "fail"]>>),
+  results: z.object(Object.fromEntries(PHONE_TEST_CHECKS.map((k) => [k, PassFail])) as Record<PhoneTestCheck, typeof PassFail>),
   issue: z.string().trim().max(1000).optional(),
   sendToIt: z.boolean(),
 }).superRefine((v, ctx) => {

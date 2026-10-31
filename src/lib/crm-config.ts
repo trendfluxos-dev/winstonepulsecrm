@@ -59,8 +59,8 @@ export type Permissions = z.infer<typeof PermissionsSchema>;
 
 export const AppConfigSchema = z.object({
   fields: z.array(CustomFieldSchema).max(20).default([]),
-  rules: RulesSchema.default({}),
-  permissions: PermissionsSchema.default({}),
+  rules: RulesSchema.prefault({}),
+  permissions: PermissionsSchema.prefault({}),
   /**
    * Email addresses allowed to reach the CRM through the agent-integration
    * (MCP) endpoint. Empty list = nobody, which is the safe default.
