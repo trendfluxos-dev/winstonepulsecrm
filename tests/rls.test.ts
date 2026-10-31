@@ -8,8 +8,10 @@ import { describe, expect, it } from "vitest";
 
 const url = process.env["SUPABASE_URL"] ?? process.env["VITE_SUPABASE_URL"];
 const key = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["VITE_SUPABASE_PUBLISHABLE_KEY"];
+// Opt-in: these probe the shared live database (writes are attempted with the browser key to prove refusal).
+const live = process.env["RUN_LIVE_SCOPE_TESTS"] === "1";
 
-const anon = createClient(url!, key!, {
+const anon = createClient(url || "http://127.0.0.1:9", key || "unset", {
   auth: { persistSession: false, autoRefreshToken: false },
   global: {
     fetch: (input, init) => {
@@ -26,7 +28,7 @@ const anon = createClient(url!, key!, {
 const blocked = (result: { data: unknown; error: unknown }) =>
   Boolean(result.error) || (Array.isArray(result.data) && result.data.length === 0);
 
-describe.runIf(url && key)("RLS: an unauthenticated client cannot read production data", () => {
+describe.runIf(live && url && key)("RLS: an unauthenticated client cannot read production data", () => {
   it("cannot read PIN hashes", async () => {
     const result = await anon.from("profiles").select("pin_hash").limit(1);
     expect(result.error).toBeTruthy();
@@ -89,7 +91,7 @@ describe.runIf(url && key)("RLS: an unauthenticated client cannot read productio
   });
 });
 
-describe.runIf(url && key)("RLS: an unauthenticated client cannot write production data", () => {
+describe.runIf(live && url && key)("RLS: an unauthenticated client cannot write production data", () => {
   it("cannot insert a lead", async () => {
     const result = await anon
       .from("leads")
@@ -153,7 +155,7 @@ describe.runIf(url && key)("RLS: an unauthenticated client cannot write producti
   });
 });
 
-describe.runIf(url && key)("private storage", () => {
+describe.runIf(live && url && key)("private storage", () => {
   it("does not allow anonymous listing of call audio", async () => {
     const result = await anon.storage.from("call-audio").list();
     expect(Boolean(result.error) || (result.data ?? []).length === 0).toBe(true);

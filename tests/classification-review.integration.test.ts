@@ -1,11 +1,16 @@
 /**
  * End-to-end check of the review alerts against the real database, using
  * throwaway rows (the probe lead is parked, never deleted). Skipped when no service credentials
- * are present (e.g. a plain CI checkout).
+ * are present or the backend is not an isolated staging project.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-const hasService = Boolean(process.env["SUPABASE_URL"] && process.env["SUPABASE_SERVICE_ROLE_KEY"]);
+// Writes probe rows, so it runs only against an isolated staging backend —
+// never the shared live database (same opt-in as tests/staging).
+const backend = process.env["SUPABASE_URL"] ?? "";
+const hasService = Boolean(
+  process.env["STAGING_E2E"] === "1" && backend && !backend.includes("siepfegeubbqwhodyxcg") && process.env["SUPABASE_SERVICE_ROLE_KEY"],
+);
 
 type Admin = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
 
