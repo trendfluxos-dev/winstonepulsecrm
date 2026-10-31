@@ -1,8 +1,8 @@
 # Roadmap
 
 ## 2026-10-31 — New workspace connections
-- [ ] Connect GitHub API fresh and verify read-only access.
-- [ ] Connect Google Search Console fresh and list verified properties.
+- [x] Connect GitHub API fresh; /user HTTP 200 confirms trendfluxos-dev.
+- [x] Connect Google Search Console fresh; /sites HTTP 200 confirms crm.winstonebd.com siteOwner.
 
 ## 2026-10-31 — Unified call qualification
 - [ ] Unify backend validation and report-grade selection; disposition-driven rejection without fake scores.
