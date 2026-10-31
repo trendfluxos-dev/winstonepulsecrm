@@ -219,7 +219,11 @@ export const getAudioUrl = createServerFn({ method: "POST" })
       .from("call-audio")
       .download(recording.audio_url);
     if (error || !file) throw new Error("Could not load this recording");
-    if (file.size > 40 * 1024 * 1024) throw new Error("This recording is too large to play here");
+    const { PLAYBACK_MAX_BYTES } = await import("@/lib/recording-playback-limit");
+    if (file.size > PLAYBACK_MAX_BYTES) {
+      // A clear, typed answer the player can explain — no audio bytes leave.
+      return { status: "too_large" as const, sizeBytes: file.size };
+    }
     // Re-check after the download so a reassignment during it is honoured.
     if (caller.scope === "agent") await scope.assertAssignedLead(agentId, recording.lead_id);
     const bytes = new Uint8Array(await file.arrayBuffer());
@@ -227,7 +231,7 @@ export const getAudioUrl = createServerFn({ method: "POST" })
     for (let i = 0; i < bytes.length; i += 0x8000) {
       binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
     }
-    return { mimeType: file.type || "audio/mpeg", base64: btoa(binary) };
+    return { status: "ok" as const, mimeType: file.type || "audio/mpeg", base64: btoa(binary) };
   });
 
 /** Splits every unassigned lead evenly across the active agents. Coordinator or PIN. */

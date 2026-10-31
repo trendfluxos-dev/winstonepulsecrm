@@ -42,8 +42,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.winstone.connect.R
+import com.winstone.connect.ui.theme.WinCharcoal
 import com.winstone.connect.ui.theme.WinGreen
 import com.winstone.connect.ui.theme.WinGreenSoft
+import com.winstone.connect.ui.theme.WinOnCharcoal
 import com.winstone.connect.ui.theme.WinInk
 import com.winstone.connect.ui.theme.WinInkMuted
 
@@ -69,21 +74,12 @@ fun SignInScreen(
     ) {
         Spacer(Modifier.height(40.dp))
 
-        // Logo mark
-        Box(
-            Modifier
-                .size(88.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(WinGreenSoft),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                "W",
-                color = WinGreen,
-                fontWeight = FontWeight.Black,
-                fontSize = 40.sp,
-            )
-        }
+        // Winstone Pulse logo
+        Image(
+            painter = painterResource(R.drawable.winstone_logo),
+            contentDescription = "Winstone Pulse logo",
+            modifier = Modifier.size(104.dp),
+        )
 
         Spacer(Modifier.height(20.dp))
 
@@ -143,7 +139,7 @@ fun SignInScreen(
                 .fillMaxWidth()
                 .height(52.dp),
             shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = WinGreen, contentColor = MaterialTheme.colorScheme.onPrimary),
+            colors = ButtonDefaults.buttonColors(containerColor = WinCharcoal, contentColor = WinOnCharcoal),
         ) {
             if (loading) {
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp, modifier = Modifier.size(22.dp))

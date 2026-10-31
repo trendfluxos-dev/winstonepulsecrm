@@ -251,7 +251,7 @@ fun DeskScreen(
             if (tab == TAB_HOME || tab == TAB_LEADS) {
                 ExtendedFloatingActionButton(
                     onClick = { showNewLead = true },
-                    containerColor = WinGreen,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                 ) { Text("নতুন লিড") }
             }
@@ -661,6 +661,12 @@ private fun WelcomeCard(
     }
     WinCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            androidx.compose.foundation.Image(
+                painter = androidx.compose.ui.res.painterResource(com.winstone.connect.R.drawable.winstone_logo),
+                contentDescription = "Winstone Pulse logo",
+                modifier = Modifier.size(44.dp),
+            )
+            Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text("Winstone Properties Ltd.", color = WinGreen, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(2.dp))
