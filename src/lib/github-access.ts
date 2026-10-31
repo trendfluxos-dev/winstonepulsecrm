@@ -11,8 +11,22 @@ export function classifyAccess(visibility: RepoVisibility, pendingInvite: boolea
 /** Which linked credential names to check, in the order the app reads them. */
 export const GITHUB_KEY_NAMES = ["GITHUB_API_KEY", "GITHUB_API_KEY_1", "GITHUB_API_KEY_2", "GITHUB_API_KEY_3"] as const;
 
+/** The CRM's current GitHub code copy (moved from trendfluxos-dev/winstone-pulse-crm on 31 Oct 2026). All IT Console GitHub views default to it. */
+export const CRM_REPOSITORY = "winstonedigital-maker/winstonepulsecrm";
+
 /** Repository the automatic access watch checks. */
-export const WATCHED_REPOSITORY = "trendfluxos-dev/winstone-pulse-crm";
+export const WATCHED_REPOSITORY = CRM_REPOSITORY;
+
+/**
+ * Previous watch state, only when it was saved for the same repository. A snapshot from another
+ * repository (or one saved before the repository was recorded) starts a fresh baseline, so moving
+ * the code copy never raises false "access lost" alerts.
+ */
+export function previousSnapshotFor(stored: unknown, repository: string): AccessSnapshot[] | null {
+  const value = stored as { repository?: string; connections?: AccessSnapshot[] } | null;
+  if (!value?.connections || !value.repository) return null;
+  return value.repository.toLowerCase() === repository.toLowerCase() ? value.connections : null;
+}
 
 export type AccessSnapshot = { key: string; login: string | null; verdict: AccessVerdict; canPush: boolean | null };
 export type AccessChange = { kind: "revoked" | "write_lost" | "account_changed" | "connection_removed" | "restored"; key: string; login: string | null; previousLogin: string | null };

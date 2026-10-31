@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 import { getAndroidBuilds } from "@/lib/github-status.functions";
 import { useT } from "@/lib/i18n";
+import { CRM_REPOSITORY } from "@/lib/github-access";
 
 const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const when = (iso: string | null) => iso ? new Date(iso).toLocaleString("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" }) : "—";
@@ -17,7 +18,7 @@ const when = (iso: string | null) => iso ? new Date(iso).toLocaleString("en-GB",
 export function AndroidBuildStatus() {
   const t = useT();
   const adminToken = useAdminToken();
-  const [repository, setRepository] = useState("trendfluxos-dev/winstone-pulse-crm");
+  const [repository, setRepository] = useState(CRM_REPOSITORY);
   const [watching, setWatching] = useState(false);
   const load = useServerFn(getAndroidBuilds);
   const valid = REPO_RE.test(repository.trim());

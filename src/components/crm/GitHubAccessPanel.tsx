@@ -17,7 +17,7 @@ const when = (iso: string | null | undefined) => iso ? new Date(iso).toLocaleStr
 export function GitHubAccessPanel() {
   const t = useT();
   const adminToken = useAdminToken();
-  const [repository, setRepository] = useState("trendfluxos-dev/winstone-pulse-crm");
+  const [repository, setRepository] = useState(CRM_REPOSITORY);
   const load = useServerFn(getGithubAccess);
   const run = useMutation({ mutationFn: () => load({ data: { adminToken: getAdminToken(), repository: repository.trim() } }) });
   const valid = REPO_RE.test(repository.trim());
