@@ -23,6 +23,8 @@ export type OfflineItem = {
   /** pending = waiting to send · syncing = being sent now · failed = last send failed. */
   status: "pending" | "syncing" | "failed";
   attempts: number;
+  /** When this phone last started sending it (set before the server answers). */
+  lastAttemptAt?: string | null;
   lastError?: string | null;
   label: string;
   payload: Record<string, unknown>;
@@ -76,6 +78,9 @@ export type SentItem = {
   /** sent = the server accepted it now · already_on_server = it had it already · not_accepted = the server refused it for good. */
   outcome: "sent" | "already_on_server" | "not_accepted";
   note?: string | null;
+  /** Send tries including the one the server answered. */
+  attempts?: number;
+  lastAttemptAt?: string | null;
 };
 
 type SentListener = (items: SentItem[]) => void;
@@ -103,7 +108,10 @@ function writeSent(items: SentItem[]) {
 }
 
 function recordSent(item: OfflineItem, outcome: SentItem["outcome"], note?: string) {
+  const current = readQueue().find((q) => q.id === item.id) ?? item;
   const entry: SentItem = {
+    attempts: (current.attempts ?? 0) + 1,
+    lastAttemptAt: current.lastAttemptAt ?? null,
     id: item.id,
     kind: item.kind,
     label: item.label,
@@ -126,7 +134,12 @@ export function subscribeSent(listener: SentListener): () => void {
 }
 
 function setStatus(id: string, status: OfflineItem["status"]) {
-  writeQueue(readQueue().map((item) => (item.id === id ? { ...item, status } : item)));
+  const at = new Date().toISOString();
+  writeQueue(
+    readQueue().map((item) =>
+      item.id === id ? { ...item, status, ...(status === "syncing" ? { lastAttemptAt: at } : {}) } : item,
+    ),
+  );
 }
 
 export function subscribeQueue(listener: Listener): () => void {
