@@ -1,5 +1,13 @@
 # Roadmap
 
+## 2026-10-31 — Publish, screen readers, WhatsApp reports, phone app
+- [x] Publish requested for crm.winstonebd.com (basic security scan clean).
+- [ ] TalkBack/VoiceOver walk on real devices — needs a person with an Android phone and an iPhone (guide: accessibility/version-line-screen-reader-guide.pdf).
+- [ ] WhatsApp call reports to a number — waiting on owner: which number, and what goes in the message.
+- [x] Phone app: 2.21-test APK already built from the current phone code (no phone-app changes since).
+- [ ] GitHub copy still stuck at 04:38 UTC — owner must restore Git sync.
+- [ ] Agent WhatsApp alerts go live after Meta approves 2 templates, Incoming messages destination is set to this project, and IT turns on the switch.
+
 ## 2026-10-31 — Phone app 2.19 (grade fix)
 - [x] Version 2.19 / code 30 set in app + build checks; 1,582 tests pass.
 - [ ] Build: blocked — GitHub main stuck at e181c95 (04:38 UTC), lacks grade-sending fix; owner must restore Git sync after workspace move.
