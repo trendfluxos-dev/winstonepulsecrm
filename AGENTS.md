@@ -34,6 +34,7 @@
 - Social moderation: CRM logs work only (append-only social_activity_logs) and makes unassigned leads via intakeLead — why: no Meta API; LeadHub assigns.
 - Wrappers/portals inherit src/styles.css tokens; Buttons separate actions from accents; headers stack phone actions, dialogs reserve close space; card lift needs a `--shadow-*` token (shadow-lg/xl are flattened); a translucent card edge uses `glass-hairline` — why: one palette, phone-safe layouts.
 - WhatsApp reads/summary use Dhaka-filtered bounded feed; CSV exports displayed totals safely — why: exports match what staff saw.
+- Agent WhatsApp alerts (agent-whatsapp*.ts) send only Meta-approved count-only templates to the agent's own opted-in number via the WhatsApp connector; one dedupe-keyed alert row is reserved before each send, delivery state comes only from the signed /api/public/whatsapp/webhook inbox (whatsapp_webhook_events), IT full PIN owns the master switch — why: no customer data in chats, no double sends, no assumed delivery.
 - Fonts use public/fonts WOFF2 + @font-face, never Google CSS — why: avoid render-blocking requests.
 - Private AI/bill reads authenticate; support inbox lists only the agent's own assigned conversations and agent escalation requires ownership; project writes reject read-only HQ; scored time needs phone sync — why: requests cannot bypass access or fabricate evidence.
 
