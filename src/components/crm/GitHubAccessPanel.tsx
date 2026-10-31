@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 import { getGithubAccess } from "@/lib/github-status.functions";
-import type { AccessVerdict } from "@/lib/github-access";
+import { CRM_REPOSITORY, type AccessVerdict } from "@/lib/github-access";
 import { useT } from "@/lib/i18n";
 
 const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;

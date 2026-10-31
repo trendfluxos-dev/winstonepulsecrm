@@ -22,3 +22,19 @@ describe("GitHub access watch", () => {
     expect(diffAccess([ready("A")], [ready("A")])).toEqual([]);
   });
 });
+
+import { CRM_REPOSITORY, WATCHED_REPOSITORY, previousSnapshotFor } from "@/lib/github-access";
+
+describe("watched repository after the 31 Oct move", () => {
+  it("watches winstonedigital-maker/winstonepulsecrm", () => {
+    expect(CRM_REPOSITORY).toBe("winstonedigital-maker/winstonepulsecrm");
+    expect(WATCHED_REPOSITORY).toBe("winstonedigital-maker/winstonepulsecrm");
+  });
+  it("starts a fresh baseline when the saved state belongs to another or unrecorded repository", () => {
+    const connections = [ready("A")];
+    expect(previousSnapshotFor({ connections }, CRM_REPOSITORY)).toBeNull();
+    expect(previousSnapshotFor({ repository: "trendfluxos-dev/winstone-pulse-crm", connections }, CRM_REPOSITORY)).toBeNull();
+    expect(previousSnapshotFor({ repository: "WinstoneDigital-Maker/WinstonePulseCRM", connections }, CRM_REPOSITORY)).toEqual(connections);
+    expect(previousSnapshotFor(null, CRM_REPOSITORY)).toBeNull();
+  });
+});
