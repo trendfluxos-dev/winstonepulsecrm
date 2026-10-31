@@ -83,9 +83,9 @@ export async function buildHqDailyReportPdf(input: { day: string; rows: AgentDay
   const cols = [
     { label: "#", x: M + 6, align: "left" as const },
     { label: "এজেন্ট", x: M + 30, align: "left" as const },
-    { label: "নতুন লিড", x: M + 300, align: "right" as const },
-    { label: "রিপোর্ট", x: M + 370, align: "right" as const },
-    { label: "যাচাইকৃত সংযুক্ত", x: M + 450, align: "right" as const },
+    { label: "নতুন লিড", x: M + 245, align: "right" as const },
+    { label: "রিপোর্ট", x: M + 315, align: "right" as const },
+    { label: "যাচাইকৃত সংযুক্ত", x: M + 415, align: "right" as const },
     { label: "নতুন ফলো-আপ", x: W - M - 6, align: "right" as const },
   ];
   const header = (p: PDFPage, yy: number) => {
