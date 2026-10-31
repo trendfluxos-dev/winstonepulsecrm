@@ -68,3 +68,4 @@
 - Extra Google tags use RootShell head; keep original — why: router dedupes.
 - HQ Claude briefing: on-demand, HQ/IT-gated, aggregate-only, native /v1/messages streamed server-side — why: no customer data or background AI cost.
 - GitHub access watch runs hourly via /api/public/jobs/github-access-watch (managed cron auth), diffs against system_settings github_access_watch and writes system_alerts; failed checks never count as revocation — why: no false alarms, read-only on GitHub.
+- Website enquiries (os_website/website leads) sync to their own 'Website Enquiries' tab of the Daily Lead Report via website-enquiry-sheet.ts: ID-matched, append-only, HQ notes kept; a tab failure never blocks the day tab — why: enquiries stay separate from agent report rows.

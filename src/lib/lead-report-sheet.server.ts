@@ -6,6 +6,14 @@
  * not linked; the CRM stays the system of record — the sheet is a mirror.
  */
 import { safeCell } from "@/lib/report-sheet.server";
+import {
+  noteField,
+  planWebsiteEnquiryRows,
+  WEBSITE_ENQUIRY_HEADER,
+  WEBSITE_ENQUIRY_SOURCES,
+  WEBSITE_ENQUIRY_TAB,
+  type WebsiteEnquiryRow,
+} from "@/lib/website-enquiry-sheet";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_sheets/v4";
 const SHEET_ID = "134iFJzfH8uwoAzTiEaAsyJcdtQUqwxEExBTmWiCUzA0";
@@ -227,6 +235,9 @@ export type LeadReportSyncResult = {
   rows: number;
   syncedAt: string;
   sheetUrl: string;
+  /** Rows in the separate "Website Enquiries" tab; null when that tab failed. */
+  websiteEnquiries: number | null;
+  websiteEnquiryError: string | null;
 };
 
 export function leadReportSheetUrl() {
@@ -280,13 +291,89 @@ export async function syncLeadReportToSheet(options?: { preserveExisting?: boole
   );
   }
 
+  // Website enquiries live in their own tab; a failure there never blocks the day tab.
+  let websiteEnquiries: number | null = null;
+  let websiteEnquiryError: string | null = null;
+  try {
+    websiteEnquiries = await syncWebsiteEnquiryTab(syncedAt);
+  } catch (error) {
+    websiteEnquiryError = error instanceof Error ? error.message.slice(0, 200) : "Website enquiry tab failed";
+    console.error("[lead-report] website enquiry tab failed", websiteEnquiryError);
+  }
+
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   await supabaseAdmin.from("app_config").upsert({
     id: CONFIG_ID,
-    data: { lastSyncedAt: syncedAt, tab, rowCount: rows.length },
+    data: { lastSyncedAt: syncedAt, tab, rowCount: rows.length, websiteEnquiries, websiteEnquiryError },
   });
 
-  return { tab, rows: rows.length, syncedAt, sheetUrl: leadReportSheetUrl() };
+  return { tab, rows: rows.length, syncedAt, sheetUrl: leadReportSheetUrl(), websiteEnquiries, websiteEnquiryError };
+}
+
+/** Website enquiry leads (newest 500), with their current agent if LeadHub assigned one. */
+export async function fetchWebsiteEnquiryRows(): Promise<WebsiteEnquiryRow[]> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("leads")
+    .select("id, name, phone_number, source, notes, status, assigned_to, created_at")
+    .in("source", [...WEBSITE_ENQUIRY_SOURCES])
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true })
+    .limit(MAX_ROWS);
+  if (error) throw new Error("Website enquiries unavailable");
+  const leads = data ?? [];
+  const agentIds = [...new Set(leads.map((l) => l.assigned_to).filter((v): v is string => !!v))];
+  const profiles = agentIds.length
+    ? await supabaseAdmin.from("profiles").select("id, name").in("id", agentIds)
+    : { data: [] as { id: string; name: string | null }[], error: null };
+  if (profiles.error) throw new Error("Website enquiry agents unavailable");
+  const agentName = new Map((profiles.data ?? []).map((p) => [p.id, p.name ?? ""]));
+  return leads.map((l) => ({
+    leadId: l.id,
+    receivedDhaka: new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Dhaka", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false,
+    }).format(new Date(l.created_at)),
+    name: l.name ?? "",
+    phone: l.phone_number ?? "",
+    source: l.source ?? "",
+    projectInterest: noteField(l.notes, "Project interest"),
+    budget: noteField(l.notes, "Budget"),
+    agentName: l.assigned_to ? agentName.get(l.assigned_to) ?? "" : "",
+    status: l.status ?? "",
+  }));
+}
+
+let enquiryTabReady = false;
+const enquiryRange = (cells: string) => encodeURIComponent(`'${WEBSITE_ENQUIRY_TAB}'!${cells}`);
+
+async function syncWebsiteEnquiryTab(syncedAt: string): Promise<number> {
+  const rows = await fetchWebsiteEnquiryRows();
+  if (!enquiryTabReady) {
+    const meta = (await gatewayFetch(`/spreadsheets/${SHEET_ID}?fields=sheets.properties.title`)) as
+      { sheets?: { properties?: { title?: string } }[] } | null;
+    if (!(meta?.sheets ?? []).some((s) => s.properties?.title === WEBSITE_ENQUIRY_TAB)) {
+      await gatewayFetch(`/spreadsheets/${SHEET_ID}:batchUpdate`, {
+        method: "POST",
+        body: JSON.stringify({ requests: [{ addSheet: { properties: { title: WEBSITE_ENQUIRY_TAB } } }] }),
+      });
+    }
+    await gatewayFetch(`/spreadsheets/${SHEET_ID}/values/${enquiryRange("A1:L1")}?valueInputOption=RAW`, {
+      method: "PUT", body: JSON.stringify({ values: [[...WEBSITE_ENQUIRY_HEADER]] }),
+    });
+    enquiryTabReady = true;
+  }
+  const current = (await gatewayFetch(`/spreadsheets/${SHEET_ID}/values/${enquiryRange("A:L")}`)) as { values?: string[][] } | null;
+  const updates = planWebsiteEnquiryRows((current?.values ?? []).slice(1), rows, syncedAt);
+  if (updates.length > 0) {
+    await gatewayFetch(`/spreadsheets/${SHEET_ID}/values:batchUpdate`, {
+      method: "POST",
+      body: JSON.stringify({
+        valueInputOption: "RAW",
+        data: updates.map((u) => ({ range: `'${WEBSITE_ENQUIRY_TAB}'!A${u.rowNumber}:L${u.rowNumber}`, values: [u.values] })),
+      }),
+    });
+  }
+  return rows.length;
 }
 
 /** Update known lead rows, append new ones, never clear old leads or HQ cells. */

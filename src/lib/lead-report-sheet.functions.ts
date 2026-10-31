@@ -33,7 +33,7 @@ export const pushLeadReportSheet = createServerFn({ method: "POST" })
       action: "lead_report_sheet_sync",
       entityType: "leads",
       entityId: null,
-      metadata: { tab: result.tab, rows: result.rows },
+      metadata: { tab: result.tab, rows: result.rows, websiteEnquiries: result.websiteEnquiries, websiteEnquiryError: result.websiteEnquiryError },
       actorProfileId: caller.profile?.id ?? null,
       actorLabel: caller.profile?.name ?? "Authority PIN",
     });

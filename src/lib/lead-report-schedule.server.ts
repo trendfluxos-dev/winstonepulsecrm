@@ -31,7 +31,7 @@ export async function handleLeadReportSchedule(request: Request): Promise<Respon
     await logAudit({
       action: "lead_report_sheet_sync", entityType: "leads",
       actorLabel: "Scheduled Daily Lead Report",
-      metadata: { source: "scheduled", outcome: "success", tab: result.tab, rows: result.rows },
+      metadata: { source: "scheduled", outcome: "success", tab: result.tab, rows: result.rows, websiteEnquiries: result.websiteEnquiries, websiteEnquiryError: result.websiteEnquiryError },
     });
     return Response.json({ ok: true, tab: result.tab, rows: result.rows, syncedAt: result.syncedAt },
       { headers: { "Cache-Control": "no-store" } });
