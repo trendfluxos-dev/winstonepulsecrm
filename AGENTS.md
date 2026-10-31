@@ -71,3 +71,4 @@
 - Extra Google tags use RootShell head; keep original — why: router dedupes.
 - HQ Claude briefing: on-demand, HQ/IT-gated, aggregate-only, native /v1/messages streamed server-side — why: no customer data or background AI cost.
 - GitHub access watch runs hourly via /api/public/jobs/github-access-watch (managed cron auth), diffs against system_settings github_access_watch and writes system_alerts; failed checks never count as revocation — why: no false alarms, read-only on GitHub.
+- Desk queue order and attempt numbers come from src/lib/desk-queue.ts: did-not-receive/already-called leads sort behind fresh leads, attempts = max(call_attempts, own submitted reports), no DB counter rewrite — why: call_attempts feeds eligibility rules and historical rows must not be overwritten.
