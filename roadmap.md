@@ -20,7 +20,8 @@
 - [ ] HQ WhatsApp number for agent summaries — waiting on owner; IT saves it in IT Console. Publish needed for the new button.
 - [x] Phone app: 2.21-test APK already built from the current phone code (no phone-app changes since).
 - [ ] GitHub copy still stuck at 04:38 UTC — owner must restore Git sync (Project settings → Git).
-- [ ] After sync + 4 signing secrets: run live APK build, verify 2.21 + company signature, save APK + SHA-256 in Files, repoint IT dashboards to the new repo.
+- [ ] After sync + 4 signing secrets: run live APK build, verify 2.21 + company signature, save APK + SHA-256 in Files.
+- [x] Repoint IT Console GitHub dashboards + hourly access watch to winstonedigital-maker/winstonepulsecrm.
 - [ ] Agent WhatsApp alerts go live after Meta approves 2 templates, Incoming messages destination is set to this project, and IT turns on the switch.
 
 ## 2026-10-31 — Phone app 2.19 (grade fix)
