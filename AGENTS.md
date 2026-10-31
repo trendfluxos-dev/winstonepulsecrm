@@ -34,7 +34,7 @@
 - Social moderation: CRM logs work only (append-only social_activity_logs) and makes unassigned leads via intakeLead — why: no Meta API; LeadHub assigns.
 - Wrappers/portals inherit src/styles.css tokens; Buttons separate actions from accents; headers stack phone actions, dialogs reserve close space; card lift needs a `--shadow-*` token (shadow-lg/xl are flattened); a translucent card edge uses `glass-hairline` — why: one palette, phone-safe layouts.
 - WhatsApp reads/summary use Dhaka-filtered bounded feed; CSV exports displayed totals safely — why: exports match what staff saw.
-- Agent WhatsApp alerts (agent-whatsapp*.ts) send only Meta-approved count-only templates to the agent's own opted-in number via the WhatsApp connector; one dedupe-keyed alert row is reserved before each send, delivery state comes only from the signed /api/public/whatsapp/webhook inbox (whatsapp_webhook_events), IT full PIN owns the master switch — why: no customer data in chats, no double sends, no assumed delivery.
+- Agent WhatsApp alerts: approved count-only templates to the agent's own opted-in number; dedupe row reserved before send; delivery state only from the signed webhook inbox; IT full PIN master switch — why: no customer data, double sends or assumed delivery.
 - Fonts use public/fonts WOFF2 + @font-face, never Google CSS — why: avoid render-blocking requests.
 - Private AI/bill reads authenticate; support inbox lists only the agent's own assigned conversations and agent escalation requires ownership; project writes reject read-only HQ; scored time needs phone sync — why: requests cannot bypass access or fabricate evidence.
 
@@ -42,7 +42,6 @@
 - Winstone AI copilot is read-only and IT Console (full PIN) only; it never assigns leads — why: LeadHub Nexus is the one assignment path.
 - Release counts as deployed only when scripts/check-live-release.ts sees /manual version, $35.29 and 50-lead markers live — why: publish requests are not proof.
 - The operations manual's only source is docs/CRM_OPERATIONS_MANUAL.md (parsed by src/lib/manual-source.ts for /manual); rebuild the PDF with npm run manual:pdf; manual:check fails on hash/version drift — why: page and PDF can never disagree.
-- Recorder (/recorder) reads agent-own call_recordings plus server-only recorder_insights (voice notes, AI takeaways) via recorder.functions.ts; AI uses the shared ai-model helper and never invents facts — why: one scoped history for calls and notes.
 - Quantity assignment uses read-only candidate previews and server revalidation before the existing LeadHub write/audit path; overdue-evidence.ts gates follow-up fault counts on confirmed responsibility — why: no silent substitutions or blame from unresolved evidence.
 - Durable Meta receipt, storage and staff-confirmed reviewed-lead path stay off until the reviewed migration is applied and Meta approvals verified; reviewed leads enter canonical intake unassigned — why: code readiness is not a working integration.
 - /inbox mounts Support Desk and shared Messenger separately by selected tab; demo lead review stays disabled until verified stored-message ownership and canonical intake are implemented — why: queues retain their access boundaries and samples cannot become customer records.
@@ -61,7 +60,6 @@
 - Agent snapshots use crm-agent-leads.server.ts indexed ownership union, stable updated_at/id paging, leadOwner precedence and fail on partial reads — why: no full scans, transfers or truncated totals.
 - Command Agent work reviews reuse its existing OpenAI Responses path with aggregate-only sampled evidence and empty action allowlists; current canonical ownership gates agent facts — why: no customer payloads, fabricated totals or automatic CRM changes.
 - Callback/manual call logging never assigns leads; new numbers enter canonical intake unassigned and require LeadHub ownership before reporting — why: calls cannot bypass routing or take another agent's lead.
-- Lead-import sheet previews use only existing server-configured report workbooks; inventory keeps its separate read scope, and audit exports neutralise every spreadsheet cell — why: workspace credentials and trusted exports cannot widen access or execute staff-supplied formulas.
 - Reads use page-all.ts (parallel 1,000-row pages, id-dedupe, fail on errors); homepage uses WebP CDN/shared fonts — why: avoid serial reads/downloads.
 - Desk/Analytics/HQ KPIs use kpi-contract.ts; agent-kpi-board.ts groups authorized rows, never phone-sync metrics — why: one definition.
 - Rejections use shared defaults; mobile UI tests mock all writes — why: no invented facts or live test data.
@@ -69,5 +67,3 @@
 - Extra Google tags use RootShell head; keep original — why: router dedupes.
 - HQ Claude briefing: on-demand, HQ/IT-gated, aggregate-only, native /v1/messages streamed server-side — why: no customer data or background AI cost.
 - GitHub access watch (hourly) and Firebase grpc-js advisory watch (daily, /api/public/jobs/firebase-grpc-watch, alerts once) use managed cron auth, diffs against system_settings github_access_watch and writes system_alerts; failed checks never count as revocation — why: no false alarms, read-only on GitHub.
-- Website enquiries (os_website/website leads) sync to their own 'Website Enquiries' tab of the Daily Lead Report via website-enquiry-sheet.ts: ID-matched, append-only, HQ notes kept; a tab failure never blocks the day tab — why: enquiries stay separate from agent report rows.
-- Call-connection evidence labels (phone-verified / report-only / mismatch / not connected) come only from src/lib/call-evidence.ts over submitted reports and are display-only; connection_verified stays the sole scoring signal — why: one explanation everywhere without changing KPI math.
