@@ -6,6 +6,13 @@
  */
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+// Safety net: if anything ever bypasses the mock, it hits a dead local address,
+// never the live CRM database.
+vi.hoisted(() => {
+  process.env["SUPABASE_URL"] = "http://127.0.0.1:9";
+  process.env["SUPABASE_SERVICE_ROLE_KEY"] = "test-only-not-a-key";
+});
+
 const s = vi.hoisted(() => ({
   reportStatus: "pending" as "pending" | "submitted",
   /** What finalize_call_report_v2 answers: first caller commits, later callers see it submitted. */
@@ -98,7 +105,11 @@ beforeEach(() => {
 describe("call report retries are idempotent", () => {
   it("two simultaneous submits of one report advance the lead once and run follow-on steps once", async () => {
     const { submitCallReport } = await import("@/lib/call-reports.server");
-    const [a, b] = await Promise.all([submitCallReport(payload as never), submitCallReport(payload as never)]);
+    // Both requests read the report as pending and race into the save step; the
+    // second starts one tick later only to avoid a Vitest concurrent-mock quirk.
+    const first = submitCallReport(payload as never);
+    await new Promise((r) => setTimeout(r, 0));
+    const [a, b] = await Promise.all([first, submitCallReport(payload as never)]);
     expect(s.rpcCalls).toBe(2);
     expect(s.leadAdvances).toBe(1);
     expect([a, b].filter((r) => (r as { alreadySubmitted?: boolean }).alreadySubmitted)).toHaveLength(1);
