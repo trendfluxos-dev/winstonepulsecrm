@@ -53,6 +53,22 @@ describe("actual mobile report interactions with isolated server fixtures", () =
     expect(screen.getAllByRole("button", { name: "Yes", exact: true })).toHaveLength(6);
     expect((screen.getByRole("button", { name: "Confirm & Submit" }) as HTMLButtonElement).disabled).toBe(true);
   });
+  it("connected sales submit requires manual grade and sends six explicit answers", async () => {
+    await open(); choose("interested");
+    for (const [label, value] of [["Customer Interest", "high"], ["Requirement", "4 Bedroom"], ["Customer Response", "interested"], ["Next Action", "send_price"]]) {
+      fireEvent.change(screen.getByLabelText(new RegExp(`^${label}`)), { target: { value } });
+    }
+    fireEvent.click(screen.getByRole("button", { name: "No Follow-up Required" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Reason no follow-up is needed" }), { target: { value: "info_completed" } });
+    screen.getAllByRole("button", { name: "Yes", exact: true }).forEach(button => fireEvent.click(button));
+    expect((screen.getByRole("button", { name: "Confirm & Submit" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText(/^Grade/), { target: { value: "D" } });
+    fireEvent.click(screen.getByRole("button", { name: "Confirm & Submit" }));
+    await waitFor(() => expect(fixture.submit).toHaveBeenCalledTimes(1));
+    expect(fixture.submit.mock.calls[0]?.[0]).toMatchObject({ data: { grade: "D", evaluationAnswers: {
+      project_interest: true, asked_price: true, wanted_info: true, visit_interest: true, decision_30d: true, wants_follow_up: true,
+    } } });
+  });
   it("outcome correction needs confirmation and a new selection; cancellation keeps rejection", async () => {
     await open(); choose("wrong_number");
     fireEvent.click(screen.getByRole("button", { name: "Correct an incorrectly selected outcome" }));
