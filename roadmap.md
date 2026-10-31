@@ -11,7 +11,8 @@
 ## 2026-10-31 — Unified call qualification
 - [x] Implement shared report validation, manual report grade and null rejection classification; align Web/Android.
 - [x] 1,565 full tests pass / 9 skipped; 96 local SQL assertions pass, automatic build OK; report in docs/UNIFIED_CALL_QUALIFICATION_REPORT.md.
-- [ ] Release blocker: review/apply function-only unapplied SQL proposal before publishing; existing live triggers reject null rejection classification. No live changes authorized/performed.
+- [x] Production grade error fixed: visible A/B/C/D selector + inline message (web/Android); function-only migration 0138 applied; 1,576 tests, 96 SQL checks pass.
+- [ ] Publish web fix and ship rebuilt APK — awaits owner approval (not authorized).
 - [ ] Android compile/unit/emulator/handset: Gradle download TLS failure, SDK unavailable; compatible rebuilt APK and two-agent physical validation required.
 
 ## 2026-10-30 — APK update build (2.18)
