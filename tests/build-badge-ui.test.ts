@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ children, to, ...rest }: { children?: React.ReactNode; to: string }) =>
+  Link: ({ children, to, activeOptions: _a, activeProps: _p, ...rest }: { children?: React.ReactNode; to: string; activeOptions?: unknown; activeProps?: unknown }) =>
     React.createElement("a", { href: to, ...rest }, children),
   useRouterState: ({ select }: { select: (s: unknown) => unknown }) =>
     select({ location: { pathname: "/desk", search: {} } }),
