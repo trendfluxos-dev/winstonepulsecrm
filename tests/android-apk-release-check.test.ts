@@ -20,7 +20,7 @@ function run(flavor: "release" | "test", stub: Stub, opts: { expected?: string; 
   writeFileSync(gradle, opts.gradle ?? '    defaultConfig {\n        versionCode = 33\n        versionName = "2.22"\n    }\n');
   const pkg = stub.pkg ?? (flavor === "release" ? "com.winstone.connect" : "com.winstone.connect.test");
   const vname = stub.vname ?? (flavor === "release" ? "2.22" : "2.22-test");
-  writeFileSync(join(dir, "aapt2"), `#!/bin/sh\necho "package: name='${pkg}' versionCode='${stub.vcode ?? "33"}' versionName='${vname}' platformBuildVersionName='15'"\n`);
+  writeFileSync(join(dir, "aapt2"), `#!/bin/sh\necho "package: name='${pkg}' versionCode='${stub.vcode ?? "33"}' versionName='${vname}' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'"\n`);
   const signerLines = Array.from({ length: stub.signers ?? 1 }, (_, i) =>
     `Signer #${i + 1} certificate DN: ${stub.dn ?? "CN=Winstone Properties, O=Winstone"}\nSigner #${i + 1} certificate SHA-256 digest: ${stub.cert ?? COMPANY}`,
   ).join("\n");
