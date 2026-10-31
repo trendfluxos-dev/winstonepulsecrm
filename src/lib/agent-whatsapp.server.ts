@@ -201,7 +201,7 @@ async function progressCounts(day: string, agentIds: string[]) {
 
 export async function runDailyProgress(now = new Date()) {
   const { dhakaDateOf, isBusinessDay } = await import("@/lib/business-day");
-  const { MAX_DAILY_LEADS_PER_AGENT } = await import("@/lib/daily-allocation");
+  const { MAX_DAILY_LEADS_PER_AGENT } = await import("@/lib/lead-quota");
   const day = dhakaDateOf(now.getTime());
   if (!(await alertsEnabled())) return { skipped: "disabled" as const };
   if (!isBusinessDay(day)) return { skipped: "holiday" as const };
@@ -227,7 +227,7 @@ export async function runDailyProgress(now = new Date()) {
 /** One self-test per agent per Dhaka day, using their real progress counts. */
 export async function sendSelfTest(agentId: string, name: string, number: string) {
   const { dhakaDateOf } = await import("@/lib/business-day");
-  const { MAX_DAILY_LEADS_PER_AGENT } = await import("@/lib/daily-allocation");
+  const { MAX_DAILY_LEADS_PER_AGENT } = await import("@/lib/lead-quota");
   const to = normalizeAgentWhatsApp(number);
   if (!to) throw new Error("Enter a valid Bangladesh mobile number first");
   const day = dhakaDateOf();
