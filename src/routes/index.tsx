@@ -37,7 +37,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Winstone Pulse — The Premium Real Estate CRM" },
       {
         property: "og:description",
-        content: "One connected workspace for your real estate sales floor.",
+        content: "Real estate CRM for Bangladesh sales teams: manage leads, agent calls, follow-ups and daily team performance in one workspace.",
       },
       { property: "og:type", content: "website" },
       { property: "og:image", content: "https://crm.winstonebd.com/social/winstone-pulse.jpg" },
