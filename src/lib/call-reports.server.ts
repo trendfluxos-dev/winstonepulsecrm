@@ -915,6 +915,9 @@ export async function editSubmittedReport(input: {
   }
 
   const received = report.connected !== false;
+  if (input.category !== report.category) {
+    throw new Error("জমা দেওয়া রিপোর্টের ফলাফল বদলাতে পূর্ণ যোগ্যতা যাচাই প্রয়োজন; এই সংশোধনে শুধু নোট বদলান।");
+  }
   // Edits can change notes, never replace saved classification with a pick.
   const temperature = received ? report.temperature as LeadTemperature | null : null;
   const grade = received ? report.grade as LeadGrade | null : null;
