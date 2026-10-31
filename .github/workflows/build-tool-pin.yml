@@ -19,13 +19,16 @@ jobs:
         # Isolated, pinned Vitest: installing into the repo would apply package.json
         # overrides against the direct devDependency and fail with EOVERRIDE.
         # The test only reads package.json, so it runs from a temp copy with no repo config.
+        # npm's peer resolver crashes ("reading 'edgesOut'") on vitest 5's optional peer set,
+        # so peers are skipped and the one runtime peer (vite) is installed explicitly.
         env:
           VITEST_VERSION: "5.0.3"
+          VITE_VERSION: "7.3.1"
         run: |
           set -euo pipefail
           TOOL="$RUNNER_TEMP/pin-vitest"; RUN="$RUNNER_TEMP/pin-run"
           mkdir -p "$TOOL" "$RUN/tests"
-          (cd "$TOOL" && npm init -y >/dev/null && npm install --no-audit --no-fund --ignore-scripts "vitest@$VITEST_VERSION")
+          (cd "$TOOL" && npm init -y >/dev/null && npm install --no-audit --no-fund --ignore-scripts --legacy-peer-deps "vitest@$VITEST_VERSION" "vite@$VITE_VERSION")
           cp package.json "$RUN/package.json"
           cp tests/build-config-pin.test.ts "$RUN/tests/"
           ln -s "$TOOL/node_modules" "$RUN/node_modules"
