@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-31 — Phone app 2.19 (grade fix)
+- [x] Version 2.19 / code 30 set in app + build checks; 1,582 tests pass.
+- [ ] Build: blocked — GitHub main stuck at e181c95 (04:38 UTC), lacks grade-sending fix; owner must restore Git sync after workspace move.
+- [ ] Install on agents' phones: owner/IT action; signed production build still needs signing settings.
+
 ## 2026-10-31 — Recording consent + real-phone check
 - [x] Per-agent recording consent screen before any audio capture/pickup/upload; customer notice on live call; withdraw from status page; 26 source checks pass.
 - [ ] Real-handset test of call trace, call log, consent-gated recording and sync: no phone/emulator/Android SDK here; needs a rebuilt APK and two agents on real phones.
