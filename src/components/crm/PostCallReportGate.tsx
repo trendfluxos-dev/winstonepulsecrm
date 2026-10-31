@@ -1,5 +1,6 @@
 import { EVALUATION_QUESTIONS, EVALUATION_QUESTIONS_LABEL_EN, categoryForScore, type EvaluationKey } from "@/lib/lead-evaluation";
 import { fastDisqualification } from "@/lib/fast-disqualification";
+import { REPORT_GRADES, REPORT_GRADE_LABELS } from "@/lib/call-qualification";
 import { CONTACT_CLOSE_REASONS, contactCloseReasonLabelFor } from "@/lib/contact-close-reasons";
 import { FOLLOW_UP_REASONS, FOLLOW_UP_REASONS_EN, type FollowUpReasonCode } from "@/lib/follow-up-reasons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -543,9 +544,7 @@ export function PostCallReportGate() {
       ? t({ bn: "Call Status বাছাই করুন", en: "Select Call Status" })
       : connected && seconds < 1
         ? t({ bn: "কথা হওয়া কলের সময়কাল (সেকেন্ড) দিন", en: "Enter the connected call's duration (seconds)" })
-        : rejection && !connected
-          ? t({ bn: "ফলাফল নিশ্চিত করতে কলের সঠিক অবস্থা দিন; কথা না হলে NO ANSWER বাছাই করুন", en: "Confirm the correct call status; use NO ANSWER if no conversation occurred" })
-        : !connected && retryPick.mode === "custom" && (!retryPick.customAt || Date.parse(retryPick.customAt) <= Date.now())
+        : !rejection && !connected && retryPick.mode === "custom" && (!retryPick.customAt || Date.parse(retryPick.customAt) <= Date.now())
           ? t({ bn: "ভবিষ্যতের তারিখ ও সময় বাছাই করুন", en: "Pick a future date and time" })
         : !category
           ? t({ bn: "Lead Category বাছাই করুন (Confirm বা Change)", en: "Select Lead Category (Confirm or Change)" })
@@ -565,6 +564,8 @@ export function PostCallReportGate() {
                         ? t({ bn: "Next Action-এ Other হলে ছোট নোট দিন", en: "Add a short note when Next Action is Other" })
                         : qualifying && !answeredAll
                           ? t({ bn: "ছয়টি প্রশ্নের সবগুলোর হ্যাঁ / না দিন", en: "Answer Yes / No for all six questions" })
+                          : qualifying && !REPORT_GRADES.some(value => value === grade)
+                            ? t({ bn: "একটি Grade A / B / C / D বাছাই করুন", en: "Select one Grade A / B / C / D" })
                           : qualifying && followMode === "set" && !when
                               ? t({ bn: "Follow-up সময় দিন, নয়তো 'No Follow-up Required' বাছাই করুন", en: "Set a follow-up time, or select 'No Follow-up Required'" })
                               : qualifying && followMode === "none" && !noFuReason
@@ -612,7 +613,7 @@ export function PostCallReportGate() {
       followUpReasonNote: followUpAt && fuReason === "other" ? fuReasonNote.trim() || null : null,
       reminderMinutes: 30,
       temperature: connected ? (temperature as "hot" | "warm" | "cold") : null,
-      grade: null,
+      grade: qualifying ? (REPORT_GRADES.find(value => value === grade) ?? null) : null,
       aiDecision: aiUsed ? (aiAllConfirmed ? ("accepted" as const) : ("edited" as const)) : null,
       direction: direction as "outgoing" | "incoming",
       callStatus: callState as "connected" | "no_answer" | "busy" | "failed",
@@ -671,7 +672,7 @@ export function PostCallReportGate() {
         <SmartRow id="sr-direction" label={t({ bn: "কলের দিক", en: "Call direction" })} required options={DIRECTIONS} value={direction} onChange={setDirection} />
         <SmartRow id="sr-status" label="Call Status" required options={CALL_STATES} value={callState} onChange={setCallState} />
       </div>
-      {!connected && (callState === "no_answer" || callState === "busy") ? (
+      {!rejection && !connected && (callState === "no_answer" || callState === "busy") ? (
         <NoAnswerRetryPicker value={retryPick} onChange={setRetryPick} />
       ) : !connected && callState ? (
         <p className="rounded-lg bg-warning/10 px-3 py-2 text-xs text-warning">
@@ -723,6 +724,8 @@ export function PostCallReportGate() {
 
       {rejection ? (
         <dl className="grid grid-cols-2 gap-2 border-y border-border py-3 text-xs">
+          <dt className="col-span-2 font-semibold">Fast Disqualification</dt>
+          <dt className="text-muted-foreground">{t({ bn: "কারণ", en: "Reason" })}</dt><dd>{rejection.reason}</dd>
           <dt className="text-muted-foreground">{t({ bn: "চাহিদা", en: "Requirement" })}</dt><dd>{t({ bn: "প্রযোজ্য নয়", en: "Not applicable" })}</dd>
           <dt className="text-muted-foreground">{t({ bn: "পরের কাজ", en: "Next action" })}</dt><dd>{t({ bn: "কোনো কাজ নেই", en: "No Action" })}</dd>
           <dt className="text-muted-foreground">Follow-up</dt><dd>{t({ bn: "দরকার নেই", en: "Not required" })} · {labelOf(CATEGORIES, category)}</dd>
@@ -859,11 +862,9 @@ export function PostCallReportGate() {
                 </div>
               ))}
             </div>
-            <p id="sr-grade" className="text-sm text-muted-foreground">
-              {recs.grade
-                ? t({ bn: `Grade: ${recs.grade.value} (কল বিশ্লেষণ থেকে)`, en: `Grade: ${recs.grade.value} (from call analysis)` })
-                : t({ bn: "Grade অপেক্ষমাণ — কল বিশ্লেষণ বা HQ ঠিক করবে", en: "Grade pending — set by AI analysis or HQ" })}
-            </p>
+            <SmartRow id="sr-grade" label={t({ bn: "গ্রেড", en: "Grade" })} required
+              options={REPORT_GRADES.map(value => ({ value, label: `${value} — ${REPORT_GRADE_LABELS[value]}` }))}
+              value={grade} onChange={setGrade} />
           </div>
         </>
       ) : null}

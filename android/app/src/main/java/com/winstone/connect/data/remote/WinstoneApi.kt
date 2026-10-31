@@ -373,7 +373,10 @@ object WinstoneApi {
         followUpNote?.let { if (it.isNotBlank()) put("follow_up_note", it) }
         // Canonical contact-close reason code (same list as web: src/lib/contact-close-reasons.ts)
         noFollowUpReason?.let { if (it.isNotBlank()) put("no_follow_up_reason", it) }
-        // Score/temperature/grade are server-derived from the six raw answers; never sent.
+        // Manual report grade is independent of temperature. Scores/temperature are never sent.
+        if (com.winstone.connect.data.ShortRejectionReport.forCategory(category) == null && callStatus == "connected") {
+            grade?.let { put("grade", it) }
+        }
         evaluationAnswers?.let { answers ->
             put("evaluation_answers", JSONObject().apply {
                 answers.forEach { (key, value) -> put(key, value) }

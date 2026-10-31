@@ -17,9 +17,9 @@ export function fastDisqualification(category: string) {
     followUpReasonNote: null,
     noFollowUpReason: fake ? "other" : category,
     followUpNote: reason,
-    // Deterministic outcome classification, never a caller-selected grade.
-    temperature: "cold" as const,
-    grade: "D" as const,
+    // A non-sales disposition is not a Cold/D sales evaluation.
+    temperature: null,
+    grade: null,
     evaluationAnswers: null,
     retryPlan: null,
   };
