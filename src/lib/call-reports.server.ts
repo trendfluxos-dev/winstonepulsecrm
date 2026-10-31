@@ -1,5 +1,5 @@
 import { isContactCloseReason } from "@/lib/contact-close-reasons";
-import { FAKE_NEEDS_ANSWERED_CALL, fakeNeedsAnsweredCall, fastDisqualification } from "@/lib/fast-disqualification";
+import { fastDisqualification } from "@/lib/fast-disqualification";
 import { qualifyCallReport } from "@/lib/call-qualification";
 /**
  * The mandatory post-call workflow.
@@ -135,9 +135,6 @@ export function validateReport(input: {
   if ((category === "not_interested" || category === "wrong_number") && !reason) {
     return { field: "reason", message: "কারণ লিখুন" };
   }
-  if (input.connected === false && fakeNeedsAnsweredCall(category, false)) {
-    return { field: "category", message: FAKE_NEEDS_ANSWERED_CALL.bn };
-  }
   if (input.connected !== false && !fastDisqualification(category)) {
     if (!LEAD_TEMPERATURES.includes((input.temperature ?? "") as LeadTemperature)) {
       return { field: "temperature", message: "কথা হওয়া কলে Hot / Warm / Cold বাছাই করুন" };
@@ -157,9 +154,6 @@ export function validateReport(input: {
     const seconds = input.durationSeconds;
     if (typeof seconds !== "number" || !Number.isFinite(seconds) || seconds < 0) {
       return { field: "durationSeconds", message: "কলের সময়কাল (সেকেন্ড) লিখুন" };
-    }
-    if (fakeNeedsAnsweredCall(category, input.callStatus === "connected")) {
-      return { field: "category", message: FAKE_NEEDS_ANSWERED_CALL.bn };
     }
     if (input.callStatus === "connected" && category === "no_answer") {
       return { field: "category", message: "কথা হওয়া কলে NO ANSWER দেওয়া যাবে না — সঠিক ক্যাটেগরি বাছাই করুন" };
