@@ -22,7 +22,7 @@
 - Winstone OS inbound events only via POST /api/public/os/events (HMAC + idempotency in server-only os_event_receipts); mapping never invents entities — why: one verified, replay-safe bridge.
 - Lead neglect: zero-work leads get 2 business-day notices (recall on the 3rd) then recall to the pool via `lead-neglect.server.ts`; recalls are append-only disputes, DB blocks re-assigning to the same agent and call-start refuses them — why: leads must not rot and the rule can't be bypassed from the UI.
 - UI: i18n English default, saved choice wins, Bi headings; sign-in reuses topPerformerToday reveal/ranking, aggregates only — why: one score, no customer disclosure.
-- Pin @lovable.dev/vite-tanstack-config to 2.25.2 — why: 2.26.0 emits createRequire(import.meta.url), crashing every page on the live Worker.
+- Pin @lovable.dev/vite-tanstack-config to 2.25.2 and keep TanStack router/start on their exact pins (refresh seroval transitively) — why: 2.26.0 crashes the live Worker, and react-start 1.169+ renames `.inputValidator` to `.validator`, untyping every server function.
 - Bookings start `approval_status='pending'`; only HQ/IT approval (server-checked, final via trigger) queues the signed OS relay event — why: HQ gatekeeps what reaches Winstone OS.
 - Knowledge Hub (winstonebd.com) data enters only as website_pages, official RSS market_news and signed site_visit.requested events (website_visit_requests); a site_visit needs agent/HQ confirmation — why: no invented facts.
 - Vite pre-bundles the TanStack router-core/seroval/h3-v2 deps in vite.config optimizeDeps.include — why: late discovery re-optimized on every cold start and broke open tabs.
