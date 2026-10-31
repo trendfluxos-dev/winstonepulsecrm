@@ -792,3 +792,9 @@
 ## 2026-10-31 — Website enquiry check
 - [x] Signed website enquiry → one unassigned LeadHub lead, no duplicates (tests/website-enquiry-e2e.test.ts; staging version opt-in)
 - [ ] Run staging version against an isolated staging backend (needs staging project)
+
+## 2026-10-31 reports summary + CI
+- [x] Reports summary: paged own-work reads (no 1,000-row truncation), lenient own-id check (case/legacy ids), tests.
+- [x] CI typecheck: install pinned tsgo (was exit 127 on GitHub).
+- [ ] Android APKs / UI test runs for 1f26f2b — in progress on GitHub when checked.
+- [ ] Signed live APK — blocked on the four WINSTONE_* repo secrets + WINSTONE_RELEASE_CERT_SHA256 from the 28 Oct key holder.
