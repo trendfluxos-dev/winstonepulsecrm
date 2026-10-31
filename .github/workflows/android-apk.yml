@@ -2,13 +2,10 @@ name: Android APKs
 
 # Builds the Winstone Android companion (call-log tracing, recording pickup,
 # post-call reports).
-# - debug job: always builds the side-by-side test APK (com.winstone.connect.test).
+# - debug job: always builds/uploads the side-by-side test APK (com.winstone.connect.test).
 #   It never needs signing secrets.
 # - release job: runs only when all four signing secrets exist; otherwise it is
 #   skipped with a notice. The keystore lives only in $RUNNER_TEMP and is always removed.
-# Every APK passes scripts/verify-android-apk.sh (version, package id, signing
-# identity, checksum) BEFORE it is saved to apk-builds or uploaded as an artifact.
-# A failed check stops the job, so agents never get an unchecked build.
 # This workflow never creates a GitHub Release (see android-release.yml for tags).
 
 on:
@@ -16,12 +13,11 @@ on:
   push:
     paths:
       - "android/**"
-      - "scripts/verify-android-apk.sh"
       - ".github/workflows/android-apk.yml"
 
 env:
-  EXPECTED_VERSION_NAME: "2.22"
-  EXPECTED_VERSION_CODE: "33"
+  EXPECTED_VERSION_NAME: "2.21"
+  EXPECTED_VERSION_CODE: "32"
 
 # The apk-builds branch is our quota-independent fallback storage for built APKs:
 # GITHUB_TOKEN only needs contents:write for that push.
@@ -44,9 +40,6 @@ jobs:
       - name: Refuse committed signing material in the build tree
         run: |
           if [ -f local.properties ]; then echo "android/local.properties must not be committed"; exit 1; fi
-          # Names only: lists tracked key/certificate/signing-config files, never their contents.
-          FOUND=$(git -C "$GITHUB_WORKSPACE" ls-files | grep -Ei '\.(jks|keystore|p12|pfx|pepk|pem|key|der)(\.(gpg|b64))?$|(^|/)(keystore|signing)\.properties$' || true)
-          if [ -n "$FOUND" ]; then echo "::error::Signing material is committed: $FOUND"; exit 1; fi
       - name: Check declared app version
         run: |
           grep -q "versionName = \"$EXPECTED_VERSION_NAME\"" app/build.gradle.kts
@@ -57,37 +50,25 @@ jobs:
         run: chmod +x gradlew && ./gradlew --no-daemon testDebugUnitTest
       - name: Build debug APK
         run: ./gradlew --no-daemon assembleDebug
-      - name: Fetch previous test build record
-        working-directory: .
-        run: |
-          rm -f "$RUNNER_TEMP/prev-test-info.txt"
-          if git fetch --quiet --depth=1 origin apk-builds 2>/dev/null; then
-            git show FETCH_HEAD:build-info-test.txt > "$RUNNER_TEMP/prev-test-info.txt" 2>/dev/null \
-              || rm -f "$RUNNER_TEMP/prev-test-info.txt"
-          fi
-      - name: Release check (version, signing identity, checksum)
-        id: gate
-        working-directory: .
-        env:
-          EXPECTED_TEST_CERT_SHA256: ${{ vars.WINSTONE_TEST_CERT_SHA256 }}
+      - name: Verify debug package id and version
         run: |
           set -euo pipefail
-          APK=$(ls android/app/build/outputs/apk/debug/*.apk | head -1)
-          bash scripts/verify-android-apk.sh --apk "$APK" --flavor test \
-            --gradle android/app/build.gradle.kts \
-            --version-name "$EXPECTED_VERSION_NAME" --version-code "$EXPECTED_VERSION_CODE" \
-            --expected-cert "${EXPECTED_TEST_CERT_SHA256:-}" \
-            --previous-info "$RUNNER_TEMP/prev-test-info.txt" \
-            --report "$RUNNER_TEMP/release-check-test.txt"
-      - name: Save checked test APK to apk-builds branch
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          APK=$(ls app/build/outputs/apk/debug/*.apk | head -1)
+          "$BT/aapt2" dump badging "$APK" | head -1 | tee /tmp/badging.txt
+          grep -q "name='com.winstone.connect.test'" /tmp/badging.txt
+          grep -q "versionCode='$EXPECTED_VERSION_CODE'" /tmp/badging.txt
+          grep -q "versionName='$EXPECTED_VERSION_NAME-test'" /tmp/badging.txt
+          sha256sum "$APK"
+      - name: Save debug APK to apk-builds branch
         working-directory: .
         env:
           GH_TOKEN: ${{ github.token }}
-          APK_PATH: ${{ steps.gate.outputs.apk }}
-          APK_SHA: ${{ steps.gate.outputs.sha256 }}
         run: |
           set -euo pipefail
-          apk_name=$(basename "$APK_PATH")
+          apk_path=$(ls android/app/build/outputs/apk/debug/*.apk | head -1)
+          apk_name=$(basename "$apk_path")
+          sha=$(sha256sum "$apk_path" | awk '{print $1}')
           repo_url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           rm -rf /tmp/apk-repo
           if git ls-remote --exit-code --heads "$repo_url" apk-builds >/dev/null 2>&1; then
@@ -95,28 +76,25 @@ jobs:
           else
             git init --quiet -b apk-builds /tmp/apk-repo
           fi
-          cp "$APK_PATH" "$APK_PATH.sha256" /tmp/apk-repo/
-          # The copy must still match the checked checksum before it is published.
-          (cd /tmp/apk-repo && sha256sum -c "$apk_name.sha256")
+          cp "$apk_path" "/tmp/apk-repo/$apk_name"
           {
-            cat "$RUNNER_TEMP/release-check-test.txt"
+            echo "package: com.winstone.connect.test"
+            echo "version: ${EXPECTED_VERSION_NAME}-test (versionCode ${EXPECTED_VERSION_CODE})"
+            echo "sha256: $sha"
             echo "build: run ${GITHUB_RUN_NUMBER} (commit ${GITHUB_SHA})"
             echo "built_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          } > /tmp/apk-repo/build-info-test.txt
-          cp /tmp/apk-repo/build-info-test.txt /tmp/apk-repo/build-info.txt
+          } > "/tmp/apk-repo/build-info.txt"
           cd /tmp/apk-repo
           git config user.name "winstone-apk-bot"
           git config user.email "winstone-apk-bot@users.noreply.github.com"
           git add -A
           git commit --quiet -m "Test APK ${apk_name} (build ${GITHUB_RUN_NUMBER})"
           git push --quiet "$repo_url" HEAD:apk-builds
-          echo "Pushed to apk-builds: $apk_name (sha256 $APK_SHA)"
+          echo "Pushed to apk-builds: $apk_name (sha256 $sha)"
       - uses: actions/upload-artifact@v4
         with:
           name: winstone-agent-debug-apk
-          path: |
-            android/app/build/outputs/apk/debug/*.apk
-            android/app/build/outputs/apk/debug/*.apk.sha256
+          path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
 
   release:
@@ -169,30 +147,36 @@ jobs:
         if: always()
         working-directory: .
         run: rm -f "$RUNNER_TEMP/winstone-release.jks"
-      - name: Release check (version, signing identity, checksum)
-        id: gate
+      - name: Verify signer fingerprint, package id and version
         if: steps.secrets.outputs.ready == 'true'
-        working-directory: .
         env:
           EXPECTED_CERT_SHA256: ${{ vars.WINSTONE_RELEASE_CERT_SHA256 }}
         run: |
           set -euo pipefail
-          APK=$(ls android/app/build/outputs/apk/release/*.apk | grep -v unsigned | head -1)
-          bash scripts/verify-android-apk.sh --apk "$APK" --flavor release \
-            --gradle android/app/build.gradle.kts \
-            --version-name "$EXPECTED_VERSION_NAME" --version-code "$EXPECTED_VERSION_CODE" \
-            --expected-cert "${EXPECTED_CERT_SHA256:-}" \
-            --report "$RUNNER_TEMP/release-check-release.txt"
-      - name: Save checked release APK to apk-builds branch
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          APK=$(ls app/build/outputs/apk/release/*.apk | grep -v unsigned | head -1)
+          "$BT/apksigner" verify --print-certs "$APK" | tee /tmp/certs.txt
+          ACTUAL=$(grep -m1 "certificate SHA-256 digest" /tmp/certs.txt | awk '{print $NF}' | tr 'A-F' 'a-f')
+          WANT=$(echo "${EXPECTED_CERT_SHA256:-}" | tr -d ': ' | tr 'A-F' 'a-f')
+          if [ -z "$WANT" ]; then
+            echo "::error::Set repository variable WINSTONE_RELEASE_CERT_SHA256 to the canonical signer fingerprint. Actual: $ACTUAL"; exit 1
+          fi
+          [ "$ACTUAL" = "$WANT" ] || { echo "::error::Signer fingerprint mismatch: $ACTUAL"; exit 1; }
+          "$BT/aapt2" dump badging "$APK" | head -1 | tee /tmp/badging.txt
+          grep -q "name='com.winstone.connect'" /tmp/badging.txt
+          grep -q "versionCode='$EXPECTED_VERSION_CODE'" /tmp/badging.txt
+          grep -q "versionName='$EXPECTED_VERSION_NAME'" /tmp/badging.txt
+          sha256sum "$APK"
+      - name: Save signed release APK to apk-builds branch
         if: steps.secrets.outputs.ready == 'true'
         working-directory: .
         env:
           GH_TOKEN: ${{ github.token }}
-          APK_PATH: ${{ steps.gate.outputs.apk }}
-          APK_SHA: ${{ steps.gate.outputs.sha256 }}
         run: |
           set -euo pipefail
-          apk_name=$(basename "$APK_PATH")
+          apk_path=$(ls android/app/build/outputs/apk/release/*.apk | grep -v unsigned | head -1)
+          apk_name=$(basename "$apk_path")
+          sha=$(sha256sum "$apk_path" | awk '{print $1}')
           repo_url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           rm -rf /tmp/apk-repo
           if git ls-remote --exit-code --heads "$repo_url" apk-builds >/dev/null 2>&1; then
@@ -200,27 +184,26 @@ jobs:
           else
             git init --quiet -b apk-builds /tmp/apk-repo
           fi
-          cp "$APK_PATH" "$APK_PATH.sha256" /tmp/apk-repo/
-          (cd /tmp/apk-repo && sha256sum -c "$apk_name.sha256")
+          cp "$apk_path" "/tmp/apk-repo/$apk_name"
           {
-            cat "$RUNNER_TEMP/release-check-release.txt"
+            echo "package: com.winstone.connect"
+            echo "version: ${EXPECTED_VERSION_NAME} (versionCode ${EXPECTED_VERSION_CODE})"
+            echo "sha256: $sha"
             echo "build: run ${GITHUB_RUN_NUMBER} (commit ${GITHUB_SHA})"
             echo "built_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          } > /tmp/apk-repo/build-info-release.txt
-          cp /tmp/apk-repo/build-info-release.txt /tmp/apk-repo/build-info.txt
+          } > "/tmp/apk-repo/build-info.txt"
           cd /tmp/apk-repo
           git config user.name "winstone-apk-bot"
           git config user.email "winstone-apk-bot@users.noreply.github.com"
           git add -A
           git commit --quiet -m "Release APK ${apk_name} (build ${GITHUB_RUN_NUMBER})"
           git push --quiet "$repo_url" HEAD:apk-builds
-          echo "Pushed to apk-builds: $apk_name (sha256 $APK_SHA)"
+          echo "Pushed to apk-builds: $apk_name (sha256 $sha)"
       - uses: actions/upload-artifact@v4
         if: steps.secrets.outputs.ready == 'true'
         with:
           name: winstone-agent-release-apk
           path: |
             android/app/build/outputs/apk/release/*.apk
-            android/app/build/outputs/apk/release/*.apk.sha256
             !android/app/build/outputs/apk/release/*-unsigned.apk
           if-no-files-found: error

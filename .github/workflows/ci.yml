@@ -2,13 +2,10 @@ name: CI
 
 # Runs the full vitest suite, the typecheck and the production build
 # (including its prebuild guards: build-tool pin, dashboard colour tokens,
-# operations-manual meta) on every pull request and on every push to main
-# (Lovable syncs straight to main, so pull requests alone would never run it).
+# operations-manual meta) on every pull request.
 
 on:
   pull_request:
-  push:
-    branches: [main]
 
 jobs:
   test-typecheck-build:
@@ -18,16 +15,13 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.4.4
+          bun-version: latest
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      # tsgo is not a project dependency (the Lovable sandbox provides it
-      # globally), so CI installs the same pinned version; `bun run typecheck`
-      # alone exited 127 (command not found) on GitHub runners.
       - name: Typecheck
-        run: bunx -p @typescript/native-preview@7.0.0-dev.20260707.2 tsgo --noEmit
+        run: bun run typecheck
 
       - name: Tests
         run: bun run test

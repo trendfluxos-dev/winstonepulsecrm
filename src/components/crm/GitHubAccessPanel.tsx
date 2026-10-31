@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 import { getGithubAccess } from "@/lib/github-status.functions";
-import { CRM_REPOSITORY, type AccessVerdict } from "@/lib/github-access";
+import type { AccessVerdict } from "@/lib/github-access";
 import { useT } from "@/lib/i18n";
 
 const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
@@ -17,7 +17,7 @@ const when = (iso: string | null | undefined) => iso ? new Date(iso).toLocaleStr
 export function GitHubAccessPanel() {
   const t = useT();
   const adminToken = useAdminToken();
-  const [repository, setRepository] = useState(CRM_REPOSITORY);
+  const [repository, setRepository] = useState("trendfluxos-dev/winstone-pulse-crm");
   const load = useServerFn(getGithubAccess);
   const run = useMutation({ mutationFn: () => load({ data: { adminToken: getAdminToken(), repository: repository.trim() } }) });
   const valid = REPO_RE.test(repository.trim());

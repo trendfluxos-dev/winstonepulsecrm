@@ -5,9 +5,8 @@ import { Smartphone } from "lucide-react";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 import { getAndroidBuilds } from "@/lib/github-status.functions";
 import { useT } from "@/lib/i18n";
-import { CRM_REPOSITORY } from "@/lib/github-access";
 
-const REPO = CRM_REPOSITORY;
+const REPO = "trendfluxos-dev/winstone-pulse-crm";
 const time = (iso: string | null) => iso ? new Date(iso).toLocaleTimeString("en-GB", { timeZone: "Asia/Dhaka", hour: "2-digit", minute: "2-digit" }) : "—";
 
 /** Compact, read-only APK build chip shown across IT Console pages. Hidden unless the full IT PIN read succeeds. */

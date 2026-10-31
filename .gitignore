@@ -33,22 +33,6 @@ dist-ssr
 tmp-manual/
 
 # Android signing material and machine config — never commit
-# (android/winstone-release.jks was retired 2026-10-28 and removed from HEAD; old copies stay in Git history)
 android/local.properties
-local.properties
 *.jks
-*.jks.gpg
 *.keystore
-*.keystore.gpg
-*.keystore.b64
-*.jks.b64
-*.p12
-*.pfx
-*.pepk
-*.pem
-*.key
-*.der
-keystore.properties
-signing.properties
-upload-keystore*
-release-key*

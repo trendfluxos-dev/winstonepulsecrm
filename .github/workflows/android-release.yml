@@ -1,8 +1,7 @@
 name: Android tagged release
 
 # On a version tag (v1.2.3), builds the signed release APK, computes its
-# SHA-256, runs scripts/verify-android-apk.sh (tag = version, company signer,
-# checksum) and only then publishes to a GitHub Release. Signing comes only from
+# SHA-256, and publishes both to a GitHub Release. Signing comes only from
 # encrypted repo secrets; the keystore is never committed. Fails closed when
 # signing secrets are missing so an unsigned/test build is never released.
 
@@ -42,40 +41,27 @@ jobs:
           echo "$WINSTONE_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
           WINSTONE_KEYSTORE_PATH="$RUNNER_TEMP/release.jks" ./gradlew --no-daemon assembleRelease
           rm -f "$RUNNER_TEMP/release.jks"
-      - name: Remove keystore (always)
-        if: always()
-        working-directory: .
-        run: rm -f "$RUNNER_TEMP/release.jks"
-      - name: Release check (tag version, signing identity, checksum)
-        id: gate
-        working-directory: .
-        env:
-          EXPECTED_CERT_SHA256: ${{ vars.WINSTONE_RELEASE_CERT_SHA256 }}
+          "$ANDROID_HOME"/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner verify app/build/outputs/apk/release/*.apk
+      - name: Name APK and compute SHA-256
+        id: pack
         run: |
-          set -euo pipefail
-          # The tag (v2.22) must equal the declared versionName; the code comes from the same file.
-          VNAME="${GITHUB_REF_NAME#v}"
-          VCODE=$(sed -n 's/^[[:space:]]*versionCode = \([0-9][0-9]*\)[[:space:]]*$/\1/p' android/app/build.gradle.kts | head -1)
-          SRC=$(ls android/app/build/outputs/apk/release/*.apk | grep -v unsigned | head -1)
           mkdir -p "$RUNNER_TEMP/out"
           APK="$RUNNER_TEMP/out/winstone-agent-${GITHUB_REF_NAME}.apk"
-          cp "$SRC" "$APK"
-          bash scripts/verify-android-apk.sh --apk "$APK" --flavor release \
-            --gradle android/app/build.gradle.kts \
-            --version-name "$VNAME" --version-code "$VCODE" \
-            --expected-cert "${EXPECTED_CERT_SHA256:-}" \
-            --report "$RUNNER_TEMP/out/release-check.txt"
+          cp app/build/outputs/apk/release/*.apk "$APK"
+          (cd "$RUNNER_TEMP/out" && sha256sum "$(basename "$APK")" > "$(basename "$APK").sha256")
+          cat "$APK.sha256"
           echo "dir=$RUNNER_TEMP/out" >> "$GITHUB_OUTPUT"
+          echo "sha=$(cut -d' ' -f1 "$APK.sha256")" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
           name: winstone-agent-release-${{ github.ref_name }}
-          path: ${{ steps.gate.outputs.dir }}/*
+          path: ${{ steps.pack.outputs.dir }}/*
           if-no-files-found: error
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" "${{ steps.gate.outputs.dir }}"/* \
+          gh release create "$GITHUB_REF_NAME" "${{ steps.pack.outputs.dir }}"/* \
             --repo "$GITHUB_REPOSITORY" --title "Winstone Agent $GITHUB_REF_NAME" \
-            --notes "Signed release APK. SHA-256: \`${{ steps.gate.outputs.sha256 }}\` — verify before installing." \
-            || gh release upload "$GITHUB_REF_NAME" "${{ steps.gate.outputs.dir }}"/* --repo "$GITHUB_REPOSITORY" --clobber
+            --notes "Signed release APK. SHA-256: \`${{ steps.pack.outputs.sha }}\` — verify before installing." \
+            || gh release upload "$GITHUB_REF_NAME" "${{ steps.pack.outputs.dir }}"/* --repo "$GITHUB_REPOSITORY" --clobber

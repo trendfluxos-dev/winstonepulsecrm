@@ -8,12 +8,11 @@ import { getAdminToken, useAdminToken } from "@/lib/local-session";
 import { getGithubRepositoryStatus, getGithubCheckHistory } from "@/lib/github-status.functions";
 import { githubCheckInput } from "@/lib/github-status-shared";
 import { useT } from "@/lib/i18n";
-import { CRM_REPOSITORY } from "@/lib/github-access";
 import { githubRecovery } from "@/lib/github-recovery";
 
 export function GitRepositoryStatusPanel() {
   const t = useT();
-  const [repository, setRepository] = useState(CRM_REPOSITORY);
+  const [repository, setRepository] = useState("trendfluxos-dev/winstone-pulse-crm");
   const [branch, setBranch] = useState("");
   const [retryUsed, setRetryUsed] = useState(false);
   const [finishedAt, setFinishedAt] = useState<string | null>(null);
@@ -82,7 +81,7 @@ export function GitRepositoryStatusPanel() {
         <h3 className="font-medium">Lovable Git sync</h3>
         <div className="space-y-2 border-l-2 border-primary pl-3" aria-label="Saved commit comparison">
           <p className="font-medium">{t({ en: "Last saved-commit comparison: matched", bn: "শেষ সংরক্ষিত কাজের তুলনা: মিলেছে" })}</p>
-          <p className="break-all">trendfluxos-dev/winstone-pulse-crm · main <span className="text-muted-foreground">({t({ en: "earlier code copy, before the 31 Oct move", bn: "আগের কোড কপি, ৩১ অক্টোবরের স্থানান্তরের আগে" })})</span></p>
+          <p className="break-all">trendfluxos-dev/winstone-pulse-crm · main</p>
           <a className="break-all underline" href="https://github.com/trendfluxos-dev/winstone-pulse-crm/commit/96b57651ea91d4133e49142fca809dde723b2223" target="_blank" rel="noopener noreferrer">96b57651ea91d4133e49142fca809dde723b2223</a>
           <p className="text-xs text-muted-foreground">{t({ en: "Compared in chat", bn: "চ্যাটে তুলনা করা হয়েছে" })}: <time dateTime="2026-10-30T15:19:45Z">30 Oct 2026 · 21:19:45 Dhaka</time></p>
           <p className="text-muted-foreground">{t({ en: "The project's saved commit and GitHub main head matched at that time. This dated evidence is not a live sync status; later edits are not covered.", bn: "ওই সময় প্রকল্পের সংরক্ষিত কাজ ও GitHub main-এর সর্বশেষ কাজ একই ছিল। এটি ওই সময়ের প্রমাণ, বর্তমান সিঙ্ক অবস্থা নয়; পরের পরিবর্তন এতে অন্তর্ভুক্ত নয়।" })}</p>

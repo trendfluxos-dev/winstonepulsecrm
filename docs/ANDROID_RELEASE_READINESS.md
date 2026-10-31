@@ -37,21 +37,6 @@ its password, the GitHub secret values or `local.properties` while doing this.
 
 What never goes in this file, chat or screenshots: keystore files, store/key passwords, key alias secrets, GitHub secret values.
 
-## 1b. Automatic CI release check
-
-`scripts/verify-android-apk.sh` runs in `android-apk.yml` (test + release jobs) and `android-release.yml` (tags)
-before any APK is saved to `apk-builds`, uploaded as an artifact or attached to a GitHub Release. It fails the job when:
-
-- `build.gradle.kts` or the built APK does not carry the expected versionName/versionCode (tag `vX.Y` must equal versionName);
-- the package id is not `com.winstone.connect` (release) / `com.winstone.connect.test` (test);
-- the APK is not v2/v3 signed by exactly one signer whose SHA-256 equals repository variable
-  `WINSTONE_RELEASE_CERT_SHA256` (release; missing variable = fail; Android debug key = fail). Test builds must match
-  `WINSTONE_TEST_CERT_SHA256` or, when unset, the previous `build-info-test.txt` signer;
-- the written `<apk>.sha256` does not verify, before and after copying to `apk-builds`.
-
-The record (`build-info-release.txt` / `build-info-test.txt`) stores package, version, signer and APK SHA-256.
-A passing check is build evidence only; the device rows below still need a real phone.
-
 ## 2. Included fixes
 
 | Fix | Status |
@@ -88,10 +73,6 @@ A passing check is build evidence only; the device rows below still need a real 
 **Safe switch procedure (B):** 1) In the CRM, confirm each agent phone has no pending/failed recordings or reports. 2) Uninstall v2.3. 3) Install new release, sign in, accept briefing. 4) Make one test call and confirm Synced. 5) Record phone + date below.
 
 **If A is chosen:** treat the committed key as possibly exposed — only acceptable if the project code has never been shared outside the owner/IT; otherwise prefer B.
-
-**Retired key removed from the code (2026-10-31):** `android/winstone-release.jks` (decision A key) was deleted from the current code and `.gitignore` now blocks keystores, certificates, private keys and signing configs; `tests/no-signing-material.test.ts` fails if any are committed again. This is **not** a history purge: the file stays readable in earlier Git commits and in any old copy or clone, so it must still be treated as exposed and must never sign a Winstone app. Shared history was deliberately not rewritten.
-
-**Live build blocker (2026-10-31 check, names only):** the current GitHub repository and the old one both have 0 Actions secrets, 0 variables and no environments, the CRM's saved settings have no signing names, and the backup table below is still blank. A signed live build stays blocked until IT adds the company key made under decision B (with its backup) as the four secrets plus `WINSTONE_RELEASE_CERT_SHA256`. The IT Console "Live agent app signing" panel shows this state.
 
 Owner decision: ☐ A ☑ **B — switch to new key** — by owner (TrendFlux OS IT) date **2026-10-28** reason: the old keystore lived in the project tree and cannot be guaranteed uncompromised; enforce the safe switch checklist; back up the new key in IT password storage.
 

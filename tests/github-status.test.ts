@@ -15,7 +15,7 @@ const input = { adminToken: null, repository: "example/private-crm" };
 afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); vi.clearAllMocks(); });
 function prepare() {
   scope.mockReturnValue("full");
-  vi.stubEnv("GITHUB_API_KEY", "synthetic-connection"); vi.stubEnv("GITHUB_API_KEY_1", ""); vi.stubEnv("GITHUB_API_KEY_2", ""); vi.stubEnv("GITHUB_API_KEY_3", "");
+  vi.stubEnv("GITHUB_API_KEY", "synthetic-connection");
   vi.stubEnv("LOVABLE_API_KEY", "synthetic-project");
   const transport = vi.fn(async (url: string) => {
     if (url.endsWith("/repos/example/private-crm")) return Response.json({ full_name: "example/private-crm", private: true, default_branch: "main", permissions: { pull: true, push: false } });

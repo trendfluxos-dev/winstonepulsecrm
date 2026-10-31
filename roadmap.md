@@ -1,26 +1,5 @@
 # Roadmap
 
-## 2026-11-01 — Retired key removal + CI repair
-- [x] Retired android/winstone-release.jks removed from HEAD (history not rewritten — old copies remain in Git history); .gitignore + tests/no-signing-material.test.ts + Android APK workflow step block keystores/certs/signing configs.
-- [x] Real CI (run 41243465048) confirmed the package parser fix; next gate failure "found 0 signers" fixed for SDK-targeted apksigner output, distinct-certificate count + "Number of signers" check; 21 gate tests.
-- [x] Build tool pin workflow: npm peer-resolver crash fixed (--legacy-peer-deps + explicit vite).
-- [x] CI workflow now also runs on push to main (bun pinned 1.4.4).
-- [ ] Verify the next GitHub runs after today's changes sync (Android APKs test build, Build tool pin, CI) — results only visible after the sync.
-- [ ] Signed live build — blocked on company key (decision B) + WINSTONE_RELEASE_CERT_SHA256 in repo settings.
-- [ ] 195 pre-existing Prettier formatting errors in older files (lint is not in CI); not touched to avoid churn.
-
-## 2026-11-01 — Android CI release check
-- [x] Gate script checks version, package, signer fingerprint and checksum before any APK is made available (test, release and tagged builds); 14 tests pass.
-- [ ] Set repository variable WINSTONE_RELEASE_CERT_SHA256 (public company fingerprint) — owner/IT; release builds refuse to publish without it.
-- [x] First real CI run (2.22-test, 31 Oct 20:31 UTC) failed closed on a package-name parsing bug in the check; fixed with anchored fields + realistic test stub. Next push re-runs it.
-- [x] IT Console "Live agent app signing" panel: names-only readiness (4 secrets + fingerprint), blocker steps, test-app path; IT Console GitHub reads now use the linked account that can see the repository.
-- [ ] Signed live build: blocked — 0/4 signing secrets and no WINSTONE_RELEASE_CERT_SHA256 in winstonedigital-maker/winstonepulsecrm (or the old repo); key backup holder (owner decision B, 28 Oct) must add them. No Play App Signing in use.
-
-## 2026-11-01 — Phone app 2.22 (auto permission ask)
-- [x] Version set to 2.22 / code 33 in app + build check so it installs over 2.21.
-- [ ] Build 2.22-test APK: blocked — GitHub still at 04:38 UTC Oct 31 (no permission-flow code); owner must restore Git sync (Project settings → Git). Local build would carry a different signature and force agents to uninstall, so not used.
-- [ ] Signed live 2.22: also needs the 4 signing settings in the repository.
-
 ## 2026-10-31 — Publish, screen readers, WhatsApp reports, phone app
 - [x] Publish requested for crm.winstonebd.com (basic security scan clean).
 - [ ] TalkBack/VoiceOver walk on real devices — needs a person with an Android phone and an iPhone (guide: accessibility/version-line-screen-reader-guide.pdf).
@@ -30,9 +9,7 @@
 - [ ] Publish so tomorrow's 17:40 run uses the new code.
 - [ ] HQ WhatsApp number for agent summaries — waiting on owner; IT saves it in IT Console. Publish needed for the new button.
 - [x] Phone app: 2.21-test APK already built from the current phone code (no phone-app changes since).
-- [ ] GitHub copy still stuck at 04:38 UTC — owner must restore Git sync (Project settings → Git).
-- [ ] After sync + 4 signing secrets: run live APK build, verify 2.21 + company signature, save APK + SHA-256 in Files.
-- [x] Repoint IT Console GitHub dashboards + hourly access watch to winstonedigital-maker/winstonepulsecrm.
+- [ ] GitHub copy still stuck at 04:38 UTC — owner must restore Git sync.
 - [ ] Agent WhatsApp alerts go live after Meta approves 2 templates, Incoming messages destination is set to this project, and IT turns on the switch.
 
 ## 2026-10-31 — Phone app 2.19 (grade fix)
@@ -792,9 +769,3 @@
 ## 2026-10-31 — Website enquiry check
 - [x] Signed website enquiry → one unassigned LeadHub lead, no duplicates (tests/website-enquiry-e2e.test.ts; staging version opt-in)
 - [ ] Run staging version against an isolated staging backend (needs staging project)
-
-## 2026-10-31 reports summary + CI
-- [x] Reports summary: paged own-work reads (no 1,000-row truncation), lenient own-id check (case/legacy ids), tests.
-- [x] CI typecheck: install pinned tsgo (was exit 127 on GitHub).
-- [ ] Android APKs / UI test runs for 1f26f2b — in progress on GitHub when checked.
-- [ ] Signed live APK — blocked on the four WINSTONE_* repo secrets + WINSTONE_RELEASE_CERT_SHA256 from the 28 Oct key holder.

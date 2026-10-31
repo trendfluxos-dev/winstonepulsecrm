@@ -17,7 +17,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.winstone.connect.data.AgentSession
 import com.winstone.connect.data.sync.PendingReportWorker
-import com.winstone.connect.telephony.AppPermissions
 import com.winstone.connect.telephony.CallPhase
 import com.winstone.connect.telephony.LiveCallLauncher
 import com.winstone.connect.telephony.RecordingConsent
@@ -146,8 +145,6 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         reportTick.value = reportTick.value + 1
-        AppPermissions.bump()
-        requestCallPermissions()
         Thread { runCatching { com.winstone.connect.telephony.CallLogSweeper.sweep(this) } }.start()
     }
 
@@ -163,33 +160,28 @@ class MainActivity : ComponentActivity() {
         val reportTick = MutableStateFlow(0)
     }
 
-    /** Permissions already asked since the app last came to the front (no prompt loops). */
-    private val askedThisOpen = mutableSetOf<String>()
-
-    override fun onStop() {
-        super.onStop()
-        // Leaving the app (e.g. to Settings) means the next open asks again for anything still off.
-        askedThisOpen.clear()
-    }
-
-    /**
-     * Automatically asks for every missing phone/call-log permission, and —
-     * only after the agent's recording consent — microphone and recorder files.
-     */
     private fun requestCallPermissions() {
-        val wanted = AppPermissions.wantedNow(this, AgentSession.employeeIdNow(this))
-        val missing = AppPermissions.toRequest(wanted, AppPermissions.grantedSet(this, wanted), askedThisOpen)
-        if (missing.isEmpty()) return
-        askedThisOpen += missing
-        ActivityCompat.requestPermissions(this, missing.toTypedArray(), 9001)
+        val wanted = mutableListOf(
+            Manifest.permission.CALL_PHONE,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_CALL_LOG,
+        )
+        if (Build.VERSION.SDK_INT >= 28) wanted += Manifest.permission.ANSWER_PHONE_CALLS
+        if (Build.VERSION.SDK_INT >= 33) wanted += Manifest.permission.POST_NOTIFICATIONS
+        // Audio permissions are asked only after the agent's recording consent.
+        if (RecordingConsent.granted(this, AgentSession.employeeIdNow(this))) wanted += audioPermissions()
+        ActivityCompat.requestPermissions(this, wanted.toTypedArray(), 9001)
     }
+
+    /** Microphone + the phone's own call-recorder files — only after consent. */
+    private fun audioPermissions(): List<String> = listOf(
+        Manifest.permission.RECORD_AUDIO,
+        if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_AUDIO
+        else Manifest.permission.READ_EXTERNAL_STORAGE,
+    )
 
     private fun requestAudioPermissions() {
-        // Consent just changed: allow the audio prompt now even if asked earlier this open.
-        askedThisOpen.remove(Manifest.permission.RECORD_AUDIO)
-        askedThisOpen.remove(Manifest.permission.READ_MEDIA_AUDIO)
-        askedThisOpen.remove(Manifest.permission.READ_EXTERNAL_STORAGE)
-        requestCallPermissions()
+        ActivityCompat.requestPermissions(this, audioPermissions().toTypedArray(), 9002)
     }
 
     override fun onRequestPermissionsResult(
@@ -198,7 +190,6 @@ class MainActivity : ComponentActivity() {
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        AppPermissions.bump()
         if (requestCode == 9001) {
             val logIndex = permissions.indexOf(Manifest.permission.READ_CALL_LOG)
             if (logIndex >= 0 && grantResults.getOrNull(logIndex) == PackageManager.PERMISSION_GRANTED) {

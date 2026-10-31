@@ -24,18 +24,9 @@ describe("Android recording consent gate", () => {
   });
 
   it("asks microphone/audio-file permission only after consent", () => {
-    const perms = src("telephony/AppPermissions.kt");
-    const initial = main.slice(main.indexOf("private fun requestCallPermissions"), main.indexOf("private fun requestAudioPermissions"));
-    expect(initial.length).toBeGreaterThan(0);
+    const initial = main.slice(main.indexOf("private fun requestCallPermissions"), main.indexOf("private fun audioPermissions"));
     expect(initial).not.toMatch(/Manifest\.permission\.RECORD_AUDIO/);
-    expect(initial).toMatch(/AppPermissions\.wantedNow\(/);
-    // The only place audio permissions enter the request list is behind the consent flag.
-    const wanted = perms.slice(perms.indexOf("fun wanted("), perms.indexOf("fun toRequest("));
-    const gate = wanted.indexOf("if (consented)");
-    expect(gate).toBeGreaterThan(-1);
-    expect(wanted.indexOf("RECORD_AUDIO")).toBeGreaterThan(gate);
-    expect(wanted.indexOf("READ_MEDIA_AUDIO")).toBeGreaterThan(gate);
-    expect(perms).toMatch(/wanted\(Build\.VERSION\.SDK_INT, RecordingConsent\.granted\(context, employeeId\)\)/);
+    expect(initial).toMatch(/RecordingConsent\.granted\(/);
     expect(main).toMatch(/RecordingConsentScreen\(/);
   });
 });

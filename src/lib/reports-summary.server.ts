@@ -13,11 +13,9 @@ import { z } from "zod";
 import type { CallRecording, Lead, Profile, WhatsappMessage } from "@/lib/crm-data";
 import { buildReport, defaultFilters, isoDay, type ReportResult } from "@/lib/crm-reports";
 import type { ApiCaller } from "@/lib/device-auth.server";
-import { readAgentLeads } from "@/lib/crm-agent-leads.server";
-import { pageAllParallel } from "@/lib/page-all";
+import { leadOwner } from "@/lib/lead-owner";
 
 export const MAX_RANGE_DAYS = 92;
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const AGENT_ROLES = new Set(["agent", "team_leader"]);
 
 const Query = z
@@ -25,9 +23,7 @@ const Query = z
     from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     employee_id: z.string().trim().min(2).max(32).optional(),
-    // Same lenient shape as the loader's identity check (not RFC-variant
-    // strict), so an agent can always name their own stored id.
-    agent_id: z.string().regex(UUID).optional(),
+    agent_id: z.string().uuid().optional(),
     source: z.string().trim().max(64).default("all"),
     status: z.enum(["all", "pending", "contacted", "follow_up", "closed"]).default("all"),
   })
@@ -74,7 +70,7 @@ export async function handleReportsSummary(
   const q = parsed.data;
 
   // Identity hints are accepted only when they name the caller themselves.
-  if (q.agent_id && q.agent_id.toLowerCase() !== String(profile.id).toLowerCase()) return json({ error: "Forbidden" }, 403);
+  if (q.agent_id && q.agent_id !== profile.id) return json({ error: "Forbidden" }, 403);
   if (q.employee_id && q.employee_id.toUpperCase() !== String(profile.employee_id ?? "").toUpperCase()) {
     return json({ error: "Forbidden" }, 403);
   }
@@ -114,6 +110,8 @@ export async function handleReportsSummary(
   });
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 type QueryClient = { from: (table: string) => any };
 
 /** Production loader: owner-scoped reads only, never company-wide tables. */
@@ -126,23 +124,18 @@ export async function loadOwnReportData(
   // is not a UUID before it is placed inside the PostgREST or() filter.
   if (!UUID.test(agentId)) throw new Error("invalid agent id");
   const db: QueryClient = client ?? (await import("@/integrations/supabase/client.server")).supabaseAdmin;
-  // Every table is read in full pages so an agent with more than 1,000 rows
-  // never gets a silently truncated total; any page error fails the read.
-  const ownSince = (table: string) =>
-    pageAllParallel((from, to) =>
-      db.from(table).select("*").eq("agent_id", agentId).gte("created_at", fromIso)
-        .order("created_at", { ascending: true }).order("id").range(from, to),
-    );
   const [leadsRes, callsRes, messagesRes] = await Promise.all([
-    // Canonical ownership union with owner precedence (assigned_to, then
-    // assigned_agent_id): a stale secondary match never counts as ours.
-    readAgentLeads(db as never, agentId),
-    ownSince("call_recordings"),
-    ownSince("whatsapp_interactions"),
+    db.from("leads").select("*").or(`assigned_to.eq.${agentId},assigned_agent_id.eq.${agentId}`),
+    db.from("call_recordings").select("*").eq("agent_id", agentId).gte("created_at", fromIso),
+    db.from("whatsapp_interactions").select("*").eq("agent_id", agentId).gte("created_at", fromIso),
   ]);
   const failed = [leadsRes, callsRes, messagesRes].find((r: { error?: unknown }) => r.error);
   if (failed?.error) throw new Error("report read failed");
-  const leads = ((leadsRes.data ?? []) as unknown as Lead[]).map((l) => ({ ...l, assigned_to: agentId }));
+  // Canonical owner precedence (assigned_to, then assigned_agent_id): a row
+  // matched only through a stale secondary column never counts as ours.
+  const leads = ((leadsRes.data ?? []) as Lead[])
+    .filter((l) => leadOwner(l) === agentId)
+    .map((l) => ({ ...l, assigned_to: agentId }));
   return {
     leads,
     calls: (callsRes.data ?? []) as CallRecording[],
