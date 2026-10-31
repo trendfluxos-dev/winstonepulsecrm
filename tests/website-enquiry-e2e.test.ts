@@ -66,7 +66,6 @@ vi.hoisted(() => {
       this.mode = "maybe";
       return this.run();
     }
-    // eslint-disable-next-line unicorn/no-thenable
     then(res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) {
       return this.run().then(res, rej);
     }
