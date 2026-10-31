@@ -7,7 +7,7 @@
  * - Delivery state comes only from signed callbacks stored in whatsapp_webhook_events.
  */
 import {
-  AGENT_WA_LANGUAGE, AGENT_WA_SETTING_KEY, AGENT_WA_TEMPLATES, dailyProgressParams,
+  AGENT_WA_HQ_NUMBER_KEY, AGENT_WA_LANGUAGE, AGENT_WA_SETTING_KEY, hqReportDedupeKey, hqReportParams, AGENT_WA_TEMPLATES, dailyProgressParams,
   inNewLeadWindow, isOptOutText, newLeadsParams, newLeadsSinceLastAlert, nextAlertStatus,
   normalizeAgentWhatsApp, type AgentAlertKind, type AgentAlertStatus,
 } from "@/lib/agent-whatsapp";
@@ -241,6 +241,54 @@ export async function sendSelfTest(agentId: string, name: string, number: string
     template: AGENT_WA_TEMPLATES.dailyProgress,
     params: dailyProgressParams({ name, dayLabel: dayLabel(day), ...counts }), counts,
   });
+}
+
+export async function readHqNumber(): Promise<string | null> {
+  const db = await admin();
+  const { data, error } = await db.from("system_settings").select("value").eq("key", AGENT_WA_HQ_NUMBER_KEY).maybeSingle();
+  if (error) throw new Error("HQ number setting unavailable");
+  return typeof data?.value === "string" ? normalizeAgentWhatsApp(data.value) : null;
+}
+
+export async function setHqNumber(raw: string | null) {
+  const number = raw ? normalizeAgentWhatsApp(raw) : null;
+  if (raw && !number) throw new Error("Enter a valid Bangladesh mobile number");
+  const db = await admin();
+  const { error } = await db.from("system_settings")
+    .upsert({ key: AGENT_WA_HQ_NUMBER_KEY, value: number, updated_at: new Date().toISOString() }, { onConflict: "key" });
+  if (error) throw new Error("Could not save the HQ number");
+  return number;
+}
+
+/** Agent sends today's own counts to the HQ WhatsApp number. Never includes customer details. */
+export async function sendReportSummaryToHq(agentId: string, name: string) {
+  if (!(await alertsEnabled())) throw new Error("IT has not switched on WhatsApp messages yet");
+  const to = await readHqNumber();
+  if (!to) throw new Error("IT has not set the HQ WhatsApp number yet");
+  const { dhakaDateOf } = await import("@/lib/business-day");
+  const { dhakaDayBounds } = await import("@/lib/accountability");
+  const day = dhakaDateOf();
+  const { start, end } = dhakaDayBounds(day);
+  const db = await admin();
+  const [reports, followUps] = await Promise.all([
+    db.from("call_reports").select("id, connection_verified").eq("agent_id", agentId)
+      .not("submitted_at", "is", null).gte("submitted_at", start).lte("submitted_at", end).limit(2000),
+    db.from("follow_up_events").select("id", { count: "exact", head: true }).eq("agent_id", agentId)
+      .gte("created_at", start).lte("created_at", end),
+  ]);
+  if (reports.error || followUps.error) throw new Error("Report counts unavailable");
+  const counts = {
+    reports: (reports.data ?? []).length,
+    verifiedConnected: (reports.data ?? []).filter((r) => r.connection_verified === true).length,
+    followUps: followUps.count ?? 0,
+  };
+  if (counts.reports === 0) throw new Error("No submitted reports today yet");
+  const outcome = await sendAlert({
+    agentId, to, kind: "hq_report", workDate: day, dedupeKey: hqReportDedupeKey(agentId, day, counts),
+    template: AGENT_WA_TEMPLATES.hqReport,
+    params: hqReportParams({ name, dayLabel: dayLabel(day), ...counts }), counts,
+  });
+  return { outcome, counts };
 }
 
 // ---------------------------------------------------------------- webhook inbox
