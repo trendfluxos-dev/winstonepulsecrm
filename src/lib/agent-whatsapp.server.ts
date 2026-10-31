@@ -26,7 +26,7 @@ function credentials() {
   return { lovable, connection };
 }
 
-async function gateway(path: string, init: RequestInit = {}) {
+export async function gateway(path: string, init: RequestInit = {}) {
   const { lovable, connection } = credentials();
   return fetch(`${GATEWAY_URL}${path}`, {
     ...init,
@@ -307,10 +307,18 @@ const stamp = (ts?: string) => (ts && /^\d+$/.test(ts) ? new Date(Number(ts) * 1
 async function applyStatus(item: StatusItem): Promise<boolean> {
   if (!item.id || !item.status) return true;
   const db = await admin();
-  const { data, error } = await db.from("agent_whatsapp_alerts")
+  let table: "agent_whatsapp_alerts" | "hq_whatsapp_report_sends" = "agent_whatsapp_alerts";
+  let { data, error } = await db.from("agent_whatsapp_alerts")
     .select("id, status, sent_at, delivered_at, read_at, failed_at, error_detail")
     .eq("provider_message_id", item.id).maybeSingle();
   if (error) throw new Error("Alert lookup failed");
+  if (!data) {
+    table = "hq_whatsapp_report_sends";
+    ({ data, error } = await db.from("hq_whatsapp_report_sends")
+      .select("id, status, sent_at, delivered_at, read_at, failed_at, error_detail")
+      .eq("provider_message_id", item.id).maybeSingle());
+    if (error) throw new Error("HQ report lookup failed");
+  }
   if (!data) return false;
   const at = stamp(item.timestamp) ?? new Date().toISOString();
   const status = nextAlertStatus(data.status as AgentAlertStatus, item.status);
@@ -326,7 +334,7 @@ async function applyStatus(item: StatusItem): Promise<boolean> {
       : data.error_detail,
     updated_at: new Date().toISOString(),
   };
-  const saved = await db.from("agent_whatsapp_alerts").update(patch).eq("id", data.id);
+  const saved = await db.from(table).update(patch).eq("id", data.id);
   if (saved.error) throw new Error("Alert status update failed");
   return true;
 }
@@ -422,7 +430,7 @@ export async function processPendingEvents(limit = 25) {
 }
 
 /** Applies any status callbacks stored before the alert row had its message id. */
-async function reconcileStoredStatuses(providerId: string) {
+export async function reconcileStoredStatuses(providerId: string) {
   const db = await admin();
   const { data } = await db.from("whatsapp_webhook_events").select("id, event, payload, attempts")
     .is("processed_at", null).eq("event", "whatsapp.status")
