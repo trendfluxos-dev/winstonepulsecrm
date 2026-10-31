@@ -9,6 +9,7 @@ import { AlertTriangle, Bot, Check, Loader2, RotateCcw, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { clearReportDraft, loadReportDraft, saveReportDraft } from "@/lib/report-draft";
 import { classifyReportSaveError, type ReportSaveFailure } from "@/lib/report-save-feedback";
+import { singleFlight } from "@/lib/single-flight";
 import { toast } from "sonner";
 
 import { createSaveLatch, matchCallShortcut, SHORTCUT_LABELS } from "@/lib/call-shortcuts";
@@ -954,9 +955,12 @@ function ReportDialog({
   const t = useT();
   const [failure, setFailure] = useState<ReportSaveFailure | null>(null);
   const leadName = detail.lead?.name ?? t({ bn: "লিড", en: "lead" });
-  const send = useMutation({
-    mutationFn: async () => {
-      const payload = payloadOf();
+  // Repeated taps, the shortcut, the inline "Try again" and the toast action all
+  // share one in-flight request; the server also ignores an already-saved report.
+  const payloadRef = useRef(payloadOf);
+  payloadRef.current = payloadOf;
+  const sendOnce = useRef(singleFlight(async () => {
+      const payload = payloadRef.current();
       if (typeof navigator !== "undefined" && navigator.onLine === false) {
         enqueue("report_submit", `${t({ bn: "কল রিপোর্ট", en: "Call report" })} (${detail.lead?.name ?? t({ bn: "লিড", en: "lead" })})`, {
           ...payload,
@@ -966,7 +970,9 @@ function ReportDialog({
       }
       const res = (await submit({ data: payload } as never)) as { reassigned?: boolean } | undefined;
       return { offline: false as const, reassigned: Boolean(res?.reassigned) };
-    },
+  })).current;
+  const send = useMutation({
+    mutationFn: () => sendOnce(),
     onMutate: () => {
       setFailure(null);
       toast.dismiss(`report-save-${detail.report.id}`);
