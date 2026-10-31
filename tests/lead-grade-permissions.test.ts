@@ -26,7 +26,7 @@ vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: { from:
     update: (patch: Record<string, unknown>) => { state.writes.push({ table, patch }); return chain; },
     insert: (patch: Record<string, unknown>) => { state.writes.push({ table, patch }); return chain; },
     maybeSingle: async () => ({ data: table === "call_reports"
-      ? { id: "report-a", lead_id: "lead-a", agent_id: "agent-a", status: "submitted", connected: true, temperature: "warm", grade: "B", call_ended_at: "2026-10-29T04:00:00Z" }
+      ? { id: "report-a", lead_id: "lead-a", agent_id: "agent-a", status: "submitted", category: "interested", connected: true, temperature: "warm", grade: "B", call_ended_at: "2026-10-29T04:00:00Z" }
       : { id: "lead-a", name: "Lead", assigned_to: "agent-a", assigned_agent_id: "agent-a" }, error: null }),
     then: (resolve: (v: unknown) => unknown) => Promise.resolve({ error: null }).then(resolve),
   };

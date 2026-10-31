@@ -423,7 +423,7 @@ export async function submitCallReport(input: {
     : report.connected !== false;
 
   const qualification = qualifyCallReport({ category: input.category, connected: received,
-    evaluationAnswers: input.evaluationAnswers, grade: input.grade, followUpPending: Boolean(input.followUpAt) });
+    evaluationAnswers: input.evaluationAnswers, grade: input.grade ?? null, followUpPending: Boolean(input.followUpAt) });
   const rejection = qualification.rejection;
   if (rejection) input = { ...input, ...rejection, smartReasons: null, aiDecision: null };
   const category = input.category as CallCategory;
