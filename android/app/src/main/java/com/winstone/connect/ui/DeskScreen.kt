@@ -1042,7 +1042,7 @@ private fun StatusCards(state: DeskUiState) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         WinCard {
             Text("ফোনের অনুমতি", fontWeight = FontWeight.Bold)
-            val permTick by com.winstone.connect.MainActivity.permissionTick.collectAsStateSafe()
+            val permTick by com.winstone.connect.telephony.AppPermissions.changes.collectAsStateSafe()
             val consentTickP by com.winstone.connect.telephony.RecordingConsent.changes.collectAsStateSafe()
             val items = remember(permTick, consentTickP, state.employeeId) {
                 com.winstone.connect.telephony.AppPermissions.wantedNow(context, state.employeeId)

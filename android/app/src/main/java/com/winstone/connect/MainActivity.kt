@@ -146,7 +146,7 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         reportTick.value = reportTick.value + 1
-        permissionTick.value = permissionTick.value + 1
+        AppPermissions.bump()
         requestCallPermissions()
         Thread { runCatching { com.winstone.connect.telephony.CallLogSweeper.sweep(this) } }.start()
     }
@@ -161,8 +161,6 @@ class MainActivity : ComponentActivity() {
     companion object {
         /** Bumped to force a fresh pending-report check. */
         private val reportTick = MutableStateFlow(0)
-        /** Bumped on resume and after a permission answer so status cards re-read access. */
-        val permissionTick = MutableStateFlow(0)
     }
 
     /** Permissions already asked since the app last came to the front (no prompt loops). */
@@ -200,7 +198,7 @@ class MainActivity : ComponentActivity() {
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        permissionTick.value = permissionTick.value + 1
+        AppPermissions.bump()
         if (requestCode == 9001) {
             val logIndex = permissions.indexOf(Manifest.permission.READ_CALL_LOG)
             if (logIndex >= 0 && grantResults.getOrNull(logIndex) == PackageManager.PERMISSION_GRANTED) {

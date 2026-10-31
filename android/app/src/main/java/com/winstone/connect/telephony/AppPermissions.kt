@@ -21,6 +21,10 @@ import androidx.core.content.ContextCompat
  * recorder files are asked ONLY after the signed-in agent's recording consent.
  */
 object AppPermissions {
+    /** Bumped on app resume and after a permission answer so status cards re-read access. */
+    val changes = kotlinx.coroutines.flow.MutableStateFlow(0)
+    fun bump() { changes.value = changes.value + 1 }
+
     data class Item(val permission: String, val labelBn: String, val audio: Boolean)
 
     /** Pure rule, unit-tested. */
