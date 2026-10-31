@@ -43,7 +43,7 @@ describe("version indicator in the desktop sidebar", () => {
     const badge = await badgeIn(container);
     expect(badge.textContent).toContain("Live");
     expect(badge.textContent).toContain(`v${MANUAL_VERSION}`);
-    expect(badge.getAttribute("title")).toMatch(/\(Dhaka\)$/);
+    expect(badge.getAttribute("title")).toMatch(/Dhaka time$/);
   });
 
   it("shows Preview on a preview address", async () => {
