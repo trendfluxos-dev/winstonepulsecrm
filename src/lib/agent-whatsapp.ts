@@ -8,11 +8,13 @@
 export const AGENT_WA_TEMPLATES = {
   newLeads: "agent_new_leads_alert",
   dailyProgress: "agent_daily_progress",
+  hqReport: "agent_report_summary_hq",
 } as const;
 export const AGENT_WA_LANGUAGE = "bn";
 export const AGENT_WA_SETTING_KEY = "agent_whatsapp_alerts_enabled";
+export const AGENT_WA_HQ_NUMBER_KEY = "agent_whatsapp_hq_number";
 
-export type AgentAlertKind = "new_leads" | "daily_progress" | "test";
+export type AgentAlertKind = "new_leads" | "daily_progress" | "test" | "hq_report";
 export type AgentAlertStatus = "sending" | "accepted" | "sent" | "delivered" | "read" | "failed";
 
 /** Bangladesh mobile → WhatsApp digits (8801XXXXXXXXX), or null when not a BD mobile. */
@@ -72,4 +74,14 @@ export function inNewLeadWindow(now: Date): boolean {
   const dhaka = new Date(now.getTime() + 6 * 3600_000);
   const minutes = dhaka.getUTCHours() * 60 + dhaka.getUTCMinutes();
   return minutes >= 9 * 60 && minutes <= 17 * 60 + 35;
+}
+
+/** HQ summary: agent name, day, submitted reports, verified connected calls, new follow-ups. Counts only. */
+export function hqReportParams(input: { name: string; dayLabel: string; reports: number; verifiedConnected: number; followUps: number }): string[] {
+  return [input.name, input.dayLabel, String(input.reports), String(input.verifiedConnected), String(input.followUps)];
+}
+
+/** Resend only when today's counts changed, so a tapped-twice button never sends a duplicate. */
+export function hqReportDedupeKey(agentId: string, day: string, c: { reports: number; verifiedConnected: number; followUps: number }): string {
+  return `hq_report:${agentId}:${day}:${c.reports}:${c.verifiedConnected}:${c.followUps}`;
 }

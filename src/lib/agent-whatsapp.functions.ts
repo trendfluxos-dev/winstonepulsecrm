@@ -62,6 +62,13 @@ export const sendMyWhatsAppTest = createServerFn({ method: "POST" }).handler(asy
   return { outcome };
 });
 
+/** Agent sends today's own count-only report summary to the HQ WhatsApp number. */
+export const sendMyReportSummaryToHq = createServerFn({ method: "POST" }).handler(async () => {
+  const me = await agentCaller();
+  const { sendReportSummaryToHq } = await import("@/lib/agent-whatsapp.server");
+  return sendReportSummaryToHq(me.id, me.name);
+});
+
 const tokenInput = z.object({ adminToken: z.string().max(256).nullable() }).strict();
 
 async function requireFullIt(token: string | null) {
@@ -75,10 +82,11 @@ export const getAgentWhatsAppAdmin = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireFullIt(data.adminToken);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { alertsEnabled, readTemplateStatuses } = await import("@/lib/agent-whatsapp.server");
+    const { alertsEnabled, readTemplateStatuses, readHqNumber } = await import("@/lib/agent-whatsapp.server");
     const since = new Date(Date.now() - 7 * 86400_000).toISOString();
-    const [enabled, templates, optins, alerts] = await Promise.all([
+    const [enabled, hqNumber, templates, optins, alerts] = await Promise.all([
       alertsEnabled(),
+      readHqNumber(),
       readTemplateStatuses().catch(() => null),
       supabaseAdmin.from("agent_whatsapp_optins").select("agent_id", { count: "exact", head: true }).eq("opted_in", true),
       supabaseAdmin.from("agent_whatsapp_alerts").select("status").gte("created_at", since).limit(5000),
@@ -86,7 +94,7 @@ export const getAgentWhatsAppAdmin = createServerFn({ method: "POST" })
     if (optins.error || alerts.error) throw new Error("Alert overview unavailable");
     const byStatus: Record<string, number> = {};
     for (const row of alerts.data ?? []) byStatus[row.status] = (byStatus[row.status] ?? 0) + 1;
-    return { enabled, templates, optedIn: optins.count ?? 0, last7Days: byStatus };
+    return { enabled, hqNumber, templates, optedIn: optins.count ?? 0, last7Days: byStatus };
   });
 
 export const setAgentWhatsAppEnabled = createServerFn({ method: "POST" })
@@ -98,4 +106,15 @@ export const setAgentWhatsAppEnabled = createServerFn({ method: "POST" })
     const { logAudit } = await import("@/lib/audit.server");
     await logAudit({ action: data.enabled ? "agent_whatsapp_alerts_on" : "agent_whatsapp_alerts_off", entityType: "system_settings", actorLabel: "IT Console", metadata: {} });
     return { enabled: data.enabled };
+  });
+
+export const setAgentWhatsAppHqNumber = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => tokenInput.extend({ number: z.string().max(20).nullable() }).strict().parse(input))
+  .handler(async ({ data }) => {
+    await requireFullIt(data.adminToken);
+    const { setHqNumber } = await import("@/lib/agent-whatsapp.server");
+    const number = await setHqNumber(data.number?.trim() || null);
+    const { logAudit } = await import("@/lib/audit.server");
+    await logAudit({ action: "agent_whatsapp_hq_number_set", entityType: "system_settings", actorLabel: "IT Console", metadata: { set: Boolean(number) } });
+    return { hqNumber: number };
   });

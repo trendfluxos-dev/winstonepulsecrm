@@ -3,7 +3,8 @@
 ## 2026-10-31 — Publish, screen readers, WhatsApp reports, phone app
 - [x] Publish requested for crm.winstonebd.com (basic security scan clean).
 - [ ] TalkBack/VoiceOver walk on real devices — needs a person with an Android phone and an iPhone (guide: accessibility/version-line-screen-reader-guide.pdf).
-- [ ] WhatsApp call reports to a number — waiting on owner: which number, and what goes in the message.
+- [x] WhatsApp call report summary (counts only) from agent → one HQ number: built; template sent to Meta for review.
+- [ ] HQ WhatsApp number — waiting on owner; IT saves it in IT Console. Publish needed for the new button.
 - [x] Phone app: 2.21-test APK already built from the current phone code (no phone-app changes since).
 - [ ] GitHub copy still stuck at 04:38 UTC — owner must restore Git sync.
 - [ ] Agent WhatsApp alerts go live after Meta approves 2 templates, Incoming messages destination is set to this project, and IT turns on the switch.

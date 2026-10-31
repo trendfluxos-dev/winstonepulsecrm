@@ -1,11 +1,15 @@
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { displayAgentWhatsApp } from "@/lib/agent-whatsapp";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 import { useT } from "@/lib/i18n";
-import { getAgentWhatsAppAdmin, setAgentWhatsAppEnabled } from "@/lib/agent-whatsapp.functions";
+import { getAgentWhatsAppAdmin, setAgentWhatsAppEnabled, setAgentWhatsAppHqNumber } from "@/lib/agent-whatsapp.functions";
 
 const REVIEW: Record<string, { en: string; bn: string }> = {
   APPROVED: { en: "Approved", bn: "অনুমোদিত" },
@@ -25,6 +29,14 @@ export function AgentWhatsAppAlertsPanel() {
   const toggle = useMutation({
     mutationFn: (enabled: boolean) => save({ data: { adminToken: getAdminToken(), enabled } }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["agent-wa-admin"] }),
+    onError: (e) => toast.error(e instanceof Error ? e.message : String(e)),
+  });
+  const saveHq = useServerFn(setAgentWhatsAppHqNumber);
+  const [hq, setHq] = useState("");
+  useEffect(() => { setHq(displayAgentWhatsApp(q.data?.hqNumber ?? null)); }, [q.data?.hqNumber]);
+  const hqSave = useMutation({
+    mutationFn: () => saveHq({ data: { adminToken: getAdminToken(), number: hq.trim() || null } }),
+    onSuccess: () => { toast.success(t({ en: "HQ number saved", bn: "HQ নম্বর সংরক্ষিত" })); void qc.invalidateQueries({ queryKey: ["agent-wa-admin"] }); },
     onError: (e) => toast.error(e instanceof Error ? e.message : String(e)),
   });
   const d = q.data;
@@ -53,7 +65,16 @@ export function AgentWhatsAppAlertsPanel() {
             <dd className="text-xs">{Object.keys(d.last7Days).length === 0 ? "—" : Object.entries(d.last7Days).map(([k, v]) => `${k}: ${v}`).join(" · ")}</dd></div>
         </dl>
       )}
-      {d && d.enabled && !allApproved && <p className="text-xs text-muted-foreground">{t({ en: "Sending is on, but WhatsApp will refuse messages until Meta approves both templates.", bn: "পাঠানো চালু, কিন্তু Meta দুটি টেমপ্লেট অনুমোদন না করা পর্যন্ত WhatsApp মেসেজ নেবে না।" })}</p>}
+      {d && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+          <label className="flex-1 space-y-1 text-xs">
+            <span className="font-medium">{t({ en: "HQ WhatsApp number for agent report summaries", bn: "এজেন্ট রিপোর্ট সারাংশের জন্য HQ WhatsApp নম্বর" })}</span>
+            <Input inputMode="tel" value={hq} onChange={(e) => setHq(e.target.value)} placeholder="01XXX-XXXXXX" className="h-10" />
+          </label>
+          <Button variant="outline" onClick={() => hqSave.mutate()} disabled={hqSave.isPending}>{hqSave.isPending ? "…" : t({ en: "Save number", bn: "নম্বর সংরক্ষণ" })}</Button>
+        </div>
+      )}
+      {d && d.enabled && !allApproved && <p className="text-xs text-muted-foreground">{t({ en: "Sending is on, but WhatsApp will refuse messages until Meta approves the templates.", bn: "পাঠানো চালু, কিন্তু Meta টেমপ্লেটগুলো অনুমোদন না করা পর্যন্ত WhatsApp মেসেজ নেবে না।" })}</p>}
     </section>
   );
 }
