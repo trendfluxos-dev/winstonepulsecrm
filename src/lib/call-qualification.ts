@@ -12,14 +12,21 @@ export const REPORT_GRADE_LABELS = {
 
 /** Authoritative for both web and device submit; previews never supply saved scores. */
 export function qualifyCallReport(input: {
-  category: string; connected: boolean; evaluationAnswers?: unknown;
-  grade?: string | null; followUpPending: boolean;
+  category: string;
+  connected: boolean;
+  evaluationAnswers?: unknown;
+  grade?: string | null;
+  followUpPending: boolean;
 }) {
   const rejection = fastDisqualification(input.category);
-  if (rejection || !input.connected) return { rejection, answers: null, evaluation: null, grade: null };
+  if (rejection || !input.connected)
+    return { rejection, answers: null, evaluation: null, grade: null };
   const answers = parseAnswers(input.evaluationAnswers);
-  if (!answers) throw new Error("কল রিপোর্টের ছয়টি প্রশ্নের প্রতিটিতে হ্যাঁ / না দিন; উত্তর বাদ রাখা যাবে না।");
-  const grade = REPORT_GRADES.find(value => value === input.grade);
+  if (!answers)
+    throw new Error(
+      "কল রিপোর্টের ছয়টি প্রশ্নের প্রতিটিতে হ্যাঁ / না দিন; উত্তর বাদ রাখা যাবে না।",
+    );
+  const grade = REPORT_GRADES.find((value) => value === input.grade);
   if (!grade) throw new Error("কল রিপোর্টে একটি Grade A / B / C / D বাছাই করুন।");
   return { rejection: null, answers, evaluation: evaluate(answers, input.followUpPending), grade };
 }
