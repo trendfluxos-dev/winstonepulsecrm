@@ -158,7 +158,7 @@ class MainActivity : ComponentActivity() {
         reportTick.value = reportTick.value + 1
     }
 
-    companion object {
+    private companion object {
         /** Bumped to force a fresh pending-report check. */
         private val reportTick = MutableStateFlow(0)
     }
