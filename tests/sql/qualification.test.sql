@@ -3,7 +3,7 @@ ALTER TABLE public.call_reports ADD COLUMN updated_at timestamptz;
 CREATE SCHEMA auth;
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$ SELECT NULL::uuid $$;
 CREATE FUNCTION public.has_role(uuid,text) RETURNS boolean LANGUAGE sql AS $$ SELECT false $$;
-\ir ../../docs/proposals/unified-call-qualification.UNAPPLIED.sql
+\ir ../../drizzle/migrations/0138_unified_call_qualification_triggers.sql
 CREATE TRIGGER report_validation BEFORE INSERT OR UPDATE ON public.call_reports
   FOR EACH ROW EXECUTE FUNCTION public.validate_call_report();
 CREATE TRIGGER lead_completion BEFORE INSERT OR UPDATE ON public.leads
