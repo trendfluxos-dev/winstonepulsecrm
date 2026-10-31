@@ -71,9 +71,11 @@ grep -Eq "^[[:space:]]*versionCode = ${VCODE}[[:space:]]*$" "$GRADLE" \
 # 1-2. Built APK manifest.
 BADGING=$("$BT/aapt2" dump badging "$APK" | head -1) || fail "aapt2 could not read the APK"
 echo "$BADGING"
-ACT_PKG=$(echo "$BADGING" | sed -n "s/.*name='\([^']*\)'.*/\1/p")
-ACT_VCODE=$(echo "$BADGING" | sed -n "s/.*versionCode='\([^']*\)'.*/\1/p")
-ACT_VNAME=$(echo "$BADGING" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")
+# Anchor each field: aapt2 also prints platformBuildVersionName/Code and
+# compileSdkVersionCodename, which a greedy ".*name=" would match instead.
+ACT_PKG=$(echo "$BADGING" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")
+ACT_VCODE=$(echo "$BADGING" | sed -n "s/.* versionCode='\([^']*\)'.*/\1/p")
+ACT_VNAME=$(echo "$BADGING" | sed -n "s/.* versionName='\([^']*\)'.*/\1/p")
 [ "$ACT_PKG" = "$PKG" ] || fail "package is '$ACT_PKG', expected '$PKG'"
 [ "$ACT_VCODE" = "$VCODE" ] || fail "APK versionCode is '$ACT_VCODE', expected '$VCODE'"
 [ "$ACT_VNAME" = "$APK_VNAME" ] || fail "APK versionName is '$ACT_VNAME', expected '$APK_VNAME'"
