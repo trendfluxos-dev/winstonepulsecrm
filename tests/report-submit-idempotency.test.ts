@@ -62,7 +62,7 @@ const payload = {
   callStatus: "no_answer",
   direction: "outgoing",
   durationSeconds: 0,
-  noFollowUpReason: "not_connected",
+  followUpAt: new Date(Date.now() + 2 * 86_400_000).toISOString(),
 };
 
 beforeEach(() => {
