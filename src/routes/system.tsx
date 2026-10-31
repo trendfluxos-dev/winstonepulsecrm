@@ -6,6 +6,7 @@ import { GitRepositoryStatusPanel } from "@/components/crm/GitRepositoryStatusPa
 import { GitHubActivityDashboard } from "@/components/crm/GitHubActivityDashboard";
 import { GitHubAccessPanel } from "@/components/crm/GitHubAccessPanel";
 import { AndroidBuildStatus } from "@/components/crm/AndroidBuildStatus";
+import { AndroidSigningReadiness } from "@/components/crm/AndroidSigningReadiness";
 import { BuildEfficiencyDashboard } from "@/components/crm/BuildEfficiencyDashboard";
 import { ItPhoneTestReports } from "@/components/crm/ItPhoneTestReports";
 import { SearchConsoleDashboard } from "@/components/crm/SearchConsoleDashboard";
@@ -173,6 +174,7 @@ function SystemBoard() {
           <GitHubAccessPanel />
           <GitHubActivityDashboard />
           <AndroidBuildStatus />
+          <AndroidSigningReadiness />
           <BuildEfficiencyDashboard />
           <ItPhoneTestReports />
           <SearchConsoleDashboard />
