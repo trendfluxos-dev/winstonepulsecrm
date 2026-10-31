@@ -21,3 +21,30 @@ describe("guest support AI budget", () => {
     expect(decideGuestAiReply({ signedIn: true, conversationAiReplies: 50, guestAiRepliesLast24h: 999 }).allow).toBe(true);
   });
 });
+
+import { callerIsActiveStaff } from "@/lib/support-ai-budget";
+
+function fakeClient(user: { id: string } | null, staff: boolean | null, error: unknown = null) {
+  return {
+    auth: { getUser: async () => ({ data: { user } }) },
+    rpc: async () => ({ data: staff, error }),
+  };
+}
+
+describe("who skips the guest AI limits", () => {
+  it("treats a visitor without a sign-in as a guest", async () => {
+    expect(await callerIsActiveStaff("", fakeClient({ id: "u1" }, true))).toBe(false);
+  });
+
+  it("treats a signed-in account that is not approved staff as a guest", async () => {
+    expect(await callerIsActiveStaff("Bearer abc", fakeClient({ id: "u1" }, false))).toBe(false);
+  });
+
+  it("treats a failed staff check as a guest", async () => {
+    expect(await callerIsActiveStaff("Bearer abc", fakeClient({ id: "u1" }, true, new Error("x")))).toBe(false);
+  });
+
+  it("lets approved, active staff skip the guest limits", async () => {
+    expect(await callerIsActiveStaff("Bearer abc", fakeClient({ id: "u1" }, true))).toBe(true);
+  });
+});
