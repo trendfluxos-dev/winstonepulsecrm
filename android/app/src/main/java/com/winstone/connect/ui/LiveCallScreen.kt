@@ -393,6 +393,14 @@ fun ReportSheet(
                         ) { Text(if (grade == value) "✓ $value" else value) }
                     }
                 }
+                if (grade == null) {
+                    Text(
+                        "গ্রেড বাকি — উপরের A / B / C / D থেকে একটি বাছাই করুন, তারপর জমা দিন",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
                 grade?.let { selected ->
                     Text(when (selected) {
                         "A" -> "Prime Buyer — বেশি বাজেট, সাইট ভিজিট বা তাৎক্ষণিক বুকিং প্রস্তুত"
