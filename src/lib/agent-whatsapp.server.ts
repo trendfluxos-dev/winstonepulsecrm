@@ -20,8 +20,8 @@ async function admin() {
 }
 
 function credentials() {
-  const lovable = process.env.LOVABLE_API_KEY;
-  const connection = process.env.WHATSAPP_API_KEY;
+  const lovable = process.env["LOVABLE_API_KEY"];
+  const connection = process.env["WHATSAPP_API_KEY"];
   if (!lovable || !connection) throw new Error("WhatsApp connection is not configured");
   return { lovable, connection };
 }
@@ -152,7 +152,7 @@ export async function runNewLeadAlerts(now = new Date()) {
   if (prior.error) throw new Error("Earlier alerts unavailable");
   const lastTotal = new Map<string, number>();
   for (const row of prior.data ?? []) {
-    const total = Number((row.counts as Record<string, unknown>)?.total ?? 0);
+    const total = Number((row.counts as Record<string, unknown>)?.["total"] ?? 0);
     lastTotal.set(row.agent_id, Math.max(lastTotal.get(row.agent_id) ?? 0, total));
   }
   let sent = 0, failed = 0;
@@ -308,11 +308,11 @@ async function processEvent(event: string, payload: unknown): Promise<"done" | "
   const value = changeValue(payload);
   if (event === "whatsapp.status") {
     let deferred = false;
-    for (const item of (value.statuses ?? []) as StatusItem[]) if (!(await applyStatus(item))) deferred = true;
+    for (const item of (value["statuses"] ?? []) as StatusItem[]) if (!(await applyStatus(item))) deferred = true;
     return deferred ? "deferred" : "done";
   }
   if (event === "whatsapp.message") {
-    for (const item of (value.messages ?? []) as InboundItem[]) await applyInbound(item);
+    for (const item of (value["messages"] ?? []) as InboundItem[]) await applyInbound(item);
   }
   // Every other event (echoes, template reviews, account updates) stays stored as received.
   return "done";

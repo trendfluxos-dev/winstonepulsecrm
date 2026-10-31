@@ -15,7 +15,7 @@ export const Route = createFileRoute("/api/public/whatsapp/webhook")({
     handlers: {
       POST: async ({ request }) => {
         if (!whatsappLimiter(requestSourceKey(request))) return new Response("busy", { status: 503 });
-        const secret = process.env.WHATSAPP_API_KEY;
+        const secret = process.env["WHATSAPP_API_KEY"];
         if (!secret) return new Response("not configured", { status: 503 });
         const deliveryId = request.headers.get("x-lovable-delivery")?.trim() ?? "";
         const event = request.headers.get("x-lovable-event")?.trim() ?? "";

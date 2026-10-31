@@ -61,7 +61,7 @@ const RANK: Record<string, number> = { sending: 0, accepted: 1, sent: 2, deliver
  */
 export function nextAlertStatus(current: AgentAlertStatus, incoming: string): AgentAlertStatus {
   const next = incoming.toLowerCase();
-  if (next === "failed") return (RANK[current] ?? 0) >= RANK.delivered ? current : "failed";
+  if (next === "failed") return (RANK[current] ?? 0) >= 3 ? current : "failed";
   if (!(next in RANK)) return current;
   if (current === "failed") return current;
   return (RANK[next] ?? 0) > (RANK[current] ?? 0) ? (next as AgentAlertStatus) : current;
