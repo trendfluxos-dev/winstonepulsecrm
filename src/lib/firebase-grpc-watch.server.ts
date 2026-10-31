@@ -8,7 +8,7 @@ async function manifest(path: string): Promise<{ version: string; dependencies?:
   if (!res.ok) throw new Error(`registry ${res.status}`);
   const body = (await res.json()) as { version?: unknown; dependencies?: Record<string, string> };
   if (typeof body.version !== "string") throw new Error("registry manifest invalid");
-  return { version: body.version, dependencies: body.dependencies };
+  return { version: body.version, dependencies: body.dependencies ?? {} };
 }
 
 /** Daily check: has a Firebase release resolved the @grpc/grpc-js advisory? Alerts IT once. */
