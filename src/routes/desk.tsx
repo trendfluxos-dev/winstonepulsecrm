@@ -55,6 +55,7 @@ import { Button } from "@/components/ui/button";
 import { DeskTabBar } from "@/components/crm/desk/DeskTabBar";
 import { SocialDesk } from "@/components/crm/social/SocialDesk";
 import { TodayHero } from "@/components/crm/desk/TodayHero";
+import { MyProgressCard } from "@/components/crm/desk/MyProgressCard";
 import { AiLeadPriority } from "@/components/crm/AiLeadPriority";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSnapshot } from "@/lib/crm-data";
@@ -360,6 +361,7 @@ function DeskPage() {
 
           {tab === "today" && (
             <>
+          <MyProgressCard />
           <OfficialNewsStrip />
           <DailyAllocationSummary surface="self" />
 

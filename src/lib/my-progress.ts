@@ -6,6 +6,8 @@
 export type MyProgressInput = {
   quota: number | null;
   received: number | null;
+  /** False on Fridays/holidays or after the cut-off: no more leads arrive today. */
+  distributionOpen: boolean | null;
   pendingLeads: number | null;
   reportsToday: number | null;
   connectedToday: number | null;
@@ -15,6 +17,7 @@ export type MyProgress = {
   quota: number | null;
   received: number | null;
   stillToReceive: number | null;
+  distributionOpen: boolean | null;
   quotaPct: number | null;
   pendingLeads: number | null;
   reportsToday: number | null;
@@ -29,7 +32,8 @@ export function myProgress(input: MyProgressInput): MyProgress {
   return {
     quota,
     received,
-    stillToReceive: known ? Math.max(0, quota - received) : null,
+    stillToReceive: known ? (input.distributionOpen === false ? 0 : Math.max(0, quota - received)) : null,
+    distributionOpen: input.distributionOpen,
     quotaPct: known ? pct(received, quota) : null,
     pendingLeads: input.pendingLeads,
     reportsToday: input.reportsToday,

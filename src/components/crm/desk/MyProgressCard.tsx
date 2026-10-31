@@ -45,10 +45,11 @@ export function MyProgressCard() {
     const rc = work.data ? deskReportCounts(work.data.reports, today) : null;
     const lc = me ? deskLeadCounts(leads, me, { from: today, to: today }) : null;
     const a = allocation.data;
-    const mine = a?.agents?.find((row: { id?: string; agentId?: string }) => (row.agentId ?? row.id) === me) ?? a?.agents?.[0];
+    const mine = a?.agents.find((row) => row.id === me);
     return myProgress({
       quota: a ? a.quota : null,
-      received: mine ? mine.received : a ? 0 : null,
+      received: mine ? mine.received : null,
+      distributionOpen: a ? a.distributionOpen : null,
       pendingLeads: lc ? lc.activePending : null,
       reportsToday: rc ? rc.submitted : null,
       connectedToday: rc ? rc.reportedConnected : null,
@@ -82,6 +83,7 @@ export function MyProgressCard() {
           label={t({ bn: "দৈনিক কোটা", en: "Daily quota" })}
           value={p.received == null || p.quota == null ? "—" : `${p.received} / ${p.quota}`}
           hint={p.stillToReceive == null ? (allocation.isError ? t({ bn: "কোটার তথ্য আনা যায়নি", en: "Could not load the quota" }) : na)
+            : p.distributionOpen === false && p.received! < p.quota! ? t({ bn: "আজ আর নতুন লিড বণ্টন হবে না", en: "No more new leads are assigned today" })
             : p.stillToReceive === 0 ? t({ bn: "আজকের সব লিড পেয়েছেন", en: "You've received all of today's leads" })
             : t({ bn: `আরও ${p.stillToReceive}টি লিড আসতে পারে`, en: `${p.stillToReceive} more leads can still arrive` })}
         >
