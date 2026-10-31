@@ -229,7 +229,7 @@ export const getAudioUrl = createServerFn({ method: "POST" })
       return { status: "too_large" as const, sizeBytes: file.size };
     }
     // Re-check after the download so a reassignment during it is honoured.
-    if (caller.scope === "agent") await scope.assertAssignedLead(agentId, recording.lead_id);
+    if (mustOwn) await scope.assertAssignedLead(agentId, recording.lead_id);
     const bytes = new Uint8Array(await file.arrayBuffer());
     let binary = "";
     for (let i = 0; i < bytes.length; i += 0x8000) {

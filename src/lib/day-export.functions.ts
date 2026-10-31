@@ -104,7 +104,12 @@ export const dayCallExport = createServerFn({ method: "POST" })
     const agentMap = new Map((agents ?? []).map((a) => [a.id, a]));
 
     // Sign every stored recording once, in one pass.
-    const paths = inDay.map((r) => r.audio_url).filter((p): p is string => !!p);
+    // Audio links only for HQ/IT PIN or admin; signed-in staff with HQ viewing
+    // must not hear recordings on leads they don't own.
+    const { hasFullRecordingAccess } = await import("@/lib/recording-access");
+    const paths = hasFullRecordingAccess(caller)
+      ? inDay.map((r) => r.audio_url).filter((p): p is string => !!p)
+      : [];
     const signedByPath = new Map<string, string>();
     if (paths.length > 0) {
       const { data: signed } = await supabaseAdmin.storage
@@ -208,7 +213,12 @@ export const recentSyncedCalls = createServerFn({ method: "POST" })
     const leadName = new Map((leads ?? []).map((l) => [l.id, l.name]));
     const agentMap = new Map((agents ?? []).map((a) => [a.id, a]));
 
-    const paths = list.map((r) => r.audio_url).filter((p): p is string => !!p);
+    // Audio links only for HQ/IT PIN or admin; signed-in staff with HQ viewing
+    // must not hear recordings on leads they don't own.
+    const { hasFullRecordingAccess } = await import("@/lib/recording-access");
+    const paths = hasFullRecordingAccess(caller)
+      ? list.map((r) => r.audio_url).filter((p): p is string => !!p)
+      : [];
     const signedByPath = new Map<string, string>();
     if (paths.length > 0) {
       const { data: signed } = await supabaseAdmin.storage
