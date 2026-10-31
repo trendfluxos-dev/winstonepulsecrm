@@ -39,12 +39,11 @@ CREATE OR REPLACE FUNCTION public.enforce_lead_completion() RETURNS trigger
 LANGUAGE plpgsql SET search_path = public AS $$
 BEGIN
   IF NEW.work_state = 'completed' AND (NEW.temperature IS NULL OR NEW.grade IS NULL)
-    AND NOT (coalesce(NEW.outcome_category,'') IN ('not_interested','wrong_number') AND EXISTS (
-      SELECT 1 FROM public.call_reports r WHERE r.lead_id = NEW.id
-        AND r.agent_id = coalesce(NEW.assigned_to,NEW.assigned_agent_id)
-        AND r.category = NEW.outcome_category AND length(btrim(coalesce(r.reason,''))) > 0
-        AND r.status IN ('pending','queued','submitted')
-    )) THEN RAISE EXCEPTION 'classification or confirmed disqualification required'; END IF;
+    -- The service-only atomic finalizer validates/saves the rejection report last.
+    -- Direct authenticated writers must not gain a completion bypass.
+    AND NOT (auth.uid() IS NULL AND NEW.status = 'closed'
+      AND coalesce(NEW.outcome_category,'') IN ('not_interested','wrong_number'))
+    THEN RAISE EXCEPTION 'classification or confirmed disqualification required'; END IF;
   IF TG_OP = 'UPDATE' AND auth.uid() IS NOT NULL AND NEW.assigned_to IS DISTINCT FROM OLD.assigned_to
     AND NOT (public.has_role(auth.uid(),'admin') OR public.has_role(auth.uid(),'team_leader')) THEN
     RAISE EXCEPTION 'Only supervisors may change lead assignment';

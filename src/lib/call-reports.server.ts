@@ -575,7 +575,7 @@ export async function submitCallReport(input: {
         reminder_minutes: input.reminderMinutes ?? 30, status: "upcoming",
       }
     : null;
-  const completeReason = !plannedAt && received
+  const completeReason = !plannedAt && (received || rejection)
     ? [input.customerResponse, input.reason, input.note, input.noFollowUpReason, noFollowUpNote].filter(Boolean).join(" — ") || null
     : null;
   let evaluationDetail: string | null = null;
