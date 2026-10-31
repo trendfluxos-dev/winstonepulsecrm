@@ -10,7 +10,7 @@ const SCRIPT = join(process.cwd(), "scripts/verify-android-apk.sh");
 const COMPANY = "a".repeat(64);
 const OTHER = "b".repeat(64);
 
-type Stub = { pkg?: string; vcode?: string; vname?: string; cert?: string; dn?: string; signers?: number; v2?: boolean };
+type Stub = { pkg?: string; vcode?: string; vname?: string; cert?: string; dn?: string; signers?: number; v2?: boolean; badging?: string };
 
 function run(flavor: "release" | "test", stub: Stub, opts: { expected?: string; prevInfo?: string; gradle?: string } = {}) {
   const dir = mkdtempSync(join(tmpdir(), "apkgate-"));
@@ -20,7 +20,8 @@ function run(flavor: "release" | "test", stub: Stub, opts: { expected?: string; 
   writeFileSync(gradle, opts.gradle ?? '    defaultConfig {\n        versionCode = 33\n        versionName = "2.22"\n    }\n');
   const pkg = stub.pkg ?? (flavor === "release" ? "com.winstone.connect" : "com.winstone.connect.test");
   const vname = stub.vname ?? (flavor === "release" ? "2.22" : "2.22-test");
-  writeFileSync(join(dir, "aapt2"), `#!/bin/sh\necho "package: name='${pkg}' versionCode='${stub.vcode ?? "33"}' versionName='${vname}' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'"\n`);
+  const badging = stub.badging ?? `package: name='${pkg}' versionCode='${stub.vcode ?? "33"}' versionName='${vname}' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'`;
+  writeFileSync(join(dir, "aapt2"), `#!/bin/sh\ncat <<'EOF'\n${badging}\nEOF\n`);
   const signerLines = Array.from({ length: stub.signers ?? 1 }, (_, i) =>
     `Signer #${i + 1} certificate DN: ${stub.dn ?? "CN=Winstone Properties, O=Winstone"}\nSigner #${i + 1} certificate SHA-256 digest: ${stub.cert ?? COMPANY}`,
   ).join("\n");
@@ -125,4 +126,38 @@ describe("Android workflows gate publishing behind the check", () => {
       }
     });
   }
+
+  // Verbatim shape of `aapt2 dump badging` from the GitHub build tools (first lines). The
+  // 2026-10-31 CI run failed with "package is '15'" because a greedy parser matched
+  // compileSdkVersionCodename='15'; these pin the anchored parser to the real layout.
+  const REAL_BADGING = (pkg: string, vname: string) => [
+    `package: name='${pkg}' versionCode='33' versionName='${vname}' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'`,
+    "minSdkVersion:'26'",
+    "targetSdkVersion:'35'",
+    "uses-permission: name='android.permission.READ_CALL_LOG'",
+    "uses-permission: name='android.permission.READ_PHONE_STATE'",
+    "application-label:'WINSTONE Connect'",
+    "application: label='WINSTONE Connect' icon='res/mipmap-anydpi-v26/ic_launcher.xml'",
+    "launchable-activity: name='com.winstone.connect.MainActivity'  label='' icon=''",
+  ].join("\n");
+
+  it("reads package and version from realistic multi-line aapt2 output (test build)", () => {
+    const r = run("test", { badging: REAL_BADGING("com.winstone.connect.test", "2.22-test") }, { expected: COMPANY });
+    expect(r.ok).toBe(true);
+    const report = readFileSync(join(r.dir, "report.txt"), "utf8");
+    expect(report).toContain("package: com.winstone.connect.test");
+    expect(report).toContain("version: 2.22-test (versionCode 33)");
+  });
+
+  it("refuses a test build that carries the live app ID, even with realistic aapt2 output", () => {
+    const r = run("test", { badging: REAL_BADGING("com.winstone.connect", "2.22-test") }, { expected: COMPANY });
+    expect(r.ok).toBe(false);
+    expect(r.out).toContain("package is 'com.winstone.connect', expected 'com.winstone.connect.test'");
+  });
+
+  it("refuses when aapt2 output has no package line instead of reading another field", () => {
+    const r = run("test", { badging: "compileSdkVersionCodename='15' versionCode='33' versionName='2.22-test'" }, { expected: COMPANY });
+    expect(r.ok).toBe(false);
+    expect(r.out).toContain("package is '', expected 'com.winstone.connect.test'");
+  });
 });
