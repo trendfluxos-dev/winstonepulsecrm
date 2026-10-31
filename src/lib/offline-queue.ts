@@ -20,7 +20,8 @@ export type OfflineItem = {
   id: string;
   kind: OfflineItemKind;
   createdAt: string;
-  status: "pending" | "failed";
+  /** pending = waiting to send · syncing = being sent now · failed = last send failed. */
+  status: "pending" | "syncing" | "failed";
   attempts: number;
   lastError?: string | null;
   label: string;
@@ -41,7 +42,9 @@ export function readQueue(): OfflineItem[] {
   try {
     const raw = localStorage.getItem(KEY);
     const parsed = raw ? (JSON.parse(raw) as OfflineItem[]) : [];
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    // A send interrupted by a reload/closed tab never got an answer: it is pending again.
+    return flushing ? parsed : parsed.map((item) => (item.status === "syncing" ? { ...item, status: "pending" } : item));
   } catch {
     return [];
   }
@@ -54,6 +57,63 @@ function writeQueue(items: OfflineItem[]) {
     /* storage full / private mode — nothing else we can honestly do */
   }
   listeners.forEach((listener) => listener(items));
+}
+
+/* ---------- Server-confirmed history (device-local, last 24h, max 20) ---------- */
+
+const SENT_KEY = "winstone.offline.sent.v1";
+const SENT_TTL_MS = 24 * 60 * 60 * 1000;
+
+export type SentItem = {
+  id: string;
+  kind: OfflineItemKind;
+  label: string;
+  createdAt: string;
+  sentAt: string;
+  /** sent = the server accepted it now · already_on_server = it had it already · not_accepted = the server refused it for good. */
+  outcome: "sent" | "already_on_server" | "not_accepted";
+  note?: string | null;
+};
+
+type SentListener = (items: SentItem[]) => void;
+const sentListeners = new Set<SentListener>();
+
+export function readSent(now = Date.now()): SentItem[] {
+  if (typeof localStorage === "undefined") return [];
+  try {
+    const parsed = JSON.parse(localStorage.getItem(SENT_KEY) ?? "[]") as SentItem[];
+    return Array.isArray(parsed) ? parsed.filter((item) => now - Date.parse(item.sentAt) < SENT_TTL_MS) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeSent(items: SentItem[]) {
+  try {
+    localStorage.setItem(SENT_KEY, JSON.stringify(items));
+  } catch {
+    /* storage full / private mode */
+  }
+  sentListeners.forEach((listener) => listener(items));
+}
+
+function recordSent(item: OfflineItem, outcome: SentItem["outcome"], note?: string) {
+  const entry: SentItem = { id: item.id, kind: item.kind, label: item.label, createdAt: item.createdAt, sentAt: new Date().toISOString(), outcome, note: note ?? null };
+  writeSent([entry, ...readSent().filter((s) => s.id !== item.id)].slice(0, 20));
+}
+
+export function clearSent() {
+  writeSent([]);
+}
+
+export function subscribeSent(listener: SentListener): () => void {
+  sentListeners.add(listener);
+  listener(readSent());
+  return () => sentListeners.delete(listener);
+}
+
+function setStatus(id: string, status: OfflineItem["status"]) {
+  writeQueue(readQueue().map((item) => (item.id === id ? { ...item, status } : item)));
 }
 
 export function subscribeQueue(listener: Listener): () => void {
@@ -100,6 +160,10 @@ function isTerminal(message: string): boolean {
   return /ইতিমধ্যে|already|not found|পাওয়া যায়নি|duplicate/i.test(message);
 }
 
+function alreadyOnServer(message: string): boolean {
+  return /ইতিমধ্যে|already|duplicate/i.test(message);
+}
+
 export type Senders = {
   call_event: (payload: Record<string, unknown>) => Promise<unknown>;
   report_submit: (payload: Record<string, unknown>) => Promise<unknown>;
@@ -117,12 +181,15 @@ export async function flushQueue(senders: Senders): Promise<{ synced: number; fa
     for (const item of readQueue().sort((a, b) => a.createdAt.localeCompare(b.createdAt))) {
       if (typeof navigator !== "undefined" && navigator.onLine === false) break;
       try {
+        setStatus(item.id, "syncing");
         await senders[item.kind](item.payload);
+        recordSent(item, "sent");
         removeItem(item.id);
         synced += 1;
       } catch (error) {
         const message = error instanceof Error ? error.message : "sync failed";
         if (isTerminal(message)) {
+          recordSent(item, alreadyOnServer(message) ? "already_on_server" : "not_accepted", message.slice(0, 160));
           removeItem(item.id);
           synced += 1;
           continue;
