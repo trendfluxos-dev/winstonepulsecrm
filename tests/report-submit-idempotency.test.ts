@@ -4,7 +4,7 @@
  * review alerts, next queued report) run only for the request that committed.
  * The database transaction itself is covered by tests/sql/finalize-and-outcome.test.sql.
  */
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const s = vi.hoisted(() => ({
   reportStatus: "pending" as "pending" | "submitted",
@@ -66,6 +66,21 @@ const payload = {
   durationSeconds: 0,
   followUpAt: new Date(Date.now() + 2 * 86_400_000).toISOString(),
 };
+
+// Vitest can hand a concurrent first dynamic import the real module instead of
+// the mock, so every mocked module is loaded once before any parallel submit.
+beforeAll(async () => {
+  for (const m of [
+    () => import("@/integrations/supabase/client.server"),
+    () => import("@/integrations/supabase/client"),
+    () => import("@/lib/call-jobs.server"),
+    () => import("@/lib/classification-review.server"),
+    () => import("@/lib/report-sheet.server"),
+    () => import("@/lib/audit.server"),
+  ]) await m();
+  const real = await import("@/integrations/supabase/client.server");
+  if (!("rpc" in real.supabaseAdmin) || typeof (real.supabaseAdmin as { auth?: unknown }).auth !== "undefined") throw new Error("real database client loaded — refusing to run");
+});
 
 beforeEach(() => {
   s.reportStatus = "pending";
