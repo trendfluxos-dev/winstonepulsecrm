@@ -39,6 +39,7 @@ import { useMyAccount, useSignOut } from "@/lib/session";
 import { LogOut } from "lucide-react";
 import logoAsset from "@/assets/winstone-emblem.png.asset.json";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { BuildBadge } from "@/components/crm/BuildBadge";
 
 type Item = { to: string; label: string };
 
@@ -234,6 +235,9 @@ export function NavSidebar({ items }: { items: readonly Item[] }) {
         <NavContent items={items} collapsed={collapsed} />
       </div>
       <SidebarAccount collapsed={collapsed} />
+      <div className={`mt-2 ${collapsed ? "flex justify-center" : "px-1"}`}>
+        <BuildBadge compact={collapsed} />
+      </div>
     </aside>
   );
 }
@@ -319,6 +323,9 @@ Premium Real Estate CRM
         </SheetHeader>
         <div className="px-3 py-4" onKeyDown={onNavKeys}>
           <NavContent items={items} onNavigate={() => setOpen(false)} />
+          <div className="mt-4 border-t border-border px-1 pt-3">
+            <BuildBadge />
+          </div>
         </div>
       </SheetContent>
     </Sheet>
