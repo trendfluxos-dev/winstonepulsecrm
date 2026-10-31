@@ -753,3 +753,7 @@
 ## 2026-10-30 — Shared ingest secret retired (code)
 - [x] Phone endpoints device-token only; reprocess retired (410); resolver, notices and checks cleaned; tests added.
 - [x] Delete INGEST_SECRET in Project Settings → Secrets and republish (done 2026-10-31).
+
+## 2026-10-31 — Website enquiry check
+- [x] Signed website enquiry → one unassigned LeadHub lead, no duplicates (tests/website-enquiry-e2e.test.ts; staging version opt-in)
+- [ ] Run staging version against an isolated staging backend (needs staging project)
