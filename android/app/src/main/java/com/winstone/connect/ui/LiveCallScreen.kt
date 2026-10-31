@@ -235,7 +235,7 @@ fun ReportSheet(
     val temperature = if (evaluationComplete) LeadEvaluation.category(evaluationScore) else null
     val ready = category.isNotBlank() &&
         seconds >= 0 && (!received || seconds >= 1) &&
-        (if (rejection != null) received else
+        (if (rejection != null) true else
             summary.trim().length > 1 && note.trim().length > 1 &&
             (if (noFollowUp) (if (received) ContactCloseReasons.isValid(noFollowUpReason, noFollowUpNote) else true) else (date.length == 10 && time.length == 5)) &&
             (!received || (evaluationComplete && grade != null)))
@@ -347,6 +347,7 @@ fun ReportSheet(
                 }
             } else {
                 Text(CATEGORIES.firstOrNull { it.first == category }?.second.orEmpty(), fontWeight = FontWeight.Bold)
+                Text("Fast Disqualification · কারণ: ${rejection.summary}", fontSize = 13.sp)
                 Text("চাহিদা: প্রযোজ্য নয় · পরের কাজ: কোনো কাজ নেই · ফলো-আপ: দরকার নেই", fontSize = 13.sp)
                 OutlinedButton(onClick = { changingOutcome = true }, modifier = Modifier.fillMaxWidth().testTag("change-outcome")) {
                     Text("ভুল ফলাফল বেছে থাকলে সংশোধন")
@@ -385,6 +386,14 @@ fun ReportSheet(
                             modifier = Modifier.weight(1f).padding(horizontal = 2.dp),
                         ) { Text(if (grade == value) "✓ $value" else value) }
                     }
+                }
+                grade?.let { selected ->
+                    Text(when (selected) {
+                        "A" -> "Prime Buyer — বেশি বাজেট, সাইট ভিজিট বা তাৎক্ষণিক বুকিং প্রস্তুত"
+                        "B" -> "Serious Prospect — স্পষ্ট চাহিদা, ১–৩ মাসে সিদ্ধান্ত"
+                        "C" -> "Early-stage Inquiry — বিকল্প খুঁজছেন, বাজেট বা সময় অনিশ্চিত"
+                        else -> "Low Probability — কেনার আগ্রহ বা সম্ভাবনা কম"
+                    }, fontSize = 12.sp)
                 }
             }
 

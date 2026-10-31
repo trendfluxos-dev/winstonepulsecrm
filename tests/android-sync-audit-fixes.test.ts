@@ -28,9 +28,9 @@ describe("phone sync audit fixes", () => {
   it("daily cap counts either owner column", () => {
     expect(src("drizzle/migrations/0136_daily_cap_counts_either_owner.sql")).toContain("COALESCE(NEW.assigned_to, NEW.assigned_agent_id)");
   });
-  it("phone report payload sends no temperature/grade", () => {
+  it("phone sends manual report grade but never temperature", () => {
     const s = src("android/app/src/main/java/com/winstone/connect/data/remote/WinstoneApi.kt");
     expect(s).not.toContain('put("temperature"');
-    expect(s).not.toContain('put("grade"');
+    expect(s).toContain('grade?.let { put("grade", it) }');
   });
 });

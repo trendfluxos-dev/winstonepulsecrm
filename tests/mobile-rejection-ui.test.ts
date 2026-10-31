@@ -45,13 +45,29 @@ describe("actual mobile report interactions with isolated server fixtures", () =
     expect((screen.getByRole("button", { name: "Confirm & Submit" }) as HTMLButtonElement).disabled).toBe(false);
     fireEvent.click(screen.getByRole("button", { name: "Confirm & Submit" }));
     await waitFor(() => expect(fixture.submit).toHaveBeenCalledTimes(1));
-    expect(fixture.submit.mock.calls[0]?.[0]).toMatchObject({ data: { category, requirement: null, nextAction: "no_action", evaluationAnswers: null, followUpAt: null, followUpNeeded: false, temperature: "cold", grade: "D" } });
+    expect(fixture.submit.mock.calls[0]?.[0]).toMatchObject({ data: { category, requirement: null, nextAction: "no_action", evaluationAnswers: null, followUpAt: null, followUpNeeded: false, temperature: null, grade: null } });
   });
   it("normal Interested still requires property/action selections and all six answers", async () => {
     await open(); choose("interested");
     for (const label of ["Requirement", "Next Action", "Customer Interest", "Customer Response"]) expect(screen.getByLabelText(new RegExp(`^${label}`))).toBeTruthy();
     expect(screen.getAllByRole("button", { name: "Yes", exact: true })).toHaveLength(6);
     expect((screen.getByRole("button", { name: "Confirm & Submit" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+  it("connected sales submit requires manual grade and sends six explicit answers", async () => {
+    await open(); choose("interested");
+    for (const [label, value] of [["Customer Interest", "high"], ["Requirement", "4 Bedroom"], ["Customer Response", "interested"], ["Next Action", "send_price"]]) {
+      fireEvent.change(screen.getByLabelText(new RegExp(`^${label}`)), { target: { value } });
+    }
+    fireEvent.click(screen.getByRole("button", { name: "No Follow-up Required" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Reason no follow-up is needed" }), { target: { value: "info_completed" } });
+    screen.getAllByRole("button", { name: "Yes", exact: true }).forEach(button => fireEvent.click(button));
+    expect((screen.getByRole("button", { name: "Confirm & Submit" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText(/^Grade/), { target: { value: "D" } });
+    fireEvent.click(screen.getByRole("button", { name: "Confirm & Submit" }));
+    await waitFor(() => expect(fixture.submit).toHaveBeenCalledTimes(1));
+    expect(fixture.submit.mock.calls[0]?.[0]).toMatchObject({ data: { grade: "D", evaluationAnswers: {
+      project_interest: true, asked_price: true, wanted_info: true, visit_interest: true, decision_30d: true, wants_follow_up: true,
+    } } });
   });
   it("outcome correction needs confirmation and a new selection; cancellation keeps rejection", async () => {
     await open(); choose("wrong_number");
@@ -71,9 +87,9 @@ describe("actual mobile report interactions with isolated server fixtures", () =
     await waitFor(() => expect(fixture.submit).toHaveBeenCalled());
     expect(fixture.submit.mock.calls[0]?.[0]).toMatchObject({ data: { requirement: null, nextAction: "no_action" } });
   });
-  it("non-connected rejection remains concise but cannot submit", async () => {
+  it("final rejection disposition is independent of connection status", async () => {
     fixture.connected = false; await open(); choose("fake"); absentSalesInputs();
-    expect((screen.getByRole("button", { name: "Confirm & Submit" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "Confirm & Submit" }) as HTMLButtonElement).disabled).toBe(false);
     expect(fixture.submit).not.toHaveBeenCalled();
   });
 });

@@ -179,12 +179,12 @@ describe("report submission verifies only phone-measured duration", () => {
   for (const category of ["not_interested", "wrong_number", "fake"]) it(`${category} ignores forged sales scoring and follow-up fields`, async () => {
     state.savedGrade = null;
     await expect(submitCallReport({ ...input, category, evaluationAnswers: input.evaluationAnswers, durationSeconds: 3, requirement: "4 Bed", interest: "high", customerResponse: "site_visit", nextAction: "site_visit", followUpAt: "2099-01-01T00:00:00Z", followUpNeeded: true, followUpReason: "site_visit", followUpReasonNote: "Forged", followUpNote: "Forged", noFollowUpReason: "info_completed", smartReasons: { grade: "A: invented" }, aiDecision: "accepted", retryPlan: { mode: "plus2", slot: "morning" }, grade: "A", temperature: "hot" })).rejects.toThrow("captured submission");
-    expect(state.writes[0]?.patch).toMatchObject({ category: category === "not_interested" ? "not_interested" : "wrong_number", temperature: "cold", grade: "D", evaluation_answers: null, evaluation_score: null, requirement: null, next_action: "no_action", follow_up_at: null, connection_verified: false, interest: category === "fake" ? "fake" : "low", customer_response: category === "not_interested" ? "not_interested" : "other", no_follow_up_reason: category === "fake" ? "other" : category, no_follow_up_note: category === "not_interested" ? "Customer Not Interested" : category === "fake" ? "Fake / Invalid contact" : "Wrong Number", smart_reasons: null, ai_decision: null });
+    expect(state.writes[0]?.patch).toMatchObject({ category: category === "not_interested" ? "not_interested" : "wrong_number", temperature: null, grade: null, evaluation_answers: null, evaluation_score: null, requirement: null, next_action: "no_action", follow_up_at: null, connection_verified: false, interest: category === "fake" ? "fake" : "low", customer_response: category === "not_interested" ? "not_interested" : "other", no_follow_up_reason: category === "fake" ? "other" : category, no_follow_up_note: category === "not_interested" ? "Customer Not Interested" : category === "fake" ? "Fake / Invalid contact" : "Wrong Number", smart_reasons: null, ai_decision: null });
   });
   for (const category of ["not_interested", "wrong_number", "fake"]) {
-  for (const callStatus of ["no_answer", "busy", "failed"]) it(`${category} cannot masquerade as confirmed rejection after ${callStatus}`, async () => {
-    await expect(submitCallReport({ ...input, category, callStatus })).rejects.toThrow("NO ANSWER");
-    expect(state.writes).toEqual([]);
+  for (const callStatus of ["no_answer", "busy", "failed"]) it(`${category} disposition is independent of ${callStatus}`, async () => {
+    await expect(submitCallReport({ ...input, category, callStatus })).rejects.toThrow("captured submission");
+    expect(state.writes[0]?.patch).toMatchObject({ connected: false, evaluation_score: null, temperature: null, grade: null });
   });
   it(`${category} cannot submit another agent's report`, async () => {
     await expect(submitCallReport({ ...input, category, agentId: "agent-b" })).rejects.toThrow("আপনার নয়");
@@ -197,15 +197,14 @@ describe("report submission verifies only phone-measured duration", () => {
       expect(state.writes).toEqual([]);
     }
   });
-  it("the server derives 30 points and Warm, preserving saved grade instead of caller grade", async () => {
+  it("the server derives 30 points and Warm with the manually selected grade", async () => {
     await expect(submitCallReport({ ...input, temperature: "hot", grade: "A" })).rejects.toThrow("captured submission");
-    expect(state.writes[0]?.patch).toMatchObject({ temperature: "warm", evaluation_score: 30, grade: "B" });
+    expect(state.writes[0]?.patch).toMatchObject({ temperature: "warm", evaluation_score: 30, grade: "A" });
   });
-  it("an agent's chosen grade cannot fill missing server classification", async () => {
+  it("manual report grade does not require audio analysis", async () => {
     state.savedGrade = null;
     await expect(submitCallReport(input)).rejects.toThrow("captured submission");
-    // The report saves with the grade pending — never the agent's own "A".
-    expect(state.writes[0]?.patch.grade).toBeNull();
+    expect(state.writes[0]?.patch.grade).toBe("A");
   });
   it("a forged web time and connected claim do not earn verification", async () => {
     await expect(submitCallReport(input)).rejects.toThrow("captured submission");

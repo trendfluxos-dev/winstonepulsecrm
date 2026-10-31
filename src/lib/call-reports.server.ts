@@ -1,5 +1,6 @@
 import { isContactCloseReason } from "@/lib/contact-close-reasons";
 import { fastDisqualification } from "@/lib/fast-disqualification";
+import { qualifyCallReport } from "@/lib/call-qualification";
 /**
  * The mandatory post-call workflow.
  *
@@ -134,7 +135,7 @@ export function validateReport(input: {
   if ((category === "not_interested" || category === "wrong_number") && !reason) {
     return { field: "reason", message: "কারণ লিখুন" };
   }
-  if (input.connected !== false) {
+  if (input.connected !== false && !fastDisqualification(category)) {
     if (!LEAD_TEMPERATURES.includes((input.temperature ?? "") as LeadTemperature)) {
       return { field: "temperature", message: "কথা হওয়া কলে Hot / Warm / Cold বাছাই করুন" };
     }
@@ -421,31 +422,23 @@ export async function submitCallReport(input: {
     ? input.callStatus === "connected"
     : report.connected !== false;
 
-  const rejection = fastDisqualification(input.category);
-  if (rejection && !received) throw new Error("অনাগ্রহী / ভুল / ভুয়া নম্বর নিশ্চিত করতে কলের সঠিক অবস্থা দিন; কথা না হলে NO ANSWER ব্যবহার করুন।");
+  const qualification = qualifyCallReport({ category: input.category, connected: received,
+    evaluationAnswers: input.evaluationAnswers, grade: input.grade ?? null, followUpPending: Boolean(input.followUpAt) });
+  const rejection = qualification.rejection;
   if (rejection) input = { ...input, ...rejection, smartReasons: null, aiDecision: null };
   const category = input.category as CallCategory;
 
   // A missing answer set must not reopen the caller-selected legacy score path.
-  const { parseAnswers, evaluate, EVALUATION_MODEL } = await import("@/lib/lead-evaluation");
-  const answers = received && !rejection ? parseAnswers(input.evaluationAnswers) : null;
-  if (received && !rejection && !answers) throw new Error("কথা হওয়া কলের ছয়টি প্রশ্নের উত্তর দিন। পুরোনো অ্যাপ হলে আপডেট করুন।");
-  const evaluation = answers ? evaluate(answers, Boolean(input.followUpAt)) : null;
-  const effectiveTemperature = rejection?.temperature ?? evaluation?.category ?? null;
-  // Grade must come from saved classification or matched recording analysis.
-  // A caller-selected grade never supplies missing classification evidence.
-  let trustedGrade = rejection?.grade ?? (LEAD_GRADES.includes(report.grade as LeadGrade) ? report.grade : null);
-  if (received && !trustedGrade && report.recording_id) {
-    const { data: gradedRecording } = await supabaseAdmin.from("call_recordings")
-      .select("ai_grade, analysis_status, agent_id, lead_id").eq("id", report.recording_id).maybeSingle();
-    if (gradedRecording?.agent_id === input.agentId && gradedRecording.lead_id === report.lead_id && gradedRecording.analysis_status === "completed" && LEAD_GRADES.includes(gradedRecording.ai_grade as LeadGrade)) trustedGrade = gradedRecording.ai_grade;
-  }
+  const { EVALUATION_MODEL } = await import("@/lib/lead-evaluation");
+  const { answers, evaluation } = qualification;
+  const effectiveTemperature = evaluation?.category ?? null;
+  const trustedGrade = qualification.grade;
   const { followUpPriorityFor } = await import("@/lib/follow-up-priority");
   const followUpPriority = input.followUpAt
     ? evaluation?.priority ?? followUpPriorityFor(effectiveTemperature)
     : followUpPriorityFor(effectiveTemperature);
 
-  const invalid = validateReport({ ...input, temperature: effectiveTemperature, grade: trustedGrade, allowPendingGrade: true, connected: received, requireCallFacts: true });
+  const invalid = validateReport({ ...input, temperature: effectiveTemperature, grade: trustedGrade, connected: received, requireCallFacts: true });
   if (invalid) throw new Error(invalid.message);
 
   const temperature = received ? ((effectiveTemperature ?? null) as LeadTemperature | null) : null;
@@ -503,7 +496,7 @@ export async function submitCallReport(input: {
 
   // Did-not-receive cadence: planned (and validated) before anything is saved,
   // so a past custom time is refused without touching the report.
-  const didNotReceive = !reassigned && !received && (input.callStatus === "no_answer" || input.callStatus === "busy");
+  const didNotReceive = !rejection && !reassigned && !received && (input.callStatus === "no_answer" || input.callStatus === "busy");
   let cadence: ReturnType<typeof import("@/lib/no-answer-cadence").planNoAnswer> | null = null;
   if (didNotReceive) {
     const { planNoAnswer, RetryPlanError } = await import("@/lib/no-answer-cadence");
@@ -556,11 +549,12 @@ export async function submitCallReport(input: {
     follow_up_priority: evaluation?.priority ?? null,
     next_best_action: rejection ? "no_action" : evaluation?.nextAction ?? null,
   };
-  const leadPatch = received && classified
+  const completed = Boolean(rejection) || (received && classified);
+  const leadPatch = completed
     ? {
         status: LEAD_STATUS_FOR[category], outcome_category: category, notes, last_call_at: nowIso,
-        temperature, grade, classification_note: input.note?.trim() || null, classified_at: nowIso,
-        classified_by: input.agentId, work_state: "completed", unanswered_attempts: 0,
+        ...(!rejection ? { temperature, grade, classification_note: input.note?.trim() || null, classified_at: nowIso,
+        classified_by: input.agentId } : {}), work_state: "completed", unanswered_attempts: 0,
       }
     : {
         status: "pending", outcome_category: category, notes, last_call_at: nowIso,
@@ -581,7 +575,7 @@ export async function submitCallReport(input: {
         reminder_minutes: input.reminderMinutes ?? 30, status: "upcoming",
       }
     : null;
-  const completeReason = !plannedAt && received
+  const completeReason = !plannedAt && (received || rejection)
     ? [input.customerResponse, input.reason, input.note, input.noFollowUpReason, noFollowUpNote].filter(Boolean).join(" — ") || null
     : null;
   let evaluationDetail: string | null = null;
@@ -593,7 +587,7 @@ export async function submitCallReport(input: {
     });
   }
   const outcomeDetail = `${CATEGORY_LABEL[category]}${
-    classified ? ` — ${TEMPERATURE_LABEL[temperature!]} / গ্রেড ${grade}` : " — কথা হয়নি, আবার কল হবে"
+    rejection ? ` — Fast Disqualification: ${input.reason}` : temperature && grade ? ` — ${TEMPERATURE_LABEL[temperature]} / গ্রেড ${grade}` : " — কথা হয়নি, আবার কল হবে"
   }${
     input.followUpAt
       ? ` — ফলো-আপ ${new Date(input.followUpAt).toLocaleString("bn-BD")}`
@@ -617,8 +611,9 @@ export async function submitCallReport(input: {
     _evaluation_detail: evaluationDetail,
     _outcome: outcomeDetail,
     _audit: {
-      category, received, temperature, grade,
-      workState: received && classified ? "completed" : "pending",
+      category, disposition: rejection?.interest === "fake" ? "fake" : category, received, temperature, grade,
+      disqualificationReason: rejection ? input.reason : null, agentId: input.agentId, at: nowIso,
+      workState: completed ? "completed" : "pending",
       aiDecision: input.aiDecision ?? null, followUpAt: input.followUpAt ?? null,
     },
   } as never);
@@ -727,7 +722,7 @@ export async function submitCallReport(input: {
     review,
     nextReportId: nextQueued,
     reassigned: reassignedAtCommit,
-    workState: received && classified ? ("completed" as const) : ("pending" as const),
+    workState: completed ? ("completed" as const) : ("pending" as const),
   };
 
 }
@@ -920,6 +915,9 @@ export async function editSubmittedReport(input: {
   }
 
   const received = report.connected !== false;
+  if (Boolean(fastDisqualification(input.category)) !== Boolean(fastDisqualification(report.category ?? ""))) {
+    throw new Error("সেলস ও অযোগ্য ফলাফলের মধ্যে পরিবর্তনে পূর্ণ রিপোর্ট যাচাই প্রয়োজন; এই সংশোধনে শুধু নোট বদলান।");
+  }
   // Edits can change notes, never replace saved classification with a pick.
   const temperature = received ? report.temperature as LeadTemperature | null : null;
   const grade = received ? report.grade as LeadGrade | null : null;

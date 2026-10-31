@@ -1,13 +1,14 @@
 # Roadmap
 
 ## 2026-10-31 — New workspace connections
-- [ ] Connect GitHub API fresh and verify read-only access.
-- [ ] Connect Google Search Console fresh and list verified properties.
+- [x] Connect GitHub API fresh; /user HTTP 200 confirms trendfluxos-dev.
+- [x] Connect Google Search Console fresh; /sites HTTP 200 confirms crm.winstonebd.com siteOwner.
 
 ## 2026-10-31 — Unified call qualification
-- [ ] Unify backend validation and report-grade selection; disposition-driven rejection without fake scores.
-- [ ] Align Web and Android reporting/previews; preserve follow-ups, history, ownership and atomic retries.
-- [ ] Run focused/full tests, inspect automatic checks, document delivery and handset blockers; no production writes or publication.
+- [x] Implement shared report validation, manual report grade and null rejection classification; align Web/Android.
+- [x] 1,565 full tests pass / 9 skipped; 96 local SQL assertions pass, automatic build OK; report in docs/UNIFIED_CALL_QUALIFICATION_REPORT.md.
+- [ ] Release blocker: review/apply function-only unapplied SQL proposal before publishing; existing live triggers reject null rejection classification. No live changes authorized/performed.
+- [ ] Android compile/unit/emulator/handset: Gradle download TLS failure, SDK unavailable; compatible rebuilt APK and two-agent physical validation required.
 
 ## 2026-10-30 — APK update build (2.18)
 - [x] Bumped Android versionCode 28→29, versionName 2.17→2.18 (android/app/build.gradle.kts).

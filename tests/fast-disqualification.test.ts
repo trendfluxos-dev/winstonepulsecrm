@@ -6,7 +6,7 @@ describe("explicit fast rejection", () => {
   for (const category of ["not_interested", "wrong_number", "fake"]) {
     it(`${category} needs no requirements, questions or repeated follow-up choice`, () => {
       const result = fastDisqualification(category);
-      expect(result).toMatchObject({ requirement: null, nextAction: "no_action", followUpAt: null, followUpNeeded: false, evaluationAnswers: null, temperature: "cold", grade: "D" });
+      expect(result).toMatchObject({ requirement: null, nextAction: "no_action", followUpAt: null, followUpNeeded: false, evaluationAnswers: null, temperature: null, grade: null });
       expect(validateReport({ ...result, category: result?.category ?? null, connected: true, requireCallFacts: true, direction: "outgoing", callStatus: "connected", durationSeconds: 3 })).toBeNull();
     });
   }
