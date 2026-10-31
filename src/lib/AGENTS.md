@@ -46,6 +46,6 @@
 - Phone lead capture always lands unassigned (capturer kept as reference_by/audit actor); `/api/public/agent/logout` revokes only the presenting token — why: LeadHub is the only assignment path and sign-out must not log out other devices.
 - download.ts delivers browser files: build the blob before the click, revoke URLs late — why: mobile drops downloads after long awaits.
 - call-reconciliation.ts keys on Android call UID; originals delete only after server checksum ack — why: filename, sync and audio are distinct evidence.
-- Recording audio (player/Recorder/day export) goes through recording-access.ts; only PIN or admin skip lead ownership — why: moved leads drop agent audio.
+- Recording audio (player/Recorder/export) uses recording-access.ts; only PIN or admin skip lead ownership — why: moved leads drop audio.
 - AI: ai-model.server.ts + pure ai-providers.ts; HQ picks provider in app_config; meta=muse-spark-1.3 via MODEL_API_KEY; fail-closed, no key fallback, no error bodies logged — why: one switch, no key leaks.
 - desk-queue.ts: not-received/called leads sort behind fresh ones; attempts = max(call_attempts, own reports), no counter rewrite — why: call_attempts feeds eligibility; history stays.
