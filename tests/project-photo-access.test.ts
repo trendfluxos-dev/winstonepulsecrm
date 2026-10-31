@@ -11,7 +11,9 @@ import { staffAccessToken } from "./fixtures/staff-session";
 
 const url = process.env["SUPABASE_URL"] ?? process.env["VITE_SUPABASE_URL"];
 const key = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["VITE_SUPABASE_PUBLISHABLE_KEY"];
-const staffToken = staffAccessToken();
+// Opt-in: read checks against the shared live storage bucket.
+const live = process.env["RUN_LIVE_SCOPE_TESTS"] === "1";
+const staffToken = live ? staffAccessToken() : null;
 const BUCKET = "project-photos";
 const FILE = "01_-_Winstone_Dream_Park_Winstone_10.jpg";
 
@@ -43,7 +45,7 @@ describe("project photos: server code never leaks images to signed-out callers",
   });
 });
 
-describe.runIf(url && key)("project photos: signed-out visitor is refused", () => {
+describe.runIf(live && url && key)("project photos: signed-out visitor is refused", () => {
   const anon = client();
   it("public URL does not serve the file", async () => {
     const res = await fetch(`${url}/storage/v1/object/public/${BUCKET}/${FILE}`);
@@ -70,7 +72,7 @@ function tokenLifetime(signedUrl: string): number {
   return p.exp - p.iat;
 }
 
-describe.runIf(url && key && staffToken)("project photos: signed-in CRM staff", () => {
+describe.runIf(live && url && key && staffToken)("project photos: signed-in CRM staff", () => {
   const staff = client(staffToken!);
   it("can download the photo", async () => {
     const { data, error } = await staff.storage.from(BUCKET).download(FILE);
