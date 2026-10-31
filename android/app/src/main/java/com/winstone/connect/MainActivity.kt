@@ -19,9 +19,11 @@ import com.winstone.connect.data.AgentSession
 import com.winstone.connect.data.sync.PendingReportWorker
 import com.winstone.connect.telephony.CallPhase
 import com.winstone.connect.telephony.LiveCallLauncher
+import com.winstone.connect.telephony.RecordingConsent
 import com.winstone.connect.ui.DeskScreen
 import com.winstone.connect.ui.LiveCallScreen
 import com.winstone.connect.ui.MaintenanceScreen
+import com.winstone.connect.ui.RecordingConsentScreen
 import com.winstone.connect.ui.DeskViewModel
 import com.winstone.connect.ui.RoleSelectionScreen
 import com.winstone.connect.ui.SignInScreen
@@ -60,6 +62,11 @@ class MainActivity : ComponentActivity() {
                 // own dialer is re-checked instead of only on first composition.
                 val tick by reportTick.collectAsStateSafe()
                 var pendingReport by remember { mutableStateOf(false) }
+                // Recording consent is per agent; re-read on account change or a new choice.
+                val consentTick by RecordingConsent.changes.collectAsStateSafe()
+                val consentDecision = remember(state.employeeId, consentTick) {
+                    RecordingConsent.decision(this@MainActivity, state.employeeId)
+                }
                 LaunchedEffect(phase, state.employeeId, tick) {
                     if (phase == CallPhase.Idle && !state.employeeId.isNullOrBlank()) {
                         val body = runCatching {
@@ -97,6 +104,19 @@ class MainActivity : ComponentActivity() {
                             lifecycleScope.launch {
                                 AgentSession.saveSelectedRole(this@MainActivity, role)
                             }
+                        },
+                    )
+                } else if (
+                    consentDecision == RecordingConsent.Decision.NONE
+                ) {
+                    RecordingConsentScreen(
+                        agentName = state.agentName ?: "",
+                        onAccept = {
+                            RecordingConsent.record(this@MainActivity, state.employeeId!!, granted = true)
+                            requestAudioPermissions()
+                        },
+                        onDecline = {
+                            RecordingConsent.record(this@MainActivity, state.employeeId!!, granted = false)
                         },
                     )
                 } else {
@@ -144,15 +164,24 @@ class MainActivity : ComponentActivity() {
         val wanted = mutableListOf(
             Manifest.permission.CALL_PHONE,
             Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.RECORD_AUDIO,
             Manifest.permission.READ_CALL_LOG,
         )
         if (Build.VERSION.SDK_INT >= 28) wanted += Manifest.permission.ANSWER_PHONE_CALLS
         if (Build.VERSION.SDK_INT >= 33) wanted += Manifest.permission.POST_NOTIFICATIONS
-        // Read the phone's own call-recorder files so they reach the CRM.
-        wanted += if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_AUDIO
-        else Manifest.permission.READ_EXTERNAL_STORAGE
+        // Audio permissions are asked only after the agent's recording consent.
+        if (RecordingConsent.granted(this, AgentSession.employeeIdNow(this))) wanted += audioPermissions()
         ActivityCompat.requestPermissions(this, wanted.toTypedArray(), 9001)
+    }
+
+    /** Microphone + the phone's own call-recorder files — only after consent. */
+    private fun audioPermissions(): List<String> = listOf(
+        Manifest.permission.RECORD_AUDIO,
+        if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_AUDIO
+        else Manifest.permission.READ_EXTERNAL_STORAGE,
+    )
+
+    private fun requestAudioPermissions() {
+        ActivityCompat.requestPermissions(this, audioPermissions().toTypedArray(), 9002)
     }
 
     override fun onRequestPermissionsResult(

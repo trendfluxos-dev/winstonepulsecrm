@@ -33,6 +33,11 @@ class PhoneRecordingPickupWorker(context: Context, params: WorkerParameters) :
 
     override suspend fun doWork(): Result {
         val ctx = applicationContext
+        // Consent may have been withdrawn (or the account switched) after the call.
+        if (!com.winstone.connect.telephony.RecordingConsent.granted(
+                ctx, com.winstone.connect.data.AgentSession.employeeIdNow(ctx))) {
+            return Result.success()
+        }
         if (!canReadAudio(ctx)) {
             SyncStatus.retrying(ctx, "Audio permission required — allow phone recording access in Android Settings")
             return Result.retry()

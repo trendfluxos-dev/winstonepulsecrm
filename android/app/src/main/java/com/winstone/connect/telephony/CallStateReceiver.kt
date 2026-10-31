@@ -40,7 +40,9 @@ class CallStateReceiver : BroadcastReceiver() {
                 lastState = state
                 offHookAt = System.currentTimeMillis()
                 val rec = recorder(app)
-                val started = rec.start(LiveCallLauncher.activeLeadId)
+                // No audio is captured without this agent's recording consent.
+                val consented = RecordingConsent.granted(app, employeeId)
+                val started = consented && rec.start(LiveCallLauncher.activeLeadId)
                 // Foreground service only once recording really started, so it is never
                 // stopped before startForeground() runs (RemoteServiceException).
                 if (started) CallRecordingService.start(app)
@@ -48,7 +50,8 @@ class CallStateReceiver : BroadcastReceiver() {
                 if (!started) {
                     val capability = RecordingCapabilityCheck.cachedOrNull()
                     LiveCallLauncher.recordingIssue =
-                        capability?.label ?: "এই ফোনে কল রেকর্ডিং সম্ভব নয়"
+                        if (!consented) "রেকর্ডিং সম্মতি দেওয়া হয়নি — অডিও রেকর্ড হবে না"
+                        else capability?.label ?: "এই ফোনে কল রেকর্ডিং সম্ভব নয়"
                     android.util.Log.w(
                         "WinstoneRecording",
                         "recording unavailable: " + (rec.unavailableReason ?: "unknown"),
@@ -87,7 +90,8 @@ class CallStateReceiver : BroadcastReceiver() {
                 // Policy: only a real two-sided carrier recording is uploaded. A
                 // microphone-only file is not a call recording, so it is deleted
                 // and the call is reported as recording-unavailable instead.
-                val uploadable = CallLifecycle.uploadable(support, captured != null)
+                val uploadable = CallLifecycle.uploadable(support, captured != null) &&
+                    RecordingConsent.granted(app, employeeId)
                 if (wasOnCall && captured != null && uploadable) {
                     // An empty/interrupted recording is refused by the queue; show it as a sync failure, never crash.
                     runCatching { CallSyncQueue.queueRecording(
@@ -110,7 +114,7 @@ class CallStateReceiver : BroadcastReceiver() {
 
                 // The app could not capture both sides itself: pick up the file
                 // the phone's own call recorder saved (if it has one turned on).
-                if (wasOnCall && !(captured != null && uploadable)) {
+                if (wasOnCall && !(captured != null && uploadable) && RecordingConsent.granted(app, employeeId)) {
                     val number = when {
                         outgoing -> LiveCallLauncher.activePhone.orEmpty()
                         DialerCallTracker.callUid != null -> DialerCallTracker.number.orEmpty()

@@ -115,6 +115,12 @@ fun LiveCallScreen(phase: CallPhase) {
                 ) {
                     Text("● REC", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "গ্রাহককে জানান: ${com.winstone.connect.telephony.RecordingConsent.CUSTOMER_NOTICE_BN}",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
             LiveCallLauncher.recordingIssue?.let { issue ->
