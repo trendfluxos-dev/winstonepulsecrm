@@ -11,6 +11,11 @@
  */
 
 export type AuditAction =
+  | "agent_whatsapp_opt_in"
+  | "agent_whatsapp_opt_out"
+  | "agent_whatsapp_alerts_on"
+  | "agent_whatsapp_alerts_off"
+  | "agent_whatsapp_alerts_job"
   | "project_catalog_import"
   | "project_photos_viewed"
   | "account_approved"
