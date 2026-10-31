@@ -9,6 +9,7 @@ import { AndroidBuildStatus } from "@/components/crm/AndroidBuildStatus";
 import { BuildEfficiencyDashboard } from "@/components/crm/BuildEfficiencyDashboard";
 import { ItPhoneTestReports } from "@/components/crm/ItPhoneTestReports";
 import { SearchConsoleDashboard } from "@/components/crm/SearchConsoleDashboard";
+import { AgentWhatsAppAlertsPanel } from "@/components/crm/AgentWhatsAppAlertsPanel";
 import { DbPerformanceDashboard } from "@/components/crm/DbPerformanceDashboard";
 import { PAGE_SECTIONS, sectionSearch, useSection } from "@/lib/page-sections";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -175,6 +176,7 @@ function SystemBoard() {
           <BuildEfficiencyDashboard />
           <ItPhoneTestReports />
           <SearchConsoleDashboard />
+          <AgentWhatsAppAlertsPanel />
           <DbPerformanceDashboard />
           <SystemManualCard />
           <SystemUpdateReport />

@@ -118,6 +118,7 @@ import { Route as ApiPublicIngestOutcomeRouteImport } from './routes/api/public/
 import { Route as ApiPublicIngestRecordingRouteImport } from './routes/api/public/ingest/recording'
 import { Route as ApiPublicIngestReprocessRouteImport } from './routes/api/public/ingest/reprocess'
 import { Route as ApiPublicIntegrationsStatusRouteImport } from './routes/api/public/integrations/status'
+import { Route as ApiPublicJobsAgentWhatsappAlertsRouteImport } from './routes/api/public/jobs/agent-whatsapp-alerts'
 import { Route as ApiPublicJobsFirebaseGrpcWatchRouteImport } from './routes/api/public/jobs/firebase-grpc-watch'
 import { Route as ApiPublicJobsGithubAccessWatchRouteImport } from './routes/api/public/jobs/github-access-watch'
 import { Route as ApiPublicJobsInventorySheetRouteImport } from './routes/api/public/jobs/inventory-sheet'
@@ -698,6 +699,12 @@ const ApiPublicIntegrationsStatusRoute =
     path: '/api/public/integrations/status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsAgentWhatsappAlertsRoute =
+  ApiPublicJobsAgentWhatsappAlertsRouteImport.update({
+    id: '/api/public/jobs/agent-whatsapp-alerts',
+    path: '/api/public/jobs/agent-whatsapp-alerts',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsFirebaseGrpcWatchRoute =
   ApiPublicJobsFirebaseGrpcWatchRouteImport.update({
     id: '/api/public/jobs/firebase-grpc-watch',
@@ -892,6 +899,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/agent-whatsapp-alerts': typeof ApiPublicJobsAgentWhatsappAlertsRoute
   '/api/public/jobs/firebase-grpc-watch': typeof ApiPublicJobsFirebaseGrpcWatchRoute
   '/api/public/jobs/github-access-watch': typeof ApiPublicJobsGithubAccessWatchRoute
   '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
@@ -1018,6 +1026,7 @@ export interface FileRoutesByTo {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/agent-whatsapp-alerts': typeof ApiPublicJobsAgentWhatsappAlertsRoute
   '/api/public/jobs/firebase-grpc-watch': typeof ApiPublicJobsFirebaseGrpcWatchRoute
   '/api/public/jobs/github-access-watch': typeof ApiPublicJobsGithubAccessWatchRoute
   '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
@@ -1145,6 +1154,7 @@ export interface FileRoutesById {
   '/api/public/ingest/recording': typeof ApiPublicIngestRecordingRoute
   '/api/public/ingest/reprocess': typeof ApiPublicIngestReprocessRoute
   '/api/public/integrations/status': typeof ApiPublicIntegrationsStatusRoute
+  '/api/public/jobs/agent-whatsapp-alerts': typeof ApiPublicJobsAgentWhatsappAlertsRoute
   '/api/public/jobs/firebase-grpc-watch': typeof ApiPublicJobsFirebaseGrpcWatchRoute
   '/api/public/jobs/github-access-watch': typeof ApiPublicJobsGithubAccessWatchRoute
   '/api/public/jobs/inventory-sheet': typeof ApiPublicJobsInventorySheetRoute
@@ -1273,6 +1283,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/agent-whatsapp-alerts'
     | '/api/public/jobs/firebase-grpc-watch'
     | '/api/public/jobs/github-access-watch'
     | '/api/public/jobs/inventory-sheet'
@@ -1399,6 +1410,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/agent-whatsapp-alerts'
     | '/api/public/jobs/firebase-grpc-watch'
     | '/api/public/jobs/github-access-watch'
     | '/api/public/jobs/inventory-sheet'
@@ -1525,6 +1537,7 @@ export interface FileRouteTypes {
     | '/api/public/ingest/recording'
     | '/api/public/ingest/reprocess'
     | '/api/public/integrations/status'
+    | '/api/public/jobs/agent-whatsapp-alerts'
     | '/api/public/jobs/firebase-grpc-watch'
     | '/api/public/jobs/github-access-watch'
     | '/api/public/jobs/inventory-sheet'
@@ -1652,6 +1665,7 @@ export interface RootRouteChildren {
   ApiPublicIngestRecordingRoute: typeof ApiPublicIngestRecordingRoute
   ApiPublicIngestReprocessRoute: typeof ApiPublicIngestReprocessRoute
   ApiPublicIntegrationsStatusRoute: typeof ApiPublicIntegrationsStatusRoute
+  ApiPublicJobsAgentWhatsappAlertsRoute: typeof ApiPublicJobsAgentWhatsappAlertsRoute
   ApiPublicJobsFirebaseGrpcWatchRoute: typeof ApiPublicJobsFirebaseGrpcWatchRoute
   ApiPublicJobsGithubAccessWatchRoute: typeof ApiPublicJobsGithubAccessWatchRoute
   ApiPublicJobsInventorySheetRoute: typeof ApiPublicJobsInventorySheetRoute
@@ -2434,6 +2448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIntegrationsStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/agent-whatsapp-alerts': {
+      id: '/api/public/jobs/agent-whatsapp-alerts'
+      path: '/api/public/jobs/agent-whatsapp-alerts'
+      fullPath: '/api/public/jobs/agent-whatsapp-alerts'
+      preLoaderRoute: typeof ApiPublicJobsAgentWhatsappAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/firebase-grpc-watch': {
       id: '/api/public/jobs/firebase-grpc-watch'
       path: '/api/public/jobs/firebase-grpc-watch'
@@ -2653,6 +2674,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIngestRecordingRoute: ApiPublicIngestRecordingRoute,
   ApiPublicIngestReprocessRoute: ApiPublicIngestReprocessRoute,
   ApiPublicIntegrationsStatusRoute: ApiPublicIntegrationsStatusRoute,
+  ApiPublicJobsAgentWhatsappAlertsRoute: ApiPublicJobsAgentWhatsappAlertsRoute,
   ApiPublicJobsFirebaseGrpcWatchRoute: ApiPublicJobsFirebaseGrpcWatchRoute,
   ApiPublicJobsGithubAccessWatchRoute: ApiPublicJobsGithubAccessWatchRoute,
   ApiPublicJobsInventorySheetRoute: ApiPublicJobsInventorySheetRoute,

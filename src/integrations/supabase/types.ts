@@ -321,6 +321,109 @@ export type Database = {
           },
         ]
       }
+      agent_whatsapp_alerts: {
+        Row: {
+          agent_id: string
+          counts: Json
+          created_at: string
+          dedupe_key: string
+          delivered_at: string | null
+          error_detail: string | null
+          failed_at: string | null
+          id: string
+          kind: string
+          provider_message_id: string | null
+          read_at: string | null
+          sent_at: string | null
+          status: string
+          template: string
+          updated_at: string
+          work_date: string
+        }
+        Insert: {
+          agent_id: string
+          counts?: Json
+          created_at?: string
+          dedupe_key: string
+          delivered_at?: string | null
+          error_detail?: string | null
+          failed_at?: string | null
+          id?: string
+          kind: string
+          provider_message_id?: string | null
+          read_at?: string | null
+          sent_at?: string | null
+          status?: string
+          template: string
+          updated_at?: string
+          work_date: string
+        }
+        Update: {
+          agent_id?: string
+          counts?: Json
+          created_at?: string
+          dedupe_key?: string
+          delivered_at?: string | null
+          error_detail?: string | null
+          failed_at?: string | null
+          id?: string
+          kind?: string
+          provider_message_id?: string | null
+          read_at?: string | null
+          sent_at?: string | null
+          status?: string
+          template?: string
+          updated_at?: string
+          work_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_whatsapp_alerts_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_whatsapp_optins: {
+        Row: {
+          agent_id: string
+          opt_out_source: string | null
+          opted_in: boolean
+          opted_in_at: string | null
+          opted_out_at: string | null
+          updated_at: string
+          whatsapp_number: string
+        }
+        Insert: {
+          agent_id: string
+          opt_out_source?: string | null
+          opted_in?: boolean
+          opted_in_at?: string | null
+          opted_out_at?: string | null
+          updated_at?: string
+          whatsapp_number: string
+        }
+        Update: {
+          agent_id?: string
+          opt_out_source?: string | null
+          opted_in?: boolean
+          opted_in_at?: string | null
+          opted_out_at?: string | null
+          updated_at?: string
+          whatsapp_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_whatsapp_optins_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_summary_cache: {
         Row: {
           content_hash: string
@@ -6787,6 +6890,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      whatsapp_webhook_events: {
+        Row: {
+          attempts: number
+          delivery_id: string
+          event: string
+          id: string
+          next_attempt_at: string
+          payload: Json
+          processed_at: string | null
+          processing_error: string | null
+          received_at: string
+        }
+        Insert: {
+          attempts?: number
+          delivery_id: string
+          event: string
+          id?: string
+          next_attempt_at?: string
+          payload: Json
+          processed_at?: string | null
+          processing_error?: string | null
+          received_at?: string
+        }
+        Update: {
+          attempts?: number
+          delivery_id?: string
+          event?: string
+          id?: string
+          next_attempt_at?: string
+          payload?: Json
+          processed_at?: string | null
+          processing_error?: string | null
+          received_at?: string
+        }
+        Relationships: []
       }
       workspace_role_grants: {
         Row: {

@@ -56,6 +56,7 @@ import { DeskTabBar } from "@/components/crm/desk/DeskTabBar";
 import { SocialDesk } from "@/components/crm/social/SocialDesk";
 import { TodayHero } from "@/components/crm/desk/TodayHero";
 import { MyProgressCard } from "@/components/crm/desk/MyProgressCard";
+import { MyWhatsAppAlerts } from "@/components/crm/desk/MyWhatsAppAlerts";
 import { AiLeadPriority } from "@/components/crm/AiLeadPriority";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSnapshot } from "@/lib/crm-data";
@@ -373,6 +374,7 @@ function DeskPage() {
             <div className="space-y-4 border-t border-border p-3 sm:p-4">
               <MyProfileCard />
               <MyPhoneSetup />
+              <MyWhatsAppAlerts />
               <PhoneSyncGuide />
             </div>
           </details>

@@ -49,3 +49,7 @@
 - Recording audio (player/Recorder/export) uses recording-access.ts; only PIN or admin skip lead ownership — why: moved leads drop audio.
 - AI: ai-model.server.ts + pure ai-providers.ts; HQ picks provider in app_config; meta=muse-spark-1.3 via MODEL_API_KEY; fail-closed, no key fallback, no error bodies logged — why: one switch, no key leaks.
 - desk-queue.ts: not-received/called leads sort behind fresh ones; attempts = max(call_attempts, own reports), no counter rewrite — why: call_attempts feeds eligibility; history stays.
+- Recorder reads agent-own call_recordings + server-only recorder_insights via recorder.functions.ts; AI uses ai-model helper, never invents facts — why: one scoped history.
+- Lead-import previews use only server-configured report workbooks; inventory keeps its own read scope; audit exports neutralise every cell — why: no widened access or formula execution.
+- Website enquiries sync to their own 'Website Enquiries' tab via website-enquiry-sheet.ts (ID-matched, append-only, HQ notes kept; failure never blocks the day tab) — why: separate from agent rows.
+- Call-evidence labels come only from call-evidence.ts over submitted reports, display-only; connection_verified stays the sole scoring signal — why: one explanation, unchanged KPIs.

@@ -1,40 +1,36 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyWebhookRequest } from "@lovable.dev/webhooks-js";
 import { createRateLimiter, requestSourceKey } from "@/lib/rate-limit";
 
-const whatsappLimiter = createRateLimiter(180, 60_000);
+// Flood brake; 503 (not 429) so the gateway retries instead of dropping a delivery.
+const whatsappLimiter = createRateLimiter(600, 60_000);
 
 /**
- * Official Meta WhatsApp Cloud API webhook.
- * GET  — Meta's subscription verification handshake (hub.verify_token).
- * POST — inbound messages / statuses, signature verified before any write.
+ * WhatsApp Business connector callbacks (forwarded and signed by Lovable).
+ * Every verified delivery is stored first in whatsapp_webhook_events, then
+ * processed; failures return 5xx so the delivery is retried.
  */
 export const Route = createFileRoute("/api/public/whatsapp/webhook")({
   server: {
     handlers: {
-      GET: async ({ request }) => {
-        const url = new URL(request.url);
-        const mode = url.searchParams.get("hub.mode");
-        const token = url.searchParams.get("hub.verify_token");
-        const challenge = url.searchParams.get("hub.challenge") ?? "";
-        const expected = process.env["WHATSAPP_WEBHOOK_SECRET"];
-        if (mode === "subscribe" && expected && token === expected) {
-          return new Response(challenge, { headers: { "Content-Type": "text/plain" } });
-        }
-        return new Response("forbidden", { status: 403 });
-      },
       POST: async ({ request }) => {
-        if (!whatsappLimiter(requestSourceKey(request)))
-          return new Response("rate limited", { status: 429 });
-        const rawBody = await request.text();
-        const signature = request.headers.get("x-hub-signature-256");
-        const { getWhatsAppProvider } = await import("@/lib/whatsapp-provider.server");
-        const provider = getWhatsAppProvider();
-        if (provider.status !== "configured") {
-          return new Response("integration required", { status: 503 });
+        if (!whatsappLimiter(requestSourceKey(request))) return new Response("busy", { status: 503 });
+        const secret = process.env["WHATSAPP_API_KEY"];
+        if (!secret) return new Response("not configured", { status: 503 });
+        const deliveryId = request.headers.get("x-lovable-delivery")?.trim() ?? "";
+        const event = request.headers.get("x-lovable-event")?.trim() ?? "";
+        let payload: unknown;
+        try {
+          ({ payload } = await verifyWebhookRequest({ req: request, secret, maxBodyBytes: 4 * 1024 * 1024 }));
+        } catch {
+          return new Response("unauthorized", { status: 401 });
         }
-        const result = await provider.processWebhook({ rawBody, signature });
-        if (!result.ok) return new Response(result.reason ?? "rejected", { status: 401 });
-        return new Response("ok");
+        if (!deliveryId || !event || deliveryId.length > 200 || event.length > 100) {
+          return new Response("missing delivery headers", { status: 400 });
+        }
+        const { receiveWebhook } = await import("@/lib/agent-whatsapp.server");
+        const ok = await receiveWebhook(deliveryId, event, payload);
+        return ok ? new Response("ok") : new Response("retry", { status: 500 });
       },
     },
   },
