@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { ApiCaller } from "@/lib/device-auth.server";
-import { handleReportsSummary, type OwnReportData } from "@/lib/reports-summary.server";
+import { handleReportsSummary, loadOwnReportData, type OwnReportData } from "@/lib/reports-summary.server";
 
 const AGENT = { id: "11111111-1111-4111-8111-111111111111", employee_id: "WIN2601", role: "agent", full_name: "A" };
 const OTHER_ID = "22222222-2222-4222-8222-222222222222";
