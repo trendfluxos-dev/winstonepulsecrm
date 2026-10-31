@@ -37,6 +37,21 @@ its password, the GitHub secret values or `local.properties` while doing this.
 
 What never goes in this file, chat or screenshots: keystore files, store/key passwords, key alias secrets, GitHub secret values.
 
+## 1b. Automatic CI release check
+
+`scripts/verify-android-apk.sh` runs in `android-apk.yml` (test + release jobs) and `android-release.yml` (tags)
+before any APK is saved to `apk-builds`, uploaded as an artifact or attached to a GitHub Release. It fails the job when:
+
+- `build.gradle.kts` or the built APK does not carry the expected versionName/versionCode (tag `vX.Y` must equal versionName);
+- the package id is not `com.winstone.connect` (release) / `com.winstone.connect.test` (test);
+- the APK is not v2/v3 signed by exactly one signer whose SHA-256 equals repository variable
+  `WINSTONE_RELEASE_CERT_SHA256` (release; missing variable = fail; Android debug key = fail). Test builds must match
+  `WINSTONE_TEST_CERT_SHA256` or, when unset, the previous `build-info-test.txt` signer;
+- the written `<apk>.sha256` does not verify, before and after copying to `apk-builds`.
+
+The record (`build-info-release.txt` / `build-info-test.txt`) stores package, version, signer and APK SHA-256.
+A passing check is build evidence only; the device rows below still need a real phone.
+
 ## 2. Included fixes
 
 | Fix | Status |
