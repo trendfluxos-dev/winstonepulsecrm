@@ -67,3 +67,42 @@ export function offlineTimeline(item: OfflineItem | SentItem): { steps: OfflineT
     attempts: item.attempts + (item.status === "syncing" ? 1 : 0),
   };
 }
+
+/** A report counts as stuck after this long in "Syncing". */
+export const SYNCING_ALERT_MS = 2 * 60 * 1000;
+/** ...or when it still has not reached "Sent" this long after it was queued. */
+export const NOT_SENT_ALERT_MS = 15 * 60 * 1000;
+
+export type StuckReason = "syncing_too_long" | "not_sent" | "refused";
+
+/**
+ * Offline call reports that need the agent's attention. Only report_submit
+ * items count; a refusal from the server is always an alert.
+ */
+export function stuckReports(
+  queue: readonly OfflineItem[],
+  sent: readonly SentItem[],
+  now = Date.now(),
+): { id: string; label: string; reason: StuckReason; since: string }[] {
+  const out: { id: string; label: string; reason: StuckReason; since: string }[] = [];
+  for (const item of queue) {
+    if (item.kind !== "report_submit") continue;
+    if (item.status === "syncing" && item.lastAttemptAt && now - Date.parse(item.lastAttemptAt) >= SYNCING_ALERT_MS) {
+      out.push({ id: item.id, label: item.label, reason: "syncing_too_long", since: item.lastAttemptAt });
+    } else if (now - Date.parse(item.createdAt) >= NOT_SENT_ALERT_MS) {
+      out.push({ id: item.id, label: item.label, reason: "not_sent", since: item.createdAt });
+    }
+  }
+  for (const s of sent) {
+    if (s.kind === "report_submit" && s.outcome === "not_accepted") {
+      out.push({ id: s.id, label: s.label, reason: "refused", since: s.sentAt });
+    }
+  }
+  return out;
+}
+
+export const STUCK_REASON_LABEL: Record<StuckReason, Bi> = {
+  syncing_too_long: { bn: "অনেকক্ষণ ধরে পাঠানো হচ্ছে — সংযোগ দেখুন", en: "Stuck in Syncing — check the connection" },
+  not_sent: { bn: "১৫ মিনিটেও সার্ভারে পৌঁছায়নি", en: "Not sent after 15 minutes" },
+  refused: { bn: "সার্ভার নেয়নি — রিপোর্ট আবার দেখুন বা IT-কে জানান", en: "Refused by the server — check it or tell IT" },
+};
