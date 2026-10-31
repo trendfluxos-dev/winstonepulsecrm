@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-11-01 — Phone app 2.22 (auto permission ask)
+- [x] Version set to 2.22 / code 33 in app + build check so it installs over 2.21.
+- [ ] Build 2.22-test APK: blocked — GitHub still at 04:38 UTC Oct 31 (no permission-flow code); owner must restore Git sync (Project settings → Git). Local build would carry a different signature and force agents to uninstall, so not used.
+- [ ] Signed live 2.22: also needs the 4 signing settings in the repository.
+
 ## 2026-10-31 — Publish, screen readers, WhatsApp reports, phone app
 - [x] Publish requested for crm.winstonebd.com (basic security scan clean).
 - [ ] TalkBack/VoiceOver walk on real devices — needs a person with an Android phone and an iPhone (guide: accessibility/version-line-screen-reader-guide.pdf).
