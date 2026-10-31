@@ -1,4 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { listLeadReports } from "@/lib/lead-notes.functions";
+import { useAdminToken } from "@/lib/local-session";
+import { useLang, useT } from "@/lib/i18n";
+import { leadAttemptInfo } from "@/lib/desk-queue";
+import { relativeTime } from "@/lib/crm-format";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Activity,
@@ -64,6 +69,38 @@ const SENTIMENT_STYLES: Record<string, string> = {
   critical: "bg-destructive/15 text-destructive border-destructive/30",
 };
 
+/** Attempts + last attempt from this lead's saved reports (same query as the reports list). */
+function LeadAttemptChips({ lead }: { lead: Lead }) {
+  const t = useT();
+  const lang = useLang();
+  const adminToken = useAdminToken();
+  const fetchReports = useServerFn(listLeadReports);
+  const { data: reports = [], isPending } = useQuery({
+    queryKey: ["lead-reports", lead.id, adminToken ? "pin" : "session"],
+    queryFn: () => fetchReports({ data: { adminToken, leadId: lead.id } }),
+  });
+  const info = leadAttemptInfo(lead, reports);
+  const n = info.attempts.toLocaleString(lang === "en" ? "en-GB" : "bn-BD");
+  const chip = "rounded-full border border-border bg-card px-2.5 py-1";
+  return (
+    <>
+      <span className={chip} aria-busy={isPending || undefined}>
+        {info.attempts
+          ? t({ bn: `${n} বার চেষ্টা`, en: `${n} ${info.attempts === 1 ? "attempt" : "attempts"}` })
+          : t({ bn: "এখনো কল হয়নি", en: "Not called yet" })}
+      </span>
+      {info.lastAttemptAt && (
+        <span className={chip} title={fullDateTime(info.lastAttemptAt)}>
+          {t({ bn: "শেষ চেষ্টা", en: "Last attempt" })}: {fullDateTime(info.lastAttemptAt)} ({relativeTime(info.lastAttemptAt)})
+          {info.lastCategory && CATEGORY_LABEL_CLIENT[info.lastCategory as keyof typeof CATEGORY_LABEL_CLIENT]
+            ? ` · ${CATEGORY_LABEL_CLIENT[info.lastCategory as keyof typeof CATEGORY_LABEL_CLIENT]}`
+            : ""}
+        </span>
+      )}
+    </>
+  );
+}
+
 export function LeadDossier({
   lead,
   timeline,
@@ -108,9 +145,7 @@ export function LeadDossier({
                     {lead.outcome_category.replace(/_/g, " ")}
                   </span>
                 )}
-                <span className="rounded-full border border-border bg-card px-2.5 py-1">
-                  {lead.call_attempts}টি চেষ্টা
-                </span>
+                <LeadAttemptChips lead={lead} />
                 {agent && (
                   <span className="rounded-full border border-border bg-card px-2.5 py-1">
                     {agent.name}
