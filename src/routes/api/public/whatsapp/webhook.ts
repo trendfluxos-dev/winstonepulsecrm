@@ -1,5 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyWebhookRequest } from "@lovable.dev/webhooks-js";
+import { createRateLimiter, requestSourceKey } from "@/lib/rate-limit";
+
+// Flood brake; 503 (not 429) so the gateway retries instead of dropping a delivery.
+const whatsappLimiter = createRateLimiter(600, 60_000);
 
 /**
  * WhatsApp Business connector callbacks (forwarded and signed by Lovable).
@@ -10,6 +14,7 @@ export const Route = createFileRoute("/api/public/whatsapp/webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        if (!whatsappLimiter(requestSourceKey(request))) return new Response("busy", { status: 503 });
         const secret = process.env.WHATSAPP_API_KEY;
         if (!secret) return new Response("not configured", { status: 503 });
         const deliveryId = request.headers.get("x-lovable-delivery")?.trim() ?? "";
