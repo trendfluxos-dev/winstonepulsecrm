@@ -16,10 +16,8 @@ export const Route = createFileRoute("/api/public/email-events")({
   server: {
     handlers: {
       GET: async () =>
-        json(200, {
-          receiver: "hostinger-email-events",
-          configured: Boolean(process.env["HOSTINGER_EMAIL_WEBHOOK_SECRET"]),
-        }),
+        // Never reveal whether the signing secret is set.
+        json(200, { receiver: "hostinger-email-events" }),
       POST: async ({ request }) => {
         if (!limiter(requestSourceKey(request)))
           return json(429, { ok: false, error: "rate_limited" });

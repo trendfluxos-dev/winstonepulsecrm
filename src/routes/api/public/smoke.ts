@@ -67,12 +67,12 @@ export const Route = createFileRoute("/api/public/smoke")({
               ? `অ্যাপ ফাইল আছে — ${(size / (1024 * 1024)).toFixed(1)} MB`
               : "অ্যাপ ফাইল স্টোরেজে পাওয়া যায়নি",
           });
-        } catch (err) {
+        } catch {
           checks.push({
             name: "/api/public/download/apk",
             ok: false,
             status: null,
-            detail: err instanceof Error ? err.message : "স্টোরেজ পড়া যায়নি",
+            detail: "স্টোরেজ পড়া যায়নি",
           });
         }
 
@@ -103,12 +103,12 @@ export const Route = createFileRoute("/api/public/smoke")({
             status: res.status,
             detail: res.status < 400 ? "সার্ভার সাড়া দিচ্ছে" : "সার্ভার সাড়া দিচ্ছে না",
           });
-        } catch (err) {
+        } catch {
           checks.push({
             name: "/api/public/agent/version",
             ok: false,
             status: null,
-            detail: err instanceof Error ? err.message : "রিকোয়েস্ট ব্যর্থ",
+            detail: "রিকোয়েস্ট ব্যর্থ",
           });
         }
 

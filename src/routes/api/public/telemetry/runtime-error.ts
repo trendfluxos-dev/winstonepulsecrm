@@ -1,5 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { createRateLimiter, requestSourceKey } from "@/lib/rate-limit";
+
+// Flood brake: one browser should never need more than this many reports a minute.
+const limiter = createRateLimiter(30, 60_000);
 
 /**
  * Browser crash reports. Public on purpose — a page that failed to load has no
@@ -17,6 +21,7 @@ export const Route = createFileRoute("/api/public/telemetry/runtime-error")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        if (!limiter(requestSourceKey(request))) return new Response(null, { status: 429 });
         const origin = request.headers.get("origin");
         const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
         if (origin && host && new URL(origin).host !== host) {
