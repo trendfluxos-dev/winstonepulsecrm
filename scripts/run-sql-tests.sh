@@ -10,6 +10,5 @@ P=("$PGBIN/psql" -h "$DIR" -p 55432 -U postgres -v ON_ERROR_STOP=1 -q -P pager=o
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 "${P[@]}" -f "$ROOT/tests/sql/fixtures.sql"
 "${P[@]}" -f "$ROOT/drizzle/migrations/0137_atomic_report_finalize_and_outcome_receipts.sql"
-"${P[@]}" -f "$ROOT/tests/sql/finalize-and-outcome.test.sql"
-"${P[@]}" -f "$ROOT/tests/sql/qualification.test.sql"
+"${P[@]}" -f "$ROOT/tests/sql/finalize-and-outcome.test.sql" -f "$ROOT/tests/sql/qualification.test.sql"
 echo "SQL tests: PASS"
