@@ -85,11 +85,18 @@ CERTS=$("$BT/apksigner" verify --verbose --print-certs "$APK" 2>&1) || fail "apk
 echo "$CERTS" | grep -q "^Verifies" || fail "apksigner did not report 'Verifies'"
 echo "$CERTS" | grep -Eq "^Verified using v(2|3) scheme.*: true" \
   || fail "APK is not signed with APK Signature Scheme v2 or v3"
-SIGNERS=$(echo "$CERTS" | grep -c "^Signer #[0-9]* certificate SHA-256 digest" || true)
-[ "$SIGNERS" = "1" ] || fail "expected exactly one signer, found $SIGNERS"
-ACT_CERT=$(normalize_cert "$(echo "$CERTS" | grep -m1 "^Signer #1 certificate SHA-256 digest" | awk -F': ' '{print $NF}')")
+# apksigner labels signers "Signer #1" or, for SDK-targeted v3/v3.1 blocks,
+# "Signer (minSdkVersion=24, maxSdkVersion=2147483647)". The same certificate can
+# appear once per block, so count DISTINCT certificate digests. Certificates and
+# fingerprints are public; key material never reaches this output.
+SIGNER_RE='^[[:space:]]*Signer (#[0-9]+|\(minSdkVersion=[0-9]+, maxSdkVersion=[0-9]+\)) certificate'
+echo "$CERTS" | grep -E "^Verif|^Number of signers|$SIGNER_RE (DN|SHA-256 digest)" || true
+DIGESTS=$(echo "$CERTS" | grep -E "$SIGNER_RE SHA-256 digest: " | awk -F': ' '{print $NF}' | tr -d ': ' | tr 'A-F' 'a-f' | sort -u)
+SIGNERS=$(printf '%s' "$DIGESTS" | grep -c . || true)
+[ "$SIGNERS" = "1" ] || fail "expected exactly one signer certificate, found $SIGNERS"
+ACT_CERT=$(normalize_cert "$DIGESTS")
 [[ "$ACT_CERT" =~ ^[0-9a-f]{64}$ ]] || fail "could not read the signer SHA-256 fingerprint"
-SIGNER_DN=$(echo "$CERTS" | grep -m1 "^Signer #1 certificate DN" | sed 's/^Signer #1 certificate DN: //')
+SIGNER_DN=$(echo "$CERTS" | grep -E -m1 "$SIGNER_RE DN: " | sed -E 's/^.* certificate DN: //')
 
 WANT=$(normalize_cert "$WANT_CERT")
 CERT_SOURCE="expected fingerprint"
