@@ -52,6 +52,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { getDeskReports, getDeskWork } from "@/lib/desk-work.functions";
 import { attemptCount, compareQueue, lastWasNotReceived, summarizeReports } from "@/lib/desk-queue";
 import { getDailyAllocation } from "@/lib/daily-allocation.functions";
+import { phoneLogMissing, summarizeEvidence, talkLabel, type EvidenceSummary } from "@/lib/call-evidence";
+import { inDhakaRange, uniqueById } from "@/lib/kpi-contract";
 import { deskFollowUpCounts, deskLeadCounts, deskReportCounts, isActiveAssigned, isHotActive } from "@/lib/desk-counts";
 import { cn } from "@/lib/utils";
 import { isParked } from "@/lib/no-answer-cadence";
@@ -223,6 +225,9 @@ export function DeskCommandCenter({
     const lc = deskLeadCounts(leads, me, { from: today, to: today });
     const fu = deskFollowUpCounts(deskWork.data?.followUps ?? [], new Date(now));
     const rc = deskReportCounts(deskWork.data?.reports ?? [], today);
+    const evidence = summarizeEvidence(
+      uniqueById(deskWork.data?.reports ?? []).filter((r) => inDhakaRange(r.submitted_at, { from: today, to: today })),
+    );
     return {
       total: lc.active,
       allTime: lc.allTimeOwned,
@@ -235,6 +240,7 @@ export function DeskCommandCenter({
       connectRate: todayCalls.length ? Math.round((connected / todayCalls.length) * 100) : 0,
       reports: rc.submitted,
       reportedConnected: rc.reportedConnected,
+      evidence,
       talk: todayCalls.reduce((s, c) => s + c.duration_seconds, 0),
       whatsapp: onToday(messages).length,
       followUp: fu.open,
@@ -551,8 +557,8 @@ export function DeskCommandCenter({
             label={t({ bn: "জমা দেওয়া কল রিপোর্ট", en: "Submitted call reports" })}
             value={deskWork.isError ? t({ bn: "পাওয়া যায়নি", en: "Unavailable" }) : bn(stats.reports, lang)}
             sub={t({
-              bn: `আজ জমা দেওয়া কল রিপোর্ট (ঢাকা সময়) · ${bn(stats.reportedConnected, lang)}টিতে কথা হয়েছে`,
-              en: `Call reports submitted today (Dhaka, by submit time) · ${bn(stats.reportedConnected, lang)} marked connected`,
+              bn: `আজ (ঢাকা) · কথা হয়েছে ${bn(stats.reportedConnected, lang)} — ফোনে প্রমাণিত ${bn(stats.evidence.phoneVerified, lang)}, শুধু রিপোর্টে ${bn(stats.evidence.reportedOnly, lang)}${stats.evidence.mismatch ? ` · মেলেনি ${bn(stats.evidence.mismatch, lang)}` : ""}`,
+              en: `Today (Dhaka) · ${bn(stats.reportedConnected, lang)} connected — ${bn(stats.evidence.phoneVerified, lang)} phone-verified, ${bn(stats.evidence.reportedOnly, lang)} report-only${stats.evidence.mismatch ? ` · ${bn(stats.evidence.mismatch, lang)} mismatch` : ""}`,
             })}
             loading={isPending}
           />
@@ -986,12 +992,14 @@ export function DeskCommandCenter({
               <div className="mt-3 space-y-2.5 text-xs">
                 <Meter label={t({ bn: "লিড শেষ", en: "Completed" })} value={stats.done} total={stats.total} />
                 <Meter label={t({ bn: "কথা হয়েছে (রিপোর্ট)", en: "Connected (reports)" })} value={stats.reportedConnected} total={stats.reports} />
+                <Meter label={t({ bn: "ফোনের কল-লগে প্রমাণিত", en: "Proven by phone call log" })} value={stats.evidence.phoneVerified} total={stats.reportedConnected} />
                 <Meter
                   label={t({ bn: "ফলো-আপ সময়মতো", en: "On-time follow-ups" })}
                   value={Math.max(stats.followUp - stats.overdue, 0)}
                   total={stats.followUp}
                 />
               </div>
+              <CallEvidenceNote evidence={stats.evidence} />
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <MiniStat label={t({ bn: "আজ যোগ হওয়া লিড", en: "New today" })} value={bn(stats.newToday, lang)} />
                 <MiniStat label={t({ bn: "আজ জমা রিপোর্ট", en: "Reports today" })} value={bn(stats.reports, lang)} />
@@ -1329,6 +1337,38 @@ function Lead360Content({
         <p className="rounded-lg bg-surface-2 p-3 text-xs text-muted-foreground">{selected.notes}</p>
       )}
     </div>
+  );
+}
+
+/** Plain-words note on how many of today's connected calls the phone's own call log proves. */
+function CallEvidenceNote({ evidence }: { evidence: EvidenceSummary }) {
+  const t = useT();
+  if (!evidence.reports) return null;
+  if (evidence.mismatch)
+    return (
+      <p role="status" className="mt-3 rounded-md border border-destructive/40 bg-destructive/5 p-2 text-[11px] text-destructive">
+        {t({
+          bn: `${evidence.mismatch}টি রিপোর্ট ফোনের কল-লগের সাথে মেলেনি — "আমার কল রিপোর্ট"-এ লাল চিহ্ন দেখে ঠিক ফলাফল দিন।`,
+          en: `${evidence.mismatch} report(s) disagree with the phone call log — check the red marks in "My call reports".`,
+        })}
+      </p>
+    );
+  if (phoneLogMissing(evidence))
+    return (
+      <p role="status" className="mt-3 rounded-md border border-warning/40 bg-warning/10 p-2 text-[11px] text-foreground">
+        {t({
+          bn: "আজ কোনো কল ফোনের কল-লগে প্রমাণিত হয়নি। WINSTONE Connect অ্যাপ থেকে কল করলে কথার সময় নিজে থেকে প্রমাণিত হবে।",
+          en: "No call today is proven by the phone call log yet. Call from the WINSTONE Connect app and talk time is proven automatically.",
+        })}
+      </p>
+    );
+  return (
+    <p className="mt-3 text-[11px] text-muted-foreground">
+      {t({
+        bn: `ফোনে প্রমাণিত কথার সময়: ${talkLabel(evidence.verifiedTalkSeconds)}`,
+        en: `Phone-proven talk time: ${talkLabel(evidence.verifiedTalkSeconds)}`,
+      })}
+    </p>
   );
 }
 

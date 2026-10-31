@@ -35,6 +35,9 @@ export type CcReport = {
   recording_id?: string | null;
   status?: string;
   connection_verified?: boolean | null;
+  duration_source?: string | null;
+  duration_seconds?: number | null;
+  channel?: string | null;
 };
 export type CcFollowUp = {
   id: string;

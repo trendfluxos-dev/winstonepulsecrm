@@ -10,6 +10,7 @@ import { CATEGORY_LABEL_CLIENT } from "@/lib/call-categories";
 import { myCallReports, summarizeMyReport } from "@/lib/call-reports.functions";
 import { clockTime, fullDateTime, relativeTime } from "@/lib/crm-format";
 import { durationSourceLabel } from "@/lib/call-duration";
+import { EVIDENCE_LABEL, EVIDENCE_TONE, callEvidence, callTimeLabel, summarizeEvidence } from "@/lib/call-evidence";
 import { useAdminToken } from "@/lib/local-session";
 import { FOLLOW_UP_PRIORITY_LABEL } from "@/lib/follow-up-priority";
 import type { ReportBrief } from "@/lib/report-summary.server";
@@ -56,7 +57,7 @@ export function MyReports() {
   const reports = data?.reports ?? [];
   const upcoming = data?.upcoming ?? [];
   const submitted = reports.filter((r) => r.status === "submitted");
-  const phoneSynced = submitted.filter((r) => r.duration_source === "phone_sync");
+  const evidence = summarizeEvidence(submitted);
   const talkMinutes = Math.round(submitted.reduce((sum, r) => sum + (r.duration_seconds ?? 0), 0) / 60);
 
   return (
@@ -110,7 +111,7 @@ export function MyReports() {
         <div className="grid grid-cols-3 gap-2">
           {[
             { label: "জমা দেওয়া রিপোর্ট", value: submitted.length },
-            { label: "ফোনের সময় মিলেছে", value: phoneSynced.length },
+            { label: "ফোনে প্রমাণিত কথা", value: evidence.phoneVerified },
             { label: "মোট কথা (মিনিট)", value: talkMinutes },
           ].map((tile) => (
             <div key={tile.label} className="rounded-lg border bg-card p-3">
@@ -140,8 +141,15 @@ export function MyReports() {
                       : (report.category && CATEGORY_LABEL_CLIENT[report.category]) || "জমা হয়েছে"}
                   </Badge>
                 </div>
+                {report.status === "submitted" ? (
+                  <div className="mt-1.5">
+                    <Badge variant={EVIDENCE_TONE[callEvidence(report)]}>
+                      {EVIDENCE_LABEL[callEvidence(report)].bn}
+                    </Badge>
+                  </div>
+                ) : null}
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {report.connected ? "সংযুক্ত" : "সংযোগ হয়নি"} · {report.duration_seconds}s ·{" "}
+                  {callTimeLabel(report) ?? `${report.duration_seconds}s`} ·{" "}
                   {relativeTime(report.call_ended_at)}
                   {report.follow_up_at ? ` · ফলো-আপ ${clockTime(report.follow_up_at)}` : ""}
                 </p>
