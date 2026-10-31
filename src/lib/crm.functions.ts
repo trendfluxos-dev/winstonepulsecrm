@@ -207,12 +207,16 @@ export const getAudioUrl = createServerFn({ method: "POST" })
       .maybeSingle();
     if (lookupError) throw new Error("Could not load this recording");
     if (!recording?.audio_url) throw new Error("This recording has no audio");
-    if (caller.scope === "agent" && recording.agent_id !== caller.profile?.id) {
+    const { hasFullRecordingAccess } = await import("@/lib/recording-access");
+    // Signed-in staff (incl. agents with HQ viewing) need current ownership;
+    // only an HQ/IT PIN session or an admin account hears every recording.
+    const mustOwn = !hasFullRecordingAccess(caller);
+    if (mustOwn && recording.agent_id !== caller.profile?.id) {
       throw new Error("This recording belongs to another agent");
     }
     const scope = await import("@/lib/assigned-lead-scope.server");
     const agentId = caller.profile?.id ?? "";
-    if (caller.scope === "agent") await scope.assertAssignedLead(agentId, recording.lead_id);
+    if (mustOwn) await scope.assertAssignedLead(agentId, recording.lead_id);
     // No bearer link leaves the server: the audio bytes are returned only to
     // this verified request, so a later reassignment revokes access at once.
     const { data: file, error } = await supabaseAdmin.storage
@@ -225,7 +229,7 @@ export const getAudioUrl = createServerFn({ method: "POST" })
       return { status: "too_large" as const, sizeBytes: file.size };
     }
     // Re-check after the download so a reassignment during it is honoured.
-    if (caller.scope === "agent") await scope.assertAssignedLead(agentId, recording.lead_id);
+    if (mustOwn) await scope.assertAssignedLead(agentId, recording.lead_id);
     const bytes = new Uint8Array(await file.arrayBuffer());
     let binary = "";
     for (let i = 0; i < bytes.length; i += 0x8000) {

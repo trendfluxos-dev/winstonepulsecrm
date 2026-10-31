@@ -68,6 +68,7 @@ export function CallAudioPlayer({
     data: payload,
     isPending,
     isError,
+    error: loadError,
   } = useMutation({
     mutationFn: () => resolveAudio({ data: { adminToken, recordingId } }),
   });
@@ -298,7 +299,14 @@ export function CallAudioPlayer({
         </div>
       )}
 
-      {isError && (
+      {isError && /not assigned to you|belongs to another agent/i.test(String(loadError?.message)) && (
+        <p role="status" className="mt-2 text-xs text-ink-muted">
+          এই লিডটি এখন আপনার নামে নেই, তাই রেকর্ডিংটি শোনা বা ডাউনলোড করা যাবে না। This lead is no
+          longer assigned to you, so its recording is not available.
+        </p>
+      )}
+
+      {isError && !/not assigned to you|belongs to another agent/i.test(String(loadError?.message)) && (
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
           <p className="text-destructive">
             রেকর্ডিংটি লোড করা যায়নি। This recording could not be loaded for playback.

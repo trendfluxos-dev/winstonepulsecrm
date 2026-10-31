@@ -177,10 +177,17 @@ export const getRecorderPlayback = createServerFn({ method: "POST" })
     const q =
       data.kind === "voice"
         ? await supabaseAdmin.from("recorder_insights").select("agent_id, storage_path").eq("id", data.id).maybeSingle()
-        : await supabaseAdmin.from("call_recordings").select("agent_id, storage_path, audio_url").eq("id", data.id).maybeSingle();
-    const row = q.data as { agent_id: string; storage_path: string | null; audio_url?: string | null } | null;
+        : await supabaseAdmin.from("call_recordings").select("agent_id, lead_id, storage_path, audio_url").eq("id", data.id).maybeSingle();
+    const row = q.data as { agent_id: string; lead_id?: string | null; storage_path: string | null; audio_url?: string | null } | null;
     if (!row) throw new Error("Recording not found");
-    if (me.scope !== "authority" && row.agent_id !== me.profile?.id) throw new Error("This recording belongs to another agent");
+    const { hasFullRecordingAccess } = await import("@/lib/recording-access");
+    const mustOwn = !hasFullRecordingAccess(me);
+    if (mustOwn && row.agent_id !== me.profile?.id) throw new Error("This recording belongs to another agent");
+    // Call audio also needs the lead to still be this agent's (moved lead = no access).
+    if (mustOwn && data.kind === "call") {
+      const { assertAssignedLead } = await import("@/lib/assigned-lead-scope.server");
+      await assertAssignedLead(me.profile?.id ?? "", row.lead_id ?? null);
+    }
     const path = data.kind === "call" ? row.audio_url || row.storage_path : row.storage_path;
     if (!path) throw new Error("This recording has no audio");
     const { data: signed, error } = await supabaseAdmin.storage.from("call-audio").createSignedUrl(path, 2 * 60);
