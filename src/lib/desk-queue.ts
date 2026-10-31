@@ -96,3 +96,29 @@ export function compareQueue(
   if (byTemp !== 0) return byTemp;
   return (a.serial_no ?? "").localeCompare(b.serial_no ?? "", "bn", { numeric: true });
 }
+
+/**
+ * Lead details panel: attempts and last attempt from this lead's own saved
+ * reports (submitted only), never lower than the stored call counter.
+ */
+export function leadAttemptInfo(
+  lead: { call_attempts?: number | null; last_call_at?: string | null },
+  reports: readonly { status?: string | null; submitted_at?: string | null; call_ended_at?: string | null; category?: string | null }[],
+): { attempts: number; lastAttemptAt: string | null; lastCategory: string | null } {
+  let lastAt: string | null = lead.last_call_at ?? null;
+  let lastCategory: string | null = null;
+  let lastReportAt = -Infinity;
+  let count = 0;
+  for (const r of reports) {
+    if (!r.submitted_at) continue;
+    count += 1;
+    const at = r.call_ended_at ?? r.submitted_at;
+    const ms = Date.parse(at);
+    if (ms > lastReportAt) {
+      lastReportAt = ms;
+      lastCategory = r.category ?? null;
+    }
+    if (!lastAt || ms > Date.parse(lastAt)) lastAt = at;
+  }
+  return { attempts: Math.max(lead.call_attempts ?? 0, count), lastAttemptAt: lastAt, lastCategory };
+}
