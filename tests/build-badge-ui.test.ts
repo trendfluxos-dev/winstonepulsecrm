@@ -72,3 +72,32 @@ describe("version indicator in the mobile menu", () => {
     });
   }
 });
+
+describe("version indicator accessibility", () => {
+  for (const [lang, host, sentence] of [
+    ["en", "crm.winstonebd.com", /^CRM version: Live, version \S+, published .+ Dhaka time$/],
+    ["en", "localhost", /^CRM version: Preview, version \S+, published .+ Dhaka time$/],
+    ["bn", "crm.winstonebd.com", /^CRM সংস্করণ: লাইভ, ভার্সন \S+, প্রকাশিত .+ ঢাকা সময়$/],
+  ] as const) {
+    it(`screen readers hear one full sentence (${lang}, ${host})`, async () => {
+      localStorage.setItem("winstone.lang", lang);
+      setHost(host);
+      const { container } = render(React.createElement(NavSidebar, { items }));
+      const badge = await within(container).findByTestId("build-badge");
+      const sr = await within(badge).findByTestId("build-badge-sr");
+      await within(badge).findByText(sentence);
+      expect(sr.className).toContain("sr-only");
+      // Visible shorthand and the dot are hidden from screen readers so nothing is read twice.
+      expect(within(badge).getByTestId("build-badge-visible").getAttribute("aria-hidden")).toBe("true");
+      expect(badge.querySelector("span.rounded-full")?.getAttribute("aria-hidden")).toBe("true");
+    });
+  }
+
+  it("never relies on colour alone: the status word is visible text", async () => {
+    setHost("crm.winstonebd.com");
+    const { container } = render(React.createElement(NavSidebar, { items }));
+    const badge = await within(container).findByTestId("build-badge");
+    const visible = await within(badge).findByTestId("build-badge-visible");
+    await within(visible).findByText("Live");
+  });
+});
