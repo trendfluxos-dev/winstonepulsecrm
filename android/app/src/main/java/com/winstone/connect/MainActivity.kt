@@ -160,7 +160,7 @@ class MainActivity : ComponentActivity() {
 
     private companion object {
         /** Bumped to force a fresh pending-report check. */
-        private val reportTick = MutableStateFlow(0)
+        val reportTick = MutableStateFlow(0)
     }
 
     /** Permissions already asked since the app last came to the front (no prompt loops). */
