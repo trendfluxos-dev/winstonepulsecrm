@@ -31,6 +31,7 @@ export type OfflineItem = {
 type Listener = (items: OfflineItem[]) => void;
 
 const listeners = new Set<Listener>();
+let flushing = false;
 
 export function newEventId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -169,7 +170,6 @@ export type Senders = {
   report_submit: (payload: Record<string, unknown>) => Promise<unknown>;
 };
 
-let flushing = false;
 
 /** Replays the queue oldest-first. Stops on the first network failure. */
 export async function flushQueue(senders: Senders): Promise<{ synced: number; failed: number }> {

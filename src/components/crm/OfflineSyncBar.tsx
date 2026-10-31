@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Activity, CloudOff, RefreshCw, WifiOff } from "lucide-react";
+import { Activity, Check, CloudOff, Loader2, RefreshCw, WifiOff } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -9,7 +9,8 @@ import { submitMyReport, syncOfflineCallEvent } from "@/lib/call-reports.functio
 import { useT } from "@/lib/i18n";
 import { type LoadRecord, readLoads, STEP_LABELS, subscribeLoads } from "@/lib/load-perf";
 import { useAdminToken } from "@/lib/local-session";
-import { flushQueue, markPending, type OfflineItem, subscribeQueue } from "@/lib/offline-queue";
+import { clearSent, flushQueue, markPending, type OfflineItem, type SentItem, subscribeQueue, subscribeSent } from "@/lib/offline-queue";
+import { offlineStatusLabel } from "@/lib/offline-status";
 
 const DATA_LABELS: Record<string, { bn: string; en: string }> = {
   "my-account": { bn: "অ্যাকাউন্ট", en: "Account" },
@@ -42,7 +43,9 @@ export function OfflineSyncBar() {
   const sendCall = useServerFn(syncOfflineCallEvent);
   const sendReport = useServerFn(submitMyReport);
 
+  const [sent, setSent] = useState<SentItem[]>([]);
   useEffect(() => subscribeQueue(setItems), []);
+  useEffect(() => subscribeSent(setSent), []);
   useEffect(() => {
     setLoads(readLoads());
     return subscribeLoads(() => setLoads(readLoads()));
@@ -211,6 +214,31 @@ export function OfflineSyncBar() {
         </div>
       )}
 
+      {sent.some((s) => s.kind === "report_submit") && (
+        <div className="space-y-1.5 rounded-xl border border-live/30 bg-live/10 p-3 text-xs">
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-bold">{t({ bn: "অফলাইন রিপোর্ট — সার্ভারে পৌঁছেছে", en: "Offline reports — reached the server" })}</p>
+            <button type="button" className="text-muted-foreground hover:text-foreground" onClick={clearSent}>
+              {t({ bn: "লুকান", en: "Hide" })}
+            </button>
+          </div>
+          {sent.filter((s) => s.kind === "report_submit").slice(0, 5).map((s) => {
+            const st = offlineStatusLabel(s);
+            return (
+              <p key={s.id} className={`flex items-start gap-1.5 ${s.outcome === "not_accepted" ? "text-destructive" : ""}`}>
+                <Check className="mt-0.5 size-3.5 shrink-0" />
+                <span className="min-w-0">
+                  <b className="font-semibold">{t(st.title)}</b> · {s.label}
+                  <span className="block text-[11px] text-muted-foreground">
+                    {t(st.hint)} · {fmtTime(Date.parse(s.sentAt))}
+                  </span>
+                </span>
+              </p>
+            );
+          })}
+        </div>
+      )}
+
       {(items.length > 0 || !online) && (
         <div className="space-y-1.5 rounded-xl border border-warning/40 bg-warning/10 p-3 text-xs">
           <p className="flex items-center gap-1.5 font-bold">
@@ -219,12 +247,18 @@ export function OfflineSyncBar() {
               ? `${items.length}টি কাজ এখনো এই ফোনেই আছে — সার্ভারে পাঠানো হচ্ছে`
               : "ইন্টারনেট সংযোগ বিচ্ছিন্ন — ড্যাশবোর্ডের ডেটা এখন আপডেট হবে না। কাজ এই ফোনে সেভ হচ্ছে; নেট ফিরলে নিজে থেকেই আবার লোড ও সিঙ্ক হবে"}
           </p>
-          {items.slice(0, 5).map((item) => (
-            <p key={item.id} className={item.status === "failed" ? "text-destructive" : "text-muted-foreground"}>
-              • {item.label} —{" "}
-              {item.status === "failed" ? `পাঠানো যায়নি (${item.lastError ?? "ত্রুটি"})` : "সিঙ্ক বাকি"}
-            </p>
-          ))}
+          {items.slice(0, 8).map((item) => {
+            const st = offlineStatusLabel(item);
+            return (
+              <p key={item.id} className={`flex items-start gap-1.5 ${item.status === "failed" ? "text-destructive" : "text-muted-foreground"}`}>
+                {item.status === "syncing" ? <Loader2 className="mt-0.5 size-3.5 shrink-0 animate-spin" /> : <span className={`mt-1 size-2 shrink-0 rounded-full ${item.status === "failed" ? "bg-destructive" : "bg-warning"}`} />}
+                <span className="min-w-0">
+                  <b className="font-semibold text-foreground">{t(st.title)}</b> · {item.label}
+                  <span className="block text-[11px]">{t(st.hint)}{item.status === "failed" && item.lastError ? ` (${item.lastError})` : ""}</span>
+                </span>
+              </p>
+            );
+          })}
           {failed.length ? (
             <Button
               type="button"
