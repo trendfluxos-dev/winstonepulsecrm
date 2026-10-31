@@ -121,6 +121,7 @@ class ShortRejectionReportUiTest {
         selectCategory("fake")
         compose.onNodeWithText("ধরেনি", substring = true).performScrollTo().performClick()
         compose.onNodeWithText("রিপোর্ট জমা দিন").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag("fake-needs-answered-call").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("লিড মূল্যায়ন — সব প্রশ্নের হ্যাঁ / না দিন").assertDoesNotExist()
     }
 

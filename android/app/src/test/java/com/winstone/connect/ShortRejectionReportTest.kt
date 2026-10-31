@@ -21,3 +21,16 @@ class ShortRejectionReportTest {
         }
     }
 }
+class FakeNeedsAnsweredCallTest {
+    @Test fun fakeOnUnansweredCallIsBlocked() {
+        org.junit.Assert.assertTrue(ShortRejectionReport.fakeNeedsAnsweredCall("fake", received = false))
+    }
+    @Test fun fakeOnAnsweredCallIsAllowed() {
+        org.junit.Assert.assertFalse(ShortRejectionReport.fakeNeedsAnsweredCall("fake", received = true))
+    }
+    @Test fun otherRejectionsUnaffected() {
+        listOf("not_interested", "wrong_number", "no_answer").forEach {
+            org.junit.Assert.assertFalse(ShortRejectionReport.fakeNeedsAnsweredCall(it, received = false))
+        }
+    }
+}
