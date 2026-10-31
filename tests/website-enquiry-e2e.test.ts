@@ -15,7 +15,10 @@ import { canonicalBdPhone, hmacHex } from "@/lib/os-bridge";
 type Row = Record<string, unknown>;
 const db = vi.hoisted(() => ({
   tables: {} as Record<string, Row[]>,
-  unique: { os_event_receipts: "idempotency_key", website_visit_requests: "hub_request_id" } as Record<string, string>,
+  unique: {
+    os_event_receipts: "idempotency_key",
+    website_visit_requests: "hub_request_id",
+  } as Record<string, string>,
   leadEventWrites: 0,
   pushes: 0,
 }));
@@ -29,23 +32,59 @@ vi.hoisted(() => {
     private returning = false;
     private mode: "one" | "maybe" | null = null;
     constructor(private table: string) {}
-    private rows() { return (db.tables[this.table] ??= []); }
-    select() { this.returning = true; return this; }
-    insert(row: Row) { this.op = "insert"; this.payload = row; return this; }
-    update(patch: Row) { this.op = "update"; this.payload = patch; return this; }
-    eq(k: string, v: unknown) { this.filters.push([k, v]); return this; }
-    not() { return this; }
-    limit() { return this; }
-    order() { return this; }
-    maybeSingle() { this.mode = "maybe"; return this.run(); }
+    private rows() {
+      return (db.tables[this.table] ??= []);
+    }
+    select() {
+      this.returning = true;
+      return this;
+    }
+    insert(row: Row) {
+      this.op = "insert";
+      this.payload = row;
+      return this;
+    }
+    update(patch: Row) {
+      this.op = "update";
+      this.payload = patch;
+      return this;
+    }
+    eq(k: string, v: unknown) {
+      this.filters.push([k, v]);
+      return this;
+    }
+    not() {
+      return this;
+    }
+    limit() {
+      return this;
+    }
+    order() {
+      return this;
+    }
+    maybeSingle() {
+      this.mode = "maybe";
+      return this.run();
+    }
     // eslint-disable-next-line unicorn/no-thenable
-    then(res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) { return this.run().then(res, rej); }
-    singleRow() { this.mode = "one"; return this.run(); }
-    private match(r: Row) { return this.filters.every(([k, v]) => r[k] === v); }
-    private async run(): Promise<{ data: unknown; error: { code: string; message: string } | null }> {
+    then(res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) {
+      return this.run().then(res, rej);
+    }
+    singleRow() {
+      this.mode = "one";
+      return this.run();
+    }
+    private match(r: Row) {
+      return this.filters.every(([k, v]) => r[k] === v);
+    }
+    private async run(): Promise<{
+      data: unknown;
+      error: { code: string; message: string } | null;
+    }> {
       if (this.op === "insert") {
         const key = db.unique[this.table];
-        if (key && this.rows().some((r) => r[key] === this.payload![key])) return { data: null, error: { code: "23505", message: "duplicate" } };
+        if (key && this.rows().some((r) => r[key] === this.payload![key]))
+          return { data: null, error: { code: "23505", message: "duplicate" } };
         const row = { id: `${this.table}-${this.rows().length + 1}`, ...this.payload };
         this.rows().push(row);
         return { data: this.returning ? row : null, error: null };
@@ -66,7 +105,9 @@ vi.hoisted(() => {
 
 const findLeadByPhone = (raw: string) => {
   const want = canonicalBdPhone(raw);
-  return (db.tables.leads ?? []).find((l) => canonicalBdPhone(String(l.phone_number)) === want) ?? null;
+  return (
+    (db.tables.leads ?? []).find((l) => canonicalBdPhone(String(l.phone_number)) === want) ?? null
+  );
 };
 
 vi.mock("@/integrations/supabase/client.server", () => {
@@ -89,12 +130,24 @@ vi.mock("@/lib/lead-eligibility.server", () => ({
   resolveLeadIdByPhone: async (raw: string) => {
     const canonical = canonicalBdPhone(raw);
     const lead = findLeadByPhone(raw);
-    return { canonicalPhones: canonical ? [canonical] : [], existingLeadId: (lead?.id as string) ?? null, alreadyWorked: false };
+    return {
+      canonicalPhones: canonical ? [canonical] : [],
+      existingLeadId: (lead?.id as string) ?? null,
+      alreadyWorked: false,
+    };
   },
 }));
 vi.mock("@/lib/audit.server", () => ({ logAudit: async () => undefined }));
-vi.mock("@/lib/lead-events.server", () => ({ logLeadEvent: async () => { db.leadEventWrites++; } }));
-vi.mock("@/lib/push.server", () => ({ sendPush: async () => { db.pushes++; } }));
+vi.mock("@/lib/lead-events.server", () => ({
+  logLeadEvent: async () => {
+    db.leadEventWrites++;
+  },
+}));
+vi.mock("@/lib/push.server", () => ({
+  sendPush: async () => {
+    db.pushes++;
+  },
+}));
 
 const SECRET = "website-enquiry-test-secret-0123456789";
 
@@ -106,7 +159,12 @@ const enquiry = (o: { key: string; phone: string; eventId?: string }) => ({
   payload: {
     external_lead_id: `web-${o.key}`,
     source: "website",
-    contact: { name: "Website Visitor", phone: o.phone, email: "visitor@example.test", city: "Dhaka" },
+    contact: {
+      name: "Website Visitor",
+      phone: o.phone,
+      email: "visitor@example.test",
+      city: "Dhaka",
+    },
     qualification: { project_interest: "Winstone Heights", budget_range: "1-2 crore" },
   },
 });
@@ -117,11 +175,20 @@ async function postSigned(body: unknown, opts: { secret?: string; tamper?: boole
   let sig = await hmacHex(opts.secret ?? SECRET, `${ts}.${raw}`);
   if (opts.tamper) sig = sig.replace(/^./, (c) => (c === "a" ? "b" : "a"));
   const { Route } = await import("@/routes/api/public/os/events");
-  const handlers = (Route.options as unknown as { server: { handlers: { POST: (a: { request: Request }) => Promise<Response> } } }).server.handlers;
+  const handlers = (
+    Route.options as unknown as {
+      server: { handlers: { POST: (a: { request: Request }) => Promise<Response> } };
+    }
+  ).server.handlers;
   const res = await handlers.POST({
     request: new Request("http://x/api/public/os/events", {
       method: "POST",
-      headers: { "content-type": "application/json", "cf-connecting-ip": String(Math.random()), "x-winstone-signature": sig, "x-winstone-timestamp": ts },
+      headers: {
+        "content-type": "application/json",
+        "cf-connecting-ip": String(Math.random()),
+        "x-winstone-signature": sig,
+        "x-winstone-timestamp": ts,
+      },
       body: raw,
     }),
   });
@@ -143,11 +210,22 @@ describe("signed website enquiry → LeadHub (end to end, in-memory database)", 
     expect(r).toMatchObject({ status: 201, body: { ok: true, status: "lead_created" } });
     expect(leadCount()).toBe(1);
     const lead = db.tables.leads![0]!;
-    expect(lead).toMatchObject({ assigned_to: null, assigned_agent_id: null, assignment_source: null, status: "pending", source: "os_website" });
+    expect(lead).toMatchObject({
+      assigned_to: null,
+      assigned_agent_id: null,
+      assignment_source: null,
+      status: "pending",
+      source: "os_website",
+    });
     expect(r.body.lead_id).toBe(lead.id);
     // Any lead event would make the lead ineligible for first assignment.
     expect(db.leadEventWrites).toBe(0);
-    expect(db.tables.os_event_receipts![0]).toMatchObject({ idempotency_key: "web-enquiry-0001", status: "processed", outcome: "lead_created", lead_id: lead.id });
+    expect(db.tables.os_event_receipts![0]).toMatchObject({
+      idempotency_key: "web-enquiry-0001",
+      status: "processed",
+      outcome: "lead_created",
+      lead_id: lead.id,
+    });
   });
 
   it("replaying the same signed enquiry is ignored and creates no second lead", async () => {
@@ -161,7 +239,10 @@ describe("signed website enquiry → LeadHub (end to end, in-memory database)", 
   it("the same visitor re-submitting (new key, differently formatted phone) reuses the existing lead", async () => {
     const first = await postSigned(enquiry({ key: "web-enquiry-0003", phone: "01712345678" }));
     const again = await postSigned(enquiry({ key: "web-enquiry-0004", phone: "+880 1712-345678" }));
-    expect(again).toMatchObject({ status: 200, body: { status: "lead_exists", lead_id: first.body.lead_id } });
+    expect(again).toMatchObject({
+      status: 200,
+      body: { status: "lead_exists", lead_id: first.body.lead_id },
+    });
     expect(leadCount()).toBe(1);
     expect(db.tables.leads![0]).toMatchObject({ assigned_to: null, assigned_agent_id: null });
   });
@@ -173,9 +254,17 @@ describe("signed website enquiry → LeadHub (end to end, in-memory database)", 
       event_type: "site_visit.requested",
       idempotency_key: "web-visit-0001",
       occurred_at: "2026-10-31T12:05:00+06:00",
-      payload: { request_id: "visit-1", name: "Website Visitor", phone: "8801712345678", project: "Winstone Heights" },
+      payload: {
+        request_id: "visit-1",
+        name: "Website Visitor",
+        phone: "8801712345678",
+        project: "Winstone Heights",
+      },
     });
-    expect(visit).toMatchObject({ status: 201, body: { status: "request_on_existing_lead", lead_id: first.body.lead_id } });
+    expect(visit).toMatchObject({
+      status: 201,
+      body: { status: "request_on_existing_lead", lead_id: first.body.lead_id },
+    });
     expect(leadCount()).toBe(1);
     // Unassigned lead → nobody to notify, and still nothing assigned.
     expect(db.pushes).toBe(0);
