@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-31 — Unified call qualification
+- [ ] Unify backend validation and report-grade selection; disposition-driven rejection without fake scores.
+- [ ] Align Web and Android reporting/previews; preserve follow-ups, history, ownership and atomic retries.
+- [ ] Run focused/full tests, inspect automatic checks, document delivery and handset blockers; no production writes or publication.
+
 ## 2026-10-30 — APK update build (2.18)
 - [x] Bumped Android versionCode 28→29, versionName 2.17→2.18 (android/app/build.gradle.kts).
 - [x] Verified GitHub repo head matches local b7bc9b75; signing secrets still 0/4 (only test APK possible).
