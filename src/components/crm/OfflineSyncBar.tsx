@@ -1,4 +1,6 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getOfflineAlertConfig } from "@/lib/offline-alert.functions";
+import { DEFAULT_OFFLINE_ALERTS } from "@/lib/offline-alert-config";
 import { useServerFn } from "@tanstack/react-start";
 import { Activity, AlertTriangle, Check, CloudOff, Loader2, RefreshCw, WifiOff } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -187,7 +189,14 @@ export function OfflineSyncBar() {
     const id = window.setInterval(() => setNow(Date.now()), 30_000);
     return () => window.clearInterval(id);
   }, []);
-  const stuck = useMemo(() => stuckReports(items, sent, now), [items, sent, now]);
+  const readAlertConfig = useServerFn(getOfflineAlertConfig);
+  const alertConfig = useQuery({
+    queryKey: ["offline-alert-config"],
+    queryFn: () => readAlertConfig({ data: { adminToken } }),
+    staleTime: 5 * 60_000,
+  });
+  const limits = alertConfig.data ?? DEFAULT_OFFLINE_ALERTS;
+  const stuck = useMemo(() => stuckReports(items, sent, now, limits), [items, sent, now, limits]);
   const alerted = useRef(new Set<string>());
   useEffect(() => {
     for (const s of stuck) {

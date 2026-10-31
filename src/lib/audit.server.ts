@@ -34,6 +34,7 @@ export type AuditAction =
   | "alert_acknowledged"
   | "report_sheet_sync"
   | "lead_report_sheet_sync"
+  | "offline_alert_config_changed"
   | "inventory_sheet_sync"
   | "agent_account_created"
   | "agent_account_updated"

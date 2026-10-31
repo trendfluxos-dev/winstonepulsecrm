@@ -35,3 +35,22 @@ describe("offline report alerts", () => {
     expect(stuckReports([item({ kind: "call_event", createdAt: "2026-10-31T07:00:00Z" })], [], now)).toEqual([]);
   });
 });
+
+import { readOfflineAlertConfig, offlineAlertSchema } from "@/lib/offline-alert-config";
+
+describe("configurable alert times", () => {
+  it("defaults to 2 and 15 minutes when nothing valid is saved", () => {
+    expect(readOfflineAlertConfig(null)).toEqual({ syncingMinutes: 2, notSentMinutes: 15 });
+    expect(readOfflineAlertConfig({ syncingMinutes: 0, notSentMinutes: 15 })).toEqual({ syncingMinutes: 2, notSentMinutes: 15 });
+  });
+  it("rejects a not-sent time that is not longer than the syncing time", () => {
+    expect(offlineAlertSchema.safeParse({ syncingMinutes: 10, notSentMinutes: 10 }).success).toBe(false);
+  });
+  it("uses saved times: 5-minute syncing and 30-minute not-sent", () => {
+    const limits = readOfflineAlertConfig({ syncingMinutes: 5, notSentMinutes: 30 });
+    const syncing = item({ status: "syncing", lastAttemptAt: "2026-10-31T08:27:00Z" });
+    expect(stuckReports([syncing], [], now, limits)).toEqual([]);
+    expect(stuckReports([item({ createdAt: "2026-10-31T08:00:00Z" })], [], now, limits).map((x) => x.reason)).toEqual(["not_sent"]);
+    expect(stuckReports([item({ createdAt: "2026-10-31T08:10:00Z" })], [], now, limits)).toEqual([]);
+  });
+});

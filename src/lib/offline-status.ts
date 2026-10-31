@@ -68,10 +68,6 @@ export function offlineTimeline(item: OfflineItem | SentItem): { steps: OfflineT
   };
 }
 
-/** A report counts as stuck after this long in "Syncing". */
-export const SYNCING_ALERT_MS = 2 * 60 * 1000;
-/** ...or when it still has not reached "Sent" this long after it was queued. */
-export const NOT_SENT_ALERT_MS = 15 * 60 * 1000;
 
 export type StuckReason = "syncing_too_long" | "not_sent" | "refused";
 
@@ -83,13 +79,14 @@ export function stuckReports(
   queue: readonly OfflineItem[],
   sent: readonly SentItem[],
   now = Date.now(),
+  limits: { syncingMinutes: number; notSentMinutes: number } = { syncingMinutes: 2, notSentMinutes: 15 },
 ): { id: string; label: string; reason: StuckReason; since: string }[] {
   const out: { id: string; label: string; reason: StuckReason; since: string }[] = [];
   for (const item of queue) {
     if (item.kind !== "report_submit") continue;
-    if (item.status === "syncing" && item.lastAttemptAt && now - Date.parse(item.lastAttemptAt) >= SYNCING_ALERT_MS) {
+    if (item.status === "syncing" && item.lastAttemptAt && now - Date.parse(item.lastAttemptAt) >= limits.syncingMinutes * 60_000) {
       out.push({ id: item.id, label: item.label, reason: "syncing_too_long", since: item.lastAttemptAt });
-    } else if (now - Date.parse(item.createdAt) >= NOT_SENT_ALERT_MS) {
+    } else if (now - Date.parse(item.createdAt) >= limits.notSentMinutes * 60_000) {
       out.push({ id: item.id, label: item.label, reason: "not_sent", since: item.createdAt });
     }
   }
@@ -103,6 +100,6 @@ export function stuckReports(
 
 export const STUCK_REASON_LABEL: Record<StuckReason, Bi> = {
   syncing_too_long: { bn: "অনেকক্ষণ ধরে পাঠানো হচ্ছে — সংযোগ দেখুন", en: "Stuck in Syncing — check the connection" },
-  not_sent: { bn: "১৫ মিনিটেও সার্ভারে পৌঁছায়নি", en: "Not sent after 15 minutes" },
+  not_sent: { bn: "নির্ধারিত সময়েও সার্ভারে পৌঁছায়নি", en: "Not sent within the set time" },
   refused: { bn: "সার্ভার নেয়নি — রিপোর্ট আবার দেখুন বা IT-কে জানান", en: "Refused by the server — check it or tell IT" },
 };
