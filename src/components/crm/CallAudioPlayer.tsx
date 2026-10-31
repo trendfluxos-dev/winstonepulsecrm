@@ -1,11 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, Loader2, Pause, Play, RotateCcw, RotateCw } from "lucide-react";
+import { Download, FileAudio, Loader2, Pause, Play, RotateCcw, RotateCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { getAudioUrl } from "@/lib/crm.functions";
 import { formatDuration } from "@/lib/crm-format";
+import { PLAYBACK_LIMIT_MB, recordingSizeMb } from "@/lib/recording-playback-limit";
 import { useAdminToken } from "@/lib/local-session";
 import { cn } from "@/lib/utils";
 
@@ -71,6 +72,8 @@ export function CallAudioPlayer({
     mutationFn: () => resolveAudio({ data: { adminToken, recordingId } }),
   });
   const [source, setSource] = useState<{ url: string } | null>(null);
+  const tooLargeMb =
+    payload?.status === "too_large" ? recordingSizeMb(payload.sizeBytes) : null;
 
   useEffect(() => {
     setBars(FLAT_BARS);
@@ -79,7 +82,7 @@ export function CallAudioPlayer({
 
   // Audio arrives as bytes from the server; keep it in a page-local blob URL.
   useEffect(() => {
-    if (!payload) return;
+    if (!payload || payload.status !== "ok") return;
     const raw = atob(payload.base64);
     const bytes = new Uint8Array(raw.length);
     for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i);
@@ -268,10 +271,47 @@ export function CallAudioPlayer({
         </div>
       </div>
 
+      {tooLargeMb !== null && (
+        <div
+          role="status"
+          className="mt-3 rounded-xl bg-ink-foreground/10 p-3 text-xs leading-relaxed"
+        >
+          <p className="flex items-center gap-2 font-semibold text-ink-foreground">
+            <FileAudio className="size-4 shrink-0 text-live" aria-hidden />
+            রেকর্ডিংটি এখানে চালানো যাচ্ছে না — ফাইলটি {tooLargeMb} MB, এখানে সর্বোচ্চ{" "}
+            {PLAYBACK_LIMIT_MB} MB চলে।
+          </p>
+          <p className="mt-1 text-ink-muted">
+            This recording is {tooLargeMb} MB; the in-app player plays up to {PLAYBACK_LIMIT_MB}{" "}
+            MB. The recording is saved safely — nothing is lost.
+          </p>
+          <p className="mt-2 font-medium text-ink-foreground">এখন যা করতে পারেন:</p>
+          <ul className="mt-1 list-disc space-y-1 pl-4 text-ink-muted">
+            <li>
+              এই লিডের কল রিপোর্ট ও নোট নিচেই আছে — কল-পরবর্তী কাজ সেগুলো দেখে চালিয়ে যান।
+            </li>
+            <li>
+              পুরো অডিও শুনতে হলে IT টিমকে এই লিডের নাম ও কলের সময় জানান; তারা রেকর্ডিং
+              ব্যাকআপ থেকে ফাইলটি দিতে পারবেন।
+            </li>
+            <li>খুব লম্বা কল হলে পরের বার মূল কথা শেষে কল শেষ করুন, যাতে ফাইল ছোট থাকে।</li>
+          </ul>
+        </div>
+      )}
+
       {isError && (
-        <p className="mt-2 text-xs text-destructive">
-          This recording could not be loaded for playback.
-        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+          <p className="text-destructive">
+            রেকর্ডিংটি লোড করা যায়নি। This recording could not be loaded for playback.
+          </p>
+          <Button
+            size="sm"
+            className="h-7 rounded-full bg-ink-foreground/10 text-ink-foreground hover:bg-ink-foreground/20"
+            onClick={() => loadUrl()}
+          >
+            আবার চেষ্টা করুন
+          </Button>
+        </div>
       )}
 
       {downloadError && (
