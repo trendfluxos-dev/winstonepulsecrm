@@ -212,6 +212,10 @@ function AuthPage() {
                   className="h-11 pl-9"
                   type={isSignup ? "email" : "text"}
                   autoComplete="username"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  enterKeyHint="next"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={isSignup ? "you@winstonebd.com" : "01805049668 or WIN2601"}
@@ -221,7 +225,8 @@ function AuthPage() {
               <IconField id="password" label="Password" icon={<Lock className="size-4" />}>
                 <Input
                   id="password"
-                  className="h-11 pl-9 pr-10"
+                  className="h-11 pl-9 pr-12"
+                  enterKeyHint="go"
                   type={showPassword ? "text" : "password"}
                   autoComplete={isSignup ? "new-password" : "current-password"}
                   value={password}
@@ -232,7 +237,7 @@ function AuthPage() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="absolute right-0.5 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
