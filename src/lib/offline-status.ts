@@ -44,3 +44,26 @@ export function offlineStatusLabel(item: Pick<OfflineItem, "status"> | Pick<Sent
     hint: { bn: "এই ফোনে সেভ আছে — নেট ফিরলে যাবে", en: "Saved on this phone — sends when online" },
   };
 }
+
+export type OfflineTimelineStep = { key: "queued" | "last_attempt" | "confirmed" | "refused"; label: Bi; at: string | null };
+
+/**
+ * Per-report details: when it was saved on this phone, when it was last sent,
+ * and when the server answered. "Confirmed" is only ever the server's answer;
+ * a refused report shows a refusal time instead, and a queued one shows none.
+ */
+export function offlineTimeline(item: OfflineItem | SentItem): { steps: OfflineTimelineStep[]; attempts: number } {
+  const queued: OfflineTimelineStep = { key: "queued", label: { bn: "এই ফোনে জমা", en: "Queued on this phone" }, at: item.createdAt };
+  const last: OfflineTimelineStep = { key: "last_attempt", label: { bn: "শেষ পাঠানোর চেষ্টা", en: "Last attempt" }, at: item.lastAttemptAt ?? null };
+  if ("outcome" in item) {
+    const answer: OfflineTimelineStep =
+      item.outcome === "not_accepted"
+        ? { key: "refused", label: { bn: "সার্ভার নেয়নি", en: "Refused by server" }, at: item.sentAt }
+        : { key: "confirmed", label: { bn: "সার্ভার নিশ্চিত করেছে", en: "Confirmed by server" }, at: item.sentAt };
+    return { steps: [queued, { ...last, at: last.at ?? item.sentAt }, answer], attempts: item.attempts ?? 1 };
+  }
+  return {
+    steps: [queued, last, { key: "confirmed", label: { bn: "সার্ভার নিশ্চিত করেছে", en: "Confirmed by server" }, at: null }],
+    attempts: item.attempts + (item.status === "syncing" ? 1 : 0),
+  };
+}

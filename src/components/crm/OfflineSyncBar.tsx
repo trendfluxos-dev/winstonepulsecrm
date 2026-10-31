@@ -18,7 +18,7 @@ import {
   subscribeQueue,
   subscribeSent,
 } from "@/lib/offline-queue";
-import { offlineStatusLabel } from "@/lib/offline-status";
+import { offlineStatusLabel, offlineTimeline } from "@/lib/offline-status";
 
 const DATA_LABELS: Record<string, { bn: string; en: string }> = {
   "my-account": { bn: "অ্যাকাউন্ট", en: "Account" },
@@ -37,6 +37,45 @@ const fmtTime = (t: number) =>
     : "—";
 
 type Refresh = { ok: string[]; failed: string[] };
+
+const fmtStamp = (iso: string) =>
+  new Date(iso).toLocaleString("en-GB", {
+    timeZone: "Asia/Dhaka",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+/** Per-report details: queued, last attempt, server confirmation (Dhaka time). */
+function ReportTimeline({ item }: { item: OfflineItem | SentItem }) {
+  const t = useT();
+  const { steps, attempts } = offlineTimeline(item);
+  return (
+    <details className="mt-1 text-[11px]">
+      <summary className="cursor-pointer select-none text-primary underline-offset-2 hover:underline">
+        {t({ bn: "বিস্তারিত", en: "Details" })}
+      </summary>
+      <dl className="mt-1 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5 rounded-lg border border-border bg-card p-2 text-foreground">
+        {steps.map((step) => (
+          <div key={step.key} className="contents">
+            <dt className="text-muted-foreground">{t(step.label)}</dt>
+            <dd className="tabular">
+              {step.at
+                ? fmtStamp(step.at)
+                : step.key === "last_attempt"
+                  ? t({ bn: "এখনো পাঠানো হয়নি", en: "Not tried yet" })
+                  : t({ bn: "এখনো নিশ্চিত হয়নি", en: "Not confirmed yet" })}
+            </dd>
+          </div>
+        ))}
+        <dt className="text-muted-foreground">{t({ bn: "মোট চেষ্টা", en: "Attempts" })}</dt>
+        <dd className="tabular">{attempts}</dd>
+      </dl>
+    </details>
+  );
+}
 
 /**
  * Always-visible connection status, last sync time, what refreshed after
@@ -292,6 +331,7 @@ export function OfflineSyncBar() {
                     <span className="block text-[11px] text-muted-foreground">
                       {t(st.hint)} · {fmtTime(Date.parse(s.sentAt))}
                     </span>
+                    <ReportTimeline item={s} />
                   </span>
                 </p>
               );
@@ -327,6 +367,7 @@ export function OfflineSyncBar() {
                     {t(st.hint)}
                     {item.status === "failed" && item.lastError ? ` (${item.lastError})` : ""}
                   </span>
+                  {item.kind === "report_submit" && <ReportTimeline item={item} />}
                 </span>
               </p>
             );
