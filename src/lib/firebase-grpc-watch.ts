@@ -29,8 +29,9 @@ export function rangeAllowsFixed(range: string, fixed = GRPC_FIXED_VERSION): boo
   const r = range.trim();
   if (!target || !r || /\|\||\s-\s|\s/.test(r)) return null;
   const op = /^(>=|\^|~|=)?v?(.*)$/.exec(r);
-  const base = op ? parse(op[2]) : null;
-  if (!op || !base || /[x*]/i.test(op[2])) return null;
+  const ver = op?.[2] ?? "";
+  const base = parse(ver);
+  if (!op || !base || /[x*]/i.test(ver)) return null;
   const kind = op[1] ?? "=";
   if (kind === ">=") return true;
   if (kind === "=") return cmp(base, target) >= 0;
