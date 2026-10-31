@@ -99,6 +99,21 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                     )
+                } else if (
+                    RecordingConsent.decision(this@MainActivity, state.employeeId) == RecordingConsent.Decision.NONE.also { consentTick }
+                ) {
+                    RecordingConsentScreen(
+                        agentName = state.agentName ?: "",
+                        onAccept = {
+                            RecordingConsent.record(this@MainActivity, state.employeeId!!, granted = true)
+                            consentTick++
+                            requestAudioPermissions()
+                        },
+                        onDecline = {
+                            RecordingConsent.record(this@MainActivity, state.employeeId!!, granted = false)
+                            consentTick++
+                        },
+                    )
                 } else {
                     DeskScreen(
                         activity = this,
@@ -144,15 +159,24 @@ class MainActivity : ComponentActivity() {
         val wanted = mutableListOf(
             Manifest.permission.CALL_PHONE,
             Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.RECORD_AUDIO,
             Manifest.permission.READ_CALL_LOG,
         )
         if (Build.VERSION.SDK_INT >= 28) wanted += Manifest.permission.ANSWER_PHONE_CALLS
         if (Build.VERSION.SDK_INT >= 33) wanted += Manifest.permission.POST_NOTIFICATIONS
-        // Read the phone's own call-recorder files so they reach the CRM.
-        wanted += if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_AUDIO
-        else Manifest.permission.READ_EXTERNAL_STORAGE
+        // Audio permissions are asked only after the agent's recording consent.
+        if (RecordingConsent.granted(this, AgentSession.employeeIdNow(this))) wanted += audioPermissions()
         ActivityCompat.requestPermissions(this, wanted.toTypedArray(), 9001)
+    }
+
+    /** Microphone + the phone's own call-recorder files — only after consent. */
+    private fun audioPermissions(): List<String> = listOf(
+        Manifest.permission.RECORD_AUDIO,
+        if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_AUDIO
+        else Manifest.permission.READ_EXTERNAL_STORAGE,
+    )
+
+    private fun requestAudioPermissions() {
+        ActivityCompat.requestPermissions(this, audioPermissions().toTypedArray(), 9002)
     }
 
     override fun onRequestPermissionsResult(
