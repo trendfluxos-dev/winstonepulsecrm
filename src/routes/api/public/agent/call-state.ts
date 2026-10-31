@@ -111,13 +111,13 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
         }
 
         const { isPhoneMeasuredCall } = await import("@/lib/call-duration");
-        let acceptedPatch: Record<string, unknown> = existing ? lifecyclePatch(existing, patch) : patch;
+        const lifecycle: Partial<typeof patch> & { call_status: string; recording_status: string } =
+          existing ? lifecyclePatch(existing, patch) : patch;
         // A live state push must never rewrite the measured time of a row that
         // came from the phone's call log or recorder.
-        if (existing && isPhoneMeasuredCall(existing) && "duration_seconds" in acceptedPatch) {
-          const { duration_seconds: _ignored, ...rest } = acceptedPatch;
-          acceptedPatch = rest;
-        }
+        const { duration_seconds: pushedDuration, ...withoutDuration } = lifecycle;
+        const acceptedPatch =
+          existing && isPhoneMeasuredCall(existing) ? withoutDuration : { ...withoutDuration, ...(pushedDuration !== undefined ? { duration_seconds: pushedDuration } : {}) };
         let recordingId = existing?.id ?? null;
 
         if (existing) {
