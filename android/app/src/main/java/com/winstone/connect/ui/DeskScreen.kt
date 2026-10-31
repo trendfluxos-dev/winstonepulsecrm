@@ -1041,6 +1041,34 @@ private fun StatusCards(state: DeskUiState) {
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         WinCard {
+            Text("ফোনের অনুমতি", fontWeight = FontWeight.Bold)
+            val permTick by com.winstone.connect.MainActivity.permissionTick.collectAsStateSafe()
+            val consentTickP by com.winstone.connect.telephony.RecordingConsent.changes.collectAsStateSafe()
+            val items = remember(permTick, consentTickP, state.employeeId) {
+                com.winstone.connect.telephony.AppPermissions.wantedNow(context, state.employeeId)
+            }
+            val granted = remember(permTick, consentTickP, state.employeeId) {
+                com.winstone.connect.telephony.AppPermissions.grantedSet(context, items)
+            }
+            items.forEach { item ->
+                val on = item.permission in granted
+                Text(
+                    "${item.labelBn}: ${if (on) "চালু" else "বন্ধ"}",
+                    fontSize = 12.sp,
+                    color = if (on) WinGreen else WinRed,
+                )
+            }
+            if (items.none { it.audio }) {
+                Text("মাইক্রোফোন: রেকর্ডিং সম্মতি দেওয়ার পর চাওয়া হবে", fontSize = 12.sp, color = WinInkMuted)
+            }
+            if (granted.size < items.size) {
+                Text("অ্যাপ খুললেই বন্ধ অনুমতিগুলো আবার চাওয়া হয়। ফোন আর না চাইলে Settings-এ চালু করুন।", fontSize = 12.sp)
+                OutlinedButton(onClick = {
+                    (context as? Activity)?.let { com.winstone.connect.telephony.AppPermissions.openAppSettings(it) }
+                }) { Text("Settings-এ অনুমতি চালু করুন") }
+            }
+        }
+        WinCard {
             Text("ইন-অ্যাপ SIM কল নিয়ন্ত্রণ", fontWeight = FontWeight.Bold)
             Text("মিউট, স্পিকার ও কল কাটার জন্য ডিফল্ট ফোন অ্যাপের অনুমতি প্রয়োজন। রেকর্ডিং সক্ষমতা আলাদা।", fontSize = 12.sp)
             OutlinedButton(onClick = { (context as? Activity)?.let { requestSimDialerRole(it) } }) {
