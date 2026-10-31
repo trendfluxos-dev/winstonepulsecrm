@@ -44,6 +44,9 @@ jobs:
       - name: Refuse committed signing material in the build tree
         run: |
           if [ -f local.properties ]; then echo "android/local.properties must not be committed"; exit 1; fi
+          # Names only: lists tracked key/certificate/signing-config files, never their contents.
+          FOUND=$(git -C "$GITHUB_WORKSPACE" ls-files | grep -Ei '\.(jks|keystore|p12|pfx|pepk|pem|key|der)(\.(gpg|b64))?$|(^|/)(keystore|signing)\.properties$' || true)
+          if [ -n "$FOUND" ]; then echo "::error::Signing material is committed: $FOUND"; exit 1; fi
       - name: Check declared app version
         run: |
           grep -q "versionName = \"$EXPECTED_VERSION_NAME\"" app/build.gradle.kts

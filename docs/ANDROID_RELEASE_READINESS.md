@@ -89,6 +89,10 @@ A passing check is build evidence only; the device rows below still need a real 
 
 **If A is chosen:** treat the committed key as possibly exposed — only acceptable if the project code has never been shared outside the owner/IT; otherwise prefer B.
 
+**Retired key removed from the code (2026-10-31):** `android/winstone-release.jks` (decision A key) was deleted from the current code and `.gitignore` now blocks keystores, certificates, private keys and signing configs; `tests/no-signing-material.test.ts` fails if any are committed again. This is **not** a history purge: the file stays readable in earlier Git commits and in any old copy or clone, so it must still be treated as exposed and must never sign a Winstone app. Shared history was deliberately not rewritten.
+
+**Live build blocker (2026-10-31 check, names only):** the current GitHub repository and the old one both have 0 Actions secrets, 0 variables and no environments, the CRM's saved settings have no signing names, and the backup table below is still blank. A signed live build stays blocked until IT adds the company key made under decision B (with its backup) as the four secrets plus `WINSTONE_RELEASE_CERT_SHA256`. The IT Console "Live agent app signing" panel shows this state.
+
 Owner decision: ☐ A ☑ **B — switch to new key** — by owner (TrendFlux OS IT) date **2026-10-28** reason: the old keystore lived in the project tree and cannot be guaranteed uncompromised; enforce the safe switch checklist; back up the new key in IT password storage.
 
 ### Encrypted backup and restore of the signing key
