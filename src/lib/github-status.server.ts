@@ -133,3 +133,40 @@ export async function readAndroidBuilds(repository: string) {
   };
 }
 
+
+/**
+ * Read-only: which Android signing secret NAMES and the fingerprint variable NAME exist in the
+ * repository's Actions settings. GitHub never returns secret values here; variable values are
+ * dropped too. A failed read is "check_failed", never "missing".
+ */
+export async function readAndroidSigningReadiness(repository: string) {
+  const { classifySigningReadiness } = await import("@/lib/android-signing-readiness");
+  const key = process.env["GITHUB_API_KEY"];
+  const lovableKey = process.env["LOVABLE_API_KEY"];
+  if (!key || !lovableKey) throw new Error("GitHub connection is not configured");
+  const headers = { Accept: "application/vnd.github+json", Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": key };
+  async function names(path: string, field: "secrets" | "variables"): Promise<{ list: string[] | null; status: number | null }> {
+    try {
+      const response = await fetch(`${GATEWAY_URL}${path}`, { headers, signal: AbortSignal.timeout(10000), redirect: "error" });
+      if (!response.ok) {
+        console.error(`GitHub signing-readiness read failed [${response.status}]`);
+        return { list: null, status: response.status };
+      }
+      const body = (await response.json()) as Record<string, Array<{ name?: unknown }> | undefined>;
+      return { list: (body[field] ?? []).map((e) => String(e.name ?? "")).filter(Boolean), status: response.status };
+    } catch {
+      return { list: null, status: null };
+    }
+  }
+  const [secrets, variables] = await Promise.all([
+    names(`/repos/${repository}/actions/secrets?per_page=100`, "secrets"),
+    names(`/repos/${repository}/actions/variables?per_page=30`, "variables"),
+  ]);
+  return {
+    repository,
+    checkedAt: new Date().toISOString(),
+    readStatus: secrets.status === 403 || variables.status === 403 ? "no_admin_access" as const
+      : secrets.list === null || variables.list === null ? "error" as const : "ok" as const,
+    ...classifySigningReadiness(secrets.list, variables.list),
+  };
+}
