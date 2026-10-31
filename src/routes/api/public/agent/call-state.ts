@@ -111,7 +111,7 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
         }
 
         const { isPhoneMeasuredCall } = await import("@/lib/call-duration");
-        const lifecycle: Partial<typeof patch> & { call_status: string; recording_status: string } =
+        const lifecycle: { call_status: string; recording_status: string; agent_phone?: string | null; started_at?: string; answered_at?: string; finished_at?: string; duration_seconds?: number } =
           existing ? lifecyclePatch(existing, patch) : patch;
         // A live state push must never rewrite the measured time of a row that
         // came from the phone's call log or recorder.
