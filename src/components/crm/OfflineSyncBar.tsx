@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Activity, Check, CloudOff, Loader2, RefreshCw, WifiOff } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Activity, AlertTriangle, Check, CloudOff, Loader2, RefreshCw, WifiOff } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import {
   subscribeQueue,
   subscribeSent,
 } from "@/lib/offline-queue";
-import { offlineStatusLabel, offlineTimeline } from "@/lib/offline-status";
+import { offlineStatusLabel, offlineTimeline, STUCK_REASON_LABEL, stuckReports } from "@/lib/offline-status";
 
 const DATA_LABELS: Record<string, { bn: string; en: string }> = {
   "my-account": { bn: "অ্যাকাউন্ট", en: "Account" },
@@ -181,6 +181,23 @@ export function OfflineSyncBar() {
     if (online && items.length) void flush();
   }, [online, items.length, flush]);
 
+  // Re-check stuck reports every 30s even when nothing else changes.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+  const stuck = useMemo(() => stuckReports(items, sent, now), [items, sent, now]);
+  const alerted = useRef(new Set<string>());
+  useEffect(() => {
+    for (const s of stuck) {
+      const key = `${s.id}:${s.reason}`;
+      if (alerted.current.has(key)) continue;
+      alerted.current.add(key);
+      toast.error(`${t({ bn: "রিপোর্ট সতর্কতা", en: "Report alert" })}: ${s.label} — ${t(STUCK_REASON_LABEL[s.reason])}`, { duration: 10_000 });
+    }
+  }, [stuck, t]);
+
   const failed = items.filter((item) => item.status === "failed");
   const avg = loads.length ? Math.round(loads.reduce((s, l) => s + l.ms, 0) / loads.length) : 0;
   const slowest = Object.keys(STEP_LABELS)
@@ -295,6 +312,38 @@ export function OfflineSyncBar() {
               ×
             </button>
           </div>
+        </div>
+      )}
+
+      {stuck.length > 0 && (
+        <div role="alert" className="space-y-1.5 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs">
+          <p className="flex items-center gap-1.5 font-bold text-destructive">
+            <AlertTriangle className="size-3.5" />
+            {t({ bn: `${stuck.length}টি রিপোর্ট সার্ভারে পৌঁছায়নি`, en: `${stuck.length} report(s) have not reached the server` })}
+          </p>
+          {stuck.slice(0, 5).map((s) => (
+            <p key={`${s.id}:${s.reason}`} className="min-w-0">
+              <b className="font-semibold">{s.label}</b> · {t(STUCK_REASON_LABEL[s.reason])}
+              <span className="block text-[11px] text-muted-foreground">
+                {t({ bn: "থেকে", en: "Since" })} {fmtTime(Date.parse(s.since))}
+              </span>
+            </p>
+          ))}
+          {stuck.some((s) => s.reason !== "refused") && (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="h-7 gap-1 px-2 text-[11px]"
+              disabled={busy || !online}
+              onClick={() => {
+                items.filter((i) => i.status !== "pending").forEach((i) => markPending(i.id));
+                void flush();
+              }}
+            >
+              <RefreshCw className={`size-3.5 ${busy ? "animate-spin" : ""}`} /> {t({ bn: "আবার পাঠান", en: "Send again" })}
+            </Button>
+          )}
         </div>
       )}
 
