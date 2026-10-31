@@ -94,6 +94,8 @@ echo "$CERTS" | grep -E "^Verif|^Number of signers|$SIGNER_RE (DN|SHA-256 digest
 DIGESTS=$(echo "$CERTS" | grep -E "$SIGNER_RE SHA-256 digest: " | awk -F': ' '{print $NF}' | tr -d ': ' | tr 'A-F' 'a-f' | sort -u)
 SIGNERS=$(printf '%s' "$DIGESTS" | grep -c . || true)
 [ "$SIGNERS" = "1" ] || fail "expected exactly one signer certificate, found $SIGNERS"
+DECLARED=$(echo "$CERTS" | sed -n 's/^Number of signers: \([0-9]*\).*/\1/p' | head -1)
+[ -z "$DECLARED" ] || [ "$DECLARED" = "1" ] || fail "expected exactly one signer, apksigner reports $DECLARED"
 ACT_CERT=$(normalize_cert "$DIGESTS")
 [[ "$ACT_CERT" =~ ^[0-9a-f]{64}$ ]] || fail "could not read the signer SHA-256 fingerprint"
 SIGNER_DN=$(echo "$CERTS" | grep -E -m1 "$SIGNER_RE DN: " | sed -E 's/^.* certificate DN: //')

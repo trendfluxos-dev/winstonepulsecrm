@@ -10,7 +10,7 @@ const SCRIPT = join(process.cwd(), "scripts/verify-android-apk.sh");
 const COMPANY = "a".repeat(64);
 const OTHER = "b".repeat(64);
 
-type Stub = { pkg?: string; vcode?: string; vname?: string; cert?: string; dn?: string; signers?: number; v2?: boolean; badging?: string };
+type Stub = { pkg?: string; vcode?: string; vname?: string; cert?: string; dn?: string; signers?: number; v2?: boolean; badging?: string; signerBlock?: string };
 
 function run(flavor: "release" | "test", stub: Stub, opts: { expected?: string; prevInfo?: string; gradle?: string } = {}) {
   const dir = mkdtempSync(join(tmpdir(), "apkgate-"));
@@ -22,10 +22,10 @@ function run(flavor: "release" | "test", stub: Stub, opts: { expected?: string; 
   const vname = stub.vname ?? (flavor === "release" ? "2.22" : "2.22-test");
   const badging = stub.badging ?? `package: name='${pkg}' versionCode='${stub.vcode ?? "33"}' versionName='${vname}' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'`;
   writeFileSync(join(dir, "aapt2"), `#!/bin/sh\ncat <<'EOF'\n${badging}\nEOF\n`);
-  const signerLines = Array.from({ length: stub.signers ?? 1 }, (_, i) =>
+  const signerLines = stub.signerBlock ?? Array.from({ length: stub.signers ?? 1 }, (_, i) =>
     `Signer #${i + 1} certificate DN: ${stub.dn ?? "CN=Winstone Properties, O=Winstone"}\nSigner #${i + 1} certificate SHA-256 digest: ${stub.cert ?? COMPANY}`,
   ).join("\n");
-  writeFileSync(join(dir, "apksigner"), `#!/bin/sh\ncat <<'EOF'\nVerifies\nVerified using v1 scheme (JAR signing): false\nVerified using v2 scheme (APK Signature Scheme v2): ${stub.v2 === false ? "false" : "true"}\nVerified using v3 scheme (APK Signature Scheme v3): false\nNumber of signers: 1\n${signerLines}\nEOF\n`);
+  writeFileSync(join(dir, "apksigner"), `#!/bin/sh\ncat <<'EOF'\nVerifies\nVerified using v1 scheme (JAR signing): false\nVerified using v2 scheme (APK Signature Scheme v2): ${stub.v2 === false ? "false" : "true"}\nVerified using v3 scheme (APK Signature Scheme v3): false\nNumber of signers: ${stub.signers ?? 1}\n${signerLines}\nEOF\n`);
   chmodSync(join(dir, "aapt2"), 0o755);
   chmodSync(join(dir, "apksigner"), 0o755);
   const args = [SCRIPT, "--apk", apk, "--flavor", flavor, "--gradle", gradle, "--version-name", "2.22", "--version-code", "33", "--report", join(dir, "report.txt")];
@@ -159,5 +159,38 @@ describe("Android workflows gate publishing behind the check", () => {
     const r = run("test", { badging: "compileSdkVersionCodename='15' versionCode='33' versionName='2.22-test'" }, { expected: COMPANY });
     expect(r.ok).toBe(false);
     expect(r.out).toContain("package is '', expected 'com.winstone.connect.test'");
+  });
+
+  // 2026-10-31 run 41243465048: the real apksigner output had no "Signer #1" line and the
+  // check reported "found 0". apksigner labels SDK-targeted v3 signers by SDK range.
+  const SDK_BLOCK = (cert: string) =>
+    [
+      `Signer (minSdkVersion=24, maxSdkVersion=2147483647) certificate DN: CN=Android Debug, O=Android, C=US`,
+      `Signer (minSdkVersion=24, maxSdkVersion=2147483647) certificate SHA-256 digest: ${cert}`,
+      `Signer (minSdkVersion=24, maxSdkVersion=2147483647) certificate SHA-1 digest: ${"c".repeat(40)}`,
+    ].join("\n");
+
+  it("reads the signer from SDK-targeted v3 output (test build)", () => {
+    const r = run("test", { signerBlock: SDK_BLOCK(COMPANY) }, { expected: COMPANY });
+    expect(r.ok).toBe(true);
+    expect(readFileSync(join(r.dir, "report.txt"), "utf8")).toContain(`signer_sha256: ${COMPANY}`);
+  });
+
+  it("counts one certificate printed in both v2 and v3 blocks as one signer", () => {
+    const both = `Signer #1 certificate DN: CN=Winstone\nSigner #1 certificate SHA-256 digest: ${COMPANY}\n${SDK_BLOCK(COMPANY)}`;
+    expect(run("test", { signerBlock: both }, { expected: COMPANY }).ok).toBe(true);
+  });
+
+  it("refuses two different signer certificates across blocks", () => {
+    const two = `Signer #1 certificate DN: CN=Winstone\nSigner #1 certificate SHA-256 digest: ${COMPANY}\n${SDK_BLOCK(OTHER)}`;
+    const r = run("test", { signerBlock: two }, { expected: COMPANY });
+    expect(r.ok).toBe(false);
+    expect(r.out).toContain("expected exactly one signer certificate, found 2");
+  });
+
+  it("still refuses a release signed with the debug key in the SDK-targeted form", () => {
+    const r = run("release", { signerBlock: SDK_BLOCK(COMPANY) }, { expected: COMPANY });
+    expect(r.ok).toBe(false);
+    expect(r.out).toContain("Android debug key");
   });
 });
