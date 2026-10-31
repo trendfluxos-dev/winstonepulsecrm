@@ -24,7 +24,7 @@ describe("unified report qualification", () => {
     expect(qualifyCallReport({ ...base, grade: "D", evaluationAnswers: answers(true) })).toMatchObject({ grade: "D", evaluation: { category: "hot" } });
   });
   for (const category of ["not_interested","wrong_number","fake"]) for (const connected of [true,false])
-    it(`${category}/${connected} needs no answers/grade and generates no classification`, () => {
+    if (!(category === "fake" && !connected)) it(`${category}/${connected} needs no answers/grade and generates no classification`, () => {
       expect(qualifyCallReport({ ...base, category, connected, grade: null })).toMatchObject({ answers: null, evaluation: null, grade: null });
     });
   it("callback retains qualification and follow-up priority", () => {

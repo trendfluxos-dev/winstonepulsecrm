@@ -182,7 +182,12 @@ describe("report submission verifies only phone-measured duration", () => {
     expect(state.writes[0]?.patch).toMatchObject({ category: category === "not_interested" ? "not_interested" : "wrong_number", temperature: null, grade: null, evaluation_answers: null, evaluation_score: null, requirement: null, next_action: "no_action", follow_up_at: null, connection_verified: false, interest: category === "fake" ? "fake" : "low", customer_response: category === "not_interested" ? "not_interested" : "other", no_follow_up_reason: category === "fake" ? "other" : category, no_follow_up_note: category === "not_interested" ? "Customer Not Interested" : category === "fake" ? "Fake / Invalid contact" : "Wrong Number", smart_reasons: null, ai_decision: null });
   });
   for (const category of ["not_interested", "wrong_number", "fake"]) {
-  for (const callStatus of ["no_answer", "busy", "failed"]) it(`${category} disposition is independent of ${callStatus}`, async () => {
+  for (const callStatus of ["no_answer", "busy", "failed"]) it(category === "fake" ? `fake is refused on ${callStatus} with no write` : `${category} disposition is independent of ${callStatus}`, async () => {
+    if (category === "fake") {
+      await expect(submitCallReport({ ...input, category, callStatus })).rejects.toThrow("কল ধরা না হলে FAKE LEAD দেওয়া যাবে না");
+      expect(state.writes).toEqual([]);
+      return;
+    }
     await expect(submitCallReport({ ...input, category, callStatus })).rejects.toThrow("captured submission");
     expect(state.writes[0]?.patch).toMatchObject({ connected: false, evaluation_score: null, temperature: null, grade: null });
   });
