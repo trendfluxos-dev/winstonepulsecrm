@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-11-01 — Android CI release check
+- [x] Gate script checks version, package, signer fingerprint and checksum before any APK is made available (test, release and tagged builds); 14 tests pass.
+- [ ] Set repository variable WINSTONE_RELEASE_CERT_SHA256 (public company fingerprint) — owner/IT; release builds refuse to publish without it.
+- [ ] First real CI run of the check — blocked until Git sync is restored (GitHub still at 04:38 UTC Oct 31).
+
 ## 2026-11-01 — Phone app 2.22 (auto permission ask)
 - [x] Version set to 2.22 / code 33 in app + build check so it installs over 2.21.
 - [ ] Build 2.22-test APK: blocked — GitHub still at 04:38 UTC Oct 31 (no permission-flow code); owner must restore Git sync (Project settings → Git). Local build would carry a different signature and force agents to uninstall, so not used.
