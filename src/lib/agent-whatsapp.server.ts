@@ -59,7 +59,7 @@ export async function readTemplateStatuses(): Promise<Array<{ name: string; stat
   const text = await response.text();
   if (!response.ok) throw new Error(`WhatsApp template check failed [${response.status}]`);
   const rows = (JSON.parse(text).data ?? []) as Array<{ name: string; status: string; language: string }>;
-  const wanted = Object.values(AGENT_WA_TEMPLATES) as string[];
+  const wanted = [...Object.values(AGENT_WA_TEMPLATES), "hq_daily_summary", "hq_daily_report_pdf"] as string[];
   return wanted.map((name) => ({
     name,
     status: rows.find((row) => row.name === name && row.language === AGENT_WA_LANGUAGE)?.status ?? "MISSING",
