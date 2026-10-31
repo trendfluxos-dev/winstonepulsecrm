@@ -361,7 +361,7 @@ function GradePicker({ value, onChange }: { value: string; onChange: (value: str
   const t = useT();
   const selected = REPORT_GRADES.some((g) => g === value);
   const move = (from: number, delta: number) => {
-    const next = REPORT_GRADES[(from + delta + REPORT_GRADES.length) % REPORT_GRADES.length];
+    const next = REPORT_GRADES[(from + delta + REPORT_GRADES.length) % REPORT_GRADES.length] ?? "A";
     onChange(next);
     document.getElementById(`sr-grade-${next}`)?.focus();
   };
