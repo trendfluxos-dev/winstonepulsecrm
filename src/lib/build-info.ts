@@ -28,5 +28,5 @@ export function formatBuildStamp(iso: string | null): string {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  }).format(d);
+  }).format(d).replace(",", "");
 }
