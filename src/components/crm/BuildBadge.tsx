@@ -8,9 +8,14 @@ import { APP_VERSION, BUILD_STAMP, buildChannel, formatBuildStamp, type BuildCha
  * Live/Preview word always carries the meaning (never colour alone).
  */
 export function BuildBadge({ compact = false }: { compact?: boolean }) {
-  const t = useT();
   const [channel, setChannel] = useState<BuildChannel | null>(null);
   useEffect(() => setChannel(buildChannel(window.location.hostname)), []);
+  return <BuildBadgeView channel={channel} compact={compact} />;
+}
+
+/** Presentational part; `channel === null` means the address is still being checked. */
+export function BuildBadgeView({ channel, compact = false }: { channel: BuildChannel | null; compact?: boolean }) {
+  const t = useT();
   const stamp = formatBuildStamp(BUILD_STAMP);
   const isLive = channel === "live";
   const label =
