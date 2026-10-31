@@ -45,7 +45,9 @@ export function readQueue(): OfflineItem[] {
     const parsed = raw ? (JSON.parse(raw) as OfflineItem[]) : [];
     if (!Array.isArray(parsed)) return [];
     // A send interrupted by a reload/closed tab never got an answer: it is pending again.
-    return flushing ? parsed : parsed.map((item) => (item.status === "syncing" ? { ...item, status: "pending" } : item));
+    return flushing
+      ? parsed
+      : parsed.map((item) => (item.status === "syncing" ? { ...item, status: "pending" } : item));
   } catch {
     return [];
   }
@@ -83,7 +85,9 @@ export function readSent(now = Date.now()): SentItem[] {
   if (typeof localStorage === "undefined") return [];
   try {
     const parsed = JSON.parse(localStorage.getItem(SENT_KEY) ?? "[]") as SentItem[];
-    return Array.isArray(parsed) ? parsed.filter((item) => now - Date.parse(item.sentAt) < SENT_TTL_MS) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((item) => now - Date.parse(item.sentAt) < SENT_TTL_MS)
+      : [];
   } catch {
     return [];
   }
@@ -99,7 +103,15 @@ function writeSent(items: SentItem[]) {
 }
 
 function recordSent(item: OfflineItem, outcome: SentItem["outcome"], note?: string) {
-  const entry: SentItem = { id: item.id, kind: item.kind, label: item.label, createdAt: item.createdAt, sentAt: new Date().toISOString(), outcome, note: note ?? null };
+  const entry: SentItem = {
+    id: item.id,
+    kind: item.kind,
+    label: item.label,
+    createdAt: item.createdAt,
+    sentAt: new Date().toISOString(),
+    outcome,
+    note: note ?? null,
+  };
   writeSent([entry, ...readSent().filter((s) => s.id !== item.id)].slice(0, 20));
 }
 
@@ -170,7 +182,6 @@ export type Senders = {
   report_submit: (payload: Record<string, unknown>) => Promise<unknown>;
 };
 
-
 /** Replays the queue oldest-first. Stops on the first network failure. */
 export async function flushQueue(senders: Senders): Promise<{ synced: number; failed: number }> {
   if (flushing) return { synced: 0, failed: 0 };
@@ -189,7 +200,11 @@ export async function flushQueue(senders: Senders): Promise<{ synced: number; fa
       } catch (error) {
         const message = error instanceof Error ? error.message : "sync failed";
         if (isTerminal(message)) {
-          recordSent(item, alreadyOnServer(message) ? "already_on_server" : "not_accepted", message.slice(0, 160));
+          recordSent(
+            item,
+            alreadyOnServer(message) ? "already_on_server" : "not_accepted",
+            message.slice(0, 160),
+          );
           removeItem(item.id);
           synced += 1;
           continue;
