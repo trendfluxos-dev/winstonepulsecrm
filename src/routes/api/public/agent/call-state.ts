@@ -13,9 +13,21 @@ import { z } from "zod";
  * row instead of creating a second call. Nothing here claims a recording: when
  * the device cannot record, `recording_status` is written as `not_available` and
  * the mandatory report flow continues untouched.
+ *
+ * State and duration here are pushed by the agent's device and include ringing
+ * time, so rows created here are labelled `android_dialer` (live dialer): they
+ * never count as phone-measured and cannot set `connection_verified`. Only the
+ * phone's own call-log sync ("log-…" ids) or a stored recording proves a call.
  */
 const Body = z.object({
-  call_uid: z.string().trim().min(6).max(120),
+  // "log-…" ids are reserved for rows read from the phone's system call log,
+  // which the server treats as phone-measured. A live state push may not claim one.
+  call_uid: z
+    .string()
+    .trim()
+    .min(6)
+    .max(120)
+    .refine((v) => !v.toLowerCase().startsWith("log-"), "reserved call id prefix"),
   lead_id: z.string().uuid(),
   state: z.enum(["initiated", "ringing", "answered", "completed", "failed", "no_answer"]),
   at: z.string().datetime({ offset: true }).optional(),
@@ -90,7 +102,7 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
 
         const { data: existing } = await supabaseAdmin
           .from("call_recordings")
-          .select("id, call_status, agent_id, lead_id, storage_path, audio_url, upload_status, recording_status")
+          .select("id, call_status, agent_id, lead_id, storage_path, audio_url, upload_status, recording_status, call_source, external_call_id")
           .eq("external_call_id", body.call_uid)
           .maybeSingle();
         // A call record may only be updated by the agent who owns it, for the same lead.
@@ -98,7 +110,14 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
           return json({ error: "This call record belongs to another agent or lead" }, 403);
         }
 
-        const acceptedPatch = existing ? lifecyclePatch(existing, patch) : patch;
+        const { isPhoneMeasuredCall } = await import("@/lib/call-duration");
+        const lifecycle: { call_status: string; recording_status: string; agent_phone?: string | null; started_at?: string; answered_at?: string; finished_at?: string; duration_seconds?: number } =
+          existing ? lifecyclePatch(existing, patch) : patch;
+        // A live state push must never rewrite the measured time of a row that
+        // came from the phone's call log or recorder.
+        const { duration_seconds: pushedDuration, ...withoutDuration } = lifecycle;
+        const acceptedPatch =
+          existing && isPhoneMeasuredCall(existing) ? withoutDuration : { ...withoutDuration, ...(pushedDuration !== undefined ? { duration_seconds: pushedDuration } : {}) };
         let recordingId = existing?.id ?? null;
 
         if (existing) {
@@ -116,7 +135,8 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
               is_two_sided: false,
               sync_status: "uploaded",
               analysis_status: "pending",
-              call_source: "android_sim",
+              // Live dialer state, not a phone-measured call (see header).
+              call_source: "android_dialer",
               external_call_id: body.call_uid,
               upload_status: "pending",
               ...patch,
