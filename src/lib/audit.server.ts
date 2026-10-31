@@ -16,6 +16,7 @@ export type AuditAction =
   | "agent_whatsapp_alerts_on"
   | "agent_whatsapp_alerts_off"
   | "agent_whatsapp_alerts_job"
+  | "agent_whatsapp_hq_number_set"
   | "project_catalog_import"
   | "project_photos_viewed"
   | "account_approved"

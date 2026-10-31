@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useT } from "@/lib/i18n";
 import { displayAgentWhatsApp, normalizeAgentWhatsApp } from "@/lib/agent-whatsapp";
-import { getMyWhatsAppAlerts, sendMyWhatsAppTest, setMyWhatsAppAlerts } from "@/lib/agent-whatsapp.functions";
+import { getMyWhatsAppAlerts, sendMyReportSummaryToHq, sendMyWhatsAppTest, setMyWhatsAppAlerts } from "@/lib/agent-whatsapp.functions";
 
 const STATUS: Record<string, { en: string; bn: string }> = {
   sending: { en: "Sending", bn: "পাঠানো হচ্ছে" },
@@ -22,6 +22,7 @@ const KIND: Record<string, { en: string; bn: string }> = {
   new_leads: { en: "New leads", bn: "নতুন লিড" },
   daily_progress: { en: "Daily progress", bn: "দৈনিক অগ্রগতি" },
   test: { en: "Test", bn: "টেস্ট" },
+  hq_report: { en: "Report summary to HQ", bn: "HQ-তে রিপোর্ট সারাংশ" },
 };
 
 /** Agent's own opt-in for count-only WhatsApp alerts (no customer details are ever sent). */
@@ -50,6 +51,18 @@ export function MyWhatsAppAlerts() {
       if (r.outcome === "sent") toast.success(t({ en: "Test sent — check WhatsApp in a minute", bn: "টেস্ট পাঠানো হয়েছে — এক মিনিটের মধ্যে WhatsApp দেখুন" }));
       else if (r.outcome === "duplicate") toast.info(t({ en: "You already sent today's test", bn: "আজকের টেস্ট আগেই পাঠানো হয়েছে" }));
       else toast.error(t({ en: "WhatsApp did not accept the test. Templates may still be waiting for Meta approval.", bn: "WhatsApp টেস্ট গ্রহণ করেনি। টেমপ্লেট সম্ভবত এখনো Meta-র অনুমোদনের অপেক্ষায়।" }));
+      void qc.invalidateQueries({ queryKey: ["my-whatsapp-alerts"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : String(e)),
+  });
+
+  const toHq = useServerFn(sendMyReportSummaryToHq);
+  const sendHq = useMutation({
+    mutationFn: () => toHq(),
+    onSuccess: (r) => {
+      if (r.outcome === "sent") toast.success(t({ en: `Sent to HQ: ${r.counts.reports} reports, ${r.counts.verifiedConnected} verified connected`, bn: `HQ-তে পাঠানো হয়েছে: ${r.counts.reports}টি রিপোর্ট, ${r.counts.verifiedConnected}টি যাচাইকৃত সংযুক্ত` }));
+      else if (r.outcome === "duplicate") toast.info(t({ en: "HQ already has these exact numbers. Send again after your next report.", bn: "এই সংখ্যাগুলো HQ আগেই পেয়েছে। পরের রিপোর্টের পর আবার পাঠান।" }));
+      else toast.error(t({ en: "WhatsApp did not accept the message. The template may still be waiting for Meta approval.", bn: "WhatsApp মেসেজ গ্রহণ করেনি। টেমপ্লেট সম্ভবত এখনো Meta-র অনুমোদনের অপেক্ষায়।" }));
       void qc.invalidateQueries({ queryKey: ["my-whatsapp-alerts"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : String(e)),
@@ -86,6 +99,13 @@ export function MyWhatsAppAlerts() {
               {sendTest.isPending ? "…" : t({ en: "Send me a test", bn: "আমাকে টেস্ট পাঠান" })}
             </Button>
           )}
+          <div className="space-y-1 border-t border-border pt-3">
+            <p className="text-xs font-medium">{t({ en: "Send today's report summary to HQ", bn: "আজকের রিপোর্ট সারাংশ HQ-তে পাঠান" })}</p>
+            <p className="text-xs text-muted-foreground">{t({ en: "Sends only your counts (reports, verified connected calls, new follow-ups) to the HQ WhatsApp number.", bn: "শুধু আপনার সংখ্যা (রিপোর্ট, যাচাইকৃত সংযুক্ত কল, নতুন ফলো-আপ) HQ-র WhatsApp নম্বরে যায়।" })}</p>
+            <Button size="sm" onClick={() => sendHq.mutate()} disabled={sendHq.isPending || !d.enabled}>
+              {sendHq.isPending ? "…" : t({ en: "Send to HQ", bn: "HQ-তে পাঠান" })}
+            </Button>
+          </div>
           {d.recent.length > 0 && (
             <ul className="space-y-1 text-xs" aria-label={t({ en: "Recent alerts", bn: "সাম্প্রতিক alert" })}>
               {d.recent.map((r) => (

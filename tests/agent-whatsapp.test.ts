@@ -43,3 +43,16 @@ describe("agent WhatsApp alerts", () => {
     expect(inNewLeadWindow(new Date("2026-10-31T11:40:00Z"))).toBe(false); // 17:40 Dhaka
   });
 });
+
+import { hqReportDedupeKey, hqReportParams } from "@/lib/agent-whatsapp";
+describe("HQ report summary", () => {
+  it("carries counts only, in template order", () => {
+    expect(hqReportParams({ name: "Rahim", dayLabel: "31 Oct", reports: 12, verifiedConnected: 8, followUps: 3 }))
+      .toEqual(["Rahim", "31 Oct", "12", "8", "3"]);
+  });
+  it("resends only when the day's counts change", () => {
+    const a = hqReportDedupeKey("a1", "2026-10-31", { reports: 12, verifiedConnected: 8, followUps: 3 });
+    expect(hqReportDedupeKey("a1", "2026-10-31", { reports: 12, verifiedConnected: 8, followUps: 3 })).toBe(a);
+    expect(hqReportDedupeKey("a1", "2026-10-31", { reports: 13, verifiedConnected: 8, followUps: 3 })).not.toBe(a);
+  });
+});
