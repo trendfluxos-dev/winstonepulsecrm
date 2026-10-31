@@ -52,6 +52,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { getDeskReports, getDeskWork } from "@/lib/desk-work.functions";
 import { attemptCount, compareQueue, lastWasNotReceived, summarizeReports } from "@/lib/desk-queue";
 import { getDailyAllocation } from "@/lib/daily-allocation.functions";
+import { phoneLogMissing, summarizeEvidence, talkLabel, type EvidenceSummary } from "@/lib/call-evidence";
+import { inDhakaRange, uniqueById } from "@/lib/kpi-contract";
 import { deskFollowUpCounts, deskLeadCounts, deskReportCounts, isActiveAssigned, isHotActive } from "@/lib/desk-counts";
 import { cn } from "@/lib/utils";
 import { isParked } from "@/lib/no-answer-cadence";
@@ -1335,6 +1337,38 @@ function Lead360Content({
         <p className="rounded-lg bg-surface-2 p-3 text-xs text-muted-foreground">{selected.notes}</p>
       )}
     </div>
+  );
+}
+
+/** Plain-words note on how many of today's connected calls the phone's own call log proves. */
+function CallEvidenceNote({ evidence }: { evidence: EvidenceSummary }) {
+  const t = useT();
+  if (!evidence.reports) return null;
+  if (evidence.mismatch)
+    return (
+      <p role="status" className="mt-3 rounded-md border border-destructive/40 bg-destructive/5 p-2 text-[11px] text-destructive">
+        {t({
+          bn: `${evidence.mismatch}টি রিপোর্ট ফোনের কল-লগের সাথে মেলেনি — "আমার কল রিপোর্ট"-এ লাল চিহ্ন দেখে ঠিক ফলাফল দিন।`,
+          en: `${evidence.mismatch} report(s) disagree with the phone call log — check the red marks in "My call reports".`,
+        })}
+      </p>
+    );
+  if (phoneLogMissing(evidence))
+    return (
+      <p role="status" className="mt-3 rounded-md border border-warning/40 bg-warning/10 p-2 text-[11px] text-foreground">
+        {t({
+          bn: "আজ কোনো কল ফোনের কল-লগে প্রমাণিত হয়নি। WINSTONE Connect অ্যাপ থেকে কল করলে কথার সময় নিজে থেকে প্রমাণিত হবে।",
+          en: "No call today is proven by the phone call log yet. Call from the WINSTONE Connect app and talk time is proven automatically.",
+        })}
+      </p>
+    );
+  return (
+    <p className="mt-3 text-[11px] text-muted-foreground">
+      {t({
+        bn: `ফোনে প্রমাণিত কথার সময়: ${talkLabel(evidence.verifiedTalkSeconds)}`,
+        en: `Phone-proven talk time: ${talkLabel(evidence.verifiedTalkSeconds)}`,
+      })}
+    </p>
   );
 }
 
