@@ -16,8 +16,8 @@ on:
       - ".github/workflows/android-apk.yml"
 
 env:
-  EXPECTED_VERSION_NAME: "2.20"
-  EXPECTED_VERSION_CODE: "31"
+  EXPECTED_VERSION_NAME: "2.21"
+  EXPECTED_VERSION_CODE: "32"
 
 # The apk-builds branch is our quota-independent fallback storage for built APKs:
 # GITHUB_TOKEN only needs contents:write for that push.
