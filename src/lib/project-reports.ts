@@ -1,3 +1,4 @@
+import { csvCell } from "@/lib/lead360-export";
 export type ProjectReportPeriod = "day" | "month";
 
 export type InventoryProject = {
@@ -95,7 +96,8 @@ export function buildProjectReport(
 }
 
 export function projectReportCsv(rows: ProjectReportRow[]) {
-  const cell = (value: string | number) => `"${String(value).replaceAll('"', '""')}"`;
+  // Formula-leading text (= + - @) is exported as plain text, never as a formula.
+  const cell = (value: string | number) => csvCell(value);
   return [
     ["Project / Requirement", "Status", "Leads", "Calls", "Site visit signals", "Bookings"],
     ...rows.map((row) => [
