@@ -9,6 +9,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
+    // Refuses every request to the real backend (preview and live share one database).
+    setupFiles: ["tests/setup/block-live-database.ts"],
     testTimeout: 30_000,
   },
 });
