@@ -61,20 +61,35 @@ export function CallAudioPlayer({
   const [downloadError, setDownloadError] = useState(false);
   const adminToken = useAdminToken();
 
-  const resolveUrl = useServerFn(getAudioUrl);
+  const resolveAudio = useServerFn(getAudioUrl);
   const {
     mutate: loadUrl,
-    data: source,
+    data: payload,
     isPending,
     isError,
   } = useMutation({
-    mutationFn: () => resolveUrl({ data: { adminToken, recordingId } }),
+    mutationFn: () => resolveAudio({ data: { adminToken, recordingId } }),
   });
+  const [source, setSource] = useState<{ url: string } | null>(null);
 
   useEffect(() => {
     setBars(FLAT_BARS);
     loadUrl();
   }, [loadUrl, recordingId, adminToken]);
+
+  // Audio arrives as bytes from the server; keep it in a page-local blob URL.
+  useEffect(() => {
+    if (!payload) return;
+    const raw = atob(payload.base64);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([bytes], { type: payload.mimeType }));
+    setSource({ url });
+    return () => {
+      setSource(null);
+      URL.revokeObjectURL(url);
+    };
+  }, [payload]);
 
   // Draw the scrubber from the actual audio, not a decorative pattern.
   useEffect(() => {

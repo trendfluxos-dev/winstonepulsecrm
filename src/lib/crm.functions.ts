@@ -210,12 +210,24 @@ export const getAudioUrl = createServerFn({ method: "POST" })
     if (caller.scope === "agent" && recording.agent_id !== caller.profile?.id) {
       throw new Error("This recording belongs to another agent");
     }
-    if (caller.scope === 'agent') await (await import('@/lib/assigned-lead-scope.server')).assertAssignedLead(caller.profile?.id ?? '', recording.lead_id);
-    const { data: signed, error } = await supabaseAdmin.storage
+    const scope = await import("@/lib/assigned-lead-scope.server");
+    const agentId = caller.profile?.id ?? "";
+    if (caller.scope === "agent") await scope.assertAssignedLead(agentId, recording.lead_id);
+    // No bearer link leaves the server: the audio bytes are returned only to
+    // this verified request, so a later reassignment revokes access at once.
+    const { data: file, error } = await supabaseAdmin.storage
       .from("call-audio")
-      .createSignedUrl(recording.audio_url, 30);
-    if (error || !signed) throw new Error("Could not create playback link");
-    return { url: signed.signedUrl };
+      .download(recording.audio_url);
+    if (error || !file) throw new Error("Could not load this recording");
+    if (file.size > 40 * 1024 * 1024) throw new Error("This recording is too large to play here");
+    // Re-check after the download so a reassignment during it is honoured.
+    if (caller.scope === "agent") await scope.assertAssignedLead(agentId, recording.lead_id);
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    let binary = "";
+    for (let i = 0; i < bytes.length; i += 0x8000) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    }
+    return { mimeType: file.type || "audio/mpeg", base64: btoa(binary) };
   });
 
 /** Splits every unassigned lead evenly across the active agents. Coordinator or PIN. */
