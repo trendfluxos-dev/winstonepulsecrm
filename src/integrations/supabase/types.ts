@@ -2151,6 +2151,66 @@ export type Database = {
           },
         ]
       }
+      hq_whatsapp_report_sends: {
+        Row: {
+          counts: Json
+          created_at: string
+          dedupe_key: string
+          delivered_at: string | null
+          error_detail: string | null
+          failed_at: string | null
+          id: string
+          pdf_path: string | null
+          provider_message_id: string | null
+          read_at: string | null
+          recipient: string
+          sent_at: string | null
+          status: string
+          template: string
+          updated_at: string
+          with_pdf: boolean
+          work_date: string
+        }
+        Insert: {
+          counts?: Json
+          created_at?: string
+          dedupe_key: string
+          delivered_at?: string | null
+          error_detail?: string | null
+          failed_at?: string | null
+          id?: string
+          pdf_path?: string | null
+          provider_message_id?: string | null
+          read_at?: string | null
+          recipient: string
+          sent_at?: string | null
+          status?: string
+          template: string
+          updated_at?: string
+          with_pdf?: boolean
+          work_date: string
+        }
+        Update: {
+          counts?: Json
+          created_at?: string
+          dedupe_key?: string
+          delivered_at?: string | null
+          error_detail?: string | null
+          failed_at?: string | null
+          id?: string
+          pdf_path?: string | null
+          provider_message_id?: string | null
+          read_at?: string | null
+          recipient?: string
+          sent_at?: string | null
+          status?: string
+          template?: string
+          updated_at?: string
+          with_pdf?: boolean
+          work_date?: string
+        }
+        Relationships: []
+      }
       inventory_requirements: {
         Row: {
           active: boolean
