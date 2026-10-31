@@ -957,18 +957,19 @@ function ReportDialog({
   const leadName = detail.lead?.name ?? t({ bn: "লিড", en: "lead" });
   // Repeated taps, the shortcut, the inline "Try again" and the toast action all
   // share one in-flight request; the server also ignores an already-saved report.
-  const payloadRef = useRef(payloadOf);
-  payloadRef.current = payloadOf;
+  const live = useRef({ payloadOf, detail, submit, t });
+  live.current = { payloadOf, detail, submit, t };
   const sendOnce = useRef(singleFlight(async () => {
-      const payload = payloadRef.current();
+      const { payloadOf: read, detail: d, submit: save, t: tr } = live.current;
+      const payload = read();
       if (typeof navigator !== "undefined" && navigator.onLine === false) {
-        enqueue("report_submit", `${t({ bn: "কল রিপোর্ট", en: "Call report" })} (${detail.lead?.name ?? t({ bn: "লিড", en: "lead" })})`, {
+        enqueue("report_submit", `${tr({ bn: "কল রিপোর্ট", en: "Call report" })} (${d.lead?.name ?? tr({ bn: "লিড", en: "lead" })})`, {
           ...payload,
-          clientEventId: `report-${detail.report.id}`,
+          clientEventId: `report-${d.report.id}`,
         });
         return { offline: true as const };
       }
-      const res = (await submit({ data: payload } as never)) as { reassigned?: boolean } | undefined;
+      const res = (await save({ data: payload } as never)) as { reassigned?: boolean } | undefined;
       return { offline: false as const, reassigned: Boolean(res?.reassigned) };
   })).current;
   const send = useMutation({
