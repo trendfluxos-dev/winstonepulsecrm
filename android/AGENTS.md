@@ -12,3 +12,4 @@
 - Call audio (app recorder, phone-recorder pickup, upload) runs only after RecordingConsent is granted for the signed-in employee id and current consent version; mic/audio-file permissions are requested after consent and the pickup worker re-checks it — why: no recording without explicit, current, per-agent consent.
 
 - Compose colours come only from ui/theme/Theme.kt tokens (light scheme; primary = charcoal button, WinGreen = gold accent); launcher icon is mipmap PNG + adaptive white tile from the brand logo, in-app logo is drawable-nodpi/winstone_logo — why: one palette matching the web CRM.
+- Visual checks run in .github/workflows/android-brand-shots.yml (emulator, offline sandbox, synthetic data) and save screenshots to apk-builds/screens/<version>/ — why: artifact quota can block uploads and real CRM must not be touched.

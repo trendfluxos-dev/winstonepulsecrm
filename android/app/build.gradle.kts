@@ -21,8 +21,8 @@ android {
         applicationId = "com.winstone.connect"
         minSdk = 24
         targetSdk = 35
-        versionCode = 30
-        versionName = "2.19"
+        versionCode = 31
+        versionName = "2.20"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val crmUrl = (localProps.getProperty("CRM_BASE_URL") ?: "https://crm.winstonebd.com").trimEnd('/')
         buildConfigField("String", "CRM_BASE_URL", "\"$crmUrl\"")

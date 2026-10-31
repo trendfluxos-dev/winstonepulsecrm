@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the Winstone Connect TEST APK (com.winstone.connect.test, 2.19-test) locally
+# Builds the Winstone Connect TEST APK (com.winstone.connect.test, 2.20-test) locally
 # and prints its SHA-256. Needs JDK 17 and an Android SDK (Android Studio provides both).
 # Never touches signing keys; the debug build uses the standard local debug key.
 set -euo pipefail
