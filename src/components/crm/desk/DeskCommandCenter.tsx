@@ -223,6 +223,9 @@ export function DeskCommandCenter({
     const lc = deskLeadCounts(leads, me, { from: today, to: today });
     const fu = deskFollowUpCounts(deskWork.data?.followUps ?? [], new Date(now));
     const rc = deskReportCounts(deskWork.data?.reports ?? [], today);
+    const evidence = summarizeEvidence(
+      uniqueById(deskWork.data?.reports ?? []).filter((r) => inDhakaRange(r.submitted_at, { from: today, to: today })),
+    );
     return {
       total: lc.active,
       allTime: lc.allTimeOwned,
@@ -235,6 +238,7 @@ export function DeskCommandCenter({
       connectRate: todayCalls.length ? Math.round((connected / todayCalls.length) * 100) : 0,
       reports: rc.submitted,
       reportedConnected: rc.reportedConnected,
+      evidence,
       talk: todayCalls.reduce((s, c) => s + c.duration_seconds, 0),
       whatsapp: onToday(messages).length,
       followUp: fu.open,
@@ -551,8 +555,8 @@ export function DeskCommandCenter({
             label={t({ bn: "জমা দেওয়া কল রিপোর্ট", en: "Submitted call reports" })}
             value={deskWork.isError ? t({ bn: "পাওয়া যায়নি", en: "Unavailable" }) : bn(stats.reports, lang)}
             sub={t({
-              bn: `আজ জমা দেওয়া কল রিপোর্ট (ঢাকা সময়) · ${bn(stats.reportedConnected, lang)}টিতে কথা হয়েছে`,
-              en: `Call reports submitted today (Dhaka, by submit time) · ${bn(stats.reportedConnected, lang)} marked connected`,
+              bn: `আজ (ঢাকা) · কথা হয়েছে ${bn(stats.reportedConnected, lang)} — ফোনে প্রমাণিত ${bn(stats.evidence.phoneVerified, lang)}, শুধু রিপোর্টে ${bn(stats.evidence.reportedOnly, lang)}${stats.evidence.mismatch ? ` · মেলেনি ${bn(stats.evidence.mismatch, lang)}` : ""}`,
+              en: `Today (Dhaka) · ${bn(stats.reportedConnected, lang)} connected — ${bn(stats.evidence.phoneVerified, lang)} phone-verified, ${bn(stats.evidence.reportedOnly, lang)} report-only${stats.evidence.mismatch ? ` · ${bn(stats.evidence.mismatch, lang)} mismatch` : ""}`,
             })}
             loading={isPending}
           />
@@ -986,12 +990,14 @@ export function DeskCommandCenter({
               <div className="mt-3 space-y-2.5 text-xs">
                 <Meter label={t({ bn: "লিড শেষ", en: "Completed" })} value={stats.done} total={stats.total} />
                 <Meter label={t({ bn: "কথা হয়েছে (রিপোর্ট)", en: "Connected (reports)" })} value={stats.reportedConnected} total={stats.reports} />
+                <Meter label={t({ bn: "ফোনের কল-লগে প্রমাণিত", en: "Proven by phone call log" })} value={stats.evidence.phoneVerified} total={stats.reportedConnected} />
                 <Meter
                   label={t({ bn: "ফলো-আপ সময়মতো", en: "On-time follow-ups" })}
                   value={Math.max(stats.followUp - stats.overdue, 0)}
                   total={stats.followUp}
                 />
               </div>
+              <CallEvidenceNote evidence={stats.evidence} />
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <MiniStat label={t({ bn: "আজ যোগ হওয়া লিড", en: "New today" })} value={bn(stats.newToday, lang)} />
                 <MiniStat label={t({ bn: "আজ জমা রিপোর্ট", en: "Reports today" })} value={bn(stats.reports, lang)} />
