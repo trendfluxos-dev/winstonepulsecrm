@@ -2,10 +2,13 @@ name: CI
 
 # Runs the full vitest suite, the typecheck and the production build
 # (including its prebuild guards: build-tool pin, dashboard colour tokens,
-# operations-manual meta) on every pull request.
+# operations-manual meta) on every pull request and on every push to main
+# (Lovable syncs straight to main, so pull requests alone would never run it).
 
 on:
   pull_request:
+  push:
+    branches: [main]
 
 jobs:
   test-typecheck-build:
@@ -15,7 +18,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.4.4
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
