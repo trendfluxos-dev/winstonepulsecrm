@@ -27,7 +27,7 @@ vi.hoisted(() => {
     private op: "select" | "insert" | "update" = "select";
     private payload: Row | null = null;
     private returning = false;
-    private single: "one" | "maybe" | null = null;
+    private mode: "one" | "maybe" | null = null;
     constructor(private table: string) {}
     private rows() { return (db.tables[this.table] ??= []); }
     select() { this.returning = true; return this; }
@@ -37,10 +37,10 @@ vi.hoisted(() => {
     not() { return this; }
     limit() { return this; }
     order() { return this; }
-    maybeSingle() { this.single = "maybe"; return this.run(); }
+    maybeSingle() { this.mode = "maybe"; return this.run(); }
     // eslint-disable-next-line unicorn/no-thenable
     then(res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) { return this.run().then(res, rej); }
-    singleRow() { this.single = "one"; return this.run(); }
+    singleRow() { this.mode = "one"; return this.run(); }
     private match(r: Row) { return this.filters.every(([k, v]) => r[k] === v); }
     private async run(): Promise<{ data: unknown; error: { code: string; message: string } | null }> {
       if (this.op === "insert") {
@@ -56,7 +56,7 @@ vi.hoisted(() => {
         return { data: this.returning ? hit : null, error: null };
       }
       const hit = this.rows().filter((r) => this.match(r));
-      if (this.single) return { data: hit[0] ?? null, error: null };
+      if (this.mode) return { data: hit[0] ?? null, error: null };
       return { data: hit, error: null };
     }
   }
