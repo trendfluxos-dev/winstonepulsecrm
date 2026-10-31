@@ -93,3 +93,16 @@ export function durationSourceLabel(source: string | null | undefined): string {
     default: return "উৎস জানা নেই";
   }
 }
+
+/**
+ * A call row whose time was measured by the phone itself, so it can prove a
+ * connection: the app's own SIM call, the phone's call recorder, or a row the
+ * Android app read from the phone's system call log (call id "log-…", Android
+ * CallLog DURATION = real talk time). Live dialer rows are not included — their
+ * time starts at dialling and includes ringing.
+ */
+export function isPhoneMeasuredCall(row: { call_source?: string | null; external_call_id?: string | null }): boolean {
+  const source = String(row.call_source ?? "");
+  if (source === "android_sim" || source === "phone_recorder") return true;
+  return (source === "android_dialer" || source === "android_incoming") && String(row.external_call_id ?? "").startsWith("log-");
+}

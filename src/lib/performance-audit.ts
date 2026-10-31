@@ -1,4 +1,5 @@
 import { dhakaDay } from "@/lib/lead-groups";
+import { isPhoneMeasuredCall } from "@/lib/call-duration";
 import { isOpenFollowUp } from "@/lib/follow-up-lifecycle";
 import type { CcAgent, CcCall, CcFilters, CcFollowUp, CcLead, CcReport } from "@/lib/command-center";
 
@@ -52,7 +53,7 @@ export function auditPerformance(input: AuditInput) {
     return c && c.agent_id === r.agent_id && c.lead_id === r.lead_id ? c : undefined;
   };
   const attempts = new Map<string, { id: string; agent_id: string | null; lead_id: string | null; connected: boolean; verified: boolean }>();
-  for (const c of calls) attempts.set(`call:${physicalCallKey(c)}`, { ...c, connected: c.call_status === "completed" && (c.device_reported_duration_seconds ?? c.duration_seconds) > 10, verified: ["android_sim", "phone_recorder"].includes(c.call_source ?? "") });
+  for (const c of calls) attempts.set(`call:${physicalCallKey(c)}`, { ...c, connected: c.call_status === "completed" && (c.device_reported_duration_seconds ?? c.duration_seconds) > 10, verified: isPhoneMeasuredCall(c) });
   for (const r of reports) {
     const c = linked(r);
     const key = c ? `call:${physicalCallKey(c)}` : `report:${r.id}`;
