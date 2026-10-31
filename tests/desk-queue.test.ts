@@ -57,3 +57,28 @@ describe("attempt numbering", () => {
     expect(s.size).toBe(0);
   });
 });
+
+import { leadAttemptInfo } from "@/lib/desk-queue";
+
+describe("lead details panel attempts", () => {
+  it("shows 2 attempts and the latest call time from two saved reports when the counter is 0", () => {
+    const info = leadAttemptInfo({ call_attempts: 0, last_call_at: null }, [
+      { submitted_at: "2026-10-31T05:01:00Z", call_ended_at: "2026-10-31T05:00:00Z", category: "no_answer" },
+      { submitted_at: "2026-10-30T05:01:00Z", call_ended_at: "2026-10-30T05:00:00Z", category: "busy" },
+      { submitted_at: null, call_ended_at: "2026-10-31T07:00:00Z", category: null },
+    ]);
+    expect(info).toEqual({ attempts: 2, lastAttemptAt: "2026-10-31T05:00:00Z", lastCategory: "no_answer" });
+  });
+
+  it("keeps a newer stored last call and a higher stored counter", () => {
+    const info = leadAttemptInfo({ call_attempts: 4, last_call_at: "2026-10-31T09:00:00Z" }, [
+      { submitted_at: "2026-10-31T05:01:00Z", call_ended_at: "2026-10-31T05:00:00Z" },
+    ]);
+    expect(info.attempts).toBe(4);
+    expect(info.lastAttemptAt).toBe("2026-10-31T09:00:00Z");
+  });
+
+  it("no calls and no reports shows zero and no time", () => {
+    expect(leadAttemptInfo({ call_attempts: 0, last_call_at: null }, [])).toEqual({ attempts: 0, lastAttemptAt: null, lastCategory: null });
+  });
+});
