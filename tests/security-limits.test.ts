@@ -28,11 +28,10 @@ describe("security limits decided 2026-10-27", () => {
     expect(Number(m![1])).toBe(60);
   });
 
-  it("call recording playback links last thirty seconds", () => {
+  it("call recording playback issues no signed link (ownership re-checked per request)", () => {
     const src = read("src/lib/crm.functions.ts");
-    const m = src.match(/createSignedUrl\(recording\.audio_url, (\d+)\)/);
-    expect(m).not.toBeNull();
-    expect(Number(m![1])).toBe(30);
+    expect(src).not.toMatch(/createSignedUrl\(recording\.audio_url/);
+    expect(src).toMatch(/\.from\("call-audio"\)\s*\.download\(recording\.audio_url\)/);
   });
 
   it("help centre lists only categories that have a published article", () => {
