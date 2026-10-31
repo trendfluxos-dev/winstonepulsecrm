@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.winstone.connect.data.AgentSession
 import com.winstone.connect.data.sync.PendingReportWorker
+import com.winstone.connect.telephony.AppPermissions
 import com.winstone.connect.telephony.CallPhase
 import com.winstone.connect.telephony.LiveCallLauncher
 import com.winstone.connect.telephony.RecordingConsent
@@ -199,6 +200,7 @@ class MainActivity : ComponentActivity() {
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionTick.value = permissionTick.value + 1
         if (requestCode == 9001) {
             val logIndex = permissions.indexOf(Manifest.permission.READ_CALL_LOG)
             if (logIndex >= 0 && grantResults.getOrNull(logIndex) == PackageManager.PERMISSION_GRANTED) {
