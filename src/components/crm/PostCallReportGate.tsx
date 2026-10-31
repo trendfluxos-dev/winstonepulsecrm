@@ -602,6 +602,8 @@ export function PostCallReportGate() {
           ? t({ bn: "Lead Category বাছাই করুন (Confirm বা Change)", en: "Select Lead Category (Confirm or Change)" })
           : connected && category === "no_answer"
             ? t({ bn: "কথা হওয়া কলে NO ANSWER দেওয়া যাবে না", en: "A connected call cannot be marked NO ANSWER" })
+          : fakeNeedsAnsweredCall(category, connected)
+            ? t(FAKE_NEEDS_ANSWERED_CALL)
             : qualifying && !interest
               ? t({ bn: "Customer Interest বাছাই করুন", en: "Select Customer Interest" })
               : qualifying && !requirement
