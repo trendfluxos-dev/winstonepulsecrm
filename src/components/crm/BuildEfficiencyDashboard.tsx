@@ -10,6 +10,7 @@ import { getAdminToken, useAdminToken } from "@/lib/local-session";
 import { getAndroidBuilds } from "@/lib/github-status.functions";
 import { buildEfficiency, runDurationMin } from "@/lib/build-efficiency";
 import { useT } from "@/lib/i18n";
+import { CRM_REPOSITORY } from "@/lib/github-access";
 
 const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", { timeZone: "Asia/Dhaka", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -18,7 +19,7 @@ const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", { timeZone: "
 export function BuildEfficiencyDashboard() {
   const t = useT();
   const adminToken = useAdminToken();
-  const [repository, setRepository] = useState("trendfluxos-dev/winstone-pulse-crm");
+  const [repository, setRepository] = useState(CRM_REPOSITORY);
   const [on, setOn] = useState(false);
   const load = useServerFn(getAndroidBuilds);
   const valid = REPO_RE.test(repository.trim());

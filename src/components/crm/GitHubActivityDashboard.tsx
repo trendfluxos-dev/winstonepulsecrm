@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { getAdminToken, useAdminToken } from "@/lib/local-session";
 import { getGithubActivity } from "@/lib/github-status.functions";
 import { useT } from "@/lib/i18n";
+import { CRM_REPOSITORY } from "@/lib/github-access";
 
 const REPO_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 
@@ -19,7 +20,7 @@ function when(iso: string | null) {
 export function GitHubActivityDashboard() {
   const t = useT();
   const adminToken = useAdminToken();
-  const [repository, setRepository] = useState("trendfluxos-dev/winstone-pulse-crm");
+  const [repository, setRepository] = useState(CRM_REPOSITORY);
   const load = useServerFn(getGithubActivity);
   const run = useMutation({ mutationFn: () => load({ data: { adminToken: getAdminToken(), repository: repository.trim() } }) });
   const data = run.data;
