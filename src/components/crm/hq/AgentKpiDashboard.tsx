@@ -28,14 +28,13 @@ export function AgentKpiDashboard() {
   const period = mode === "all" ? t({ bn: "সব সময়", en: "All time" }) : `${range.from} → ${range.to}`;
   const agents = snapshot.profiles.filter((p) => p.is_active && p.approval_status === "approved" && (p.role === "agent" || p.role === "team_leader"));
   const rows = useMemo(() => agentKpiRows(agents, snapshot.leads, feed.data?.reports ?? [], feed.data?.followUps ?? [], range, new Date()), [snapshot.profiles, snapshot.leads, feed.data, range.from, range.to]);
-  const floor = summarizeEvidence(rows.flatMap(() => []));
   const floorEvidence = rows.reduce((s, r) => ({
     ...s,
     reports: s.reports + r.evidence.reports, phoneVerified: s.phoneVerified + r.evidence.phoneVerified,
     reportedOnly: s.reportedOnly + r.evidence.reportedOnly, notConnected: s.notConnected + r.evidence.notConnected,
     mismatch: s.mismatch + r.evidence.mismatch, phoneLogged: s.phoneLogged + r.evidence.phoneLogged,
     verifiedTalkSeconds: s.verifiedTalkSeconds + r.evidence.verifiedTalkSeconds,
-  }), floor);
+  }), summarizeEvidence([]));
   return <section className="space-y-5" aria-label="Agent KPI dashboard">
     <header className="flex flex-wrap items-start justify-between gap-3">
       <div><h2 className="flex items-center gap-2 text-xl font-semibold"><Users className="size-5 text-primary" />{t({ bn: "এজেন্ট KPI ড্যাশবোর্ড", en: "Agent KPI dashboard" })}</h2>
