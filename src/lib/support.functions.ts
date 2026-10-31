@@ -235,12 +235,10 @@ export const sendSupportMessage = createServerFn({ method: "POST" })
 
 async function callerIsSignedIn(): Promise<boolean> {
   const { getRequest } = await import("@tanstack/react-start/server");
-  const auth = getRequest()?.headers?.get("authorization") ?? "";
-  const bearer = auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : "";
-  if (!bearer) return false;
+  const { callerIsActiveStaff } = await import("@/lib/support-ai-budget");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin.auth.getUser(bearer);
-  return Boolean(data?.user);
+  const auth = getRequest()?.headers?.get("authorization") ?? "";
+  return callerIsActiveStaff(auth, supabaseAdmin as never);
 }
 
 /**
