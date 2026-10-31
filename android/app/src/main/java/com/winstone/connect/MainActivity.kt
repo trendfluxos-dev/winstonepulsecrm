@@ -19,9 +19,11 @@ import com.winstone.connect.data.AgentSession
 import com.winstone.connect.data.sync.PendingReportWorker
 import com.winstone.connect.telephony.CallPhase
 import com.winstone.connect.telephony.LiveCallLauncher
+import com.winstone.connect.telephony.RecordingConsent
 import com.winstone.connect.ui.DeskScreen
 import com.winstone.connect.ui.LiveCallScreen
 import com.winstone.connect.ui.MaintenanceScreen
+import com.winstone.connect.ui.RecordingConsentScreen
 import com.winstone.connect.ui.DeskViewModel
 import com.winstone.connect.ui.RoleSelectionScreen
 import com.winstone.connect.ui.SignInScreen
@@ -60,6 +62,11 @@ class MainActivity : ComponentActivity() {
                 // own dialer is re-checked instead of only on first composition.
                 val tick by reportTick.collectAsStateSafe()
                 var pendingReport by remember { mutableStateOf(false) }
+                // Recording consent is per agent; re-read on account change or a new choice.
+                var consentTick by remember { mutableStateOf(0) }
+                val consentDecision = remember(state.employeeId, consentTick) {
+                    RecordingConsent.decision(this@MainActivity, state.employeeId)
+                }
                 LaunchedEffect(phase, state.employeeId, tick) {
                     if (phase == CallPhase.Idle && !state.employeeId.isNullOrBlank()) {
                         val body = runCatching {
@@ -100,7 +107,7 @@ class MainActivity : ComponentActivity() {
                         },
                     )
                 } else if (
-                    RecordingConsent.decision(this@MainActivity, state.employeeId) == RecordingConsent.Decision.NONE.also { consentTick }
+                    consentDecision == RecordingConsent.Decision.NONE
                 ) {
                     RecordingConsentScreen(
                         agentName = state.agentName ?: "",
