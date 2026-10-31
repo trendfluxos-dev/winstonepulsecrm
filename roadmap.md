@@ -3,7 +3,9 @@
 ## 2026-11-01 — Android CI release check
 - [x] Gate script checks version, package, signer fingerprint and checksum before any APK is made available (test, release and tagged builds); 14 tests pass.
 - [ ] Set repository variable WINSTONE_RELEASE_CERT_SHA256 (public company fingerprint) — owner/IT; release builds refuse to publish without it.
-- [ ] First real CI run of the check — blocked until Git sync is restored (GitHub still at 04:38 UTC Oct 31).
+- [x] First real CI run (2.22-test, 31 Oct 20:31 UTC) failed closed on a package-name parsing bug in the check; fixed with anchored fields + realistic test stub. Next push re-runs it.
+- [x] IT Console "Live agent app signing" panel: names-only readiness (4 secrets + fingerprint), blocker steps, test-app path; IT Console GitHub reads now use the linked account that can see the repository.
+- [ ] Signed live build: blocked — 0/4 signing secrets and no WINSTONE_RELEASE_CERT_SHA256 in winstonedigital-maker/winstonepulsecrm (or the old repo); key backup holder (owner decision B, 28 Oct) must add them. No Play App Signing in use.
 
 ## 2026-11-01 — Phone app 2.22 (auto permission ask)
 - [x] Version set to 2.22 / code 33 in app + build check so it installs over 2.21.
