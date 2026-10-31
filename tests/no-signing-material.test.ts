@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
-import { closeSync, openSync, readFileSync, readSync, statSync } from "node:fs";
+import { closeSync, existsSync, openSync, readFileSync, readSync, statSync } from "node:fs";
 
 /**
  * Guards against committing signing keys again. Reads only file NAMES and the first 4 bytes
@@ -10,7 +10,8 @@ const SIGNING_FILE = /\.(jks|keystore|p12|pfx|pepk|pem|key|der)(\.(gpg|b64))?$|(
 
 function trackedFiles(): string[] {
   const out = execFileSync("git", ["ls-files", "-z"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
-  return out.split("\0").filter(Boolean);
+  // Present files only: a deletion staged but not yet committed is already removed.
+  return out.split("\0").filter((f) => f && existsSync(f));
 }
 
 function magic(path: string): string {
