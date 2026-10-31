@@ -346,10 +346,10 @@ private fun StartCallingCard(onStart: () -> Unit, enabled: Boolean) {
                 Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(WinGreen),
+                    .background(WinGreenSoft),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(Icons.Filled.Call, contentDescription = null, tint = Color(0xFF17130A), modifier = Modifier.size(24.dp))
+                Icon(Icons.Filled.Call, contentDescription = null, tint = WinGreen, modifier = Modifier.size(24.dp))
             }
             Column(Modifier.weight(1f)) {
                 Text("Start Calling", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = WinInk)
@@ -359,7 +359,10 @@ private fun StartCallingCard(onStart: () -> Unit, enabled: Boolean) {
                 onClick = onStart,
                 enabled = enabled,
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = WinGreen, contentColor = Color(0xFF17130A)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
             ) {
                 Icon(Icons.Filled.Call, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
