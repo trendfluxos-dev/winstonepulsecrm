@@ -78,6 +78,10 @@ beforeAll(async () => {
     () => import("@/lib/report-sheet.server"),
     () => import("@/lib/audit.server"),
   ]) await m();
+  // Warm the report module's own database import with one harmless sequential call.
+  s.reportStatus = "submitted";
+  const { submitCallReport } = await import("@/lib/call-reports.server");
+  await submitCallReport({ reportId: "warm", agentId: "agent-1", category: "no_answer" } as never);
   const real = await import("@/integrations/supabase/client.server");
   if (!("rpc" in real.supabaseAdmin) || typeof (real.supabaseAdmin as { auth?: unknown }).auth !== "undefined") throw new Error("real database client loaded — refusing to run");
 });
