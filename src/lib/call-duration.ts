@@ -104,9 +104,8 @@ export function durationSourceLabel(source: string | null | undefined): string {
  */
 export function isPhoneMeasuredCall(row: { call_source?: string | null; external_call_id?: string | null; talk_time_source?: string | null }): boolean {
   const source = String(row.call_source ?? "");
-  if (source.startsWith("web")) return false;
-  // A live row the phone's call log later reconciled (same physical call).
-  if (row.talk_time_source === "call_log") return true;
   if (source === "android_sim" || source === "phone_recorder") return true;
+  // A live phone row the phone's call log later reconciled (same physical call).
+  if ((source === "android_dialer" || source === "android_incoming") && row.talk_time_source === "call_log") return true;
   return (source === "android_dialer" || source === "android_incoming") && String(row.external_call_id ?? "").startsWith("log-");
 }
