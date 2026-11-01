@@ -7,7 +7,7 @@ const route = (f: string) => readFileSync(`src/routes/${f}`, "utf8");
 
 describe("route-by-role UI gates", () => {
   // Screens that must only open for HQ / IT (authority) sessions.
-  const authorityOnly = ["hq.tsx", "agent-activity.tsx", "staff-portal.tsx", "booking-review.tsx", "contributions.tsx", "audit-log.tsx", "credits.tsx", "social-pages.tsx", "system.tsx", "runtime-errors.tsx", "load-diagnostics.tsx", "migration.tsx", "migration-export.tsx", "facebook-ads.tsx", "meta-control-center.tsx"];
+  const authorityOnly = ["hq.tsx", "agent-activity.tsx", "staff-portal.tsx", "booking-review.tsx", "contributions.tsx", "audit-log.tsx", "credits.tsx", "social-pages.tsx", "system.tsx", "runtime-errors.tsx", "load-diagnostics.tsx", "sync-failures.tsx", "migration.tsx", "migration-export.tsx", "facebook-ads.tsx", "meta-control-center.tsx"];
   for (const f of authorityOnly) {
     it(`${f} is gated to authority and never lets agents in`, () => {
       const src = route(f);
