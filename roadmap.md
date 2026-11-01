@@ -1,5 +1,12 @@
 # Roadmap
 
+## 2026-11-01 — New workspace connections (second move)
+- [x] GitHub API linked (GITHUB_API_KEY); verify trendfluxos-dev/winstone-pulse-crm access.
+- [ ] Google Drive linked (GOOGLE_DRIVE_API_KEY); verify folder 1CciCz… and project folder 1IExiE….
+- [ ] Google Search Console linked (GOOGLE_SEARCH_CONSOLE_API_KEY); verify crm.winstonebd.com property.
+- [ ] Google Sheets linked (GOOGLE_SHEETS_API_KEY); verify Daily Lead Report 134iFJ… and Call Reports 1cS2BH….
+- [ ] WhatsApp Business linked (WHATSAPP_API_KEY); webhook /api/public/whatsapp/webhook; Incoming messages destination set by owner.
+
 ## 2026-10-31 — Publish, screen readers, WhatsApp reports, phone app
 - [x] Publish requested for crm.winstonebd.com (basic security scan clean).
 - [ ] TalkBack/VoiceOver walk on real devices — needs a person with an Android phone and an iPhone (guide: accessibility/version-line-screen-reader-guide.pdf).
