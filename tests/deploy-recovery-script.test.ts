@@ -130,16 +130,12 @@ describe("deploy recovery: bounded reloads (production)", () => {
     const s = server();
     const session = memoryStorage();
     const local = memoryStorage();
-    const reloadsAt: number[] = [];
     for (let load = 1; load <= 3; load++) {
       const tab = boot({ server: s, session, local });
-      const start = Date.now();
       tab.safariPreloadError();
       await vi.advanceTimersByTimeAsync(6_000);
       expect(tab.location.reload).toHaveBeenCalledTimes(1);
-      reloadsAt.push(Date.now() - start);
     }
-    // Backoff before reloads 2 and 3 (0s, 2s, 5s plus the 0.3s settle delay).
     const fourth = boot({ server: s, session, local });
     fourth.safariPreloadError();
     await vi.advanceTimersByTimeAsync(20 * 60_000);
@@ -232,7 +228,9 @@ describe("offline shell service worker", () => {
   function loadWorker() {
     const handlers: Record<string, (e: unknown) => void> = {};
     const self = { addEventListener: (t: string, fn: (e: unknown) => void) => (handlers[t] = fn), location: { origin: "https://crm.example" } };
-    new Function("self", "caches", readFileSync("public/sw.js", "utf8"))(self, {});
+    const caches = { match: () => Promise.resolve(undefined), open: () => Promise.resolve({ put: () => {}, keys: () => Promise.resolve([]) }) };
+    const fetch = () => Promise.resolve({ ok: true, status: 200, clone() { return this; } });
+    new Function("self", "caches", "fetch", readFileSync("public/sw.js", "utf8"))(self, caches, fetch);
     return (path: string) => {
       const respondWith = vi.fn();
       handlers.fetch({ request: { method: "GET", url: `https://crm.example${path}`, mode: "no-cors" }, respondWith });
