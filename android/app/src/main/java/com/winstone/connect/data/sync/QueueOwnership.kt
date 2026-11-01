@@ -21,6 +21,17 @@ object QueueOwnership {
         if (owner.isNullOrBlank()) return Decision.SEND
         return if (owner.trim().equals(current.trim(), ignoreCase = true)) Decision.SEND else Decision.DROP
     }
+
+    /**
+     * Recordings are stricter: audio must stay bound to the agent who made the
+     * call and to that call's id. A recording with no owner or no call id is
+     * never sent (it could be attached to the wrong agent or call); a different
+     * signed-in agent drops it; nobody signed in holds it.
+     */
+    fun decideRecording(owner: String?, current: String?, token: String?, callUid: String?): Decision {
+        if (owner.isNullOrBlank() || callUid.isNullOrBlank()) return Decision.DROP
+        return decide(owner, current, token)
+    }
 }
 
 /** One stable call_uid per call/outcome, reused across every retry. */

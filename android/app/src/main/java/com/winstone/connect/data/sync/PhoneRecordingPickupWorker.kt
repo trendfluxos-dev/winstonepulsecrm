@@ -33,9 +33,16 @@ class PhoneRecordingPickupWorker(context: Context, params: WorkerParameters) :
 
     override suspend fun doWork(): Result {
         val ctx = applicationContext
-        // Consent may have been withdrawn (or the account switched) after the call.
-        if (!com.winstone.connect.telephony.RecordingConsent.granted(
-                ctx, com.winstone.connect.data.AgentSession.employeeIdNow(ctx))) {
+        // Bound to the agent who made the call: a later sign-in by someone else
+        // must never pick up this audio as theirs.
+        val owner = inputData.getString(KEY_OWNER)
+        val current = com.winstone.connect.data.AgentSession.employeeIdNow(ctx)
+        if (owner.isNullOrBlank() || current.isNullOrBlank() || !owner.trim().equals(current.trim(), ignoreCase = true)) {
+            if (owner.isNullOrBlank() || !current.isNullOrBlank()) return Result.success() // other agent / unbound: never attach
+            return Result.retry() // nobody signed in yet: wait for the same agent
+        }
+        // Consent may have been withdrawn after the call.
+        if (!com.winstone.connect.telephony.RecordingConsent.granted(ctx, owner)) {
             return Result.success()
         }
         if (!canReadAudio(ctx)) {
@@ -47,7 +54,13 @@ class PhoneRecordingPickupWorker(context: Context, params: WorkerParameters) :
         val phone = inputData.getString(KEY_PHONE).orEmpty()
         val uid = inputData.getString(KEY_UID) ?: return Result.success()
 
-        val match = PhoneRecordingMatcher.pick(query(ctx, start), start, end, phone)
+        val decision = PhoneRecordingMatcher.decide(query(ctx, start), start, end, phone)
+        if (decision.outcome == com.winstone.connect.telephony.MatchOutcome.AMBIGUOUS) {
+            // Waiting will not make it less ambiguous; never guess which file is this call.
+            SyncStatus.failed(ctx, "Several phone recordings match this call — none uploaded to avoid attaching the wrong one / একাধিক রেকর্ডিং মিলেছে — ভুল কলে যুক্ত না করতে কোনোটি পাঠানো হয়নি")
+            return Result.failure()
+        }
+        val match = decision.candidate
         if (match == null) {
             val message = "No matching phone recording found; call report sync is separate from audio"
             if (runAttemptCount < MAX_ATTEMPTS) {
@@ -96,6 +109,7 @@ class PhoneRecordingPickupWorker(context: Context, params: WorkerParameters) :
                 recorderSource = SOURCE,
                 callUid = uid,
                 callStartedAt = com.winstone.connect.data.IsoTime.fromMillis(start),
+                ownerEmployeeId = owner,
             )
         } catch (e: Exception) {
             SyncStatus.retrying(ctx, "Could not persist phone recording; retrying without deleting the pickup copy")
@@ -154,6 +168,7 @@ class PhoneRecordingPickupWorker(context: Context, params: WorkerParameters) :
         private const val KEY_LEAD = "lead"
         private const val KEY_INCOMING = "incoming"
         private const val KEY_UID = "uid"
+        private const val KEY_OWNER = "owner_employee_id"
 
         fun canReadAudio(ctx: Context): Boolean {
             val perm =
@@ -170,8 +185,10 @@ class PhoneRecordingPickupWorker(context: Context, params: WorkerParameters) :
             phoneNumber: String,
             leadId: String?,
             incoming: Boolean,
+            /** Agent who made the call; the pickup never attaches audio to anyone else. */
+            ownerEmployeeId: String?,
         ) {
-            if (callStartMs <= 0L || callUid == null) return
+            if (callStartMs <= 0L || callUid == null || ownerEmployeeId.isNullOrBlank()) return
             val uid = callUid
             val request = OneTimeWorkRequestBuilder<PhoneRecordingPickupWorker>()
                 .setInitialDelay(12, TimeUnit.SECONDS)
@@ -184,6 +201,7 @@ class PhoneRecordingPickupWorker(context: Context, params: WorkerParameters) :
                         .putString(KEY_LEAD, leadId)
                         .putBoolean(KEY_INCOMING, incoming)
                         .putString(KEY_UID, uid)
+                        .putString(KEY_OWNER, ownerEmployeeId)
                         .build(),
                 )
                 .build()

@@ -232,7 +232,9 @@ describe("P2-4 sign-out revokes only this phone's token", () => {
   });
   it("queued jobs are stamped with their account and checked before sending", () => {
     const q = src("android/app/src/main/java/com/winstone/connect/data/sync/CallSyncQueue.kt");
-    expect(q).toContain(".putString(KEY_OWNER, AgentSession.employeeIdNow(context))");
+    // Signed-in account by default; an owner already on the job (recordings, resends) is kept.
+    expect(q).toContain('data.getString(KEY_OWNER)?.takeIf { it.isNotBlank() } ?: AgentSession.employeeIdNow(context)');
+    expect(q).toContain(".putString(KEY_OWNER, owner)");
     expect(q).toContain("QueueOwnership.Decision.DROP -> return Result.failure()");
   });
 });

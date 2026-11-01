@@ -40,7 +40,12 @@ object CallSyncQueue {
         recorderSource: String = "unknown",
         callUid: String? = null,
         callStartedAt: String? = null,
+        /** Agent who made the call; defaults to the signed-in agent at call end. */
+        ownerEmployeeId: String? = AgentSession.employeeIdNow(context),
     ) {
+        // Audio is only ever queued bound to one agent and one call.
+        if (callUid.isNullOrBlank()) throw IOException("Recording has no call id — not queued, so it cannot attach to the wrong call")
+        if (ownerEmployeeId.isNullOrBlank()) throw IOException("No signed-in agent for this recording — not queued")
         val uploadId = QueuedAudioIdentity.uploadId(callUid)
         // Cache storage can be evicted while offline. Keep queued originals in app files.
         val dir = File(context.filesDir, "pending_call_audio").apply { mkdirs() }
@@ -81,6 +86,7 @@ object CallSyncQueue {
                 .putString(KEY_UPLOAD_ID, uploadId)
                 .putString(KEY_CALL_UID, callUid)
                 .putString(KEY_AT, callStartedAt)
+                .putString(KEY_OWNER, ownerEmployeeId)
                 .build(),
         )
     }
@@ -284,9 +290,11 @@ object CallSyncQueue {
 
     private fun enqueue(context: Context, unique: String, data: Data, policy: ExistingWorkPolicy = ExistingWorkPolicy.KEEP, tags: List<String> = emptyList()) {
         // Stamp the signed-in account so a queued job can never be sent under
-        // a different agent's token after an account switch.
+        // a different agent's token after an account switch. An owner already on
+        // the job (recordings, resent failed jobs) is kept, never replaced.
+        val owner = data.getString(KEY_OWNER)?.takeIf { it.isNotBlank() } ?: AgentSession.employeeIdNow(context)
         val owned = Data.Builder().putAll(data)
-            .putString(KEY_OWNER, AgentSession.employeeIdNow(context))
+            .putString(KEY_OWNER, owner)
             .build()
         val request = OneTimeWorkRequestBuilder<CrmSyncWorker>()
             .apply { tags.forEach { addTag(it) } }
@@ -349,7 +357,19 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
 
     private suspend fun doSyncWork(): Result {
         val employeeId = AgentSession.employeeIdNow(applicationContext) ?: return Result.retry()
-        when (QueueOwnership.decide(inputData.getString(CallSyncQueue.KEY_OWNER), employeeId, AgentSession.deviceTokenNow(applicationContext))) {
+        val owner = inputData.getString(CallSyncQueue.KEY_OWNER)
+        val token = AgentSession.deviceTokenNow(applicationContext)
+        val ownership = if (inputData.getString(CallSyncQueue.KEY_KIND) == CallSyncQueue.KIND_RECORDING) {
+            QueueOwnership.decideRecording(owner, employeeId, token, inputData.getString(CallSyncQueue.KEY_CALL_UID))
+        } else {
+            QueueOwnership.decide(owner, employeeId, token)
+        }
+        if (ownership == QueueOwnership.Decision.DROP && inputData.getString(CallSyncQueue.KEY_KIND) == CallSyncQueue.KIND_RECORDING) {
+            // Kept on the phone (file not deleted) but never sent under another agent or without a call id.
+            CallSyncQueue.setRecordingError(applicationContext, inputData.getString(CallSyncQueue.KEY_UPLOAD_ID),
+                "Recording belongs to another agent or has no call id — not uploaded / অন্য এজেন্টের বা কল-আইডি ছাড়া রেকর্ডিং — পাঠানো হয়নি")
+        }
+        when (ownership) {
             QueueOwnership.Decision.HOLD -> return Result.retry()
             QueueOwnership.Decision.DROP -> return Result.failure()
             QueueOwnership.Decision.SEND -> Unit
@@ -362,6 +382,12 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 CallSyncQueue.KIND_RECORDING -> {
                     val path = inputData.getString(CallSyncQueue.KEY_FILE) ?: return Result.failure()
                     val file = File(path)
+                    // Consent can be withdrawn after the call: re-check for the agent who owns the audio.
+                    if (!com.winstone.connect.telephony.RecordingConsent.granted(applicationContext, owner)) {
+                        SyncStatus.failed(applicationContext, "Recording consent not active — audio not uploaded / রেকর্ডিং সম্মতি নেই — অডিও পাঠানো হয়নি")
+                        CallSyncQueue.setRecordingError(applicationContext, inputData.getString(CallSyncQueue.KEY_UPLOAD_ID), "Recording consent not active")
+                        return Result.failure()
+                    }
                     if (!file.exists()) {
                         SyncStatus.failed(applicationContext, "Original audio file missing — recover the phone recording; no audio uploaded")
                         CallSyncQueue.setRecordingError(applicationContext, inputData.getString(CallSyncQueue.KEY_UPLOAD_ID), "Original audio file missing")
