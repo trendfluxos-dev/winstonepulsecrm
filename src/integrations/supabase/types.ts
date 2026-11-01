@@ -972,6 +972,7 @@ export type Database = {
           answered_at: string | null
           audio_url: string | null
           call_direction: Database["public"]["Enums"]["call_direction"]
+          call_log_id: string | null
           call_source: string
           call_status: string
           checksum: string | null
@@ -1008,6 +1009,7 @@ export type Database = {
           stt_status: string | null
           sync_status: Database["public"]["Enums"]["sync_status"]
           talk_time_source: string | null
+          talk_time_verified_at: string | null
           transcribed_at: string | null
           transcription_text: string | null
           updated_at: string
@@ -1028,6 +1030,7 @@ export type Database = {
           answered_at?: string | null
           audio_url?: string | null
           call_direction?: Database["public"]["Enums"]["call_direction"]
+          call_log_id?: string | null
           call_source?: string
           call_status?: string
           checksum?: string | null
@@ -1064,6 +1067,7 @@ export type Database = {
           stt_status?: string | null
           sync_status?: Database["public"]["Enums"]["sync_status"]
           talk_time_source?: string | null
+          talk_time_verified_at?: string | null
           transcribed_at?: string | null
           transcription_text?: string | null
           updated_at?: string
@@ -1084,6 +1088,7 @@ export type Database = {
           answered_at?: string | null
           audio_url?: string | null
           call_direction?: Database["public"]["Enums"]["call_direction"]
+          call_log_id?: string | null
           call_source?: string
           call_status?: string
           checksum?: string | null
@@ -1120,6 +1125,7 @@ export type Database = {
           stt_status?: string | null
           sync_status?: Database["public"]["Enums"]["sync_status"]
           talk_time_source?: string | null
+          talk_time_verified_at?: string | null
           transcribed_at?: string | null
           transcription_text?: string | null
           updated_at?: string
