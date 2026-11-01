@@ -2,7 +2,7 @@
 
 বাংলা UI-র সেলস CRM — এজেন্টের নিজের সিমে কল, রেকর্ডিং সিঙ্ক, দৈনিক লিড বিতরণ, শিফট সারসংক্ষেপ, Executive HQ ও আইটি কনসোল।
 
-**Live app**: https://webcrm.winstonebd.com
+**Live app**: https://crm.winstonebd.com
 
 ## নথিপত্র / Documentation
 
