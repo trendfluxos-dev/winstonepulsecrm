@@ -61,7 +61,7 @@ export function lifecyclePatch(row: AudioEvidence, patch: { call_status: string;
  * of the same agent and lead (assertAudioIdentity) or creates it under that id.
  * Without a call id it is refused, never attached by lead or time alone.
  */
-export function recordingBindingError(body: { recorder_source?: string | null; call_uid?: string | null }): string | null {
+export function recordingBindingError(body: { recorder_source?: string | null | undefined; call_uid?: string | null | undefined }): string | null {
   if (body.recorder_source === "phone_recorder" && !String(body.call_uid ?? "").trim()) {
     return "Phone recorder audio must include its call id";
   }
