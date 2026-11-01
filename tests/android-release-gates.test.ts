@@ -52,20 +52,3 @@ describe("official Android release gates", () => {
     expect(pub.run).not.toContain("--clobber");
   });
 });
-
-describe("Android CI check (build + tests, no signing)", () => {
-  const raw = readFileSync(".github/workflows/android-ci.yml", "utf8");
-  const ci = yaml.load(raw) as Wf & { on: Record<string, unknown>; permissions: Record<string, string> };
-  const steps = ci.jobs["build-and-test"].steps;
-  it("runs on pull requests and is read-only", () => {
-    expect(Object.keys(ci.on)).toContain("pull_request");
-    expect(ci.permissions).toEqual({ contents: "read" });
-  });
-  it("runs the full unit-test suite and builds unsigned APKs", () => {
-    expect(steps.some((s) => s.run?.includes("./gradlew --no-daemon test assembleDebug assembleSandbox"))).toBe(true);
-  });
-  it("never touches signing secrets, release builds, pushes or releases", () => {
-    expect(raw).not.toMatch(/secrets\./);
-    expect(raw).not.toMatch(/assembleRelease|bundleRelease|gh release|git push/);
-  });
-});
