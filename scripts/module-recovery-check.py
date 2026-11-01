@@ -2,7 +2,7 @@
 Regression check: simulate a failed dynamic module import in a running preview
 tab and verify (1) the waiting notice appears, (2) concurrent failures coalesce
 into one availability probe, (3) the app reloads itself, and (4) after repeated
-failed reloads a clear fallback screen with a refresh button shows — never a
+failed probes a clear fallback screen with a refresh button shows — never a
 blank page. Local dev only; telemetry posts are stubbed so nothing is recorded.
 Run: bun run test:recovery   (exit 0 = pass)
 """
@@ -64,7 +64,6 @@ async def main():
 
         # Dev preview never caps reloads, so reach the fallback the way a real
         # outage does: the probe keeps failing (~2 minutes of 2s probes).
-        await page.route(BASE + "/", head)
         probe_down["on"] = True
         await page.evaluate(
             "m => window.dispatchEvent(new CustomEvent('winstone:module-load-error', { detail: m }))",
@@ -72,12 +71,12 @@ async def main():
         )
         try:
             await page.locator("#deploy-recovery").wait_for(timeout=180_000)
-            probe_down["on"] = False
             if await page.locator("#deploy-recovery button").count() == 0:
                 failures.append("fallback screen has no refresh button")
             if await page.locator("#deploy-recovery a[href='/']").count() == 0:
                 failures.append("fallback screen has no home link")
             await page.locator("#deploy-recovery button").click()
+            probe_down["on"] = False
             await page.wait_for_url("**_fresh=*", timeout=10_000)
             await page.wait_for_load_state("networkidle", timeout=60_000)
             if await page.locator("#deploy-recovery").count():
