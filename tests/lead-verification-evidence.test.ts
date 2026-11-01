@@ -6,7 +6,7 @@ const LEAD = "11111111-1111-4111-8111-111111111111";
 const UID = "and-abc123-1800000000000";
 const good: CallEvidenceRow = {
   agent_id: AGENT, lead_id: LEAD, call_status: "completed", duration_seconds: 48,
-  call_source: "android_sim", external_call_id: UID,
+  call_source: "android_sim", external_call_id: UID, talk_time_source: "call_log",
 };
 const check = (row: CallEvidenceRow | null, callUid: string | null = UID) =>
   verifyLeadFromCallEvidence({ callUid, row, agentId: AGENT, leadId: LEAD });
@@ -33,8 +33,17 @@ describe("lead verification needs valid call evidence", () => {
       expect(check({ ...good, duration_seconds: seconds }).reason).toBe("no_talk_time");
     }
   });
+  it("app 2.21 app-dialled call: ringing-inclusive time without call-history proof never verifies", () => {
+    // 2.21 sent "completed" with dial-to-hang-up seconds even when nobody answered.
+    expect(check({ ...good, talk_time_source: null, duration_seconds: 75 }).reason).toBe("not_phone_measured");
+    expect(check({ ...good, talk_time_source: undefined }).reason).toBe("not_phone_measured");
+    expect(check({ ...good, talk_time_source: "live" }).reason).toBe("not_phone_measured");
+  });
+  it("phone-dialer call verifies with call-history proof", () => {
+    expect(check({ ...good, call_source: "android_dialer", talk_time_source: "call_log" }).verified).toBe(true);
+  });
   it("time not measured by the phone (live dialer, web timer, manual) never verifies", () => {
-    expect(check({ ...good, call_source: "android_dialer", external_call_id: UID }).reason).toBe("not_phone_measured");
+    expect(check({ ...good, call_source: "android_dialer", external_call_id: UID, talk_time_source: null }).reason).toBe("not_phone_measured");
     expect(check({ ...good, call_source: "web", external_call_id: UID }).reason).toBe("not_phone_measured");
     expect(check({ ...good, call_source: null }).reason).toBe("not_phone_measured");
   });
@@ -85,6 +94,12 @@ describe("phone outcome endpoint", () => {
     expect(res.status).toBe(200);
     expect(s.rpc[0]._connected).toBe(false);
     expect(body).toMatchObject({ verified: false, verification_reason: "no_call_record", connected_claimed: true });
+  });
+  it("app 2.21 'completed' row with ringing time and no call-history proof does not verify", async () => {
+    s.call = { ...good, talk_time_source: null, duration_seconds: 75 };
+    const body = await (await post({ lead_id: LEAD, outcome: "interested", connected: true, call_uid: UID })).json();
+    expect(s.rpc[0]._connected).toBe(false);
+    expect(body.verification_reason).toBe("not_phone_measured");
   });
   it("connected=true with an unanswered call (0 s) does not verify", async () => {
     s.call = { ...good, call_status: "no_answer", duration_seconds: 0 };
