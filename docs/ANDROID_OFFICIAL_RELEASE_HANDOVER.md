@@ -1,17 +1,25 @@
-# Winstone Pulse Agent App — Official Release Handover and Release Gate
+# Winstone Pulse Agent App — Internal Release Handover and Operational Sign-off
 
-**Release Gate: NOT READY** (status as of 2026-11-01, 15:51 Dhaka).
+**Scope: internal company distribution only.** Winstone Pulse Android is a private internal tool for
+Winstone's own agents. It is **not** published to Google Play or any public store, and no store listing,
+store review or store signing service is required. The goal is an internally signed, installable APK that
+uses the same production CRM backend, data and business rules as the web CRM.
+
+**Internal operational sign-off: NOT READY** (status as of 2026-11-01, 15:51 Dhaka).
+The three gates in section F are technical, internal checks — not app-store gates.
 This document is the handover sequence. Supporting detail stays in:
 `docs/ANDROID_RELEASE_READINESS.md` (key backup/restore, ledger), `docs/ANDROID_DEVICE_ACCEPTANCE.md`
-(device checklist), `.github/workflows/android-apk.yml` and `android-release.yml` (the build gate),
-`tests/android-release-gates.test.ts` (guards the gate rules).
+(device checklist), `docs/ANDROID_CRM_CONSISTENCY_AUDIT.md` (Android ↔ web CRM data/call-time audit),
+`.github/workflows/android-apk.yml` and `android-release.yml` (the build gate; a tag creates only a private
+draft release inside the company repository), `tests/android-release-gates.test.ts` (guards the gate rules).
 
 | Fixed identity | Value |
 |---|---|
-| Repository / branch | `trendfluxos-dev/winstone-pulse-crm` / `main` |
+| Repository / branch | `trendfluxos-dev/winstone-pulse-crm` (private) / `main` |
 | Release applicationId | `com.winstone.connect` (test build `com.winstone.connect.test` is never official) |
 | Version | `versionName 2.21`, `versionCode 32` (`android/app/build.gradle.kts`) |
-| Live CRM | https://crm.winstonebd.com |
+| Live CRM (same backend the APK uses) | https://crm.winstonebd.com |
+| Distribution | internal only: IT shares the verified APK + `.sha256` directly with company agent phones |
 
 Never put keystore files, passwords, alias values, secret values or `local.properties` in chat, logs,
 screenshots, tickets or this repository. Only the **public** certificate SHA-256 fingerprint may be written down.
