@@ -51,8 +51,22 @@ class CallHistoryEvidenceTest {
             assertEquals("no_answer", o.state.wire)
             assertFalse(o.connected)
         }
-        val unanswered = outcomeFor(listOf(row(TYPE_INCOMING, 0)), outgoing = false)
-        assertEquals(CallVerdict.MISSED, unanswered.verdict)
+    }
+
+    @Test fun incomingTypeIsAnsweredEvenAtZeroSecondsWithNoTalkTime() {
+        val zero = outcomeFor(listOf(row(TYPE_INCOMING, 0)), outgoing = false)
+        assertEquals(CallVerdict.ANSWERED, zero.verdict)
+        assertEquals("completed", zero.state.wire)
+        assertEquals(0, zero.talkSeconds)
+        val talked = outcomeFor(listOf(row(TYPE_INCOMING, 25)), outgoing = false)
+        assertEquals(CallVerdict.ANSWERED, talked.verdict)
+        assertEquals(25, talked.talkSeconds)
+    }
+
+    @Test fun outgoingZeroSecondsStaysUnanswered() {
+        val o = outcomeFor(listOf(row(CallHistoryEvidence.TYPE_OUTGOING, 0)), outgoing = true)
+        assertEquals(CallVerdict.UNANSWERED, o.verdict)
+        assertFalse(o.connected)
     }
 
     @Test fun unavailableCallHistoryNeverClaimsAnswer() {

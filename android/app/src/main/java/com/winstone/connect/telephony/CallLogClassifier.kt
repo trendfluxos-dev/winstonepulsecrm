@@ -18,7 +18,9 @@ object CallLogClassifier {
         val direction = if (type == CallLog.Calls.OUTGOING_TYPE) "outgoing" else "incoming"
         val kind = when (type) {
             CallLog.Calls.OUTGOING_TYPE -> if (duration > 0) "outgoing_connected" else "outgoing_unanswered"
-            CallLog.Calls.INCOMING_TYPE -> if (duration > 0) "incoming_answered" else "incoming_unanswered"
+            // INCOMING_TYPE is an answered incoming call even at 0 s (missed/rejected
+            // have their own types). Only a corrupt negative duration is distrusted.
+            CallLog.Calls.INCOMING_TYPE -> if (durationSeconds >= 0) "incoming_answered" else "incoming_unanswered"
             CallLog.Calls.MISSED_TYPE -> "missed"
             CallLog.Calls.REJECTED_TYPE -> "rejected"
             CallLog.Calls.BLOCKED_TYPE -> "blocked"

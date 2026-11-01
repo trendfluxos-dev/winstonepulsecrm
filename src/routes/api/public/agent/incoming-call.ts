@@ -73,31 +73,51 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
         );
         const phone = normalizeLeadPhone(body.phone_number);
 
-        // Late call-log reconciliation: if the live receiver already reported a
-        // call to this number around the same minute, that is the same physical
-        // call — reuse it instead of logging the call twice.
-        if (body.source === "call_log") {
-          const centre = new Date(at).getTime();
-          const { data: near } = await supabaseAdmin
-            .from("call_recordings")
-            .select("id, lead_id, external_call_id, call_status")
-            .eq("agent_id", caller.profile.id)
-            .eq("phone_number", phone)
-            .gte("started_at", new Date(centre - 150_000).toISOString())
-            .lte("started_at", new Date(centre + 150_000).toISOString())
-            .limit(1)
-            .maybeSingle();
-          if (near && near.external_call_id !== body.call_uid) {
+        // Late call-log reconciliation: the live row of the same physical call
+        // (same agent + number, unique nearby start) takes the phone's own
+        // CallLog duration/type. No unique match → stored as its own row below.
+        if (body.source === "call_log" && (body.state === "completed" || body.state === "no_answer")) {
+          const { reconcileLateCallLog } = await import("@/lib/call-log-reconcile.server");
+          const result = await reconcileLateCallLog(supabaseAdmin, {
+            agentId: caller.profile.id,
+            phone,
+            callUid: body.call_uid,
+            state: body.state,
+            durationSeconds: body.duration_seconds,
+            at,
+          }).catch(() => "error" as const);
+          if (result === "error") return json({ error: "Call reconciliation failed" }, 500);
+          if (result) {
+            if (result.reconciled) {
+              const { recordSyncEvent } = await import("@/lib/call-jobs.server");
+              await recordSyncEvent({
+                agentId: caller.profile.id,
+                deviceId: caller.device.id,
+                eventType: "call_log_reconciled",
+                entityType: "call_recording",
+                entityId: result.recordingId,
+                idempotencyKey: `call_log_reconcile:${body.call_uid}`,
+                payload: {
+                  call_log_id: body.call_uid,
+                  live_call_id: result.duplicateOf,
+                  previous_call_status: result.previous?.call_status ?? null,
+                  previous_duration_seconds: result.previous?.duration_seconds ?? null,
+                  call_log_state: body.state,
+                  call_log_duration_seconds: body.duration_seconds ?? 0,
+                },
+              });
+            }
             return json({
               ok: true,
               call_uid: body.call_uid,
-              lead_id: near.lead_id,
+              lead_id: result.leadId,
               lead_created: false,
-              recording_id: near.id,
+              recording_id: result.recordingId,
               report_id: null,
-              call_status: near.call_status,
+              call_status: result.callStatus,
               recording_status: "unknown",
-              duplicate_of: near.external_call_id,
+              duplicate_of: result.duplicateOf,
+              reconciled: result.reconciled,
             });
           }
         }

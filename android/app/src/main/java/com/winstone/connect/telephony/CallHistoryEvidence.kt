@@ -88,9 +88,10 @@ object CallHistoryEvidence {
             TYPE_OUTGOING ->
                 if (talk > 0) CallOutcome(CallVerdict.ANSWERED, CallState.COMPLETED, talk, row.dateMs)
                 else CallOutcome(CallVerdict.UNANSWERED, CallState.CANCELLED, 0, row.dateMs)
+            // Answered incoming even at 0 s; 0 talk seconds never proves a connection server-side.
             TYPE_INCOMING ->
-                if (talk > 0) CallOutcome(CallVerdict.ANSWERED, CallState.COMPLETED, talk, row.dateMs)
-                else CallOutcome(CallVerdict.MISSED, CallState.MISSED, 0, row.dateMs)
+                if (row.durationSeconds >= 0) CallOutcome(CallVerdict.ANSWERED, CallState.COMPLETED, talk, row.dateMs)
+                else unavailable()
             TYPE_MISSED, TYPE_REJECTED, TYPE_BLOCKED, TYPE_VOICEMAIL ->
                 CallOutcome(CallVerdict.MISSED, CallState.MISSED, 0, row.dateMs)
             else -> unavailable()

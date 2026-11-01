@@ -20,6 +20,11 @@ class CallLogClassifierTest {
         assertEquals("incoming", r.direction); assertEquals("completed", r.state)
     }
 
+    @Test fun incomingAnsweredAtZeroSecondsIsCompleted() {
+        val r = CallLogClassifier.classify(CallLog.Calls.INCOMING_TYPE, 0)
+        assertEquals("incoming", r.direction); assertEquals("completed", r.state); assertEquals("incoming_answered", r.kind)
+    }
+
     @Test fun missedIsIncomingNoAnswer() {
         val r = CallLogClassifier.classify(CallLog.Calls.MISSED_TYPE, 0)
         assertEquals("incoming", r.direction); assertEquals("no_answer", r.state); assertEquals("missed", r.kind)
