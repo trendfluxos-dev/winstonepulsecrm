@@ -451,6 +451,11 @@ object WinstoneApi {
         post("/api/public/agent/incoming-call", payload)
     }
 
+    /** Batch of locally logged sync failures for the CRM's IT view (technical fields only). */
+    suspend fun postSyncFailures(failures: org.json.JSONArray): JSONObject = withContext(Dispatchers.IO) {
+        post("/api/public/agent/sync-failures", JSONObject().put("failures", failures))
+    }
+
     /** Due follow-ups and unfinished reports, for the reminder notifications. */
     suspend fun reminders(): JSONObject = withContext(Dispatchers.IO) {
         val req = Request.Builder()
