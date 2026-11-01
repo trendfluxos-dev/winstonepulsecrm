@@ -186,11 +186,13 @@ object CallSyncQueue {
         phoneNumber: String? = null,
         recordingSupported: Boolean? = null,
         recordingNote: String? = null,
+        talkTimeSource: String? = null,
     ) {
         enqueue(
             context,
             unique = "state_${callUid}_$state",
             data = Data.Builder()
+                .putString(KEY_TALK_SOURCE, talkTimeSource)
                 .putString(KEY_KIND, KIND_CALL_STATE)
                 .putString(KEY_CALL_UID, callUid)
                 .putString(KEY_LEAD, leadId)
@@ -222,11 +224,14 @@ object CallSyncQueue {
         source: String = "realtime",
         /** When the call happened, for log entries that are reported late. */
         atIso: String? = null,
+        /** "call_log" when durationSeconds is Android CallLog.DURATION. */
+        talkTimeSource: String? = null,
     ) {
         enqueue(
             context,
             unique = "${direction}_${callUid}_$state",
             data = Data.Builder()
+                .putString(KEY_TALK_SOURCE, talkTimeSource)
                 .putString(KEY_KIND, KIND_INCOMING_CALL)
                 .putString(KEY_DIRECTION, direction)
                 .putString(KEY_CALL_UID, callUid)
@@ -312,6 +317,7 @@ object CallSyncQueue {
     const val TAG_QUEUED_AT_PREFIX = "rec_at:"
     const val TAG_UPLOAD_PREFIX = "rec_id:"
     const val KEY_CALL_UID = "call_uid"
+    const val KEY_TALK_SOURCE = "talk_time_source"
     const val KEY_STATE = "state"
     const val KEY_REC_SUPPORTED = "recording_supported"
     const val KEY_REC_NOTE = "recording_note"
@@ -428,6 +434,7 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                         direction = inputData.getString(CallSyncQueue.KEY_DIRECTION) ?: "incoming",
                         source = inputData.getString(CallSyncQueue.KEY_CALL_SOURCE) ?: "realtime",
                         atIso = inputData.getString(CallSyncQueue.KEY_AT),
+                        talkTimeSource = inputData.getString(CallSyncQueue.KEY_TALK_SOURCE),
                     )
                     Result.success()
                 }
@@ -485,6 +492,7 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                                 inputData.getBoolean(CallSyncQueue.KEY_REC_SUPPORTED, false)
                             else null,
                         recordingNote = inputData.getString(CallSyncQueue.KEY_REC_NOTE),
+                        talkTimeSource = inputData.getString(CallSyncQueue.KEY_TALK_SOURCE),
                     )
                     Result.success()
                 }

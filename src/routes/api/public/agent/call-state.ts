@@ -28,6 +28,8 @@ const Body = z.object({
   agent_phone: z.string().trim().min(5).max(20).nullable().optional(),
   recording_supported: z.boolean().optional(),
   recording_note: z.string().trim().max(300).nullable().optional(),
+  /** Set by app 2.22+ when duration_seconds is Android CallLog.DURATION (talk time). */
+  talk_time_source: z.enum(["call_log"]).optional(),
 });
 
 function json(body: unknown, status = 200): Response {
@@ -98,7 +100,11 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
           return json({ error: "This call record belongs to another agent or lead" }, 403);
         }
 
-        const acceptedPatch = existing ? lifecyclePatch(existing, patch) : patch;
+        const { talkTimeEvidence } = await import("@/lib/call-reconciliation");
+        // Call-history evidence is authoritative for the final result and talk time,
+        // so it applies even when the row already looks finished.
+        const evidence = talkTimeEvidence(body);
+        const acceptedPatch = { ...(existing ? lifecyclePatch(existing, patch) : patch), ...evidence };
         let recordingId = existing?.id ?? null;
 
         if (existing) {
@@ -126,6 +132,7 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
               external_call_id: body.call_uid,
               upload_status: "pending",
               ...patch,
+              ...evidence,
             })
             .select("id")
             .single();

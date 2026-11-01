@@ -81,7 +81,7 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
         if (call_uid) {
           const { data: callRow, error: callError } = await supabaseAdmin
             .from("call_recordings")
-            .select("agent_id, lead_id, call_status, duration_seconds, call_source, external_call_id")
+            .select("agent_id, lead_id, call_status, duration_seconds, call_source, external_call_id, talk_time_source")
             .eq("external_call_id", call_uid)
             .maybeSingle();
           if (callError) return json({ error: "Call evidence could not be read", retryable: true }, 500);

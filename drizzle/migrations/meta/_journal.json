@@ -1002,6 +1002,13 @@
       "when": 1793456712300,
       "tag": "0142_hq_whatsapp_daily_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 143,
+      "version": "7",
+      "when": 1793529842270,
+      "tag": "0143_call_talk_time_source",
+      "breakpoints": true
     }
   ]
 }
