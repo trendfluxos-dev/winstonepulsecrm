@@ -84,3 +84,90 @@ export function talkTimeEvidence(body: {
   if (body.state === "completed" && seconds === 0) return {}; // completed needs talk time
   return { talk_time_source: "call_log", duration_seconds: body.state === "completed" ? seconds : 0, call_status: body.state };
 }
+
+/**
+ * Late call-log reconciliation (G2). A call-log row reported by the phone after
+ * the call ended is matched to the live row the app already reported for the
+ * same physical call, so the CRM keeps ONE call row carrying Android's own
+ * CallLog.DURATION and type instead of the live (ringing-inclusive) time.
+ *
+ * Matching is conservative: same agent only, never a row that is itself a
+ * call-log row or was already reconciled by a different call-log entry, within
+ * ±150 s of the call-log start. With several such rows only a single row within
+ * ±30 s is accepted; anything else is ambiguous and never merged.
+ */
+export const CALL_LOG_MATCH_WINDOW_MS = 150_000;
+export const CALL_LOG_TIGHT_WINDOW_MS = 30_000;
+
+export type CallLogCandidate = {
+  id: string;
+  agent_id: string | null;
+  external_call_id: string | null;
+  call_log_id?: string | null;
+  started_at: string | null;
+};
+
+export type CallLogMatch<T extends CallLogCandidate> =
+  | { kind: "matched"; row: T }
+  | { kind: "already_reconciled"; row: T }
+  | { kind: "own_row" }
+  | { kind: "none" }
+  | { kind: "ambiguous"; count: number };
+
+export function pickCallLogMatch<T extends CallLogCandidate>(
+  candidates: readonly T[],
+  input: { agentId: string; callUid: string; atMs: number },
+): CallLogMatch<T> {
+  const mine = candidates.filter((c) => c.agent_id === input.agentId);
+  // A retry of a call-log row that was stored as its own row: normal path updates it.
+  if (mine.some((c) => c.external_call_id === input.callUid)) return { kind: "own_row" };
+  const done = mine.find((c) => c.call_log_id === input.callUid);
+  if (done) return { kind: "already_reconciled", row: done };
+  if (!Number.isFinite(input.atMs)) return { kind: "none" };
+  const eligible = mine
+    .filter((c) => !String(c.external_call_id ?? "").startsWith("log-") && !c.call_log_id)
+    .map((c) => ({ c, gap: Math.abs(new Date(c.started_at ?? "").getTime() - input.atMs) }))
+    .filter((x) => Number.isFinite(x.gap) && x.gap <= CALL_LOG_MATCH_WINDOW_MS);
+  if (eligible.length === 0) return { kind: "none" };
+  if (eligible.length === 1) return { kind: "matched", row: eligible[0]!.c };
+  const tight = eligible.filter((x) => x.gap <= CALL_LOG_TIGHT_WINDOW_MS);
+  if (tight.length === 1) return { kind: "matched", row: tight[0]!.c };
+  return { kind: "ambiguous", count: eligible.length };
+}
+
+/**
+ * Fields written onto the matched live row. Call-log state/duration are
+ * authoritative (they replace live dial-to-hang-up time). An incoming row the
+ * phone saw answered (answered_at) is never downgraded to "no_answer" — older
+ * apps label a 0-second answered incoming call that way — but it still gets
+ * 0 talk seconds, so it can never prove a connection.
+ */
+export function callLogReconcilePatch(
+  row: { call_direction?: string | null; answered_at?: string | null; finished_at?: string | null; device_reported_duration_seconds?: number | null },
+  log: { state: "completed" | "no_answer"; durationSeconds: number | undefined; atMs: number; callUid: string },
+  nowIso: string,
+) {
+  const seconds = Math.max(0, Math.floor(Number(log.durationSeconds) || 0));
+  const answeredIncoming = row.call_direction === "incoming_callback" && Boolean(row.answered_at);
+  const status = log.state === "completed" || answeredIncoming ? "completed" : "no_answer";
+  return {
+    call_status: status,
+    duration_seconds: status === "completed" ? seconds : 0,
+    // Keep the earlier device claim when one exists; otherwise store the phone's measurement.
+    ...(row.device_reported_duration_seconds == null ? { device_reported_duration_seconds: seconds } : {}),
+    talk_time_source: "call_log" as const,
+    talk_time_verified_at: nowIso,
+    call_log_id: log.callUid,
+    ...(!row.finished_at && Number.isFinite(log.atMs) ? { finished_at: new Date(log.atMs + seconds * 1000).toISOString() } : {}),
+  };
+}
+
+/** Duration fields copied onto a still-pending report linked to the reconciled row. Nothing else changes. */
+export function pendingReportDurationPatch(patch: { duration_seconds: number }, seconds: number, nowIso: string) {
+  return {
+    duration_seconds: patch.duration_seconds,
+    device_reported_duration_seconds: Math.max(0, Math.floor(seconds)),
+    duration_source: "phone_sync",
+    duration_synced_at: nowIso,
+  };
+}
