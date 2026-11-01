@@ -138,3 +138,8 @@ Run `android/DEVICE_TEST_CHECKLIST.md`, plus:
 - Canonical signer fingerprint: not established (section 3 table blank). `android/winstone-release.jks` is again tracked (restored by the 2026-10-31 22:24 revert) and is the retired, untrusted key per the owner's decision B; the official build now refuses to run while it is tracked.
 - Latest build: test APK 2.21-test (32), run 24, commit `d03ae7b2`, SHA-256 `d1e5162028aa7bdd670c70ffdb32183b891fd876bc039249968ca6f849c81008`; red only because the artifact upload hit storage quota.
 - Device acceptance: NOT DONE — see `docs/ANDROID_DEVICE_ACCEPTANCE.md`.
+
+### Local build 2026-11-01 (16:28 Dhaka) — test build only, not official
+- Built in the Lovable workspace with JDK 17 + Android SDK 35 / build-tools 35.0.0 from the current project code (GitHub not yet synced): `./gradlew testDebugUnitTest assembleDebug` → BUILD SUCCESSFUL; 84 unit tests, 0 failures (incl. CallHistoryEvidence, SyncErrorClassifier, RecordingBinding, PhoneRecordingMatcher).
+- Output: `com.winstone.connect.test` 2.21-test (32), SHA-256 `59a7e26ff5dfc32ef44f6ee7969b48ce1015fc0fd2ec0b5bd15939d030024c27`, debug-signed — not the official APK.
+- Not done: emulator/instrumented UI tests (no hardware virtualisation available), real-device run, signed release.

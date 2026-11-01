@@ -50,6 +50,11 @@ you control; never call a real customer.
 | 29 | Duplicate prevention | Retry by toggling airplane mode during upload; resubmit report | one call row, one report, one recording in CRM | NOT DONE | |
 | 31 | Call history permission off | Deny call-log permission, dial and talk 20 s | CRM shows call not verified (failed) with note; report opens as not connected; nothing claims answered | NOT DONE | |
 | 30 | Agent attribution | Agent B opens CRM | Agent B cannot see Agent A's call, report or recording | NOT DONE | |
+| 32 | Sync: no internet (retryable) | Airplane mode, finish a call + report | Desk shows "ইন্টারনেট নেই … / No internet — will send automatically when online"; item stays Pending; after reconnect it sends once | NOT DONE | |
+| 33 | Sync: signed out (waits) | Sign out with work pending, sign back in as the same agent | "Sign in again — waiting work will send after"; work sends after sign-in, never under another agent | NOT DONE | |
+| 34 | Sync: permanent refusal | IT reassigns the test lead to another agent, then the tester submits for it | Item marked Failed with "This lead is not assigned to you — contact LeadHub/IT (HTTP 403 …)"; it stops retrying | NOT DONE | |
+| 35 | No duplicate history on retry | Toggle airplane mode several times while a call state and recording are sending | Lead history in the CRM shows one "call started", one "recording saved" for that call | NOT DONE | |
+| 36 | Recording bound to agent | Make a call as Agent A, sign out before upload, sign in as Agent B | Recording not uploaded under B; shows "belongs to another agent"; CRM has no audio for B | NOT DONE | |
 | 24 | Stability | Whole run | no crash, no wrong lead owner | NOT DONE | |
 
 ## Evidence capture rules
