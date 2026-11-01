@@ -65,6 +65,7 @@ export const NAV = [
   { to: "/system", label: "IT Console", scopes: ["authority"] },
   { to: "/runtime-errors", label: "Runtime Errors", scopes: ["authority"] },
   { to: "/load-diagnostics", label: "Page-load Diagnostics", scopes: ["authority"] },
+  { to: "/sync-failures", label: "Android Sync Failures", scopes: ["authority"] },
   { to: "/ingest", label: "Ingest Check", scopes: ["authority"] },
   { to: "/migration", label: "Migration Checklist", scopes: ["authority"] },
   { to: "/migration-export", label: "Migration Export", scopes: ["authority"] },

@@ -56,6 +56,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   "/staff-portal": Users,
   "/runtime-errors": Server,
   "/load-diagnostics": Server,
+  "/sync-failures": Server,
   "/inventory": Building2,
   "/unit-board": Building2,
   "/qualify": Flame,
@@ -89,7 +90,7 @@ const GROUPS: { title: { bn: string; en: string }; routes: string[] }[] = [
   { title: { bn: "সাপোর্ট", en: "Support" }, routes: ["/inbox", "/tickets", "/customers", "/support-admin"] },
   {
     title: { bn: "আইটি ও নিরাপত্তা", en: "IT & security" },
-    routes: ["/integrations", "/system", "/runtime-errors", "/load-diagnostics", "/security", "/ingest", "/migration", "/migration-export"],
+    routes: ["/integrations", "/system", "/runtime-errors", "/load-diagnostics", "/sync-failures", "/security", "/ingest", "/migration", "/migration-export"],
   },
   { title: { bn: "সহায়তা", en: "Help" }, routes: ["/walkthrough", "/docs", "/docs-admin", "/help"] },
 ];

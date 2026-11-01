@@ -93,6 +93,7 @@ import { Route as ApiPublicAgentRecorderRouteImport } from './routes/api/public/
 import { Route as ApiPublicAgentRemindersRouteImport } from './routes/api/public/agent/reminders'
 import { Route as ApiPublicAgentReportRouteImport } from './routes/api/public/agent/report'
 import { Route as ApiPublicAgentSupportRouteImport } from './routes/api/public/agent/support'
+import { Route as ApiPublicAgentSyncFailuresRouteImport } from './routes/api/public/agent/sync-failures'
 import { Route as ApiPublicAgentVersionRouteImport } from './routes/api/public/agent/version'
 import { Route as ApiPublicAgentVersionHandoffRouteImport } from './routes/api/public/agent/version-handoff'
 import { Route as ApiPublicAgentWhatsappRouteImport } from './routes/api/public/agent/whatsapp'
@@ -560,6 +561,12 @@ const ApiPublicAgentSupportRoute = ApiPublicAgentSupportRouteImport.update({
   path: '/api/public/agent/support',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentSyncFailuresRoute =
+  ApiPublicAgentSyncFailuresRouteImport.update({
+    id: '/api/public/agent/sync-failures',
+    path: '/api/public/agent/sync-failures',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAgentVersionRoute = ApiPublicAgentVersionRouteImport.update({
   id: '/api/public/agent/version',
   path: '/api/public/agent/version',
@@ -880,6 +887,7 @@ export interface FileRoutesByFullPath {
   '/api/public/agent/reminders': typeof ApiPublicAgentRemindersRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
   '/api/public/agent/support': typeof ApiPublicAgentSupportRoute
+  '/api/public/agent/sync-failures': typeof ApiPublicAgentSyncFailuresRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/version-handoff': typeof ApiPublicAgentVersionHandoffRoute
   '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
@@ -1008,6 +1016,7 @@ export interface FileRoutesByTo {
   '/api/public/agent/reminders': typeof ApiPublicAgentRemindersRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
   '/api/public/agent/support': typeof ApiPublicAgentSupportRoute
+  '/api/public/agent/sync-failures': typeof ApiPublicAgentSyncFailuresRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/version-handoff': typeof ApiPublicAgentVersionHandoffRoute
   '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
@@ -1137,6 +1146,7 @@ export interface FileRoutesById {
   '/api/public/agent/reminders': typeof ApiPublicAgentRemindersRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
   '/api/public/agent/support': typeof ApiPublicAgentSupportRoute
+  '/api/public/agent/sync-failures': typeof ApiPublicAgentSyncFailuresRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/version-handoff': typeof ApiPublicAgentVersionHandoffRoute
   '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
@@ -1267,6 +1277,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/reminders'
     | '/api/public/agent/report'
     | '/api/public/agent/support'
+    | '/api/public/agent/sync-failures'
     | '/api/public/agent/version'
     | '/api/public/agent/version-handoff'
     | '/api/public/agent/whatsapp'
@@ -1395,6 +1406,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/reminders'
     | '/api/public/agent/report'
     | '/api/public/agent/support'
+    | '/api/public/agent/sync-failures'
     | '/api/public/agent/version'
     | '/api/public/agent/version-handoff'
     | '/api/public/agent/whatsapp'
@@ -1523,6 +1535,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/reminders'
     | '/api/public/agent/report'
     | '/api/public/agent/support'
+    | '/api/public/agent/sync-failures'
     | '/api/public/agent/version'
     | '/api/public/agent/version-handoff'
     | '/api/public/agent/whatsapp'
@@ -1652,6 +1665,7 @@ export interface RootRouteChildren {
   ApiPublicAgentRemindersRoute: typeof ApiPublicAgentRemindersRoute
   ApiPublicAgentReportRoute: typeof ApiPublicAgentReportRoute
   ApiPublicAgentSupportRoute: typeof ApiPublicAgentSupportRoute
+  ApiPublicAgentSyncFailuresRoute: typeof ApiPublicAgentSyncFailuresRoute
   ApiPublicAgentVersionRoute: typeof ApiPublicAgentVersionRoute
   ApiPublicAgentVersionHandoffRoute: typeof ApiPublicAgentVersionHandoffRoute
   ApiPublicAgentWhatsappRoute: typeof ApiPublicAgentWhatsappRoute
@@ -2286,6 +2300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentSupportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/agent/sync-failures': {
+      id: '/api/public/agent/sync-failures'
+      path: '/api/public/agent/sync-failures'
+      fullPath: '/api/public/agent/sync-failures'
+      preLoaderRoute: typeof ApiPublicAgentSyncFailuresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/agent/version': {
       id: '/api/public/agent/version'
       path: '/api/public/agent/version'
@@ -2669,6 +2690,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAgentRemindersRoute: ApiPublicAgentRemindersRoute,
   ApiPublicAgentReportRoute: ApiPublicAgentReportRoute,
   ApiPublicAgentSupportRoute: ApiPublicAgentSupportRoute,
+  ApiPublicAgentSyncFailuresRoute: ApiPublicAgentSyncFailuresRoute,
   ApiPublicAgentVersionRoute: ApiPublicAgentVersionRoute,
   ApiPublicAgentVersionHandoffRoute: ApiPublicAgentVersionHandoffRoute,
   ApiPublicAgentWhatsappRoute: ApiPublicAgentWhatsappRoute,
