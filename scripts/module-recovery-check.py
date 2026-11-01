@@ -64,6 +64,9 @@ async def main():
 
         # Dev preview never caps reloads, so reach the fallback the way a real
         # outage does: the probe keeps failing (~2 minutes of 2s probes).
+        await page.wait_for_load_state("networkidle", timeout=60_000)
+        await page.wait_for_function("() => typeof window.__winstoneRecover === 'function'", timeout=30_000)
+        probes.clear()
         probe_down["on"] = True
         await page.evaluate(
             "m => window.dispatchEvent(new CustomEvent('winstone:module-load-error', { detail: m }))",
@@ -85,7 +88,7 @@ async def main():
             if left:
                 failures.append("Try again did not reset the reload counter")
         except Exception as e:
-            failures.append(f"fallback/retry flow failed: {str(e)[:160]}")
+            failures.append(f"fallback/retry flow failed: {str(e)[:160]} (probes during outage: {len(probes)})")
         await browser.close()
 
     if failures:
