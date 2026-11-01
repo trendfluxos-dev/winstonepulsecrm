@@ -56,6 +56,8 @@ const KIND_LABEL: Record<string, string> = {
   "import-rejected": "পেজ অংশ লোড ব্যর্থ",
   "fallback-shown": "Refresh বাটন দেখানো হয়েছে",
   "server-unreachable": "সার্ভার সাড়া দেয়নি — ফিরে এলে নিজে থেকে রিলোড",
+  "assets-unavailable": "নতুন ফাইল এখনো পৌঁছায়নি — পৌঁছালে নিজে থেকে রিলোড",
+  "late-retry": "সার্ভার ঠিক হওয়ার পর একবার স্বয়ংক্রিয় রিলোড",
   "recovered-after-reload": "রিলোডের পর ঠিক হয়েছে",
 };
 

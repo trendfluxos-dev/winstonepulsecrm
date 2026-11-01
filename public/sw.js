@@ -7,7 +7,7 @@
  * pretends a write reached the server — writes go through the local queue in
  * src/lib/offline-queue.ts and only sync when the network is back.
  */
-const CACHE = "winstone-shell-v3";
+const CACHE = "winstone-shell-v4";
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => {
@@ -31,8 +31,9 @@ self.addEventListener("fetch", (event) => {
   if (
     url.pathname.startsWith("/src/") ||
     url.pathname.startsWith("/node_modules/") ||
-    url.pathname.startsWith("/@vite/") ||
-    url.pathname.startsWith("/@react-refresh")
+    // Every dev-server virtual path (/@vite/, /@react-refresh, /@oj-start/, /@id/,
+    // /@fs/) is unhashed: a cache-first copy would pin a stale entry module.
+    url.pathname.startsWith("/@")
   ) {
     return;
   }
