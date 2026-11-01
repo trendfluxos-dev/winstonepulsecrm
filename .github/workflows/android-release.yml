@@ -1,9 +1,11 @@
 name: Android tagged release
 
-# On a version tag (v1.2.3), builds the signed release APK, computes its
-# SHA-256, and publishes both to a GitHub Release. Signing comes only from
-# encrypted repo secrets; the keystore is never committed. Fails closed when
-# signing secrets are missing so an unsigned/test build is never released.
+# On a version tag (v1.2.3), builds the signed release APK, verifies signer
+# fingerprint / package id / version, computes its SHA-256, and attaches both to
+# a DRAFT GitHub Release. Nothing is published or distributed automatically: a
+# person must review and publish the draft. Fails closed when any signing secret
+# or the approved fingerprint variable is missing, so an unsigned/test build is
+# never released.
 
 on:
   push:
@@ -20,7 +22,35 @@ jobs:
       run:
         working-directory: android
     steps:
+      - name: Check signing secrets and approved fingerprint (names only)
+        working-directory: .
+        env:
+          A: ${{ secrets.WINSTONE_KEYSTORE_B64 }}
+          B: ${{ secrets.WINSTONE_KEYSTORE_PASSWORD }}
+          C: ${{ secrets.WINSTONE_KEY_ALIAS }}
+          D: ${{ secrets.WINSTONE_KEY_PASSWORD }}
+          F: ${{ vars.WINSTONE_RELEASE_CERT_SHA256 }}
+        run: |
+          missing=""
+          [ -n "$A" ] || missing="$missing WINSTONE_KEYSTORE_B64"
+          [ -n "$B" ] || missing="$missing WINSTONE_KEYSTORE_PASSWORD"
+          [ -n "$C" ] || missing="$missing WINSTONE_KEY_ALIAS"
+          [ -n "$D" ] || missing="$missing WINSTONE_KEY_PASSWORD"
+          [ -n "$F" ] || missing="$missing WINSTONE_RELEASE_CERT_SHA256(variable)"
+          if [ -n "$missing" ]; then
+            echo "::error::Official release BLOCKED, nothing signed. Missing:$missing"
+            exit 1
+          fi
       - uses: actions/checkout@v4
+      - name: Refuse committed signing material
+        working-directory: .
+        run: |
+          FOUND=$(git ls-files | grep -Ei '\.(jks|keystore|p12|pfx|pepk)(\.(gpg|b64))?$' || true)
+          if [ -n "$FOUND" ]; then echo "::error::Official release BLOCKED: signing material is committed: $FOUND"; exit 1; fi
+      - name: Tag must match declared version
+        run: |
+          VN=$(grep -oE 'versionName = "[^"]+"' app/build.gradle.kts | head -1 | cut -d'"' -f2)
+          [ "v$VN" = "$GITHUB_REF_NAME" ] || { echo "::error::Tag $GITHUB_REF_NAME does not match versionName $VN"; exit 1; }
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -37,31 +67,64 @@ jobs:
           WINSTONE_KEY_ALIAS: ${{ secrets.WINSTONE_KEY_ALIAS }}
           WINSTONE_KEY_PASSWORD: ${{ secrets.WINSTONE_KEY_PASSWORD }}
         run: |
-          test -n "$WINSTONE_KEYSTORE_B64" || { echo "Release signing secrets missing"; exit 1; }
-          echo "$WINSTONE_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
-          WINSTONE_KEYSTORE_PATH="$RUNNER_TEMP/release.jks" ./gradlew --no-daemon assembleRelease
-          rm -f "$RUNNER_TEMP/release.jks"
-          "$ANDROID_HOME"/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner verify app/build/outputs/apk/release/*.apk
+          set -euo pipefail
+          KS="$RUNNER_TEMP/release.jks"
+          trap 'rm -f "$KS"' EXIT
+          echo "$WINSTONE_KEYSTORE_B64" | base64 -d > "$KS"
+          chmod 600 "$KS"
+          WINSTONE_KEYSTORE_PATH="$KS" ./gradlew --no-daemon assembleRelease
+      - name: Remove keystore (always)
+        if: always()
+        working-directory: .
+        run: rm -f "$RUNNER_TEMP/release.jks"
+      - name: Verify signer fingerprint, package id and version
+        env:
+          EXPECTED_CERT_SHA256: ${{ vars.WINSTONE_RELEASE_CERT_SHA256 }}
+        run: |
+          set -euo pipefail
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          APK=$(ls app/build/outputs/apk/release/*.apk | grep -v unsigned | head -1)
+          "$BT/apksigner" verify --print-certs "$APK" | tee /tmp/certs.txt
+          ACTUAL=$(grep -m1 "certificate SHA-256 digest" /tmp/certs.txt | awk '{print $NF}' | tr 'A-F' 'a-f')
+          WANT=$(echo "$EXPECTED_CERT_SHA256" | tr -d ': ' | tr 'A-F' 'a-f')
+          [ "$ACTUAL" = "$WANT" ] || { echo "::error::Signer fingerprint mismatch: $ACTUAL"; exit 1; }
+          VN="${GITHUB_REF_NAME#v}"
+          "$BT/aapt2" dump badging "$APK" | head -1 | tee /tmp/badging.txt
+          grep -q "name='com.winstone.connect'" /tmp/badging.txt
+          grep -q "versionName='$VN'" /tmp/badging.txt
       - name: Name APK and compute SHA-256
         id: pack
         run: |
+          set -euo pipefail
           mkdir -p "$RUNNER_TEMP/out"
           APK="$RUNNER_TEMP/out/winstone-agent-${GITHUB_REF_NAME}.apk"
-          cp app/build/outputs/apk/release/*.apk "$APK"
+          cp "$(ls app/build/outputs/apk/release/*.apk | grep -v unsigned | head -1)" "$APK"
           (cd "$RUNNER_TEMP/out" && sha256sum "$(basename "$APK")" > "$(basename "$APK").sha256")
           cat "$APK.sha256"
           echo "dir=$RUNNER_TEMP/out" >> "$GITHUB_OUTPUT"
           echo "sha=$(cut -d' ' -f1 "$APK.sha256")" >> "$GITHUB_OUTPUT"
+      # The draft release below is the durable copy; an artifact quota failure is
+      # reported separately and does not fail the verified build.
       - uses: actions/upload-artifact@v4
+        id: upload
+        continue-on-error: true
         with:
           name: winstone-agent-release-${{ github.ref_name }}
           path: ${{ steps.pack.outputs.dir }}/*
           if-no-files-found: error
-      - name: Publish GitHub Release
+      - name: Report artifact upload result
+        if: always()
+        working-directory: .
+        env:
+          UPLOAD: ${{ steps.upload.outcome }}
+        run: |
+          if [ "$UPLOAD" = "failure" ]; then
+            echo "::warning::Official APK verified; GitHub artifact copy NOT uploaded (usually storage quota). The draft release still holds the APK and checksum."
+          fi
+      - name: Attach to DRAFT GitHub Release (not published)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" "${{ steps.pack.outputs.dir }}"/* \
-            --repo "$GITHUB_REPOSITORY" --title "Winstone Agent $GITHUB_REF_NAME" \
-            --notes "Signed release APK. SHA-256: \`${{ steps.pack.outputs.sha }}\` — verify before installing." \
-            || gh release upload "$GITHUB_REF_NAME" "${{ steps.pack.outputs.dir }}"/* --repo "$GITHUB_REPOSITORY" --clobber
+            --draft --repo "$GITHUB_REPOSITORY" --title "Winstone Agent $GITHUB_REF_NAME" \
+            --notes "DRAFT — signed release APK. SHA-256: \`${{ steps.pack.outputs.sha }}\`. Publish only after the real-device checklist passes."
