@@ -108,6 +108,11 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
           return json({ error: "Invalid payload" }, 400);
         }
         const body = parsed.data;
+        // A file picked up from the phone's own recorder is only attributable to
+        // a call through its call id; without one it could land on the wrong call.
+        const { recordingBindingError } = await import("@/lib/call-reconciliation");
+        const bindingError = recordingBindingError(body);
+        if (bindingError) return json({ error: bindingError, code: "recording_unbound" }, 400);
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
