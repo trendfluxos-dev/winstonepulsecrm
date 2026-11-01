@@ -401,10 +401,13 @@ object WinstoneApi {
         agentPhone: String? = null,
         recordingSupported: Boolean? = null,
         recordingNote: String? = null,
+        /** "call_log" when durationSeconds is Android CallLog.DURATION (verified talk time). */
+        talkTimeSource: String? = null,
     ): JSONObject = withContext(Dispatchers.IO) {
         val payload = JSONObject().apply {
             put("call_uid", callUid)
             put("lead_id", leadId)
+            talkTimeSource?.let { put("talk_time_source", it) }
             put("state", state)
             durationSeconds?.let { put("duration_seconds", it) }
             agentPhone?.let { if (it.isNotBlank()) put("agent_phone", it) }
@@ -430,10 +433,13 @@ object WinstoneApi {
         /** "realtime" observed live, or "call_log" found later in the system log. */
         source: String = "realtime",
         atIso: String? = null,
+        /** "call_log" when durationSeconds is Android CallLog.DURATION (verified talk time). */
+        talkTimeSource: String? = null,
     ): JSONObject = withContext(Dispatchers.IO) {
         val payload = JSONObject().apply {
             put("call_uid", callUid)
             put("phone_number", phoneNumber)
+            talkTimeSource?.let { put("talk_time_source", it) }
             put("state", state)
             put("direction", direction)
             put("source", source)

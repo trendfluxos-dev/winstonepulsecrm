@@ -48,6 +48,8 @@ class CallOutcomeWorker(context: Context, params: WorkerParameters) : CoroutineW
         val outcome = CallHistoryEvidence.resolve(row, window)
         val note = CallHistoryEvidence.note(outcome)
         val wire = outcome.state.wire ?: return Result.success()
+        // Marks the duration as Android call-history talk time; never sent when unverified.
+        val talkTimeSource = if (outcome.verdict == CallVerdict.UNAVAILABLE) null else "call_log"
 
         if (mode == MODE_DIALER) {
             CallSyncQueue.queueIncomingCall(
@@ -59,6 +61,7 @@ class CallOutcomeWorker(context: Context, params: WorkerParameters) : CoroutineW
                 recordingSupported = recordingSupported,
                 recordingNote = note,
                 direction = "outgoing",
+                talkTimeSource = talkTimeSource,
             )
         } else if (leadId != null) {
             CallSyncQueue.queueCallState(
@@ -70,6 +73,7 @@ class CallOutcomeWorker(context: Context, params: WorkerParameters) : CoroutineW
                 phoneNumber = phone,
                 recordingSupported = recordingSupported,
                 recordingNote = note,
+                talkTimeSource = talkTimeSource,
             )
             CallSyncQueue.queueReportOpen(
                 context = ctx,
