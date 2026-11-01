@@ -88,7 +88,7 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
           evidenceRow = callRow;
         }
         const verification = verifyLeadFromCallEvidence({
-          callUid: call_uid, row: evidenceRow, agentId: caller.profile.id, leadId: lead_id,
+          callUid: call_uid ?? null, row: evidenceRow, agentId: caller.profile.id, leadId: lead_id,
         });
         const verificationBody = {
           verified: verification.verified,

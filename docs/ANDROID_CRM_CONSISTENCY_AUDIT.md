@@ -68,8 +68,8 @@ calls will have **no recording**; that is expected and is not a failure.
 | G4 | P2 `ingest/outcome` set `leads.is_verified` from the device `connected` flag. | verification without call proof | **Fixed**: verified only from the CRM's own call record for the same call_uid, agent and lead — completed, talk time > 0, phone-measured (`src/lib/lead-verification.ts`); legacy calls without a call id never verify; `tests/lead-verification-evidence.test.ts` |
 | G5 | P2 Phone-recorder pickup job not stamped with the original employee; upload worker does not recheck consent. | delayed file could be queued after account switch / consent withdrawal | Open (Android, needs CI compile) |
 | G6 | P2 Pickup matching: number match optional, time window start−15 s…end+3 min. | wrong nearby recording possible | Open |
-| G7 | P3 Retry worker does not distinguish 401/403/409/429/5xx; some job types retry without a ceiling. | battery/noise, stuck jobs | Open |
-| G8 | P3 Replays append duplicate `call_started` / `recording_saved` timeline events; upload response always says `duplicate:false`. | cosmetic history duplicates | Open |
+| G7 | P3 Retry worker did not distinguish 401/403/409/429/5xx. | stuck jobs, unclear errors | **Fixed in Android source (not yet built)**: `SyncErrorClassifier` — network/408/429/5xx retry; 400/403/404/409/410 stop as Failed; sign-in and 9:05 briefing wait for the agent; agents see a bilingual reason + action + HTTP code. `SyncErrorClassifierTest.kt` |
+| G8 | P3 Replays appended duplicate `call_started` / `call_ended` / `recording_saved` history; upload response always said `duplicate:false`. | duplicate history | **Fixed**: once per call/recording via `src/lib/lead-events-once.server.ts` (sync_events marker); upload reports `duplicate:true` on replay. `tests/call-history-once.test.ts` |
 
 G1 applied 2026-11-01; remaining recommendation for G2: phone sends outgoing OFFHOOK as `initiated` and no `answered`; final
 `completed`/`no_answer` and duration come from the matched CallLog row; server stores that call-log duration on the

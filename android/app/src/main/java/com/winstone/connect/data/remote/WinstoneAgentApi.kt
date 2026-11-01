@@ -125,7 +125,7 @@ object WinstoneAgentApi {
             .build()
         client.newCall(req).execute().use { res ->
             val body = runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
-            if (!res.isSuccessful) error(body.optString("error", "HTTP ${res.code}"))
+            if (!res.isSuccessful) throw SyncHttpException(res.code, body.optString("error", "HTTP ${res.code}"), res.header("Retry-After")?.toLongOrNull())
             body
         }
     }
@@ -138,7 +138,7 @@ object WinstoneAgentApi {
             .build()
         client.newCall(req).execute().use { res ->
             val body = runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
-            if (!res.isSuccessful) error(body.optString("error", "HTTP ${res.code}"))
+            if (!res.isSuccessful) throw SyncHttpException(res.code, body.optString("error", "HTTP ${res.code}"), res.header("Retry-After")?.toLongOrNull())
             val brief = body.optJSONObject("briefing") ?: body.optJSONObject("coach") ?: body
             Coach(
                 summary = brief.optString("summary").ifBlank { "এখনও পর্যাপ্ত কল ডেটা নেই।" },
@@ -205,7 +205,7 @@ object WinstoneAgentApi {
             .build()
         client.newCall(req).execute().use { res ->
             val body = runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
-            if (!res.isSuccessful) error(body.optString("error", "HTTP ${res.code}"))
+            if (!res.isSuccessful) throw SyncHttpException(res.code, body.optString("error", "HTTP ${res.code}"), res.header("Retry-After")?.toLongOrNull())
             body
         }
     }

@@ -85,7 +85,7 @@ export async function recordSyncEvent(input: {
   idempotencyKey?: string | null;
   status?: "queued" | "processed" | "failed";
   errorMessage?: string | null;
-}): Promise<void> {
+}): Promise<{ inserted: boolean }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const status = input.status ?? "processed";
 
@@ -107,4 +107,5 @@ export async function recordSyncEvent(input: {
   if (error && !`${error.message}`.toLowerCase().includes("duplicate")) {
     console.error("[sync_events] insert failed", error.message);
   }
+  return { inserted: !error };
 }

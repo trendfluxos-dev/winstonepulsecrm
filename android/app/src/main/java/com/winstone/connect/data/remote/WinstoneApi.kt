@@ -56,7 +56,7 @@ object WinstoneApi {
             .build()
         client.newCall(req).execute().use { res ->
             val body = JSONObject(res.body?.string() ?: "{}")
-            if (!res.isSuccessful) error(body.optString("error", "HTTP ${res.code}"))
+            if (!res.isSuccessful) throw SyncHttpException(res.code, body.optString("error", "HTTP ${res.code}"), res.header("Retry-After")?.toLongOrNull())
             val agent = body.getJSONObject("agent")
             Workspace(
                 agentId = agent.getString("id"),
@@ -78,7 +78,7 @@ object WinstoneApi {
             .build()
         client.newCall(req).execute().use { res ->
             val body = runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
-            if (!res.isSuccessful) error(body.optString("error", "HTTP ${res.code}"))
+            if (!res.isSuccessful) throw SyncHttpException(res.code, body.optString("error", "HTTP ${res.code}"), res.header("Retry-After")?.toLongOrNull())
             body
         }
     }
@@ -137,7 +137,7 @@ object WinstoneApi {
 
         client.newCall(req).execute().use { res ->
             val json = JSONObject(res.body?.string() ?: "{}")
-            if (!res.isSuccessful) error(json.optString("error", "HTTP ${res.code}"))
+            if (!res.isSuccessful) throw SyncHttpException(res.code, json.optString("error", "HTTP ${res.code}"), res.header("Retry-After")?.toLongOrNull())
             check(com.winstone.connect.data.sync.QueuedAudioIdentity.uploadConfirmed(
                 json.optString("recording_id"), json.optString("upload_status"), json.optString("checksum"), checksum
             )) {
@@ -247,7 +247,7 @@ object WinstoneApi {
             .build()
         client.newCall(req).execute().use { res ->
             val body = runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
-            if (!res.isSuccessful) error(body.optString("error", "HTTP ${res.code}"))
+            if (!res.isSuccessful) throw SyncHttpException(res.code, body.optString("error", "HTTP ${res.code}"), res.header("Retry-After")?.toLongOrNull())
             body
         }
     }
@@ -466,7 +466,7 @@ object WinstoneApi {
             .build()
         client.newCall(req).execute().use { res ->
             val body = runCatching { JSONObject(res.body?.string().orEmpty()) }.getOrElse { JSONObject() }
-            if (!res.isSuccessful) error(body.optString("error", "HTTP ${res.code}"))
+            if (!res.isSuccessful) throw SyncHttpException(res.code, body.optString("error", "HTTP ${res.code}"), res.header("Retry-After")?.toLongOrNull())
             body
         }
     }
@@ -481,7 +481,7 @@ object WinstoneApi {
         client.newCall(req).execute().use { res ->
             val text = res.body?.string().orEmpty()
             val body = runCatching { JSONObject(text) }.getOrElse { JSONObject() }
-            if (!res.isSuccessful) error(body.optString("error", "HTTP ${res.code}"))
+            if (!res.isSuccessful) throw SyncHttpException(res.code, body.optString("error", "HTTP ${res.code}"), res.header("Retry-After")?.toLongOrNull())
             return body
         }
     }

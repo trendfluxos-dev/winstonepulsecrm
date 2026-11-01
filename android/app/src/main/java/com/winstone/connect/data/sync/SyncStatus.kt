@@ -68,7 +68,7 @@ object SyncStatus {
     /** Still queued, will be retried — keep it in the pending count. */
     @Synchronized
     fun retrying(context: Context, message: String?) = update(context) {
-        it.copy(lastError = message?.take(160))
+        it.copy(lastError = message?.take(300))
     }
 
     /** Given up on this item. */
@@ -77,7 +77,7 @@ object SyncStatus {
         it.copy(
             pending = (it.pending - 1).coerceAtLeast(0),
             failed = it.failed + 1,
-            lastError = message?.take(160),
+            lastError = message?.take(300),
         )
     }
 

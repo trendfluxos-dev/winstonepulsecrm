@@ -166,7 +166,6 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
           if (!ownerId) return json({ error: "LeadHub assignment required", code: "unassigned_lead" }, 409);
         }
 
-        const { logLeadEvent } = await import("@/lib/lead-events.server");
 
         try {
           const recordingId = await ingestRecording({
@@ -185,7 +184,12 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
             deviceId: caller.device.id,
           });
 
-          await logLeadEvent({
+          // A retried upload reuses the stored audio; it must not add a second
+          // "recording saved" entry, and the response says it was a duplicate.
+          const { logLeadEventOnce } = await import("@/lib/lead-events-once.server");
+          const savedEvent = await logLeadEventOnce({
+            onceKey: `recording:${recordingId}`,
+            deviceId: caller.device.id,
             leadId,
             agentId: agent?.id ?? null,
             recordingId,
@@ -216,7 +220,7 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
           // not depend on an AI/Drive request or create additional billing on replay.
           const saved = await supabaseAdmin.from("call_recordings").select("checksum, upload_status, analysis_status").eq("id", recordingId).single();
           if (saved.error || !saved.data) throw new Error("Stored audio confirmation unavailable");
-          return json({ duplicate: false, recording_id: recordingId, upload_status: saved.data.upload_status, checksum: saved.data.checksum, analysis: saved.data.analysis_status }, 202);
+          return json({ duplicate: !savedEvent.logged, recording_id: recordingId, upload_status: saved.data.upload_status, checksum: saved.data.checksum, analysis: saved.data.analysis_status }, 202);
         } catch (error) {
           console.error("[ingest] recording failed", error);
           const conflict = error instanceof Error && ["CALL_IDENTITY_CONFLICT", "AUDIO_CHECKSUM_CONFLICT", "AUDIO_CONTENT_ALREADY_LINKED"].includes(error.message);
