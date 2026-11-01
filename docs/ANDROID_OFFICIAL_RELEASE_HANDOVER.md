@@ -103,14 +103,15 @@ recording consent/permission/availability and phone-recorder pickup, call-log ev
 CRM sync including offline + reboot, report submission, duplicate prevention (each call/report once),
 and diagnostics (Desk sync status, failed/retry states, IT load diagnostics if errors appear).
 
-## F. Release Gate and sign-off
+## F. Internal operational sign-off (not a Play Store gate)
 
-The gate stays **NOT READY** until all three rows below are **Pass** with evidence. Any Fail → do not distribute.
+The sign-off stays **NOT READY** until all three rows below are **Pass** with evidence. Any Fail → do not hand the APK
+to agents. Passing means only: IT may install the APK on company agent phones (internal company distribution only).
 
 | # | Gate | Owner | Evidence required | Status | Date (Dhaka) |
 |---|---|---|---|---|---|
-| 1 | Approved signing certificate (A + B) | Company Signing Key Owner + IT Admin | 4 secret names present; variable set; fingerprint confirmed from two trusted records | NOT READY — 0 secrets, 0 variables, no trusted fingerprint (checked 2026-11-01) | |
-| 2 | Signed build from latest synced code (C + D) | Lovable Project Owner + IT Admin | GitHub `main` = latest Lovable commit; run link; signer/package/version lines; APK SHA-256; `sha256sum -c` OK | NOT READY — repository stale; no official build | |
-| 3 | Real-device end-to-end test (E) | Agent Tester + IT Admin | completed device checklist with screenshots/recordings | NOT DONE | |
+| 1 | Approved company signing certificate (A + B) | Company Signing Key Owner + IT Admin | 4 secret names present; variable set; fingerprint confirmed from two trusted records | NOT READY — 0 secrets, 0 variables, no trusted fingerprint (checked 2026-11-01) | |
+| 2 | Signed APK from latest code synced to the existing GitHub repository (C + D) | Lovable Project Owner + IT Admin | GitHub `main` = latest Lovable commit; run link; signer/package/version lines; APK SHA-256; `sha256sum -c` OK | NOT READY — repository stale; no official build | |
+| 3 | Real-device end-to-end acceptance test (E) | Agent Tester + IT Admin | completed `docs/ANDROID_DEVICE_ACCEPTANCE.md` with screenshots/recordings | NOT DONE | |
 
-Final approval to distribute: ________ (IT Admin)  ________ (Executive HQ)  Date: ________
+Internal approval to install on agent phones: ________ (IT Admin)  ________ (Executive HQ)  Date: ________
