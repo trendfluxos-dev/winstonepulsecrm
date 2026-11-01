@@ -127,5 +127,4 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" "${{ steps.pack.outputs.dir }}"/* \
             --draft --repo "$GITHUB_REPOSITORY" --title "Winstone Agent $GITHUB_REF_NAME" \
-            --notes "DRAFT — signed release APK. SHA-256: \`${{ steps.pack.outputs.sha }}\`. Publish only after the real-device checklist passes." \
-            || gh release upload "$GITHUB_REF_NAME" "${{ steps.pack.outputs.dir }}"/* --repo "$GITHUB_REPOSITORY" --clobber
+            --notes "DRAFT — signed release APK. SHA-256: \`${{ steps.pack.outputs.sha }}\`. Publish only after the real-device checklist passes."
