@@ -109,6 +109,7 @@ class CallStateReceiver : BroadcastReceiver() {
                         recorderSource = recorderSource,
                         callUid = physicalCallUid,
                         callStartedAt = if (offHookAt > 0) com.winstone.connect.data.IsoTime.fromMillis(offHookAt) else null,
+                        ownerEmployeeId = employeeId,
                     ) }.onFailure { com.winstone.connect.data.sync.SyncStatus.failed(app, "Recording not saved: ${it.message}") }
                 } else if (captured != null) {
                     captured.first.delete()
@@ -130,6 +131,7 @@ class CallStateReceiver : BroadcastReceiver() {
                         phoneNumber = number,
                         leadId = if (outgoing) endedLeadId else null,
                         incoming = !outgoing && DialerCallTracker.callUid == null,
+                        ownerEmployeeId = employeeId,
                     )
                 }
 
