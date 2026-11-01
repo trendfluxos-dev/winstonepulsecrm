@@ -62,6 +62,7 @@ import { Route as SocialPagesRouteImport } from './routes/social-pages'
 import { Route as StaffPortalRouteImport } from './routes/staff-portal'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SupportAdminRouteImport } from './routes/support-admin'
+import { Route as SyncFailuresRouteImport } from './routes/sync-failures'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TechRouteImport } from './routes/tech'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -400,6 +401,11 @@ const SupportRoute = SupportRouteImport.update({
 const SupportAdminRoute = SupportAdminRouteImport.update({
   id: '/support-admin',
   path: '/support-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SyncFailuresRoute = SyncFailuresRouteImport.update({
+  id: '/sync-failures',
+  path: '/sync-failures',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SystemRoute = SystemRouteImport.update({
@@ -856,6 +862,7 @@ export interface FileRoutesByFullPath {
   '/staff-portal': typeof StaffPortalRoute
   '/support': typeof SupportRoute
   '/support-admin': typeof SupportAdminRoute
+  '/sync-failures': typeof SyncFailuresRoute
   '/system': typeof SystemRoute
   '/tech': typeof TechRoute
   '/terms': typeof TermsRoute
@@ -985,6 +992,7 @@ export interface FileRoutesByTo {
   '/staff-portal': typeof StaffPortalRoute
   '/support': typeof SupportRoute
   '/support-admin': typeof SupportAdminRoute
+  '/sync-failures': typeof SyncFailuresRoute
   '/system': typeof SystemRoute
   '/tech': typeof TechRoute
   '/terms': typeof TermsRoute
@@ -1115,6 +1123,7 @@ export interface FileRoutesById {
   '/staff-portal': typeof StaffPortalRoute
   '/support': typeof SupportRoute
   '/support-admin': typeof SupportAdminRoute
+  '/sync-failures': typeof SyncFailuresRoute
   '/system': typeof SystemRoute
   '/tech': typeof TechRoute
   '/terms': typeof TermsRoute
@@ -1246,6 +1255,7 @@ export interface FileRouteTypes {
     | '/staff-portal'
     | '/support'
     | '/support-admin'
+    | '/sync-failures'
     | '/system'
     | '/tech'
     | '/terms'
@@ -1375,6 +1385,7 @@ export interface FileRouteTypes {
     | '/staff-portal'
     | '/support'
     | '/support-admin'
+    | '/sync-failures'
     | '/system'
     | '/tech'
     | '/terms'
@@ -1504,6 +1515,7 @@ export interface FileRouteTypes {
     | '/staff-portal'
     | '/support'
     | '/support-admin'
+    | '/sync-failures'
     | '/system'
     | '/tech'
     | '/terms'
@@ -1634,6 +1646,7 @@ export interface RootRouteChildren {
   StaffPortalRoute: typeof StaffPortalRoute
   SupportRoute: typeof SupportRoute
   SupportAdminRoute: typeof SupportAdminRoute
+  SyncFailuresRoute: typeof SyncFailuresRoute
   SystemRoute: typeof SystemRoute
   TechRoute: typeof TechRoute
   TermsRoute: typeof TermsRoute
@@ -2081,6 +2094,13 @@ declare module '@tanstack/react-router' {
       path: '/support-admin'
       fullPath: '/support-admin'
       preLoaderRoute: typeof SupportAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sync-failures': {
+      id: '/sync-failures'
+      path: '/sync-failures'
+      fullPath: '/sync-failures'
+      preLoaderRoute: typeof SyncFailuresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/system': {
@@ -2658,6 +2678,7 @@ const rootRouteChildren: RootRouteChildren = {
   StaffPortalRoute: StaffPortalRoute,
   SupportRoute: SupportRoute,
   SupportAdminRoute: SupportAdminRoute,
+  SyncFailuresRoute: SyncFailuresRoute,
   SystemRoute: SystemRoute,
   TechRoute: TechRoute,
   TermsRoute: TermsRoute,
