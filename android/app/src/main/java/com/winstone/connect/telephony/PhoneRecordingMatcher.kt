@@ -53,8 +53,9 @@ object PhoneRecordingMatcher {
     /** True when the name carries a phone number that is not this call's number. */
     fun namesAnotherNumber(c: RecordingCandidate, phoneTail: String?): Boolean {
         if (phoneTail == null) return false
-        val numbers = BD_NUMBER.findAll(c.displayName.filter { it.isDigit() || it == ' ' || it == '_' || it == '-' }.replace(Regex("[ _-]"), "|"))
-            .map { it.value }.toList()
+        val numbers = Regex("\\d+").findAll(c.displayName)
+            .mapNotNull { run -> BD_NUMBER.find(run.value)?.value }
+            .toList()
         return numbers.isNotEmpty() && numbers.none { it.endsWith(phoneTail) }
     }
 
