@@ -78,3 +78,9 @@ same call row and only then treats it as phone-measured. Needs owner approval be
 ## 7. Device evidence
 
 Real-phone checks: `docs/ANDROID_DEVICE_ACCEPTANCE.md` — **NOT DONE**.
+
+## Follow-up 2026-11-01: app 2.21 ringing time cannot verify leads
+- New nullable column `call_recordings.talk_time_source` (migration 0143, additive; existing rows stay NULL).
+- The updated app sends `talk_time_source = "call_log"` with the verified outcome from call history; app 2.21 never does.
+- Lead verification (`hasProvenTalkTime` in `src/lib/lead-verification.ts`) trusts app-dialled (`android_sim`) talk time only with that mark. Report `connection_verified` and KPI "phone-measured" counts still use `isPhoneMeasuredCall` and are unchanged.
+- Tests: `tests/lead-verification-evidence.test.ts`, `tests/talk-time-evidence.test.ts`, `tests/call-state-ack.test.ts`.
