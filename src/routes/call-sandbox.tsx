@@ -28,7 +28,7 @@ function CallSandbox() {
         <input aria-label="Import sandbox JSON" type="file" accept="application/json,.json" className="min-w-0 max-w-full text-sm" onChange={async event => {
           const file = event.target.files?.[0]; if (!file) return;
           setError("");
-          try { if (file.size > 32_768) throw new Error(); const parsed = sandboxResultSchema.parse(JSON.parse(await file.text())); setResult(parsed); }
+          try { if (file.size > 65_536) throw new Error(); const parsed = sandboxResultSchema.parse(JSON.parse(await file.text())); setResult(parsed); }
           catch { setError("Invalid sandbox result. Only bounded synthetic sandbox JSON is accepted."); }
           event.target.value = "";
         }} />
