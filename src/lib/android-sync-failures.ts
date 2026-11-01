@@ -122,9 +122,9 @@ const iso = (v: unknown): string | null =>
 /** Maps one stored row to a safe DTO; unknown or missing values stay explicit. */
 export function toSyncFailureEvent(row: SyncFailureRow, names: Map<string, string>, versions: Map<string, string>): SyncFailureEvent {
   const p = (row.payload && typeof row.payload === "object" ? row.payload : {}) as Record<string, unknown>;
-  const errorKind = pick(p.error_kind, SYNC_ERROR_KINDS, "UNKNOWN");
-  const lastAt = iso(p.last_at) ?? row.created_at;
-  const callRef = typeof p.call_ref === "string" && /^[a-f0-9]{12}$/.test(p.call_ref) ? p.call_ref : null;
+  const errorKind = pick(p["error_kind"], SYNC_ERROR_KINDS, "UNKNOWN");
+  const lastAt = iso(p["last_at"]) ?? row.created_at;
+  const callRef = typeof p["call_ref"] === "string" && /^[a-f0-9]{12}$/.test(p["call_ref"]) ? p["call_ref"] : null;
   return {
     id: row.id,
     agentId: row.agent_id,
@@ -132,13 +132,13 @@ export function toSyncFailureEvent(row: SyncFailureRow, names: Map<string, strin
     deviceId: row.device_id,
     appVersion: (row.device_id && versions.get(row.device_id)) || "Unknown",
     errorKind,
-    itemKind: pick(p.item_kind, SYNC_ITEM_KINDS, "other"),
-    httpStatus: int(p.http_status, 0, 599),
-    attempts: int(p.attempts, 0, 9999) ?? 0,
-    count: Math.max(1, int(p.count, 1, 9999) ?? 1),
-    permanent: typeof p.permanent === "boolean" ? p.permanent : NEXT_STEP[errorKind].permanent,
+    itemKind: pick(p["item_kind"], SYNC_ITEM_KINDS, "other"),
+    httpStatus: int(p["http_status"], 0, 599),
+    attempts: int(p["attempts"], 0, 9999) ?? 0,
+    count: Math.max(1, int(p["count"], 1, 9999) ?? 1),
+    permanent: typeof p["permanent"] === "boolean" ? p["permanent"] : NEXT_STEP[errorKind].permanent,
     callRef,
-    firstAtUtc: iso(p.first_at),
+    firstAtUtc: iso(p["first_at"]),
     lastAtUtc: lastAt,
     receivedAtUtc: row.created_at,
   };
