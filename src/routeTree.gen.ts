@@ -36,6 +36,7 @@ import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as LeadhubRouteImport } from './routes/leadhub'
 import { Route as LiveLeadsRouteImport } from './routes/live-leads'
+import { Route as LoadDiagnosticsRouteImport } from './routes/load-diagnostics'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MessengerRouteImport } from './routes/messenger'
@@ -268,6 +269,11 @@ const LeadhubRoute = LeadhubRouteImport.update({
 const LiveLeadsRoute = LiveLeadsRouteImport.update({
   id: '/live-leads',
   path: '/live-leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoadDiagnosticsRoute = LoadDiagnosticsRouteImport.update({
+  id: '/load-diagnostics',
+  path: '/load-diagnostics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ManualRoute = ManualRouteImport.update({
@@ -817,6 +823,7 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof InventoryRoute
   '/leadhub': typeof LeadhubRoute
   '/live-leads': typeof LiveLeadsRoute
+  '/load-diagnostics': typeof LoadDiagnosticsRoute
   '/manual': typeof ManualRoute
   '/mcp': typeof McpRoute
   '/messenger': typeof MessengerRoute
@@ -944,6 +951,7 @@ export interface FileRoutesByTo {
   '/inventory': typeof InventoryRoute
   '/leadhub': typeof LeadhubRoute
   '/live-leads': typeof LiveLeadsRoute
+  '/load-diagnostics': typeof LoadDiagnosticsRoute
   '/manual': typeof ManualRoute
   '/mcp': typeof McpRoute
   '/messenger': typeof MessengerRoute
@@ -1072,6 +1080,7 @@ export interface FileRoutesById {
   '/inventory': typeof InventoryRoute
   '/leadhub': typeof LeadhubRoute
   '/live-leads': typeof LiveLeadsRoute
+  '/load-diagnostics': typeof LoadDiagnosticsRoute
   '/manual': typeof ManualRoute
   '/mcp': typeof McpRoute
   '/messenger': typeof MessengerRoute
@@ -1201,6 +1210,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/leadhub'
     | '/live-leads'
+    | '/load-diagnostics'
     | '/manual'
     | '/mcp'
     | '/messenger'
@@ -1328,6 +1338,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/leadhub'
     | '/live-leads'
+    | '/load-diagnostics'
     | '/manual'
     | '/mcp'
     | '/messenger'
@@ -1455,6 +1466,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/leadhub'
     | '/live-leads'
+    | '/load-diagnostics'
     | '/manual'
     | '/mcp'
     | '/messenger'
@@ -1583,6 +1595,7 @@ export interface RootRouteChildren {
   InventoryRoute: typeof InventoryRoute
   LeadhubRoute: typeof LeadhubRoute
   LiveLeadsRoute: typeof LiveLeadsRoute
+  LoadDiagnosticsRoute: typeof LoadDiagnosticsRoute
   ManualRoute: typeof ManualRoute
   McpRoute: typeof McpRoute
   MessengerRoute: typeof MessengerRoute
@@ -1872,6 +1885,13 @@ declare module '@tanstack/react-router' {
       path: '/live-leads'
       fullPath: '/live-leads'
       preLoaderRoute: typeof LiveLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/load-diagnostics': {
+      id: '/load-diagnostics'
+      path: '/load-diagnostics'
+      fullPath: '/load-diagnostics'
+      preLoaderRoute: typeof LoadDiagnosticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/manual': {
@@ -2591,6 +2611,7 @@ const rootRouteChildren: RootRouteChildren = {
   InventoryRoute: InventoryRoute,
   LeadhubRoute: LeadhubRoute,
   LiveLeadsRoute: LiveLeadsRoute,
+  LoadDiagnosticsRoute: LoadDiagnosticsRoute,
   ManualRoute: ManualRoute,
   McpRoute: McpRoute,
   MessengerRoute: MessengerRoute,
