@@ -4,7 +4,7 @@
 A row counts as passed only with tester name, Dhaka time and evidence (screenshot/screen recording).
 CI builds, emulator runs and sandbox screenshots are never device evidence.
 
-Use only an OFFICIAL APK (package `com.winstone.connect`, signer equal to the approved
+Internal company distribution only (not Google Play). Use only an OFFICIAL APK (package `com.winstone.connect`, signer equal to the approved
 `WINSTONE_RELEASE_CERT_SHA256`, checksum matching its `.sha256` file). Never test a debug/test APK
 here and record it as the official result. Use a staff test account, test leads and a second phone
 you control; never call a real customer.
@@ -43,6 +43,12 @@ you control; never call a real customer.
 | 21 | Background | Battery optimisation prompt / manufacturer autostart (if shown) | instructions clear; behaviour recorded per brand | NOT DONE | |
 | 22 | Account switch | Sign out, sign in as another test agent | previous agent's queued work not attributed to the new agent | NOT DONE | |
 | 23 | Sign-out | Sign out | device token removed; next API call refused until sign-in | NOT DONE | |
+| 25 | Call timing (outgoing, answered) | Note phone clock at dial, answer, hang-up; compare CRM | CRM start ≈ dial time; talk duration = phone call history duration (±5 s), not dial-to-hang-up | NOT DONE | |
+| 26 | Call timing (outgoing, unanswered 30 s ring) | Let it ring 30 s, hang up | CRM must show no answer / 0 s talk; report must not be "connected"; FAKE LEAD blocked. Known risk G1 in the consistency audit — record actual result | NOT DONE | |
+| 27 | Call timing (incoming) | Record ring start, answer, end | answer and end times and duration match phone history | NOT DONE | |
+| 28 | Dhaka display | Make a call at a known time | CRM web and phone both show the same Asia/Dhaka time | NOT DONE | |
+| 29 | Duplicate prevention | Retry by toggling airplane mode during upload; resubmit report | one call row, one report, one recording in CRM | NOT DONE | |
+| 30 | Agent attribution | Agent B opens CRM | Agent B cannot see Agent A's call, report or recording | NOT DONE | |
 | 24 | Stability | Whole run | no crash, no wrong lead owner | NOT DONE | |
 
 ## Evidence capture rules
