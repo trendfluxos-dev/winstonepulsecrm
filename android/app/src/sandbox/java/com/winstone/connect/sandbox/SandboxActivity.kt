@@ -10,6 +10,7 @@ import android.provider.CallLog
 import android.widget.*
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import com.winstone.connect.data.sync.SyncFailureDrill
 import com.winstone.connect.telephony.CallLogClassifier
 import org.json.JSONArray
 import org.json.JSONObject
@@ -23,6 +24,8 @@ class SandboxActivity : ComponentActivity() {
     private var calls = JSONArray()
     private var summary = "not_run"
     private var summaryText = ""
+    private var syncDrills = JSONArray()
+    private var drillText = ""
     private var player: MediaPlayer? = null
     private var audioUri: Uri? = null
     private lateinit var status: TextView
@@ -85,6 +88,21 @@ class SandboxActivity : ComponentActivity() {
             refresh()
         }
         label("Summary simulation copies the supplied synthetic text. It does not transcribe audio, call AI or verify the live summary service.")
+        label("Sync failure drill · offline\nReplays scripted CRM replies (server error, no internet, busy, lost reply, expired sign-in, unassigned lead, rejected data, call conflict, old app) through the app's real retry rules. No network, no live CRM writes.")
+        action("Run sync failure drill") {
+            val now = com.winstone.connect.data.IsoTime.now()
+            val results = SyncFailureDrill.runAll(now)
+            syncDrills = JSONArray()
+            results.forEach { r ->
+                syncDrills.put(JSONObject().put("scenario", r.scenario).put("expectRetryable", r.expectRetryable).put("final", r.final)
+                    .put("historyEntries", r.historyEntries).put("failureLogEntries", r.failureLogEntries)
+                    .put("attempts", JSONArray().apply { r.attempts.forEach { a -> put(JSONObject().put("attempt", a.attempt).put("reply", a.reply)
+                        .put("http", a.http ?: JSONObject.NULL).put("kind", a.kind ?: JSONObject.NULL).put("retryable", a.retryable ?: JSONObject.NULL)
+                        .put("decision", a.decision).put("agentMessage", a.agentMessage ?: JSONObject.NULL)) } }))
+            }
+            drillText = results.joinToString("\n") { r -> "${r.scenario}: ${r.final} · ${r.attempts.size} attempt(s) · history ${r.historyEntries}" }
+            refresh()
+        }
         action("Export sandbox results") { saveResults.launch("winstone-sandbox-results.json") }
         status = TextView(this).apply { textSize = 15f }
         layout.addView(status)
@@ -112,7 +130,7 @@ class SandboxActivity : ComponentActivity() {
     private fun export() = JSONObject().put("format", "winstone-sandbox-v1").put("synthetic", true)
         .put("checkedAt", System.currentTimeMillis()).put("callLogAccess", permission).put("calls", calls)
         .put("recording", recording).put("audioDurationMs", audioDurationMs).put("summary", summary)
-        .put("summaryText", summaryText).put("liveWrites", 0)
-    private fun refresh() { status.text = "Call-log access: $permission\nMatching calls: ${calls.length()}\nRecording: $recording ($audioDurationMs ms)\nSummary: $summary" }
+        .put("summaryText", summaryText).put("syncDrills", syncDrills).put("liveWrites", 0)
+    private fun refresh() { status.text = "Call-log access: $permission\nMatching calls: ${calls.length()}\nRecording: $recording ($audioDurationMs ms)\nSummary: $summary" + if (drillText.isEmpty()) "" else "\n\nSync drill:\n$drillText" }
     override fun onDestroy() { player?.release(); player = null; super.onDestroy() }
 }

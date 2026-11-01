@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, FlaskConical, Upload, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { sandboxResultSchema, simulateSandbox, type SandboxResult } from "@/lib/call-sandbox";
+import { checkSyncDrill, sandboxResultSchema, simulateSandbox, type SandboxResult } from "@/lib/call-sandbox";
 
 export const Route = createFileRoute("/call-sandbox")({
   head: () => ({ meta: [
@@ -28,7 +28,7 @@ function CallSandbox() {
         <input aria-label="Import sandbox JSON" type="file" accept="application/json,.json" className="min-w-0 max-w-full text-sm" onChange={async event => {
           const file = event.target.files?.[0]; if (!file) return;
           setError("");
-          try { if (file.size > 32_768) throw new Error(); const parsed = sandboxResultSchema.parse(JSON.parse(await file.text())); setResult(parsed); }
+          try { if (file.size > 65_536) throw new Error(); const parsed = sandboxResultSchema.parse(JSON.parse(await file.text())); setResult(parsed); }
           catch { setError("Invalid sandbox result. Only bounded synthetic sandbox JSON is accepted."); }
           event.target.value = "";
         }} />
@@ -49,6 +49,15 @@ function CallSandbox() {
         ["Local audio duration", `${result.audioDurationMs} ms`], ["Summary simulation", result.summary],
       ].map(([label, value]) => <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="break-words font-medium">{value}</dd></div>)}</dl>
       {result.calls.map((call, i) => <div key={i} className="border-b border-border py-2 text-sm">Synthetic lead · type {call.type} · {call.durationSeconds}s · {new Date(call.at).toLocaleString()}</div>)}
+      {result.syncDrills && result.syncDrills.length > 0 && <section aria-label="Sync failure drill" className="space-y-2 border-t border-border pt-4">
+        <h3 className="font-semibold">Sync failure drill · offline</h3>
+        <p className="text-xs text-muted-foreground">Scripted CRM replies run through the phone app's real retry rules. No live CRM writes.</p>
+        <ul className="space-y-2">{result.syncDrills.map((d) => { const check = checkSyncDrill(d); return <li key={d.scenario} className="border-b border-border py-2 text-sm">
+          <p className="flex flex-wrap items-center gap-2 font-medium"><span className={check.passed ? "text-success" : "text-destructive"}>{check.passed ? "Pass" : "Fail"}</span><span className="break-all">{d.scenario}</span><span className="text-muted-foreground">· {d.expectRetryable ? "retryable" : "permanent"}</span></p>
+          <p className="text-muted-foreground">{check.reason}</p>
+          <ol className="mt-1 space-y-0.5 text-xs text-muted-foreground">{d.attempts.map((a) => <li key={a.attempt} className="break-words">#{a.attempt} · {a.reply}{a.http ? ` ${a.http}` : ""}{a.kind ? ` · ${a.kind}` : ""} · {a.decision}{a.agentMessage ? ` — ${a.agentMessage}` : ""}</li>)}</ol>
+        </li>; })}</ul>
+      </section>}
       {result.summaryText && <p className="whitespace-pre-wrap break-words text-sm">{result.summaryText}</p>}
       <p className="text-xs text-muted-foreground">A readable recording is not proof of two-sided audio or call matching. Call-log rows do not verify background recovery. Browser results disappear when this page closes.</p>
     </section>}
