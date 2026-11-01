@@ -1,17 +1,25 @@
-# Winstone Pulse Agent App — Official Release Handover and Release Gate
+# Winstone Pulse Agent App — Internal Release Handover and Operational Sign-off
 
-**Release Gate: NOT READY** (status as of 2026-11-01, 15:51 Dhaka).
+**Scope: internal company distribution only.** Winstone Pulse Android is a private internal tool for
+Winstone's own agents. It is **not** published to Google Play or any public store, and no store listing,
+store review or store signing service is required. The goal is an internally signed, installable APK that
+uses the same production CRM backend, data and business rules as the web CRM.
+
+**Internal operational sign-off: NOT READY** (status as of 2026-11-01, 15:51 Dhaka).
+The three gates in section F are technical, internal checks — not app-store gates.
 This document is the handover sequence. Supporting detail stays in:
 `docs/ANDROID_RELEASE_READINESS.md` (key backup/restore, ledger), `docs/ANDROID_DEVICE_ACCEPTANCE.md`
-(device checklist), `.github/workflows/android-apk.yml` and `android-release.yml` (the build gate),
-`tests/android-release-gates.test.ts` (guards the gate rules).
+(device checklist), `docs/ANDROID_CRM_CONSISTENCY_AUDIT.md` (Android ↔ web CRM data/call-time audit),
+`.github/workflows/android-apk.yml` and `android-release.yml` (the build gate; a tag creates only a private
+draft release inside the company repository), `tests/android-release-gates.test.ts` (guards the gate rules).
 
 | Fixed identity | Value |
 |---|---|
-| Repository / branch | `trendfluxos-dev/winstone-pulse-crm` / `main` |
+| Repository / branch | `trendfluxos-dev/winstone-pulse-crm` (private) / `main` |
 | Release applicationId | `com.winstone.connect` (test build `com.winstone.connect.test` is never official) |
 | Version | `versionName 2.21`, `versionCode 32` (`android/app/build.gradle.kts`) |
-| Live CRM | https://crm.winstonebd.com |
+| Live CRM (same backend the APK uses) | https://crm.winstonebd.com |
+| Distribution | internal only: IT shares the verified APK + `.sha256` directly with company agent phones |
 
 Never put keystore files, passwords, alias values, secret values or `local.properties` in chat, logs,
 screenshots, tickets or this repository. Only the **public** certificate SHA-256 fingerprint may be written down.
@@ -95,14 +103,15 @@ recording consent/permission/availability and phone-recorder pickup, call-log ev
 CRM sync including offline + reboot, report submission, duplicate prevention (each call/report once),
 and diagnostics (Desk sync status, failed/retry states, IT load diagnostics if errors appear).
 
-## F. Release Gate and sign-off
+## F. Internal operational sign-off (not a Play Store gate)
 
-The gate stays **NOT READY** until all three rows below are **Pass** with evidence. Any Fail → do not distribute.
+The sign-off stays **NOT READY** until all three rows below are **Pass** with evidence. Any Fail → do not hand the APK
+to agents. Passing means only: IT may install the APK on company agent phones (internal company distribution only).
 
 | # | Gate | Owner | Evidence required | Status | Date (Dhaka) |
 |---|---|---|---|---|---|
-| 1 | Approved signing certificate (A + B) | Company Signing Key Owner + IT Admin | 4 secret names present; variable set; fingerprint confirmed from two trusted records | NOT READY — 0 secrets, 0 variables, no trusted fingerprint (checked 2026-11-01) | |
-| 2 | Signed build from latest synced code (C + D) | Lovable Project Owner + IT Admin | GitHub `main` = latest Lovable commit; run link; signer/package/version lines; APK SHA-256; `sha256sum -c` OK | NOT READY — repository stale; no official build | |
-| 3 | Real-device end-to-end test (E) | Agent Tester + IT Admin | completed device checklist with screenshots/recordings | NOT DONE | |
+| 1 | Approved company signing certificate (A + B) | Company Signing Key Owner + IT Admin | 4 secret names present; variable set; fingerprint confirmed from two trusted records | NOT READY — 0 secrets, 0 variables, no trusted fingerprint (checked 2026-11-01) | |
+| 2 | Signed APK from latest code synced to the existing GitHub repository (C + D) | Lovable Project Owner + IT Admin | GitHub `main` = latest Lovable commit; run link; signer/package/version lines; APK SHA-256; `sha256sum -c` OK | NOT READY — repository stale; no official build | |
+| 3 | Real-device end-to-end acceptance test (E) | Agent Tester + IT Admin | completed `docs/ANDROID_DEVICE_ACCEPTANCE.md` with screenshots/recordings | NOT DONE | |
 
-Final approval to distribute: ________ (IT Admin)  ________ (Executive HQ)  Date: ________
+Internal approval to install on agent phones: ________ (IT Admin)  ________ (Executive HQ)  Date: ________

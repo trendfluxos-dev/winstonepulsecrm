@@ -102,7 +102,13 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
         let recordingId = existing?.id ?? null;
 
         if (existing) {
-          await supabaseAdmin.from("call_recordings").update(acceptedPatch).eq("id", existing.id);
+          // A failed write must not be acknowledged: a 5xx keeps the phone's
+          // queued state update pending so WorkManager retries it.
+          const { error: updateError } = await supabaseAdmin
+            .from("call_recordings")
+            .update(acceptedPatch)
+            .eq("id", existing.id);
+          if (updateError) return json({ error: "Call update failed" }, 500);
         } else {
           const { data: inserted, error } = await supabaseAdmin
             .from("call_recordings")
