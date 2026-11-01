@@ -59,14 +59,16 @@ class CallStateReceiver : BroadcastReceiver() {
                     CallRecordingService.stop(app)
                 }
                 LiveCallLauncher.setPhase(CallPhase.Connected)
-                // Answered is the first moment Android actually tells us the call
-                // is up — we never infer it from the agent pressing CALL.
+                // Outgoing OFFHOOK = dialling started, never "answered": the answer
+                // and talk time come later from the phone's call history.
                 if (outgoing) {
                     reportState(app, CallLifecycle.outgoingState(CallLifecycle.ANDROID_OFFHOOK, false))
                 } else if (DialerCallTracker.callUid != null) {
-                    // Dialled from the phone's own dialer: outgoing, no lead id yet.
-                    reportDialer(app, CallLifecycle.outgoingState(CallLifecycle.ANDROID_OFFHOOK, false))
+                    // Dialled from the phone's own dialer: the CRM's number-based
+                    // contract has no "initiated", so nothing is sent until the
+                    // verified outcome (CallOutcomeWorker).
                 } else {
+                    // Incoming: OFFHOOK after RINGING is a real answer.
                     IncomingCallTracker.ensure(intent.incomingNumber())
                     reportIncoming(app, CallLifecycle.incomingState(CallLifecycle.ANDROID_OFFHOOK, false))
                 }
@@ -131,20 +133,46 @@ class CallStateReceiver : BroadcastReceiver() {
                     )
                 }
 
-                val duration = if (wasOnCall && offHookAt > 0) ((System.currentTimeMillis() - offHookAt) / 1000L).toInt().coerceIn(0, 86400) else 0
+                val endedAt = System.currentTimeMillis()
+                // Live window: for incoming it starts at answer (talk time); for
+                // outgoing it includes ringing, so it is never sent as talk time.
+                val duration = if (wasOnCall && offHookAt > 0) ((endedAt - offHookAt) / 1000L).toInt().coerceIn(0, 86400) else 0
                 val ended =
                     if (outgoing) CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
                     else CallLifecycle.incomingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
-                if (outgoing) {
-                    reportState(app, ended, duration, uploadable)
-                } else if (DialerCallTracker.callUid != null) {
-                    reportDialer(
-                        app,
-                        CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, wasOnCall),
-                        duration,
-                        uploadable,
-                    )
-                    DialerCallTracker.clear()
+                if (outgoing || DialerCallTracker.callUid != null) {
+                    val appDialled = outgoing
+                    if (wasOnCall) {
+                        // Answered or not, and the real talk time, come from the
+                        // phone's call history — never from dial-to-hang-up time.
+                        com.winstone.connect.data.sync.CallOutcomeWorker.schedule(
+                            context = app,
+                            callUid = physicalCallUid,
+                            phoneNumber = if (appDialled) LiveCallLauncher.activePhone.orEmpty() else DialerCallTracker.number.orEmpty(),
+                            leadId = if (appDialled) endedLeadId else null,
+                            callStartMs = offHookAt,
+                            callEndMs = endedAt,
+                            mode = if (appDialled) com.winstone.connect.data.sync.CallOutcomeWorker.MODE_APP
+                                else com.winstone.connect.data.sync.CallOutcomeWorker.MODE_DIALER,
+                            recordingSupported = uploadable,
+                        )
+                    } else if (appDialled) {
+                        // Never went off-hook: cancelled before dialling, known without call history.
+                        reportState(app, ended, 0, uploadable)
+                        if (endedLeadId != null) {
+                            CallSyncQueue.queueReportOpen(
+                                context = app,
+                                leadId = endedLeadId,
+                                phoneNumber = LiveCallLauncher.activePhone.orEmpty(),
+                                durationSeconds = 0,
+                                connected = false,
+                                callUid = physicalCallUid,
+                            )
+                        }
+                    } else {
+                        reportDialer(app, ended, 0, uploadable)
+                    }
+                    if (!appDialled) DialerCallTracker.clear()
                 } else {
                     // Callback finished: the CRM resolves or creates the lead from
                     // the caller's number and opens the same mandatory report.
@@ -153,23 +181,10 @@ class CallStateReceiver : BroadcastReceiver() {
                 }
 
                 // Every finished call becomes reportable, even when recording
-                // failed entirely — the report is opened server-side and queued
-                // so a dead network cannot swallow it.
-                // Answered or not answered: an app-dialled call always becomes a
-                // report. Calls from the phone dialer or incoming calls have no
-                // lead id here — the CRM opens their report from the number.
-                if (endedLeadId != null) {
-                    CallSyncQueue.queueReportOpen(
-                        context = app,
-                        leadId = endedLeadId,
-                        phoneNumber = LiveCallLauncher.activePhone.orEmpty(),
-                        durationSeconds = duration,
-                        // Connected means Android saw the call go off-hook, not
-                        // that we managed to record it.
-                        connected = wasOnCall,
-                        callUid = physicalCallUid,
-                    )
-                }
+                // failed entirely. App-dialled calls that went off-hook get their
+                // report from CallOutcomeWorker (connected only with call-history
+                // talk time); calls from the phone dialer or incoming calls have
+                // no lead id here — the CRM opens their report from the number.
                 // Any number, any direction, app open or not: the mandatory
                 // report is pushed to the front of the phone once the CRM has
                 // opened it. Idempotent — nothing shows if none is pending.
