@@ -166,7 +166,6 @@ export const Route = createFileRoute("/api/public/ingest/recording")({
           if (!ownerId) return json({ error: "LeadHub assignment required", code: "unassigned_lead" }, 409);
         }
 
-        const { logLeadEvent } = await import("@/lib/lead-events.server");
 
         try {
           const recordingId = await ingestRecording({

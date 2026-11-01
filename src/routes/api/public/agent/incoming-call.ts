@@ -219,7 +219,6 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
           }
         }
 
-        const { logLeadEvent } = await import("@/lib/lead-events.server");
         const { recordSyncEvent } = await import("@/lib/call-jobs.server");
 
         await recordSyncEvent({
