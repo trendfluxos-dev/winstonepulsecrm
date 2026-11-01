@@ -1007,6 +1007,7 @@ export type Database = {
           stt_request_id: string | null
           stt_status: string | null
           sync_status: Database["public"]["Enums"]["sync_status"]
+          talk_time_source: string | null
           transcribed_at: string | null
           transcription_text: string | null
           updated_at: string
@@ -1062,6 +1063,7 @@ export type Database = {
           stt_request_id?: string | null
           stt_status?: string | null
           sync_status?: Database["public"]["Enums"]["sync_status"]
+          talk_time_source?: string | null
           transcribed_at?: string | null
           transcription_text?: string | null
           updated_at?: string
@@ -1117,6 +1119,7 @@ export type Database = {
           stt_request_id?: string | null
           stt_status?: string | null
           sync_status?: Database["public"]["Enums"]["sync_status"]
+          talk_time_source?: string | null
           transcribed_at?: string | null
           transcription_text?: string | null
           updated_at?: string
