@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import type { CallEvidenceRow } from "@/lib/lead-verification";
 
 /**
  * Post-call outcome from the Android live call screen.
@@ -73,23 +74,46 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
           return json({ error: LEAD_NOT_YOURS }, 403);
         }
 
+        // The phone's `connected` flag is only a claim. The lead is marked
+        // verified solely from the CRM's own call record for this call_uid.
+        const { verifyLeadFromCallEvidence } = await import("@/lib/lead-verification");
+        let evidenceRow: CallEvidenceRow | null = null;
+        if (call_uid) {
+          const { data: callRow, error: callError } = await supabaseAdmin
+            .from("call_recordings")
+            .select("agent_id, lead_id, call_status, duration_seconds, call_source, external_call_id")
+            .eq("external_call_id", call_uid)
+            .maybeSingle();
+          if (callError) return json({ error: "Call evidence could not be read", retryable: true }, 500);
+          evidenceRow = callRow;
+        }
+        const verification = verifyLeadFromCallEvidence({
+          callUid: call_uid, row: evidenceRow, agentId: caller.profile.id, leadId: lead_id,
+        });
+        const verificationBody = {
+          verified: verification.verified,
+          verification_reason: verification.reason,
+          connected_claimed: connected === true,
+        };
+
         if (call_uid) {
           // Idempotent per agent + call_uid: retries return the first result and
           // never append notes, attempts or timeline events twice.
           const { data, error } = await supabaseAdmin.rpc("apply_phone_outcome_atomic", {
             _agent: caller.profile.id, _lead: lead_id, _call_uid: call_uid, _outcome: outcome,
-            _status: OUTCOME_STAGE[outcome], _notes: notes?.trim() ?? "", _connected: connected === true,
+            _status: OUTCOME_STAGE[outcome], _notes: notes?.trim() ?? "", _connected: verification.verified,
           });
           if (error) {
             if (/another lead/.test(error.message)) return json({ error: "call_uid already used for another lead" }, 409);
             if (/not assigned/.test(error.message)) return json({ error: LEAD_NOT_YOURS }, 403);
             return json({ error: "Outcome could not be saved", retryable: true }, 500);
           }
-          return json({ ...(data as Record<string, unknown>), idempotent: true });
+          return json({ ...(data as Record<string, unknown>), ...verificationBody, idempotent: true });
         }
 
         // Legacy payload (older app, no call_uid): applied once as before, but
         // flagged non-idempotent so the phone/IT know retries may duplicate.
+        // Without a call id there is no call evidence, so it never verifies a lead.
         const stamp = new Date();
         const trimmed = notes?.trim();
         const appended = trimmed
@@ -104,7 +128,6 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
             notes: appended,
             call_attempts: (lead.call_attempts ?? 0) + 1,
             last_call_at: stamp.toISOString(),
-            ...(connected === true ? { is_verified: true } : {}),
           })
           .eq("id", lead_id);
         if (error) return json({ error: error.message }, 500);
@@ -123,6 +146,7 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
           status: OUTCOME_STAGE[outcome],
           outcome,
           server_time: stamp.toISOString(),
+          ...verificationBody,
           idempotent: false,
           legacy: true,
         });
