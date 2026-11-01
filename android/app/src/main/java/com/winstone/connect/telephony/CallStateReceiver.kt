@@ -138,7 +138,7 @@ class CallStateReceiver : BroadcastReceiver() {
                 // outgoing it includes ringing, so it is never sent as talk time.
                 val duration = if (wasOnCall && offHookAt > 0) ((endedAt - offHookAt) / 1000L).toInt().coerceIn(0, 86400) else 0
                 val ended =
-                    if (outgoing) CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
+                    if (outgoing || DialerCallTracker.callUid != null) CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
                     else CallLifecycle.incomingState(CallLifecycle.ANDROID_IDLE, wasOnCall)
                 if (outgoing || DialerCallTracker.callUid != null) {
                     val appDialled = outgoing
