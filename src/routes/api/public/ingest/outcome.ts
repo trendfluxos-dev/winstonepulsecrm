@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import type { CallEvidenceRow } from "@/lib/lead-verification";
 
 /**
  * Post-call outcome from the Android live call screen.
@@ -76,7 +77,7 @@ export const Route = createFileRoute("/api/public/ingest/outcome")({
         // The phone's `connected` flag is only a claim. The lead is marked
         // verified solely from the CRM's own call record for this call_uid.
         const { verifyLeadFromCallEvidence } = await import("@/lib/lead-verification");
-        let evidenceRow = null;
+        let evidenceRow: CallEvidenceRow | null = null;
         if (call_uid) {
           const { data: callRow, error: callError } = await supabaseAdmin
             .from("call_recordings")
