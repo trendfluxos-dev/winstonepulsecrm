@@ -1,5 +1,6 @@
 package com.winstone.connect
 
+import com.winstone.connect.telephony.MatchOutcome
 import com.winstone.connect.telephony.PhoneRecordingMatcher
 import com.winstone.connect.telephony.RecordingCandidate
 import org.junit.Assert.assertEquals
@@ -39,14 +40,48 @@ class PhoneRecordingMatcherTest {
         )
     }
 
-    @Test fun picksClosestToCallEnd() {
-        val hit = PhoneRecordingMatcher.pick(
-            listOf(
-                c(5, "a.m4a", "Recordings/Call/", start - 10_000),
-                c(6, "b.m4a", "Recordings/Call/", end + 3_000),
-            ),
-            start, end, null,
+    @Test fun twoUnnamedCallFolderFilesAreAmbiguousNotGuessed() {
+        val files = listOf(
+            c(5, "a.m4a", "Recordings/Call/", start - 10_000),
+            c(6, "b.m4a", "Recordings/Call/", end + 3_000),
         )
-        assertEquals(6L, hit?.id)
+        assertNull(PhoneRecordingMatcher.pick(files, start, end, null))
+        assertEquals(MatchOutcome.AMBIGUOUS, PhoneRecordingMatcher.decide(files, start, end, null).outcome)
+    }
+
+    @Test fun singleFileNamingThisNumberWinsOverUnnamedNeighbours() {
+        val hit = PhoneRecordingMatcher.decide(
+            listOf(
+                c(7, "rec.m4a", "Recordings/Call/", end + 2_000),
+                c(8, "01711223344_20241024153012.m4a", "Recordings/Call/", end + 6_000),
+            ),
+            start, end, "01711223344",
+        )
+        assertEquals(MatchOutcome.MATCHED, hit.outcome)
+        assertEquals(8L, hit.candidate?.id)
+    }
+
+    @Test fun twoFilesNamingThisNumberAreAmbiguous() {
+        val d = PhoneRecordingMatcher.decide(
+            listOf(
+                c(9, "01711223344_1.m4a", "Recordings/Call/", end + 2_000),
+                c(10, "01711223344_2.m4a", "Recordings/Call/", end + 9_000),
+            ),
+            start, end, "+8801711223344",
+        )
+        assertEquals(MatchOutcome.AMBIGUOUS, d.outcome)
+        assertNull(d.candidate)
+    }
+
+    @Test fun fileNamingAnotherNumberIsNeverAttached() {
+        val d = PhoneRecordingMatcher.decide(
+            listOf(c(11, "Call recording 01899887766_241024.m4a", "Recordings/Call/", end + 4_000)),
+            start, end, "01711223344",
+        )
+        assertEquals(MatchOutcome.NONE, d.outcome)
+    }
+
+    @Test fun nothingInTheWindowIsNone() {
+        assertEquals(MatchOutcome.NONE, PhoneRecordingMatcher.decide(emptyList(), start, end, "01711223344").outcome)
     }
 }
