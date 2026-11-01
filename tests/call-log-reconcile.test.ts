@@ -4,7 +4,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { reconcileLateCallLog } from "@/lib/call-log-reconcile.server";
 import { callLogReconcilePatch, pickCallLogMatch } from "@/lib/call-reconciliation";
 import { isPhoneMeasuredCall, resolveCallDuration, resolveDurationSource } from "@/lib/call-duration";
-import { hasProvenTalkTime } from "@/lib/lead-verification";
+import { verifyLeadFromCallEvidence } from "@/lib/lead-verification";
 
 type Row = Record<string, unknown>;
 
@@ -153,7 +153,11 @@ describe("duration precedence and connected-talk-time evidence", () => {
     expect(isPhoneMeasuredCall({ call_source: "web_callback", talk_time_source: "call_log" })).toBe(false);
   });
   it("a zero-second answered incoming call never proves connected talk time", () => {
-    expect(hasProvenTalkTime({ call_status: "completed", duration_seconds: 0, call_source: "android_incoming", external_call_id: "u", talk_time_source: "call_log" })).toBe(false);
-    expect(hasProvenTalkTime({ call_status: "completed", duration_seconds: 41, call_source: "android_sim", external_call_id: "u", talk_time_source: "call_log" })).toBe(true);
+    const base = { agent_id: AGENT, lead_id: "lead-1", external_call_id: "u", call_status: "completed", talk_time_source: "call_log" };
+    const call = (row: Record<string, unknown>) => verifyLeadFromCallEvidence({ callUid: "u", agentId: AGENT, leadId: "lead-1", row: { ...base, ...row } });
+    expect(call({ duration_seconds: 0, call_source: "android_incoming" })).toEqual({ verified: false, reason: "no_talk_time" });
+    expect(call({ duration_seconds: 41, call_source: "android_sim" })).toEqual({ verified: true, reason: "verified" });
+    // Finalization only sets connection_verified for phone_sync with seconds > 0.
+    expect(resolveDurationSource({ phoneSeconds: 0, storedSeconds: 0 })).toBe("entered");
   });
 });
