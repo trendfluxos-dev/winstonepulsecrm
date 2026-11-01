@@ -452,13 +452,13 @@ export async function submitCallReport(input: {
   if (report.recording_id && !isWhatsapp) {
     const { data: rec } = await supabaseAdmin
       .from("call_recordings")
-      .select("duration_seconds, call_source, external_call_id, created_at, agent_id, lead_id, call_status")
+      .select("duration_seconds, call_source, external_call_id, talk_time_source, talk_time_verified_at, created_at, agent_id, lead_id, call_status")
       .eq("id", report.recording_id)
       .maybeSingle();
     const { isPhoneMeasuredCall } = await import("@/lib/call-duration");
     if (rec && rec.agent_id === input.agentId && rec.lead_id === report.lead_id && isPhoneMeasuredCall(rec) && rec.call_status === "completed") {
       phoneSeconds = rec.duration_seconds ?? null;
-      phoneSyncedAt = rec.created_at ?? null;
+      phoneSyncedAt = rec.talk_time_verified_at ?? rec.created_at ?? null;
     }
   }
   if (!isWhatsapp && (phoneSeconds === null || phoneSeconds <= 0)) {
@@ -466,7 +466,7 @@ export async function submitCallReport(input: {
     const since = new Date(new Date(report.created_at).getTime() - 3 * 60 * 60 * 1000).toISOString();
     const { data: phoneRows } = await supabaseAdmin
       .from("call_recordings")
-      .select("started_at, created_at, duration_seconds, call_source, external_call_id, call_status")
+      .select("started_at, created_at, duration_seconds, call_source, external_call_id, talk_time_source, talk_time_verified_at, call_status")
       .eq("lead_id", report.lead_id)
       .eq("agent_id", report.agent_id)
       .gte("created_at", since)
