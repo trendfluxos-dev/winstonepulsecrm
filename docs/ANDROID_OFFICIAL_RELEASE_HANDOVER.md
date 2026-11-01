@@ -15,7 +15,7 @@ draft release inside the company repository), `tests/android-release-gates.test.
 
 | Fixed identity | Value |
 |---|---|
-| Repository / branch | `trendfluxos-dev/winstone-pulse-crm` (private) / `main` |
+| Repository / branch | `trendfluxos-dev/winstonepulsecrm` (private) / `main` |
 | Release applicationId | `com.winstone.connect` (test build `com.winstone.connect.test` is never official) |
 | Version | `versionName 2.21`, `versionCode 32` (`android/app/build.gradle.kts`) |
 | Live CRM (same backend the APK uses) | https://crm.winstonebd.com |
@@ -28,7 +28,7 @@ screenshots, tickets or this repository. Only the **public** certificate SHA-256
 
 ## A. Company Signing Key Owner — GitHub encrypted secrets
 
-Where: GitHub → `trendfluxos-dev/winstone-pulse-crm` → Settings → Secrets and variables → Actions → **Secrets**.
+Where: GitHub → `trendfluxos-dev/winstonepulsecrm` → Settings → Secrets and variables → Actions → **Secrets**.
 
 | Secret name | Content |
 |---|---|
@@ -64,7 +64,7 @@ Done when: variable exists, two people confirmed the value from independent trus
 
 Do not change repository, branch or history, and never force-push.
 
-1. Lovable → this project → Project settings → **Git**. Confirm it shows `trendfluxos-dev/winstone-pulse-crm`, branch `main`.
+1. Lovable → this project → Project settings → **Git**. Confirm it shows `trendfluxos-dev/winstonepulsecrm`, branch `main`.
 2. If it shows connected but behind: push any small commit to `main` from a local clone (normal push), which makes Lovable sync.
    If it reports "diverged": merge the newest `lovable-sync*` branch into `main` on GitHub (pull request, normal merge).
 3. If it shows **disconnected**: Lovable cannot re-link an existing repository — reconnecting always creates a new one.
@@ -72,7 +72,7 @@ Do not change repository, branch or history, and never force-push.
 4. Confirm sync: the newest commit on GitHub `main` (Code → commits) must match the newest change in Lovable's history,
    and `android/app/build.gradle.kts` on GitHub must show the expected version.
 
-Status 2026-11-01: GitHub `main` = `e181c951` (2026-10-31 04:38 UTC); Lovable is ahead at `f2e56ab8` (2026-11-01 09:24 UTC) → **stale**.
+Status 2026-11-01 16:40 Dhaka: the project is now synced to `trendfluxos-dev/winstonepulsecrm` `main` (head `7bd4285d` = Lovable head). The older `winstone-pulse-crm` repository is no longer used. Secrets (A) and the variable (B) must be set on `winstonepulsecrm`; it currently has 0 secrets and 0 variables, and `android/winstone-release.jks` is still tracked, which blocks the official build.
 
 ## D. IT Admin — build and verify the official signed APK
 
@@ -111,7 +111,7 @@ to agents. Passing means only: IT may install the APK on company agent phones (i
 | # | Gate | Owner | Evidence required | Status | Date (Dhaka) |
 |---|---|---|---|---|---|
 | 1 | Approved company signing certificate (A + B) | Company Signing Key Owner + IT Admin | 4 secret names present; variable set; fingerprint confirmed from two trusted records | NOT READY — 0 secrets, 0 variables, no trusted fingerprint (checked 2026-11-01) | |
-| 2 | Signed APK from latest code synced to the existing GitHub repository (C + D) | Lovable Project Owner + IT Admin | GitHub `main` = latest Lovable commit; run link; signer/package/version lines; APK SHA-256; `sha256sum -c` OK | NOT READY — repository stale; no official build | |
+| 2 | Signed APK from latest code synced to the existing GitHub repository (C + D) | Lovable Project Owner + IT Admin | GitHub `main` = latest Lovable commit; run link; signer/package/version lines; APK SHA-256; `sha256sum -c` OK | NOT READY — repository synced; no official build (signing blocked) | |
 | 3 | Real-device end-to-end acceptance test (E) | Agent Tester + IT Admin | completed `docs/ANDROID_DEVICE_ACCEPTANCE.md` with screenshots/recordings | NOT DONE | |
 
 Internal approval to install on agent phones: ________ (IT Admin)  ________ (Executive HQ)  Date: ________
