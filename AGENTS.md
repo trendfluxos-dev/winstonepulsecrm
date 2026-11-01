@@ -62,7 +62,7 @@
 - Reads use page-all.ts (parallel 1,000-row pages, id-dedupe, fail on errors); homepage uses WebP CDN/shared fonts — why: avoid serial reads/downloads.
 - Desk/Analytics/HQ KPIs use kpi-contract.ts; agent-kpi-board.ts groups authorized rows, never phone-sync metrics — why: one definition.
 - Rejections use shared defaults; mobile UI tests mock all writes — why: no invented facts or live test data.
-- HQ forecasts never allocate; IT GitHub cannot prove sync; version choices grant no access; call-sandbox is local — why: facts are not authority.
+- HQ forecasts never allocate; IT GitHub cannot prove sync; version choices grant no access; call-sandbox and the sandbox APK's SyncFailureDrill stay offline (liveWrites 0) — why: facts are not authority.
 - Extra Google tags use RootShell head; keep original — why: router dedupes.
 - HQ Claude briefing: on-demand, HQ/IT-gated, aggregate-only, native /v1/messages streamed server-side — why: no customer data or background AI cost.
 - GitHub access (hourly) and Firebase grpc-js advisory (daily) watches use managed cron auth, diff against system_settings and write system_alerts; failed checks never mean revocation — why: no false alarms.
