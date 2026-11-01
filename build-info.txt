@@ -1,5 +1,5 @@
 package: com.winstone.connect.test
 version: 2.21-test (versionCode 32)
-sha256: 7a4f17ff8350b0c533372ca00fc3f2d07192d8ea4e60c7209f634b80686a10a6
-build: run 7 (commit b1112e13095bf3e0a8328a2340ad94b5982c4ada)
-built_at: 2026-11-01T11:22:20Z
+sha256: 2561e51d5e22ae50a7edeb059e5a1783c9e6280e56bbeeab62828038e4901cee
+build: run 8 (commit 37af00e1445de74d50b28aa224d577a0d0539741)
+built_at: 2026-11-01T11:33:02Z
