@@ -9,6 +9,7 @@
 export const IT_SURFACE_ROUTES = [
   "/system",
   "/runtime-errors",
+  "/load-diagnostics",
   "/ingest",
   "/migration",
   "/migration-export",
