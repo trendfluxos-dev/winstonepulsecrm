@@ -40,6 +40,8 @@ const Body = z.object({
    * same minute instead of creating a second call row for one physical call.
    */
   source: z.enum(["realtime", "call_log"]).optional(),
+  /** Set by app 2.22+ when duration_seconds is Android CallLog.DURATION (talk time). */
+  talk_time_source: z.enum(["call_log"]).optional(),
 });
 
 function json(body: unknown, status = 200): Response {
@@ -172,7 +174,9 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
           return json({ error: "call_uid belongs to another agent", code: "call_uid_conflict" }, 409);
         }
 
-        const acceptedPatch = existing ? lifecyclePatch(existing, patch) : patch;
+        const { talkTimeEvidence } = await import("@/lib/call-reconciliation");
+        const evidence = talkTimeEvidence(body);
+        const acceptedPatch = { ...(existing ? lifecyclePatch(existing, patch) : patch), ...evidence };
         let recordingId = existing?.id ?? null;
 
         if (existing) {
@@ -199,6 +203,7 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
               upload_status: "pending",
               started_at: at,
               ...patch,
+              ...evidence,
             })
             .select("id")
             .single();

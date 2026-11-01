@@ -67,3 +67,20 @@ export function recordingBindingError(body: { recorder_source?: string | null | 
   }
   return null;
 }
+
+/**
+ * Fields stored only when the phone proved the call's result from Android's call
+ * history (app 2.22+ sends talk_time_source = "call_log" with a terminal state).
+ * App 2.21 never sends it, so its ringing-inclusive time stays unproven.
+ */
+export function talkTimeEvidence(body: {
+  state: string;
+  talk_time_source?: string | undefined;
+  duration_seconds?: number | undefined;
+}): { talk_time_source: "call_log"; duration_seconds: number; call_status: string } | Record<string, never> {
+  if (body.talk_time_source !== "call_log") return {};
+  if (body.state !== "completed" && body.state !== "no_answer") return {};
+  const seconds = typeof body.duration_seconds === "number" && body.duration_seconds > 0 ? body.duration_seconds : 0;
+  if (body.state === "completed" && seconds === 0) return {}; // completed needs talk time
+  return { talk_time_source: "call_log", duration_seconds: body.state === "completed" ? seconds : 0, call_status: body.state };
+}
