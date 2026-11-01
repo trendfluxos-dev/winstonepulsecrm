@@ -466,28 +466,30 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 else -> Result.failure()
             }.also { if (it is Result.Success) SyncStatus.succeeded(applicationContext, kind == CallSyncQueue.KIND_RECORDING, kind == CallSyncQueue.KIND_REPORT_OPEN || kind == CallSyncQueue.KIND_REPORT_SUBMIT) }
         } catch (error: Exception) {
-            // 4xx = bad payload, retrying will not help; anything else is transient.
-            val message = error.message.orEmpty()
-            val giveUp = message.contains("Invalid payload")
+            // Classified by HTTP status / network: permanent failures (bad data, not
+            // your lead, conflict, retired app) stop; transient ones retry. Agents see
+            // a short bilingual reason with what to do, never a raw stack trace.
+            val failure = SyncErrorClassifier.classify(error)
+            val serverDetail = (error as? com.winstone.connect.data.remote.SyncHttpException)
+                ?.let { " (HTTP ${it.code}: ${it.message.orEmpty().take(60)})" }.orEmpty()
+            val shown = failure.agentMessage + serverDetail
             // A call recording and its report are the audit trail of the call:
-            // never give up on them while the failure could still be the network.
-            val keepTrying = !giveUp && (
-                kind == CallSyncQueue.KIND_RECORDING ||
-                    kind == CallSyncQueue.KIND_REPORT_OPEN ||
-                    kind == CallSyncQueue.KIND_REPORT_SUBMIT ||
-                    kind == CallSyncQueue.KIND_LEAD_SUBMIT ||
-                    kind == CallSyncQueue.KIND_CALL_STATE ||
-                    runAttemptCount < 12
-                )
+            // never give up on them while the failure could still be transient.
+            val auditTrail = kind == CallSyncQueue.KIND_RECORDING ||
+                kind == CallSyncQueue.KIND_REPORT_OPEN ||
+                kind == CallSyncQueue.KIND_REPORT_SUBMIT ||
+                kind == CallSyncQueue.KIND_LEAD_SUBMIT ||
+                kind == CallSyncQueue.KIND_CALL_STATE
+            val keepTrying = SyncErrorClassifier.shouldRetry(failure, auditTrail, runAttemptCount)
             if (kind == CallSyncQueue.KIND_RECORDING) {
-                CallSyncQueue.setRecordingError(applicationContext, inputData.getString(CallSyncQueue.KEY_UPLOAD_ID), message.ifBlank { "Upload failed" })
+                CallSyncQueue.setRecordingError(applicationContext, inputData.getString(CallSyncQueue.KEY_UPLOAD_ID), shown)
             }
             if (keepTrying) {
-                SyncStatus.retrying(applicationContext, message)
+                SyncStatus.retrying(applicationContext, shown)
                 Result.retry()
             } else {
                 if (kind == CallSyncQueue.KIND_RECORDING) CallSyncQueue.rememberFailedRecording(applicationContext, inputData)
-                SyncStatus.failed(applicationContext, message)
+                SyncStatus.failed(applicationContext, shown)
                 Result.failure()
             }
         }

@@ -78,4 +78,20 @@ object SyncErrorClassifier {
         SyncErrorKind.UNKNOWN -> SyncFailure(kind, true,
             "পাঠানো যায়নি — আবার চেষ্টা হবে / Could not send — retrying")
     }
+
+    /** Non-audit items stop after this many transient failures. */
+    const val MAX_TRANSIENT_ATTEMPTS = 12
+
+    /**
+     * Keep the item queued? Permanent failures never retry. Waiting on the agent
+     * (sign-in, briefing) and audit-trail items (recordings, reports, call
+     * states, leads) keep retrying; other transient failures stop after
+     * [MAX_TRANSIENT_ATTEMPTS].
+     */
+    fun shouldRetry(failure: SyncFailure, auditTrail: Boolean, attempt: Int): Boolean = when {
+        !failure.retryable -> false
+        failure.kind == SyncErrorKind.SIGN_IN_REQUIRED || failure.kind == SyncErrorKind.BRIEFING_REQUIRED -> true
+        auditTrail -> true
+        else -> attempt < MAX_TRANSIENT_ATTEMPTS
+    }
 }
