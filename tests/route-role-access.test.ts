@@ -22,7 +22,7 @@ describe("route-by-role UI gates", () => {
   });
   it("every page route file is in the reviewed inventory", () => {
     const files = readdirSync("src/routes").filter((f) => f.endsWith(".tsx") && f !== "__root.tsx");
-    expect(files.length).toBe(64); // versions.tsx and call-sandbox.tsx are public, local-only; no records or payments.
+    expect(files.length).toBe(65); // +sync-failures.tsx (authority-only, reviewed above); versions.tsx and call-sandbox.tsx are public, local-only; no records or payments.
   });
 });
 
