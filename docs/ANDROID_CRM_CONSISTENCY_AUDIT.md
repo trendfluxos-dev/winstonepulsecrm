@@ -25,7 +25,7 @@ Paths: Android = `android/app/src/main/java/com/winstone/connect/…`; server = 
 |---|---|---|
 | Call start | PHONE_STATE OFFHOOK epoch ms (`telephony/CallStateReceiver.kt:41`) | `started_at` (`initiated`) |
 | Answer (incoming) | OFFHOOK after RINGING — real | `answered_at` |
-| Answer (outgoing) | **OFFHOOK = dialling started, not answer** (`telephony/CallLifecycle.kt:51-52`) | **sent as `answered` — gap G1** |
+| Answer (outgoing) | OFFHOOK = dialling started → sent as `initiated`; answer + talk time from the matched CallLog row (`telephony/CallHistoryEvidence.kt`, `data/sync/CallOutcomeWorker.kt`) | `completed` with CallLog talk time, or `no_answer`, or `failed` = not verified |
 | End / duration (live) | IDLE − OFFHOOK, clamped 0–86 400 s (`CallStateReceiver.kt:134`) — includes ringing for outgoing | `finished_at`, `duration_seconds` |
 | End / duration (call log) | Android `CallLog.DURATION` (real talk time), `log-<rowId>-<tail>` id (`telephony/CallLogSweeper.kt:93-105`) | phone-measured (`src/lib/call-duration.ts:97-107`) |
 | Missed / rejected / blocked / voicemail | CallLog TYPE (`telephony/CallLogClassifier.kt:16-33`) → `no_answer`; fine-grained kind not uploaded | `no_answer` |
@@ -62,7 +62,7 @@ calls will have **no recording**; that is expected and is not a failure.
 
 | # | Gap | Impact | Status |
 |---|---|---|---|
-| G1 | **P1** Outgoing OFFHOOK reported as `answered`; IDLE as `completed` with ringing-inclusive time. `call-state` then opens the report as connected, and `isPhoneMeasuredCall` counts `android_sim` rows as phone-measured, so an unanswered app-dialled call can look connected/verified. | false "connected", inflated talk time / verified-call KPI | **Open — needs owner decision** (changes KPI counts) |
+| G1 | **P1** Outgoing OFFHOOK reported as `answered`; IDLE as `completed` with ringing-inclusive time. `call-state` then opens the report as connected, and `isPhoneMeasuredCall` counts `android_sim` rows as phone-measured, so an unanswered app-dialled call can look connected/verified. | false "connected", inflated talk time / verified-call KPI | **Fixed in Android source (not yet built/installed)**: new APK sends `initiated`, then the verified call-history outcome; phones on 2.21 or older keep the old behaviour until updated. Verified-call totals will fall where ringing was counted. |
 | G2 | **P1** The later call-log row (true `CallLog.DURATION`) for the same call is discarded as a duplicate (`agent/incoming-call.ts:76-100`) instead of correcting the live row. | real evidence thrown away | Open — fix needs a stored call-log-duration field (schema change) |
 | G3 | P2 `call-state` acknowledged 200 even if the call-row update failed. | phone drops a state the CRM never saved | **Fixed** — now 500 so the phone retries; `tests/call-state-ack.test.ts` |
 | G4 | P2 `ingest/outcome` sets `leads.is_verified` from a device `connected` flag (`ingest/outcome.ts:107`, migration 0137). | verification without recording/call-log proof | Open |
@@ -71,7 +71,7 @@ calls will have **no recording**; that is expected and is not a failure.
 | G7 | P3 Retry worker does not distinguish 401/403/409/429/5xx; some job types retry without a ceiling. | battery/noise, stuck jobs | Open |
 | G8 | P3 Replays append duplicate `call_started` / `recording_saved` timeline events; upload response always says `duplicate:false`. | cosmetic history duplicates | Open |
 
-Recommended fix for G1+G2 (not applied): phone sends outgoing OFFHOOK as `initiated` and no `answered`; final
+G1 applied 2026-11-01; remaining recommendation for G2: phone sends outgoing OFFHOOK as `initiated` and no `answered`; final
 `completed`/`no_answer` and duration come from the matched CallLog row; server stores that call-log duration on the
 same call row and only then treats it as phone-measured. Needs owner approval because verified-call KPI totals change.
 
