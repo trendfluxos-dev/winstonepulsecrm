@@ -1,11 +1,13 @@
 # Roadmap
 
 ## 2026-11-01 — New workspace connections (second move)
-- [x] GitHub API linked (GITHUB_API_KEY); verify trendfluxos-dev/winstone-pulse-crm access.
-- [ ] Google Drive linked (GOOGLE_DRIVE_API_KEY); verify folder 1CciCz… and project folder 1IExiE….
-- [ ] Google Search Console linked (GOOGLE_SEARCH_CONSOLE_API_KEY); verify crm.winstonebd.com property.
-- [ ] Google Sheets linked (GOOGLE_SHEETS_API_KEY); verify Daily Lead Report 134iFJ… and Call Reports 1cS2BH….
-- [ ] WhatsApp Business linked (WHATSAPP_API_KEY); webhook /api/public/whatsapp/webhook; Incoming messages destination set by owner.
+- [x] GitHub API linked (GITHUB_API_KEY); trendfluxos-dev/winstone-pulse-crm HTTP 200.
+- [x] Google Drive linked (GOOGLE_DRIVE_API_KEY); "Winstone CRM" folder readable/writable; 1IExiE… is an Apps Script project (readable).
+- [x] Google Search Console linked (GOOGLE_SEARCH_CONSOLE_API_KEY); crm + os.winstonebd.com siteOwner.
+- [x] Google Sheets linked (GOOGLE_SHEETS_API_KEY); Daily Lead Report + Call Reports workbooks open.
+- [x] WhatsApp Business linked (WHATSAPP_API_KEY); webhook route exists.
+- [ ] WhatsApp: connected number is Meta's +1 555 test number with 0 templates — owner must connect the real business number; templates then re-created and re-reviewed.
+- [ ] WhatsApp Incoming messages destination → this project (owner, Connectors → WhatsApp).
 
 ## 2026-10-31 — Publish, screen readers, WhatsApp reports, phone app
 - [x] Publish requested for crm.winstonebd.com (basic security scan clean).
