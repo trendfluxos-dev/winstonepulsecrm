@@ -160,10 +160,13 @@ export const Route = createFileRoute("/api/public/agent/call-state")({
         });
 
         if (body.state === "initiated") {
-          const { logLeadEvent } = await import("@/lib/lead-events.server");
-          await logLeadEvent({
+          // Once per physical call: phone retries never add a second entry.
+          const { logLeadEventOnce } = await import("@/lib/lead-events-once.server");
+          await logLeadEventOnce({
+            onceKey: `call:${body.call_uid}`,
             leadId: lead.id,
             agentId: caller.profile.id,
+            deviceId: caller.device.id,
             kind: "call_started",
             detail: `${caller.profile.name} কল শুরু করেছেন`,
           });

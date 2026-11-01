@@ -238,8 +238,15 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
           },
         });
 
-        if (body.state === "ringing" || (outgoing && body.state === "answered")) {
-          await logLeadEvent({
+        // Once per physical call (keyed on call_uid): retries never duplicate history.
+        // Outgoing dialer calls no longer send "answered" (Android cannot see the
+        // remote answer), so their start entry is written with the verified outcome.
+        const { logLeadEventOnce } = await import("@/lib/lead-events-once.server");
+        const terminal = body.state === "completed" || body.state === "no_answer" || body.state === "failed";
+        if (body.state === "ringing" || (outgoing && (body.state === "answered" || terminal))) {
+          await logLeadEventOnce({
+            onceKey: `call:${body.call_uid}`,
+            deviceId: caller.device.id,
             leadId,
             agentId: caller.profile.id,
             kind: "call_started",
@@ -256,11 +263,15 @@ export const Route = createFileRoute("/api/public/agent/incoming-call")({
           await supabaseAdmin.from("leads").update({ last_call_at: at }).eq("id", leadId);
 
           if (!connected) {
-            await logLeadEvent({
+            await logLeadEventOnce({
+              onceKey: `call:${body.call_uid}`,
+              deviceId: caller.device.id,
               leadId,
               agentId: caller.profile.id,
               kind: "call_ended",
-              detail: outgoing ? "কল ধরা হয়নি" : "ইনকামিং কল ধরা হয়নি",
+              detail: body.state === "failed"
+                ? "কলের ফল যাচাই করা যায়নি (ফোনের কল-হিস্টরি পাওয়া যায়নি)"
+                : outgoing ? "কল ধরা হয়নি" : "ইনকামিং কল ধরা হয়নি",
             });
           }
 
