@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-11-01 — Read-only page-load diagnostics
+- [x] /load-diagnostics (HQ/IT PIN): module-load failures, asset URLs, recovery outcomes, filters, trend, browser table, events, CSV; 16 tests; full suite, typecheck, build pass.
+- [ ] Not published (not requested). View with real data not seen on screen — needs an HQ/IT PIN session.
+
 ## 2026-11-01 — New workspace connections (second move)
 - [x] GitHub API linked (GITHUB_API_KEY); trendfluxos-dev/winstone-pulse-crm HTTP 200.
 - [x] Google Drive linked (GOOGLE_DRIVE_API_KEY); "Winstone CRM" folder readable/writable; 1IExiE… is an Apps Script project (readable).
