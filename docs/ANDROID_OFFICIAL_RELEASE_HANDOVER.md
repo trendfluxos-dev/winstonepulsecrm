@@ -64,7 +64,7 @@ Done when: variable exists, two people confirmed the value from independent trus
 
 Do not change repository, branch or history, and never force-push.
 
-1. Lovable → this project → Project settings → **Git**. Confirm it shows `trendfluxos-dev/winstone-pulse-crm`, branch `main`.
+1. Lovable → this project → Project settings → **Git**. Confirm it shows `trendfluxos-dev/winstonepulsecrm`, branch `main`.
 2. If it shows connected but behind: push any small commit to `main` from a local clone (normal push), which makes Lovable sync.
    If it reports "diverged": merge the newest `lovable-sync*` branch into `main` on GitHub (pull request, normal merge).
 3. If it shows **disconnected**: Lovable cannot re-link an existing repository — reconnecting always creates a new one.
