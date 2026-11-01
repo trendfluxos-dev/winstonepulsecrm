@@ -44,10 +44,11 @@ you control; never call a real customer.
 | 22 | Account switch | Sign out, sign in as another test agent | previous agent's queued work not attributed to the new agent | NOT DONE | |
 | 23 | Sign-out | Sign out | device token removed; next API call refused until sign-in | NOT DONE | |
 | 25 | Call timing (outgoing, answered) | Note phone clock at dial, answer, hang-up; compare CRM | CRM start ≈ dial time; talk duration = phone call history duration (±5 s), not dial-to-hang-up | NOT DONE | |
-| 26 | Call timing (outgoing, unanswered 30 s ring) | Let it ring 30 s, hang up | CRM must show no answer / 0 s talk; report must not be "connected"; FAKE LEAD blocked. Known risk G1 in the consistency audit — record actual result | NOT DONE | |
+| 26 | Call timing (outgoing, unanswered 30 s ring) | Let it ring 30 s, hang up | CRM must show no answer / 0 s talk; report must not be "connected"; FAKE LEAD blocked. CRM must show no answer (0 s) after a 30 s ring; record actual result | NOT DONE | |
 | 27 | Call timing (incoming) | Record ring start, answer, end | answer and end times and duration match phone history | NOT DONE | |
 | 28 | Dhaka display | Make a call at a known time | CRM web and phone both show the same Asia/Dhaka time | NOT DONE | |
 | 29 | Duplicate prevention | Retry by toggling airplane mode during upload; resubmit report | one call row, one report, one recording in CRM | NOT DONE | |
+| 31 | Call history permission off | Deny call-log permission, dial and talk 20 s | CRM shows call not verified (failed) with note; report opens as not connected; nothing claims answered | NOT DONE | |
 | 30 | Agent attribution | Agent B opens CRM | Agent B cannot see Agent A's call, report or recording | NOT DONE | |
 | 24 | Stability | Whole run | no crash, no wrong lead owner | NOT DONE | |
 

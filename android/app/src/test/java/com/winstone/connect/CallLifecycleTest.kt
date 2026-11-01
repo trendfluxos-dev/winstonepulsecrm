@@ -14,17 +14,19 @@ import org.junit.Test
 class CallLifecycleTest {
 
     @Test
-    fun `pressing call never counts as answered`() {
-        // Only OFFHOOK maps to answered; nothing else may.
+    fun `outgoing off-hook is dialling started, never answered`() {
         assertEquals(CallState.UNKNOWN, CallLifecycle.outgoingState("DIALING", false))
         assertEquals(CallState.UNKNOWN, CallLifecycle.outgoingState(CallLifecycle.ANDROID_RINGING, false))
-        assertEquals(CallState.ANSWERED, CallLifecycle.outgoingState(CallLifecycle.ANDROID_OFFHOOK, false))
+        assertEquals(CallState.INITIATED, CallLifecycle.outgoingState(CallLifecycle.ANDROID_OFFHOOK, false))
+        assertEquals("initiated", CallLifecycle.outgoingState(CallLifecycle.ANDROID_OFFHOOK, false).wire)
     }
 
     @Test
-    fun `outgoing call ended before answer is not completed`() {
+    fun `outgoing end is left to call-history evidence`() {
+        // Never off-hook: known cancelled. Off-hook then idle: answer unknown until call history is read.
         assertEquals(CallState.CANCELLED, CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, false))
-        assertEquals(CallState.COMPLETED, CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, true))
+        assertEquals(CallState.UNKNOWN, CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, true))
+        assertNull(CallLifecycle.outgoingState(CallLifecycle.ANDROID_IDLE, true).wire)
     }
 
     @Test

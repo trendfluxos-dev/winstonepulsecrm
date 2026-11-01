@@ -47,10 +47,17 @@ object CallLifecycle {
         return "and-$tail-$nowMillis"
     }
 
-    /** Outgoing call: Android never reports "ringing" for the number we dialled. */
+    /**
+     * Outgoing call: OFFHOOK only means dialling started — Android does not tell
+     * an app when the other side answers. So OFFHOOK is "initiated", and the end
+     * of a call that went off-hook is UNKNOWN here: CallOutcomeWorker decides
+     * answered / unanswered and the real talk time from the phone's call history
+     * (CallHistoryEvidence). Only a call that never went off-hook is known to be
+     * cancelled without the receiver's help.
+     */
     fun outgoingState(androidState: String, wasOffHook: Boolean): CallState = when (androidState) {
-        ANDROID_OFFHOOK -> CallState.ANSWERED
-        ANDROID_IDLE -> if (wasOffHook) CallState.COMPLETED else CallState.CANCELLED
+        ANDROID_OFFHOOK -> CallState.INITIATED
+        ANDROID_IDLE -> if (wasOffHook) CallState.UNKNOWN else CallState.CANCELLED
         else -> CallState.UNKNOWN
     }
 
