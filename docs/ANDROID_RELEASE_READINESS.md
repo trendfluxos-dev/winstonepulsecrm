@@ -131,3 +131,10 @@ Run `android/DEVICE_TEST_CHECKLIST.md`, plus:
 ### Build 2026-10-28 — audit fixes (commit 51d820c, run 40583215365)
 - Unit tests: passed in CI. Debug + signed release APK built. Release artifact 1.7 MB (R8 shrinking on; was 11.5 MB).
 - Not yet verified: fingerprint/app ID/version (section 1a), on-device run of the minified release.
+
+### Status check 2026-11-01 (15:50 Dhaka) — no official build run
+- CRM repo `trendfluxos-dev/winstone-pulse-crm`, default branch `main` at `e181c951` (2026-10-31 04:38 UTC); Lovable project is 323 commits ahead (`f2e56ab8`, 2026-11-01 09:24 UTC) → Git sync stale.
+- GitHub Actions secrets: 0 present (all four WINSTONE_* missing). Variables: 0 (`WINSTONE_RELEASE_CERT_SHA256` missing).
+- Canonical signer fingerprint: not established (section 3 table blank). `android/winstone-release.jks` is again tracked (restored by the 2026-10-31 22:24 revert) and is the retired, untrusted key per the owner's decision B; the official build now refuses to run while it is tracked.
+- Latest build: test APK 2.21-test (32), run 24, commit `d03ae7b2`, SHA-256 `d1e5162028aa7bdd670c70ffdb32183b891fd876bc039249968ca6f849c81008`; red only because the artifact upload hit storage quota.
+- Device acceptance: NOT DONE — see `docs/ANDROID_DEVICE_ACCEPTANCE.md`.
