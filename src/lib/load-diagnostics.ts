@@ -301,8 +301,8 @@ export type LoadFilters = {
 
 export function applyFilters(events: LoadEvent[], f: LoadFilters): LoadEvent[] {
   return events.filter((e) =>
-    (!f.browser || `${e.browserFamily} ${e.browserVersion}` === f.browser || e.browserFamily === f.browser) &&
-    (!f.os || `${e.os} ${e.osVersion}` === f.os || e.os === f.os) &&
+    (!f.browser || browserLabel(e) === f.browser || e.browserFamily === f.browser) &&
+    (!f.os || osLabel(e) === f.os || e.os === f.os) &&
     (!f.device || e.device === f.device) &&
     (!f.route || e.route === f.route) &&
     (!f.kind || e.kind === f.kind) &&
@@ -329,6 +329,16 @@ export type LoadSummary = {
   trend: { bucket: string; total: number; moduleLoad: number; fallback: number; recovered: number }[];
 };
 
+/** "Chrome 156", "Safari (version Unknown)" or "Unknown". */
+export function browserLabel(e: Pick<ParsedAgent, "browserFamily" | "browserVersion">): string {
+  if (e.browserFamily === UNKNOWN) return UNKNOWN;
+  return e.browserVersion === UNKNOWN ? `${e.browserFamily} (version ${UNKNOWN})` : `${e.browserFamily} ${e.browserVersion}`;
+}
+export function osLabel(e: Pick<ParsedAgent, "os" | "osVersion">): string {
+  if (e.os === UNKNOWN) return UNKNOWN;
+  return e.osVersion === UNKNOWN ? e.os : `${e.os} ${e.osVersion}`;
+}
+
 const isFallback = (o: RecoveryOutcome) => o === "fallback-shown" || o === "server-offline" || o === "assets-waiting";
 
 export function summarize(events: LoadEvent[], unit: "day" | "hour" = "day"): LoadSummary {
@@ -347,7 +357,7 @@ export function summarize(events: LoadEvent[], unit: "day" | "hour" = "day"): Lo
     if (e.browserFamily === UNKNOWN) unknownBrowser++;
 
     const bKey = `${e.browserFamily} ${e.browserVersion}|${e.os} ${e.osVersion}|${e.device}`;
-    const b = browser.get(bKey) ?? { browser: `${e.browserFamily} ${e.browserVersion}`.replace(` ${UNKNOWN}`, e.browserFamily === UNKNOWN ? "" : ` (version ${UNKNOWN.toLowerCase()})`), os: `${e.os} ${e.osVersion}`.replace(` ${UNKNOWN}`, e.os === UNKNOWN ? "" : ""), device: e.device, count: 0, moduleLoad: 0, fallback: 0 };
+    const b = browser.get(bKey) ?? { browser: browserLabel(e), os: osLabel(e), device: e.device, count: 0, moduleLoad: 0, fallback: 0 };
     b.count++; if (e.isModuleLoad) b.moduleLoad++; if (isFallback(e.outcome)) b.fallback++;
     browser.set(bKey, b);
 
