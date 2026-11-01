@@ -29,14 +29,18 @@ async def main():
             failures.append(f"fresh boot runtime errors: {errors[:2]}")
 
         probes = []
+        probe_down = {"on": False}
 
         async def head(route):
-            if route.request.method == "HEAD":
+            # The recovery probe is a no-store fetch of the current page; page
+            # navigations (document) must pass through untouched.
+            if route.request.resource_type == "fetch":
                 probes.append(1)
+                if probe_down["on"]:
+                    await route.abort()
+                    return
                 await asyncio.sleep(1)
-                await route.fulfill(status=200)
-            else:
-                await route.continue_()
+            await route.continue_()
 
         await page.route(BASE + "/", head)
         loads = []
@@ -58,14 +62,17 @@ async def main():
         if len(body) < 20:
             failures.append("blank page after reload")
 
+        # Dev preview never caps reloads, so reach the fallback the way a real
+        # outage does: the probe keeps failing (~2 minutes of 2s probes).
+        await page.route(BASE + "/", head)
+        probe_down["on"] = True
         await page.evaluate(
-            """m => { sessionStorage.setItem('deployment-reload-attempted','1');
-                     sessionStorage.setItem('deployment-reload-attempted:n','3');
-                     window.dispatchEvent(new CustomEvent('winstone:module-load-error', { detail: m })); }""",
+            "m => window.dispatchEvent(new CustomEvent('winstone:module-load-error', { detail: m }))",
             FAIL_MSG,
         )
         try:
-            await page.locator("#deploy-recovery").wait_for(timeout=5000)
+            await page.locator("#deploy-recovery").wait_for(timeout=180_000)
+            probe_down["on"] = False
             if await page.locator("#deploy-recovery button").count() == 0:
                 failures.append("fallback screen has no refresh button")
             if await page.locator("#deploy-recovery a[href='/']").count() == 0:
