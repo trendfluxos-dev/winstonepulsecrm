@@ -55,6 +55,7 @@ const KIND_LABEL: Record<string, string> = {
   "module-error": "মডিউল ত্রুটি",
   "import-rejected": "পেজ অংশ লোড ব্যর্থ",
   "fallback-shown": "Refresh বাটন দেখানো হয়েছে",
+  "server-unreachable": "সার্ভার সাড়া দেয়নি — ফিরে এলে নিজে থেকে রিলোড",
   "recovered-after-reload": "রিলোডের পর ঠিক হয়েছে",
 };
 
