@@ -47,9 +47,10 @@ describe("phone call-state acknowledgement", () => {
     expect(s.reports).toBe(1);
   });
   it("stores call-history proof only when the phone sends it (app 2.21 never does)", async () => {
+    const callRowPatches = () => s.patches.filter((p) => "call_status" in p);
     await call();
-    expect(s.patches[0]).not.toHaveProperty("talk_time_source");
+    expect(callRowPatches()[0]).not.toHaveProperty("talk_time_source");
     await call({ talk_time_source: "call_log" });
-    expect(s.patches[1]).toMatchObject({ talk_time_source: "call_log", duration_seconds: 42, call_status: "completed" });
+    expect(callRowPatches()[1]).toMatchObject({ talk_time_source: "call_log", duration_seconds: 42, call_status: "completed" });
   });
 });
