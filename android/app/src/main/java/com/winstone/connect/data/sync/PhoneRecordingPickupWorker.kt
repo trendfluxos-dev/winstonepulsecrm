@@ -58,6 +58,7 @@ class PhoneRecordingPickupWorker(context: Context, params: WorkerParameters) :
         if (decision.outcome == com.winstone.connect.telephony.MatchOutcome.AMBIGUOUS) {
             // Waiting will not make it less ambiguous; never guess which file is this call.
             SyncStatus.failed(ctx, "Several phone recordings match this call — none uploaded to avoid attaching the wrong one / একাধিক রেকর্ডিং মিলেছে — ভুল কলে যুক্ত না করতে কোনোটি পাঠানো হয়নি")
+            SyncFailureReporter.record(ctx, "recording_pickup", "RECORDING_AMBIGUOUS", null, runAttemptCount + 1, permanent = true, callUid = uid)
             return Result.failure()
         }
         val match = decision.candidate

@@ -62,6 +62,7 @@ import { Route as SocialPagesRouteImport } from './routes/social-pages'
 import { Route as StaffPortalRouteImport } from './routes/staff-portal'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SupportAdminRouteImport } from './routes/support-admin'
+import { Route as SyncFailuresRouteImport } from './routes/sync-failures'
 import { Route as SystemRouteImport } from './routes/system'
 import { Route as TechRouteImport } from './routes/tech'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -93,6 +94,7 @@ import { Route as ApiPublicAgentRecorderRouteImport } from './routes/api/public/
 import { Route as ApiPublicAgentRemindersRouteImport } from './routes/api/public/agent/reminders'
 import { Route as ApiPublicAgentReportRouteImport } from './routes/api/public/agent/report'
 import { Route as ApiPublicAgentSupportRouteImport } from './routes/api/public/agent/support'
+import { Route as ApiPublicAgentSyncFailuresRouteImport } from './routes/api/public/agent/sync-failures'
 import { Route as ApiPublicAgentVersionRouteImport } from './routes/api/public/agent/version'
 import { Route as ApiPublicAgentVersionHandoffRouteImport } from './routes/api/public/agent/version-handoff'
 import { Route as ApiPublicAgentWhatsappRouteImport } from './routes/api/public/agent/whatsapp'
@@ -401,6 +403,11 @@ const SupportAdminRoute = SupportAdminRouteImport.update({
   path: '/support-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SyncFailuresRoute = SyncFailuresRouteImport.update({
+  id: '/sync-failures',
+  path: '/sync-failures',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SystemRoute = SystemRouteImport.update({
   id: '/system',
   path: '/system',
@@ -560,6 +567,12 @@ const ApiPublicAgentSupportRoute = ApiPublicAgentSupportRouteImport.update({
   path: '/api/public/agent/support',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAgentSyncFailuresRoute =
+  ApiPublicAgentSyncFailuresRouteImport.update({
+    id: '/api/public/agent/sync-failures',
+    path: '/api/public/agent/sync-failures',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAgentVersionRoute = ApiPublicAgentVersionRouteImport.update({
   id: '/api/public/agent/version',
   path: '/api/public/agent/version',
@@ -849,6 +862,7 @@ export interface FileRoutesByFullPath {
   '/staff-portal': typeof StaffPortalRoute
   '/support': typeof SupportRoute
   '/support-admin': typeof SupportAdminRoute
+  '/sync-failures': typeof SyncFailuresRoute
   '/system': typeof SystemRoute
   '/tech': typeof TechRoute
   '/terms': typeof TermsRoute
@@ -880,6 +894,7 @@ export interface FileRoutesByFullPath {
   '/api/public/agent/reminders': typeof ApiPublicAgentRemindersRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
   '/api/public/agent/support': typeof ApiPublicAgentSupportRoute
+  '/api/public/agent/sync-failures': typeof ApiPublicAgentSyncFailuresRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/version-handoff': typeof ApiPublicAgentVersionHandoffRoute
   '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
@@ -977,6 +992,7 @@ export interface FileRoutesByTo {
   '/staff-portal': typeof StaffPortalRoute
   '/support': typeof SupportRoute
   '/support-admin': typeof SupportAdminRoute
+  '/sync-failures': typeof SyncFailuresRoute
   '/system': typeof SystemRoute
   '/tech': typeof TechRoute
   '/terms': typeof TermsRoute
@@ -1008,6 +1024,7 @@ export interface FileRoutesByTo {
   '/api/public/agent/reminders': typeof ApiPublicAgentRemindersRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
   '/api/public/agent/support': typeof ApiPublicAgentSupportRoute
+  '/api/public/agent/sync-failures': typeof ApiPublicAgentSyncFailuresRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/version-handoff': typeof ApiPublicAgentVersionHandoffRoute
   '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
@@ -1106,6 +1123,7 @@ export interface FileRoutesById {
   '/staff-portal': typeof StaffPortalRoute
   '/support': typeof SupportRoute
   '/support-admin': typeof SupportAdminRoute
+  '/sync-failures': typeof SyncFailuresRoute
   '/system': typeof SystemRoute
   '/tech': typeof TechRoute
   '/terms': typeof TermsRoute
@@ -1137,6 +1155,7 @@ export interface FileRoutesById {
   '/api/public/agent/reminders': typeof ApiPublicAgentRemindersRoute
   '/api/public/agent/report': typeof ApiPublicAgentReportRoute
   '/api/public/agent/support': typeof ApiPublicAgentSupportRoute
+  '/api/public/agent/sync-failures': typeof ApiPublicAgentSyncFailuresRoute
   '/api/public/agent/version': typeof ApiPublicAgentVersionRoute
   '/api/public/agent/version-handoff': typeof ApiPublicAgentVersionHandoffRoute
   '/api/public/agent/whatsapp': typeof ApiPublicAgentWhatsappRoute
@@ -1236,6 +1255,7 @@ export interface FileRouteTypes {
     | '/staff-portal'
     | '/support'
     | '/support-admin'
+    | '/sync-failures'
     | '/system'
     | '/tech'
     | '/terms'
@@ -1267,6 +1287,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/reminders'
     | '/api/public/agent/report'
     | '/api/public/agent/support'
+    | '/api/public/agent/sync-failures'
     | '/api/public/agent/version'
     | '/api/public/agent/version-handoff'
     | '/api/public/agent/whatsapp'
@@ -1364,6 +1385,7 @@ export interface FileRouteTypes {
     | '/staff-portal'
     | '/support'
     | '/support-admin'
+    | '/sync-failures'
     | '/system'
     | '/tech'
     | '/terms'
@@ -1395,6 +1417,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/reminders'
     | '/api/public/agent/report'
     | '/api/public/agent/support'
+    | '/api/public/agent/sync-failures'
     | '/api/public/agent/version'
     | '/api/public/agent/version-handoff'
     | '/api/public/agent/whatsapp'
@@ -1492,6 +1515,7 @@ export interface FileRouteTypes {
     | '/staff-portal'
     | '/support'
     | '/support-admin'
+    | '/sync-failures'
     | '/system'
     | '/tech'
     | '/terms'
@@ -1523,6 +1547,7 @@ export interface FileRouteTypes {
     | '/api/public/agent/reminders'
     | '/api/public/agent/report'
     | '/api/public/agent/support'
+    | '/api/public/agent/sync-failures'
     | '/api/public/agent/version'
     | '/api/public/agent/version-handoff'
     | '/api/public/agent/whatsapp'
@@ -1621,6 +1646,7 @@ export interface RootRouteChildren {
   StaffPortalRoute: typeof StaffPortalRoute
   SupportRoute: typeof SupportRoute
   SupportAdminRoute: typeof SupportAdminRoute
+  SyncFailuresRoute: typeof SyncFailuresRoute
   SystemRoute: typeof SystemRoute
   TechRoute: typeof TechRoute
   TermsRoute: typeof TermsRoute
@@ -1652,6 +1678,7 @@ export interface RootRouteChildren {
   ApiPublicAgentRemindersRoute: typeof ApiPublicAgentRemindersRoute
   ApiPublicAgentReportRoute: typeof ApiPublicAgentReportRoute
   ApiPublicAgentSupportRoute: typeof ApiPublicAgentSupportRoute
+  ApiPublicAgentSyncFailuresRoute: typeof ApiPublicAgentSyncFailuresRoute
   ApiPublicAgentVersionRoute: typeof ApiPublicAgentVersionRoute
   ApiPublicAgentVersionHandoffRoute: typeof ApiPublicAgentVersionHandoffRoute
   ApiPublicAgentWhatsappRoute: typeof ApiPublicAgentWhatsappRoute
@@ -2069,6 +2096,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SupportAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sync-failures': {
+      id: '/sync-failures'
+      path: '/sync-failures'
+      fullPath: '/sync-failures'
+      preLoaderRoute: typeof SyncFailuresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/system': {
       id: '/system'
       path: '/system'
@@ -2284,6 +2318,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/agent/support'
       fullPath: '/api/public/agent/support'
       preLoaderRoute: typeof ApiPublicAgentSupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/agent/sync-failures': {
+      id: '/api/public/agent/sync-failures'
+      path: '/api/public/agent/sync-failures'
+      fullPath: '/api/public/agent/sync-failures'
+      preLoaderRoute: typeof ApiPublicAgentSyncFailuresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/agent/version': {
@@ -2637,6 +2678,7 @@ const rootRouteChildren: RootRouteChildren = {
   StaffPortalRoute: StaffPortalRoute,
   SupportRoute: SupportRoute,
   SupportAdminRoute: SupportAdminRoute,
+  SyncFailuresRoute: SyncFailuresRoute,
   SystemRoute: SystemRoute,
   TechRoute: TechRoute,
   TermsRoute: TermsRoute,
@@ -2669,6 +2711,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAgentRemindersRoute: ApiPublicAgentRemindersRoute,
   ApiPublicAgentReportRoute: ApiPublicAgentReportRoute,
   ApiPublicAgentSupportRoute: ApiPublicAgentSupportRoute,
+  ApiPublicAgentSyncFailuresRoute: ApiPublicAgentSyncFailuresRoute,
   ApiPublicAgentVersionRoute: ApiPublicAgentVersionRoute,
   ApiPublicAgentVersionHandoffRoute: ApiPublicAgentVersionHandoffRoute,
   ApiPublicAgentWhatsappRoute: ApiPublicAgentWhatsappRoute,

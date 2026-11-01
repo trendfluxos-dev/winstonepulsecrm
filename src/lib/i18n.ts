@@ -65,6 +65,7 @@ export const NAV_LABELS: Record<string, { bn: string; en: string }> = {
   "/system": { bn: "আইটি কনসোল (সেটিংস)", en: "IT Console (settings)" },
   "/runtime-errors": { bn: "সিস্টেমের সমস্যা", en: "System Problems" },
   "/load-diagnostics": { bn: "পেজ লোড সমস্যা", en: "Page-load Diagnostics" },
+  "/sync-failures": { bn: "ফোন সিঙ্ক সমস্যা", en: "Android Sync Failures" },
   "/ingest": { bn: "নতুন লিড আসার পরীক্ষা", en: "New Lead Check" },
   "/migration": { bn: "ডেটা সরানোর চেকলিস্ট", en: "Data Move Checklist" },
   "/migration-export": { bn: "ডেটা এক্সপোর্ট", en: "Data Export" },

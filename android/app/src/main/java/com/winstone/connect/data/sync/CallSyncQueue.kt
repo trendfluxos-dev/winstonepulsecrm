@@ -374,6 +374,8 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             // Kept on the phone (file not deleted) but never sent under another agent or without a call id.
             CallSyncQueue.setRecordingError(applicationContext, inputData.getString(CallSyncQueue.KEY_UPLOAD_ID),
                 "Recording belongs to another agent or has no call id — not uploaded / অন্য এজেন্টের বা কল-আইডি ছাড়া রেকর্ডিং — পাঠানো হয়নি")
+            SyncFailureReporter.record(applicationContext, CallSyncQueue.KIND_RECORDING, "RECORDING_OWNER_MISMATCH", null,
+                runAttemptCount + 1, permanent = true, callUid = inputData.getString(CallSyncQueue.KEY_CALL_UID))
         }
         when (ownership) {
             QueueOwnership.Decision.HOLD -> return Result.retry()
@@ -392,6 +394,8 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                     if (!com.winstone.connect.telephony.RecordingConsent.granted(applicationContext, owner)) {
                         SyncStatus.failed(applicationContext, "Recording consent not active — audio not uploaded / রেকর্ডিং সম্মতি নেই — অডিও পাঠানো হয়নি")
                         CallSyncQueue.setRecordingError(applicationContext, inputData.getString(CallSyncQueue.KEY_UPLOAD_ID), "Recording consent not active")
+                        SyncFailureReporter.record(applicationContext, CallSyncQueue.KIND_RECORDING, "RECORDING_CONSENT_INACTIVE", null,
+                            runAttemptCount + 1, permanent = true, callUid = inputData.getString(CallSyncQueue.KEY_CALL_UID))
                         return Result.failure()
                     }
                     if (!file.exists()) {
@@ -498,7 +502,13 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 }
 
                 else -> Result.failure()
-            }.also { if (it is Result.Success) SyncStatus.succeeded(applicationContext, kind == CallSyncQueue.KIND_RECORDING, kind == CallSyncQueue.KIND_REPORT_OPEN || kind == CallSyncQueue.KIND_REPORT_SUBMIT) }
+            }.also {
+                if (it is Result.Success) {
+                    SyncStatus.succeeded(applicationContext, kind == CallSyncQueue.KIND_RECORDING, kind == CallSyncQueue.KIND_REPORT_OPEN || kind == CallSyncQueue.KIND_REPORT_SUBMIT)
+                    // Online again: report any logged failures to the CRM (never fails this job).
+                    runCatching { SyncFailureReporter.flush(applicationContext) }
+                }
+            }
         } catch (error: Exception) {
             // Classified by HTTP status / network: permanent failures (bad data, not
             // your lead, conflict, retired app) stop; transient ones retry. Agents see
@@ -515,6 +525,12 @@ class CrmSyncWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 kind == CallSyncQueue.KIND_LEAD_SUBMIT ||
                 kind == CallSyncQueue.KIND_CALL_STATE
             val keepTrying = SyncErrorClassifier.shouldRetry(failure, auditTrail, runAttemptCount)
+            SyncFailureReporter.record(
+                applicationContext, kind, failure.kind.name,
+                (error as? com.winstone.connect.data.remote.SyncHttpException)?.code,
+                runAttemptCount + 1, permanent = !keepTrying,
+                callUid = inputData.getString(CallSyncQueue.KEY_CALL_UID),
+            )
             if (kind == CallSyncQueue.KIND_RECORDING) {
                 CallSyncQueue.setRecordingError(applicationContext, inputData.getString(CallSyncQueue.KEY_UPLOAD_ID), shown)
             }
