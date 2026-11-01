@@ -90,7 +90,7 @@ class SandboxActivity : ComponentActivity() {
         label("Summary simulation copies the supplied synthetic text. It does not transcribe audio, call AI or verify the live summary service.")
         label("Sync failure drill · offline\nReplays scripted CRM replies (server error, no internet, busy, lost reply, expired sign-in, unassigned lead, rejected data, call conflict, old app) through the app's real retry rules. No network, no live CRM writes.")
         action("Run sync failure drill") {
-            val now = java.time.Instant.now().toString()
+            val now = com.winstone.connect.data.IsoTime.now()
             val results = SyncFailureDrill.runAll(now)
             syncDrills = JSONArray()
             results.forEach { r ->
