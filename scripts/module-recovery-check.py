@@ -2,7 +2,7 @@
 Regression check: simulate a failed dynamic module import in a running preview
 tab and verify (1) the waiting notice appears, (2) concurrent failures coalesce
 into one availability probe, (3) the app reloads itself, and (4) after repeated
-failed reloads a clear fallback screen with a refresh button shows — never a
+failed probes a clear fallback screen with a refresh button shows — never a
 blank page. Local dev only; telemetry posts are stubbed so nothing is recorded.
 Run: bun run test:recovery   (exit 0 = pass)
 """
@@ -29,14 +29,18 @@ async def main():
             failures.append(f"fresh boot runtime errors: {errors[:2]}")
 
         probes = []
+        probe_down = {"on": False}
 
         async def head(route):
-            if route.request.method == "HEAD":
+            # The recovery probe is a no-store fetch of the current page; page
+            # navigations (document) must pass through untouched.
+            if route.request.resource_type == "fetch":
                 probes.append(1)
+                if probe_down["on"]:
+                    await route.abort()
+                    return
                 await asyncio.sleep(1)
-                await route.fulfill(status=200)
-            else:
-                await route.continue_()
+            await route.continue_()
 
         await page.route(BASE + "/", head)
         loads = []
@@ -58,19 +62,24 @@ async def main():
         if len(body) < 20:
             failures.append("blank page after reload")
 
+        # Dev preview never caps reloads, so reach the fallback the way a real
+        # outage does: the probe keeps failing (~2 minutes of 2s probes).
+        await page.wait_for_load_state("networkidle", timeout=60_000)
+        await page.wait_for_function("() => typeof window.__winstoneRecover === 'function'", timeout=30_000)
+        probes.clear()
+        probe_down["on"] = True
         await page.evaluate(
-            """m => { sessionStorage.setItem('deployment-reload-attempted','1');
-                     sessionStorage.setItem('deployment-reload-attempted:n','3');
-                     window.dispatchEvent(new CustomEvent('winstone:module-load-error', { detail: m })); }""",
+            "m => window.dispatchEvent(new CustomEvent('winstone:module-load-error', { detail: m }))",
             FAIL_MSG,
         )
         try:
-            await page.locator("#deploy-recovery").wait_for(timeout=5000)
+            await page.locator("#deploy-recovery").wait_for(timeout=180_000)
             if await page.locator("#deploy-recovery button").count() == 0:
                 failures.append("fallback screen has no refresh button")
             if await page.locator("#deploy-recovery a[href='/']").count() == 0:
                 failures.append("fallback screen has no home link")
             await page.locator("#deploy-recovery button").click()
+            probe_down["on"] = False
             await page.wait_for_url("**_fresh=*", timeout=10_000)
             await page.wait_for_load_state("networkidle", timeout=60_000)
             if await page.locator("#deploy-recovery").count():
@@ -79,7 +88,7 @@ async def main():
             if left:
                 failures.append("Try again did not reset the reload counter")
         except Exception as e:
-            failures.append(f"fallback/retry flow failed: {str(e)[:160]}")
+            failures.append(f"fallback/retry flow failed: {str(e)[:160]} (probes during outage: {len(probes)})")
         await browser.close()
 
     if failures:
